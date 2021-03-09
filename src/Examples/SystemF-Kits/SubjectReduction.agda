@@ -9,50 +9,10 @@ open import Function using () renaming (_∋_ to _by_)
 
 open import Examples.SystemF-Kits.Definitions
 
-kit-compose-lemmas : KitComposeLemmas
-kit-compose-lemmas = record { ⋯-id = ⋯-id } where
-  ⋯-id : ∀ {{𝕂 : Kit}} (v : Term κ K) → v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id               (` x)                             = tm-vr x
-  ⋯-id {κ = κ} {{K}} (λ→ t)   rewrite id↑≡id {{K}} ★ κ = cong λ→_ (⋯-id t)
-  ⋯-id {κ = κ} {{K}} (Λ→ t)   rewrite id↑≡id {{K}} ■ κ = cong Λ→_ (⋯-id t)
-  ⋯-id {κ = κ} {{K}} (∀→ t)   rewrite id↑≡id {{K}} ■ κ = cong ∀→_ (⋯-id t)
-  ⋯-id               (t₁ · t₂)                         = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               (t₁ ∙ t₂)                         = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               (t₁ ⇒ t₂)                         = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               [★]                               = refl
-
-open KitComposeLemmas kit-compose-lemmas using (⋯-id; dist-⦅⦆ₛ-⋯ₛ; dist-⦅⦆ₛ-⋯ᵣ)
-
--- Order Preserving Embeddings for Contexts. Required by wk-⊢', where we can't
--- just say Γ₂ ≡ Γ₁ ⋯* ρ because weakenings in ρ require us to fill the gaps
--- between the weakened Γ₁ types with new Γ₂ types (the `T` in the `ope-drop`
--- constructor).
--- Also arbitrary renamings would allow swapping types in the context which
--- could violate the telescoping (I think).
-data OPE : κ₁ →ᵣ κ₂ → Ctx κ₁ → Ctx κ₂ → Set where
-  ope-id : ∀ {Γ : Ctx κ} →
-    OPE idᵣ Γ Γ
-  ope-keep  : ∀ {ρ : κ₁ →ᵣ κ₂} {Γ₁ : Ctx κ₁} {Γ₂ : Ctx κ₂} {T : Type κ₁ (k→K k)} →
-    OPE  ρ       Γ₁        Γ₂ →
-    OPE (ρ ↑ k) (Γ₁ ,, T) (Γ₂ ,, (T ⋯ ρ))
-  ope-drop  : ∀ {ρ : κ₁ →ᵣ κ₂} {Γ₁ : Ctx κ₁} {Γ₂ : Ctx κ₂} {T : Type κ₂ (k→K k)} →
-    OPE  ρ        Γ₁  Γ₂ →
-    OPE (wk ∘ᵣ ρ) Γ₁ (Γ₂ ,, T)
-
--- TODO: works equally well with k instead of ★, but requires even more ⋯ₜ versions of ⋯ lemmas...
-ope-pres-telescope : ∀ {ρ : κ₁ →ᵣ κ₂} (x : κ₁ ∋ ★) →
-  OPE ρ Γ₁ Γ₂ →
-  wk-drop-∈ (ρ ★ x) (Γ₂ (ρ ★ x)) ≡ wk-drop-∈ x (Γ₁ x) ⋯ ρ
-ope-pres-telescope x           ope-id = sym (⋯-id _)
-ope-pres-telescope (here refl) (ope-keep {ρ = ρ} {T = T} ope) = sym (dist-↑-ren T ρ)
-ope-pres-telescope (there x)   (ope-keep {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ₂} ope) =
-  wk _ (wk-drop-∈ (ρ _ x) (Γ₂ (ρ _ x))) ≡⟨ cong (wk _) (ope-pres-telescope x ope) ⟩
-  wk _ (wk-drop-∈ x (Γ₁ x) ⋯ ρ)         ≡⟨ sym (dist-↑-ren (wk-drop-∈ x (Γ₁ x)) ρ) ⟩
-  wk _ (wk-drop-∈ x (Γ₁ x)) ⋯ ρ ↑ _     ∎
-ope-pres-telescope x           (ope-drop {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ₂} ope) =
-  wk-drop-∈ (ρ _ x) (Γ₂ (ρ _ x)) ⋯ wk ≡⟨ cong (_⋯ wk) (ope-pres-telescope x ope) ⟩
-  wk-drop-∈ x (Γ₁ x) ⋯ ρ         ⋯ wk ≡⟨ ⋯-assoc (wk-drop-∈ x (Γ₁ x)) ρ wk ⟩
-  wk-drop-∈ x (Γ₁ x) ⋯ wk ∘ᵣ ρ        ∎
+Term●→[★] : ∀ (T : Term κ ●) → T ≡ [★]
+Term●→[★] (`[_]_ {k = ★} () y)
+Term●→[★] (`[_]_ {k = ■} () y)
+Term●→[★] [★] = refl
 
 wk-⊢' : ∀ {v : Term κ₁ K} {t : Type κ₁ K} {ρ : κ₁ →ᵣ κ₂} →
   OPE ρ Γ₁ Γ₂ →

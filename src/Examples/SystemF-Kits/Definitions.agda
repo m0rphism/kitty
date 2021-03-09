@@ -1,26 +1,15 @@
 module Examples.SystemF-Kits.Definitions where
 
-open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
-open import Data.List.Relation.Unary.Any using (here; there)
-open import Data.Unit using (⊤; tt)
-open import Axiom.Extensionality.Propositional using (Extensionality)
-open import Function using (id; _∘_)
-open import Data.Nat using (ℕ; zero; suc)
 
 infixr  3  _↪_  _⊢_∶_  _⊢*_∶_
 infixr  4  ∀→_  λ→_  Λ→_
 infixr  5  _⇒_
 infixl  5  _·_  _∙_
-infixl  5  _,,_
 infix   7  `_
-
-variable
-  ℓ ℓ₁ ℓ₂ ℓ₃ : Level
-  A B C      : Set ℓ
 
 -- Syntax ----------------------------------------------------------------------
 
@@ -37,11 +26,6 @@ k→K : VKind → TKind
 k→K ★ = ★
 k→K ■ = ■
 
-↑ₖ : TKind → TKind
-↑ₖ ★ = ■
-↑ₖ ■ = ●
-↑ₖ ● = ●
-
 variable
   k k₁ k₂    : VKind
   k' k₁' k₂' : VKind
@@ -56,14 +40,16 @@ variable
   X Y Z      : k ∈ κ
 
 data Term : List VKind → TKind → Set where
-  `[_]_  : K ≡ k→K k → k ∈ κ → Term κ K                -- Expr and Type Variables
-  λ→_ : Term (★ ∷ κ) ★ → Term κ ★
-  Λ→_ : Term (■ ∷ κ) ★ → Term κ ★
-  ∀→_ : Term (■ ∷ κ) ■ → Term κ ■
-  _·_ : Term κ ★ → Term κ ★ → Term κ ★
-  _∙_ : Term κ ★ → Term κ ■ → Term κ ★
-  _⇒_ : Term κ ■ → Term κ ■ → Term κ ■
-  [★] : Term κ ●
+  `[_]_ : K ≡ k→K k → k ∈ κ → Term κ K  -- Expr and Type Variables
+  λ→_   : Term (★ ∷ κ) ★ → Term κ ★
+  Λ→_   : Term (■ ∷ κ) ★ → Term κ ★
+  ∀→_   : Term (■ ∷ κ) ■ → Term κ ■
+  _·_   : Term κ ★ → Term κ ★ → Term κ ★
+  _∙_   : Term κ ★ → Term κ ■ → Term κ ★
+  _⇒_   : Term κ ■ → Term κ ■ → Term κ ■
+  [★]   : Term κ ●
+
+pattern `_ x = `[ refl ] x
 
 variable
   e  e₁  e₂  : Term κ ★
@@ -71,13 +57,6 @@ variable
   v  v₁  v₂  : Term κ K
 
 -- Kits ------------------------------------------------------------------------
-
-pattern `_ x = `[ refl ] x
-
-Term●→[★] : ∀ (T : Term κ ●) → T ≡ [★]
-Term●→[★] (`[_]_ {k = ★} () y)
-Term●→[★] (`[_]_ {k = ■} () y)
-Term●→[★] [★] = refl
 
 open import KitTheory.Everything VKind TKind k→K Term `_ public
 
@@ -128,52 +107,34 @@ instance AAᵣₛ = AssocAssumptionsᵣₛ
 instance AAₛᵣ = AssocAssumptionsₛᵣ
 instance AAₛₛ = AssocAssumptionsₛₛ
 
-Type : List VKind → TKind → Set
-Type κ K = Term κ (↑ₖ K)
+instance kit-compose-lemmas : KitComposeLemmas
+kit-compose-lemmas = record { ⋯-id = ⋯-id } where
+  ⋯-id : ∀ {{𝕂 : Kit}} (v : Term κ K) → v ⋯ idₖ {{𝕂}} ≡ v
+  ⋯-id               (` x)                             = tm-vr x
+  ⋯-id {κ = κ} {{K}} (λ→ t)   rewrite id↑≡id {{K}} ★ κ = cong λ→_ (⋯-id t)
+  ⋯-id {κ = κ} {{K}} (Λ→ t)   rewrite id↑≡id {{K}} ■ κ = cong Λ→_ (⋯-id t)
+  ⋯-id {κ = κ} {{K}} (∀→ t)   rewrite id↑≡id {{K}} ■ κ = cong ∀→_ (⋯-id t)
+  ⋯-id               (t₁ · t₂)                         = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
+  ⋯-id               (t₁ ∙ t₂)                         = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
+  ⋯-id               (t₁ ⇒ t₂)                         = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
+  ⋯-id               [★]                               = refl
 
-_∶⊢_ : List VKind → TKind → Set
-_∶⊢_ = Type
+open KitComposeLemmas {{...}} hiding (ckit) public
+
+instance kit-type : KitType
+kit-type = record { ↑ₜ = λ { ★ → ■ ; ■ → ● ; ● → ● } }
+open KitType kit-type public hiding (kit-compose-lemmas)
+
+Type : List VKind → TKind → Set
+Type = _∶⊢_
 
 variable
   t  t₁  t₂  : Type κ ★
   t' t₁' t₂' : Type κ ★
   T  T₁  T₂  : Type κ K
+  Γ  Γ₁  Γ₂  : Ctx κ
 
 -- Type System -----------------------------------------------------------------
-
-depth : ∀ {x : A} {xs : List A} → x ∈ xs → ℕ
-depth (here px) = zero
-depth (there x) = suc (depth x)
-
--- We need to drop one extra using `suc`, because otherwise the types in a
--- context are allowed to use themselves.
-drop-∈ : ∀ {x : A} {xs : List A} → x ∈ xs → List A → List A
-drop-∈ = drop ∘ suc ∘ depth
-
--- wk-drop : ∀ n → Type (List.drop n κ) k → Type κ k
--- wk-drop              zero    t = t
--- wk-drop {κ = []}     (suc n) t = t -- This case (index > length) cannot happen with drop-∈
--- wk-drop {κ = k' ∷ κ} (suc n) t = wkt (wk-drop n t)
-
-wk-drop-∈ : (x : k ∈ κ) → Type (drop-∈ x κ) (k→K k) → Type κ (k→K k)
-wk-drop-∈ (here _)  t = wk _ t
-wk-drop-∈ (there x) t = wk _ (wk-drop-∈ x t)
-
-Ctx : List VKind → Set
-Ctx κ = ∀ {k} → (x : κ ∋ k) → Type (drop-∈ x κ) (k→K k)
-
--- Our context is defined as a telescope.
--- This function automatically weakens all the types in a `Ctx κ` such that they
--- refer to `κ` instead of a `κ`-suffix.
-wk-telescope : Ctx κ → k ∈ κ → Type κ (k→K k)
-wk-telescope Γ x = wk-drop-∈ x (Γ x)
-
-variable
-  Γ Γ₁ Γ₂ : Ctx κ
-
-_,,_ : Ctx κ → Type κ (k→K k) → Ctx (k ∷ κ)
-(Γ ,, t) (here refl) = t
-(Γ ,, t) (there x) = Γ x
 
 data _⊢_∶_ : Ctx κ → Term κ K → Type κ K → Set where
   τ-` : ∀ {Γ : Ctx κ} {t : Type κ ★} {x : ★ ∈ κ} →
