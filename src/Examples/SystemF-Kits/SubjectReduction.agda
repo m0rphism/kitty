@@ -12,8 +12,7 @@ open import Examples.SystemF-Kits.Definitions
 kit-compose-lemmas : KitComposeLemmas
 kit-compose-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : Term κ K) → v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id               (`ᵉ x)                            = tm-vr x
-  ⋯-id               (`ᵗ x)                            = tm-vr x
+  ⋯-id               (` x)                             = tm-vr x
   ⋯-id {κ = κ} {{K}} (λ→ t)   rewrite id↑≡id {{K}} ★ κ = cong λ→_ (⋯-id t)
   ⋯-id {κ = κ} {{K}} (Λ→ t)   rewrite id↑≡id {{K}} ■ κ = cong Λ→_ (⋯-id t)
   ⋯-id {κ = κ} {{K}} (∀→ t)   rewrite id↑≡id {{K}} ■ κ = cong ∀→_ (⋯-id t)
@@ -76,7 +75,7 @@ lift-⊢* : ∀ {σ : κ₁ →ₛ κ₂} (T : Type κ₁ (k→K k)) →
   Γ₂              ⊢*  σ      ∶ Γ₁ →
   (Γ₂ ,, (T ⋯ σ)) ⊢* (σ ↑ k) ∶ (Γ₁ ,, T)
 lift-⊢* {k = ★} {σ = σ} T ⊢σ (here refl) = τ-` (sym (dist-↑-sub T σ))
-lift-⊢* {k = ■} {Γ₂ = Γ₂} {σ = σ} [★] ⊢σ (here refl) = τ-★               -- TODO: This makes problem with a single `_ constructor.
+lift-⊢* {k = ■} {Γ₂ = Γ₂} {σ = σ} T ⊢σ (here refl) rewrite Term●→[★] T = τ-★
 lift-⊢* {k = k} {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} T ⊢σ (there x) =
   subst ((Γ₂ ,, (T ⋯ σ)) ⊢ (σ _ x ⋯ wk) ∶_)
         (sym (wk-drop-∈ x (Γ₁ x) ⋯ wk ⋯ (σ ↑ k) ≡⟨ dist-↑-sub (wk-drop-∈ x (Γ₁ x)) σ ⟩
@@ -106,8 +105,7 @@ _,*_ {Γ₂ = Γ₂} {Γ₁ = Γ₁} {v = v} {σ = σ} {T = T} ⊢σ ⊢v (there
 
 ⊢*-idₛ : ∀ {Γ : Ctx κ} →
   Γ ⊢* idₛ ∶ Γ
-⊢*-idₛ {κ = k ∷ κ} {Γ = Γ} {■} x with wk-telescope Γ x
-...                                 | [★] = τ-★
+⊢*-idₛ {κ = k ∷ κ} {Γ = Γ} {■} x rewrite Term●→[★] (wk-telescope Γ x) = τ-★
 ⊢*-idₛ {κ = k ∷ κ} {Γ = Γ} {★} x rewrite ⋯-id {{𝕂 = kitₛ}} (wk-telescope Γ x) = τ-` refl
 
 vsub-pres-⊢ : ∀ {Γ : Ctx κ} {e₁ : Term (★ ∷ κ) ★} {e₂ : Term κ ★} {t₁ t₂ : Type κ ★} →

@@ -56,9 +56,7 @@ variable
   X Y Z      : k ∈ κ
 
 data Term : List VKind → TKind → Set where
-  -- `_  : k ∈ κ → Term κ (k→K k)                -- Expr and Type Variables
-  `ᵉ_ : ★ ∈ κ → Term κ ★
-  `ᵗ_ : ■ ∈ κ → Term κ ■
+  `[_]_  : K ≡ k→K k → k ∈ κ → Term κ K                -- Expr and Type Variables
   λ→_ : Term (★ ∷ κ) ★ → Term κ ★
   Λ→_ : Term (■ ∷ κ) ★ → Term κ ★
   ∀→_ : Term (■ ∷ κ) ■ → Term κ ■
@@ -74,9 +72,12 @@ variable
 
 -- Kits ------------------------------------------------------------------------
 
-`_  : k ∈ κ → Term κ (k→K k)
-`_ {k = ★} = `ᵉ_
-`_ {k = ■} = `ᵗ_
+pattern `_ x = `[ refl ] x
+
+Term●→[★] : ∀ (T : Term κ ●) → T ≡ [★]
+Term●→[★] (`[_]_ {k = ★} () y)
+Term●→[★] (`[_]_ {k = ■} () y)
+Term●→[★] [★] = refl
 
 open import KitTheory.Everything VKind TKind k→K Term `_ public
 
@@ -84,8 +85,7 @@ open Kit {{...}} public
 open KitTraversal {{...}} public
 
 instance traversal : KitTraversal
-KitTraversal._⋯_ traversal (`ᵉ x)    f = tm' (f _ x)
-KitTraversal._⋯_ traversal (`ᵗ x)    f = tm' (f _ x)
+KitTraversal._⋯_ traversal (` x)     f = tm' (f _ x)
 KitTraversal._⋯_ traversal (λ→ t)    f = λ→ (t ⋯ (f ↑ ★))
 KitTraversal._⋯_ traversal (Λ→ t)    f = Λ→ (t ⋯ (f ↑ ■))
 KitTraversal._⋯_ traversal (∀→ t)    f = ∀→ (t ⋯ (f ↑ ■))
@@ -103,22 +103,19 @@ open AssocAssumptions {{...}} public
 open KitCompose {{...}} public
 
 instance ckit : KitCompose {{traversal}}
-KitCompose.⋯-assoc ckit (`ᵉ x) f g =
-  tm' (f _ x) ⋯ g    ≡⟨ tm'-⋯-∘ f g x ⟩
-  tm' ((g ∘ₖ f) _ x) ∎
-KitCompose.⋯-assoc ckit (`ᵗ x) f g =
+KitCompose.⋯-assoc ckit (` x) f g =
   tm' (f _ x) ⋯ g    ≡⟨ tm'-⋯-∘ f g x ⟩
   tm' ((g ∘ₖ f) _ x) ∎
 KitCompose.⋯-assoc ckit (λ→ e) f g = cong λ→_
-  (e ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
+  (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
 KitCompose.⋯-assoc ckit (Λ→ e) f g = cong Λ→_
-  (e ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
+  (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
 KitCompose.⋯-assoc ckit (∀→ e) f g = cong ∀→_
-  (e ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
+  (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
 KitCompose.⋯-assoc ckit (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
