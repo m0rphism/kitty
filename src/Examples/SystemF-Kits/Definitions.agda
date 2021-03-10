@@ -13,10 +13,12 @@ infix   7  `_
 
 -- Syntax ----------------------------------------------------------------------
 
+-- Variable Modes
 data Modeᵥ : Set where
-  𝕖 : Modeᵥ  -- Value-level variables.
-  𝕥 : Modeᵥ  -- Type-level variables.
+  𝕖 : Modeᵥ  -- Value-level variables
+  𝕥 : Modeᵥ  -- Type-level variables
 
+-- Type Modes
 data Modeₜ : Set where
   𝕖 : Modeₜ  -- Expressions
   𝕥 : Modeₜ  -- Types
