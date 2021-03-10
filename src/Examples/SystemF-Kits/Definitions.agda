@@ -13,67 +13,66 @@ infix   7  `_
 
 -- Syntax ----------------------------------------------------------------------
 
-data VKind : Set where
-  ★ : VKind -- The kind of value-level variables.
-  ■ : VKind -- The kind of type-level variables.
+data Modeᵥ : Set where
+  𝕖 : Modeᵥ  -- Value-level variables.
+  𝕥 : Modeᵥ  -- Type-level variables.
 
-data TKind : Set where
-  ★ : TKind -- The kind of expressions
-  ■ : TKind -- The kind of types
-  ● : TKind -- The kind of sorts ("kinds")
+data Modeₜ : Set where
+  𝕖 : Modeₜ  -- Expressions
+  𝕥 : Modeₜ  -- Types
+  𝕜 : Modeₜ  -- Kinds
 
-k→K : VKind → TKind
-k→K ★ = ★
-k→K ■ = ■
+m→M : Modeᵥ → Modeₜ
+m→M 𝕖 = 𝕖
+m→M 𝕥 = 𝕥
 
 variable
-  k k₁ k₂    : VKind
-  k' k₁' k₂' : VKind
-  K K₁ K₂    : TKind
-  K' K₁' K₂' : TKind
-  κ κ₁ κ₂ κ₃ : List VKind
-  κ' κ₁' κ₂' : List VKind
-  κ₁₁ κ₁₂    : List VKind
-  κ₂₁ κ₂₂    : List VKind
-  x y z      : ★ ∈ κ
-  α β γ      : ■ ∈ κ
-  X Y Z      : k ∈ κ
+  m m₁ m₂    : Modeᵥ
+  m' m₁' m₂' : Modeᵥ
+  M M₁ M₂    : Modeₜ
+  M' M₁' M₂' : Modeₜ
+  μ μ₁ μ₂ μ₃ : List Modeᵥ
+  μ' μ₁' μ₂' : List Modeᵥ
+  μ₁₁ μ₁₂    : List Modeᵥ
+  μ₂₁ μ₂₂    : List Modeᵥ
+  x y z      : 𝕖 ∈ μ
+  α β γ      : 𝕥 ∈ μ
+  X Y Z      : m ∈ μ
 
-data Term : List VKind → TKind → Set where
-  `[_]_ : K ≡ k→K k → k ∈ κ → Term κ K  -- Expr and Type Variables
-  λ→_   : Term (★ ∷ κ) ★ → Term κ ★
-  Λ→_   : Term (■ ∷ κ) ★ → Term κ ★
-  ∀→_   : Term (■ ∷ κ) ■ → Term κ ■
-  _·_   : Term κ ★ → Term κ ★ → Term κ ★
-  _∙_   : Term κ ★ → Term κ ■ → Term κ ★
-  _⇒_   : Term κ ■ → Term κ ■ → Term κ ■
-  [★]   : Term κ ●
+data Term : List Modeᵥ → Modeₜ → Set where
+  `[_]_ : M ≡ m→M m → m ∈ μ → Term μ M  -- Expr and Type Variables
+  λ→_   : Term (𝕖 ∷ μ) 𝕖 → Term μ 𝕖
+  Λ→_   : Term (𝕥 ∷ μ) 𝕖 → Term μ 𝕖
+  ∀→_   : Term (𝕥 ∷ μ) 𝕥 → Term μ 𝕥
+  _·_   : Term μ 𝕖 → Term μ 𝕖 → Term μ 𝕖
+  _∙_   : Term μ 𝕖 → Term μ 𝕥 → Term μ 𝕖
+  _⇒_   : Term μ 𝕥 → Term μ 𝕥 → Term μ 𝕥
+  ★   : Term μ 𝕜
 
 pattern `_ x = `[ refl ] x
 
 variable
-  e  e₁  e₂  : Term κ ★
-  e' e₁' e₂' : Term κ ★
-  v  v₁  v₂  : Term κ K
+  e  e₁  e₂  : Term μ 𝕖
+  e' e₁' e₂' : Term μ 𝕖
+  v  v₁  v₂  : Term μ M
 
 -- Kits ------------------------------------------------------------------------
 
-open import KitTheory.Everything VKind TKind k→K Term `_ public
+open import KitTheory.Everything Modeᵥ Modeₜ m→M Term `_ public
 
 open Kit {{...}} public
 open KitTraversal {{...}} public
 
 instance traversal : KitTraversal
 KitTraversal._⋯_ traversal (` x)     f = tm' (f _ x)
-KitTraversal._⋯_ traversal (λ→ t)    f = λ→ (t ⋯ (f ↑ ★))
-KitTraversal._⋯_ traversal (Λ→ t)    f = Λ→ (t ⋯ (f ↑ ■))
-KitTraversal._⋯_ traversal (∀→ t)    f = ∀→ (t ⋯ (f ↑ ■))
+KitTraversal._⋯_ traversal (λ→ t)    f = λ→ (t ⋯ (f ↑ 𝕖))
+KitTraversal._⋯_ traversal (Λ→ t)    f = Λ→ (t ⋯ (f ↑ 𝕥))
+KitTraversal._⋯_ traversal (∀→ t)    f = ∀→ (t ⋯ (f ↑ 𝕥))
 KitTraversal._⋯_ traversal (t₁ · t₂) f = (t₁ ⋯ f) · (t₂ ⋯ f)
 KitTraversal._⋯_ traversal (t₁ ∙ t₂) f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
 KitTraversal._⋯_ traversal (t₁ ⇒ t₂) f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
-KitTraversal._⋯_ traversal [★]       f = [★]
-KitTraversal.⋯-var traversal {k = ★} x f = refl
-KitTraversal.⋯-var traversal {k = ■} x f = refl
+KitTraversal._⋯_ traversal ★       f = ★
+KitTraversal.⋯-var traversal x f = refl
 
 instance 𝕂ᵣ = kitᵣ
 instance 𝕂ₛ = kitₛ
@@ -100,7 +99,7 @@ KitCompose.⋯-assoc ckit (∀→ e) f g = cong ∀→_
 KitCompose.⋯-assoc ckit (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
 KitCompose.⋯-assoc ckit (e₁ ∙ e₂) f g = cong₂ _∙_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
 KitCompose.⋯-assoc ckit (e₁ ⇒ e₂) f g = cong₂ _⇒_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitCompose.⋯-assoc ckit [★]       f g = refl
+KitCompose.⋯-assoc ckit ★       f g = refl
 
 instance AAᵣᵣ = AssocAssumptionsᵣᵣ
 instance AAᵣₛ = AssocAssumptionsᵣₛ
@@ -109,64 +108,64 @@ instance AAₛₛ = AssocAssumptionsₛₛ
 
 instance kit-compose-lemmas : KitComposeLemmas
 kit-compose-lemmas = record { ⋯-id = ⋯-id } where
-  ⋯-id : ∀ {{𝕂 : Kit}} (v : Term κ K) → v ⋯ idₖ {{𝕂}} ≡ v
+  ⋯-id : ∀ {{𝕂 : Kit}} (v : Term μ M) → v ⋯ idₖ {{𝕂}} ≡ v
   ⋯-id               (` x)                             = tm-vr x
-  ⋯-id {κ = κ} {{K}} (λ→ t)   rewrite id↑≡id {{K}} ★ κ = cong λ→_ (⋯-id t)
-  ⋯-id {κ = κ} {{K}} (Λ→ t)   rewrite id↑≡id {{K}} ■ κ = cong Λ→_ (⋯-id t)
-  ⋯-id {κ = κ} {{K}} (∀→ t)   rewrite id↑≡id {{K}} ■ κ = cong ∀→_ (⋯-id t)
+  ⋯-id {μ = μ} {{𝕂}} (λ→ t)   rewrite id↑≡id {{𝕂}} 𝕖 μ = cong λ→_ (⋯-id t)
+  ⋯-id {μ = μ} {{𝕂}} (Λ→ t)   rewrite id↑≡id {{𝕂}} 𝕥 μ = cong Λ→_ (⋯-id t)
+  ⋯-id {μ = μ} {{𝕂}} (∀→ t)   rewrite id↑≡id {{𝕂}} 𝕥 μ = cong ∀→_ (⋯-id t)
   ⋯-id               (t₁ · t₂)                         = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id               (t₁ ∙ t₂)                         = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id               (t₁ ⇒ t₂)                         = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               [★]                               = refl
+  ⋯-id               ★                               = refl
 
 open KitComposeLemmas {{...}} hiding (ckit) public
 
 instance kit-type : KitType
-kit-type = record { ↑ₜ = λ { ★ → ■ ; ■ → ● ; ● → ● } }
+kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 } }
 open KitType kit-type public hiding (kit-compose-lemmas)
 
-Type : List VKind → TKind → Set
+Type : List Modeᵥ → Modeₜ → Set
 Type = _∶⊢_
 
 variable
-  t  t₁  t₂  : Type κ ★
-  t' t₁' t₂' : Type κ ★
-  T  T₁  T₂  : Type κ K
-  Γ  Γ₁  Γ₂  : Ctx κ
+  t  t₁  t₂  : Type μ 𝕖
+  t' t₁' t₂' : Type μ 𝕖
+  T  T₁  T₂  : Type μ M
+  Γ  Γ₁  Γ₂  : Ctx μ
 
 -- Type System -----------------------------------------------------------------
 
-data _⊢_∶_ : Ctx κ → Term κ K → Type κ K → Set where
-  τ-` : ∀ {Γ : Ctx κ} {t : Type κ ★} {x : ★ ∈ κ} →
+data _⊢_∶_ : Ctx μ → Term μ M → Type μ M → Set where
+  τ-` : ∀ {Γ : Ctx μ} {t : Type μ 𝕖} {x : 𝕖 ∈ μ} →
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
-  τ-λ : ∀ {Γ : Ctx κ} →
+  τ-λ : ∀ {Γ : Ctx μ} →
     Γ ,, t₁ ⊢ e ∶ wk _ t₂ →
     Γ ⊢ λ→ e ∶ t₁ ⇒ t₂
   τ-Λ :
-    Γ ,, [★] ⊢ e ∶ t₂ →
+    Γ ,, ★ ⊢ e ∶ t₂ →
     Γ ⊢ Λ→ e ∶ ∀→ t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →
     Γ ⊢ e₂ ∶ t₁ →
     Γ ⊢ e₁ · e₂ ∶ t₂
-  τ-∙ : ∀ {Γ : Ctx κ} →
+  τ-∙ : ∀ {Γ : Ctx μ} →
     Γ ⊢ e ∶ ∀→ t₂ →
     Γ ⊢ e ∙ t ∶ t₂ ⋯ ⦅ t ⦆
-  τ-★ :
-    Γ ⊢ t ∶ [★]
-  τ-[★] :
-    Γ ⊢ [★] ∶ [★]
+  τ-𝕥 :
+    Γ ⊢ t ∶ ★
+  τ-𝕜 :
+    Γ ⊢ ★ ∶ ★
 
-_⊢*_∶_ : Ctx κ₂ → κ₁ →ₛ κ₂ → Ctx κ₁ → Set
-_⊢*_∶_ {κ₁ = κ₁} Γ₂ σ Γ₁ = ∀ {k₁} → (x : κ₁ ∋ k₁) → Γ₂ ⊢ σ _ x ∶ (wk-telescope Γ₁ x ⋯ σ)
+_⊢*_∶_ : Ctx μ₂ → μ₁ →ₛ μ₂ → Ctx μ₁ → Set
+_⊢*_∶_ {μ₁ = μ₁} Γ₂ σ Γ₁ = ∀ {m₁} → (x : μ₁ ∋ m₁) → Γ₂ ⊢ σ _ x ∶ (wk-telescope Γ₁ x ⋯ σ)
 
 -- Semantics -------------------------------------------------------------------
 
-data _↪_ : Term κ ★ → Term κ ★ → Set where
-  β-λ : ∀ {e₂ : Term κ ★} →
+data _↪_ : Term μ 𝕖 → Term μ 𝕖 → Set where
+  β-λ : ∀ {e₂ : Term μ 𝕖} →
     (λ→ e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
-  β-Λ : ∀ {t : Term κ ■} →
+  β-Λ : ∀ {t : Term μ 𝕥} →
     (Λ→ e) ∙ t ↪ e ⋯ ⦅ t ⦆
   ξ-λ :
     e ↪ e' →
