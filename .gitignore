@@ -1,1 +1,5 @@
 *.agdai
+paper/_build
+*.pdf
+*.swp
+*.swo
