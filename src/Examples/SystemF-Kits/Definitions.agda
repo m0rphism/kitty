@@ -27,17 +27,13 @@ m→M 𝕖 = 𝕖
 m→M 𝕥 = 𝕥
 
 variable
-  m m₁ m₂    : Modeᵥ
-  m' m₁' m₂' : Modeᵥ
-  M M₁ M₂    : Modeₜ
-  M' M₁' M₂' : Modeₜ
-  μ μ₁ μ₂ μ₃ : List Modeᵥ
-  μ' μ₁' μ₂' : List Modeᵥ
-  μ₁₁ μ₁₂    : List Modeᵥ
-  μ₂₁ μ₂₂    : List Modeᵥ
-  x y z      : 𝕖 ∈ μ
-  α β γ      : 𝕥 ∈ μ
-  X Y Z      : m ∈ μ
+  m m₁ m₂ m₃ m' m₁' m₂' m₃' : Modeᵥ
+  M M₁ M₂ M₃ M' M₁' M₂' M₃' : Modeₜ
+  μ μ₁ μ₂ μ₃ μ' μ₁' μ₂' μ₃' : List Modeᵥ
+  μ₁₁ μ₁₂ μ₂₁ μ₂₂           : List Modeᵥ
+  x y z                     : 𝕖 ∈ μ
+  α β γ                     : 𝕥 ∈ μ
+  X Y Z                     : m ∈ μ
 
 data Term : List Modeᵥ → Modeₜ → Set where
   `[_]_ : M ≡ m→M m → m ∈ μ → Term μ M  -- Expr and Type Variables
@@ -52,9 +48,10 @@ data Term : List Modeᵥ → Modeₜ → Set where
 pattern `_ x = `[ refl ] x
 
 variable
-  e  e₁  e₂  : Term μ 𝕖
-  e' e₁' e₂' : Term μ 𝕖
-  v  v₁  v₂  : Term μ M
+  e e₁ e₂ e' e₁' e₂' : Term μ 𝕖
+  t t₁ t₂ t' t₁' t₂' : Term μ 𝕥
+  k k₁ k₂ k' k₁' k₂' : Term μ 𝕜
+  E E₁ E₂ E' E₁' E₂' : Term μ M
 
 -- Kits ------------------------------------------------------------------------
 
@@ -128,10 +125,8 @@ Type : List Modeᵥ → Modeₜ → Set
 Type = _∶⊢_
 
 variable
-  t  t₁  t₂  : Type μ 𝕖
-  t' t₁' t₂' : Type μ 𝕖
-  T  T₁  T₂  : Type μ M
-  Γ  Γ₁  Γ₂  : Ctx μ
+  Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx μ
+  T T₁ T₂ T' T₁' T₂' : Type μ M
 
 -- Type System -----------------------------------------------------------------
 
