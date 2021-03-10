@@ -55,7 +55,7 @@ variable
   k k₁ k₂ k' k₁' k₂' : Term μ 𝕜
   E E₁ E₂ E' E₁' E₂' : Term μ M
 
--- Kits ------------------------------------------------------------------------
+-- Substitutions ---------------------------------------------------------------
 
 open import KitTheory.Everything Modeᵥ Modeₜ m→M Term `_ public
 
@@ -70,7 +70,7 @@ KitTraversal._⋯_ traversal (∀→ t)    f = ∀→ (t ⋯ (f ↑ 𝕥))
 KitTraversal._⋯_ traversal (t₁ · t₂) f = (t₁ ⋯ f) · (t₂ ⋯ f)
 KitTraversal._⋯_ traversal (t₁ ∙ t₂) f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
 KitTraversal._⋯_ traversal (t₁ ⇒ t₂) f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
-KitTraversal._⋯_ traversal ★       f = ★
+KitTraversal._⋯_ traversal ★         f = ★
 KitTraversal.⋯-var traversal x f = refl
 
 instance 𝕂ᵣ = kitᵣ
@@ -80,9 +80,9 @@ open AssocAssumptions {{...}} public
 open KitCompose {{...}} public
 
 instance ckit : KitCompose {{traversal}}
-KitCompose.⋯-assoc ckit (` x) f g =
-  tm' (f _ x) ⋯ g    ≡⟨ tm'-⋯-∘ f g x ⟩
-  tm' ((g ∘ₖ f) _ x) ∎
+KitCompose.⋯-assoc ckit (` X) f g =
+  tm' (f _ X) ⋯ g    ≡⟨ tm'-⋯-∘ f g X ⟩
+  tm' ((g ∘ₖ f) _ X) ∎
 KitCompose.⋯-assoc ckit (λ→ e) f g = cong λ→_
   (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
