@@ -1,0 +1,59 @@
+\documentclass{llncs}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[hidelinks]{hyperref}
+
+\usepackage[links]{agda}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+\usepackage{newunicodechar}
+\newunicodechar{≡}{\ensuremath{\equiv}}
+\newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
+\newunicodechar{∘}{\ensuremath{\circ}}
+
+\usepackage{cite}
+
+\title{Kit Theory}
+
+\begin{document}
+  \maketitle
+
+  \begin{abstract}
+    Variable binding and substitution are a long-standing nuisance for mechanized
+    metatheory of programming languages. A common approach is to represent
+    variables as DeBruijn Indices, where substitution is defined in terms of
+    variable renaming. If a language has $n$ different kinds of variables, and
+    $m$ different kinds of terms, we potentially need to define both
+    substitution and renaming for all $m\cdot n$ combinations and prove the
+    theory of those operations both in isolation and with respect to each other.
+    McBride introduced kits to define both substitution and renaming by a
+    single term traversal for intrinsically typed terms.\cite{mcbride2005kits}
+
+    We propose a technique to derive the implementation and metatheory of
+    substitution and renaming for all $m\cdot n$ combinations of variables and terms
+    from a single term traversal and a few simple lemmas.
+    We use a slight generalization of McBride's kits but for extrinsic typing,
+    which decouples type preservation from scope preservation and the
+    theory of substitution. Hence, the technique is also suitable for
+    non-standard typing relations like dependent types and type state.
+    We provide a well-documented implementation of the technique as an Agda
+    library and show its use in several case studies including System F.
+  \end{abstract}
+
+  % The following line will be replaced by make with an \input{} for each
+  % .lagda.tex file:
+
+  % SED MARKER
+
+  % \bibliographystyle{ACM-Reference-Format}
+  \bibliographystyle{abbrv}
+  \bibliography{paper}
+
+  \clearpage
+  \appendix
+\end{document}
