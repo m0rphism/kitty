@@ -1,15 +1,36 @@
-\documentclass{llncs}
+\documentclass[sigplan, screen]{acmart}
+% \documentclass[sigplan, screen, anonymous, review, authordraft]{acmart}
+
+\bibliographystyle{ACM-Reference-Format}
+
+\title{Kit Theory}
+
+\author{Hannes Saffrich}
+\orcid{0000-0002-1825-0097}                 %% \orcid is optional
+\affiliation{
+  % \department{Department1}                %% \department is recommended
+  \institution{University of Freiburg}      %% \institution is required
+  \country{Germany}                         %% \country is recommended
+}
+\email{saffrich@informatik.uni-freiburg.de} %% \email is recommended
+
+\author{Peter Thiemann}
+\orcid{0000-0002-9000-1239}                 %% \orcid is optional
+\affiliation{
+  % \department{Department2a}               %% \department is recommended
+  \institution{University of Freiburg}      %% \institution is required
+  \country{Germany}                         %% \country is recommended
+}
+\email{thiemann@informatik.uni-freiburg.de} %% \email is recommended
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 
-\usepackage[hidelinks]{hyperref}
-
 \usepackage[links]{agda}
 
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
+% \usepackage{amsmath}
+% \usepackage{amsfonts}
+% \usepackage{amssymb}
 
 \usepackage{newunicodechar}
 \newunicodechar{≡}{\ensuremath{\equiv}}
@@ -30,18 +51,14 @@
 % \newunicodechar{Γ}{\ensuremath{\texttt{\Gamma}}}
 % \newunicodechar{λ}{\ensuremath{\texttt{\lambda}}}
 
-\usepackage{cite}
+% \usepackage{cite}
 % \usepackage{DejaVuSansMono}
 \usepackage{alphabeta} % Make greek letter macros also work in text-mode.
 
 \usepackage{microtype}
 \DisableLigatures[-]{encoding=T1}
 
-\title{Kit Theory}
-
 \begin{document}
-  \maketitle
-
   \begin{abstract}
     Variable binding and substitution are a long-standing nuisance for mechanized
     metatheory of programming languages. A common approach is to represent
@@ -64,13 +81,14 @@
     library and show its use in several case studies including System F.
   \end{abstract}
 
+  \maketitle
+
   % The following line will be replaced by make with an \input{} for each
   % .lagda.tex file:
 
   % SED MARKER
 
   % \bibliographystyle{ACM-Reference-Format}
-  \bibliographystyle{abbrv}
   \bibliography{paper}
 
   \clearpage

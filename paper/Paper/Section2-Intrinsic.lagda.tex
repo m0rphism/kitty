@@ -11,11 +11,6 @@ infixl 6  _·_
 \newpage
 \section{STLC with Intrinsic Typing}
 
-
-\begin{figure}[b!]
-\centering
-\makebox[\textwidth]{
-\begin{minipage}{0.67\linewidth}
 \begin{code}
 data Type : Set where
   ∅    : Type                -- Empty Type
@@ -32,26 +27,21 @@ data _∋_ : List Type → Type → Set where
 
 -- Well-typed terms
 data _⊢_ : List Type → Type → Set where
-  `_   : (Γ ∋ t) → (Γ ⊢ t)                    -- Var
-  λx_  : (t₁ ∷ Γ ⊢ t₂) → (Γ ⊢ t₁ ⇒ t₂)        -- Abs
-  _·_  : (Γ ⊢ t₁ ⇒ t₂) → (Γ ⊢ t₁) → (Γ ⊢ t₂)  -- App
-
+  `_   : (Γ ∋ t) → (Γ ⊢ t)                    -- Variable
+  λx_  : (t₁ ∷ Γ ⊢ t₂) → (Γ ⊢ t₁ ⇒ t₂)        -- Function
+  _·_  : (Γ ⊢ t₁ ⇒ t₂) → (Γ ⊢ t₁) → (Γ ⊢ t₂)  -- Application
+\end{code}
+%
+\begin{code}[hide]
 -- The application of the identity function
 -- to itself is a well-typed term.
 example₁ : [] ⊢ ∅ ⇒ ∅
 example₁ = (λx (` zero)) · (λx (` zero))
 
-
-
-\end{code}
-\end{minipage}
-%
-\begin{code}[hide]
 private
   infix  4  _→ᵣ_  _→ₛ_
 \end{code}
 %
-\begin{minipage}{0.67\linewidth}
 \begin{code}
   -- Parallel Renamings and Substitutions
   _→ᵣ_ _→ₛ_ : List Type → List Type → Set
@@ -102,8 +92,3 @@ private
     ξ-·₁  : (e₁ ↪ e₁') → (e₁ · e₂ ↪ e₁' · e₂)
     ξ-·₂  : (e₂ ↪ e₂') → (e₁ · e₂ ↪ e₁' · e₂)
 \end{code}
-\end{minipage}
-}
-\caption{STLC}
-\label{fig:stlc-intrinsic}
-\end{figure}
