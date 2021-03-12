@@ -215,13 +215,23 @@
     % \newcommand\ColorCtor   {6bb26b}
     % \newcommand\ColorComment{aaaaaa}
     % \newcommand\ColorDef    {000000}
+    % \newcommand\ColorField  {EE1289}
 
-    % New 2
-    \newcommand\ColorType   {9a5ad2}
+    % New 1
+    % \newcommand\ColorType   {9a5ad2}
+    % \newcommand\ColorKeyword{4884ff}
+    % \newcommand\ColorCtor   {008B00}
+    % \newcommand\ColorComment{aaaaaa}
+    % \newcommand\ColorDef    {000000}
+    % \newcommand\ColorField  {EE1289}
+
+    % New 2: Keywords, Constructors, Definitions, Bound
+    \newcommand\ColorType   {008B00}
     \newcommand\ColorKeyword{4884ff}
     \newcommand\ColorCtor   {008B00}
     \newcommand\ColorComment{aaaaaa}
-    \newcommand\ColorDef    {000000}
+    \newcommand\ColorDef    {9a5ad2}
+    \newcommand\ColorField  {EE1289}
 
     % Spacemacs
     % \newcommand\ColorType   {ae81ff}
@@ -229,6 +239,7 @@
     % \newcommand\ColorCtor   {99ff99}
     % \newcommand\ColorComment{aaaaaa}
     % \newcommand\ColorDef    {000000}
+    % \newcommand\ColorField  {EE1289}
 
     % Spacemacs * 0.7
     % \newcommand\ColorType   {7a5ab2}
@@ -236,6 +247,7 @@
     % \newcommand\ColorCtor   {6bb26b}
     % \newcommand\ColorComment{aaaaaa}
     % \newcommand\ColorDef    {000000}
+    % \newcommand\ColorField  {EE1289}
 
     % Agda Default
     % \newcommand\ColorType   {0000CD}
@@ -243,6 +255,7 @@
     % \newcommand\ColorCtor   {008B00}
     % \newcommand\ColorComment{B22222}
     % \newcommand\ColorDef    {0000CD}
+    % \newcommand\ColorField  {EE1289}
 
     \newcommand\StyleKeyword\textbf
     % \newcommand\StyleKeyword[1]{#1}
@@ -253,8 +266,8 @@
     \definecolor{AgdaComment}      {HTML}{\ColorComment}
     \definecolor{AgdaPragma}       {HTML}{000000}
     \definecolor{AgdaKeyword}      {HTML}{\ColorKeyword}
-    \definecolor{AgdaString}       {HTML}{B22222}
-    \definecolor{AgdaNumber}       {HTML}{A020F0}
+    \definecolor{AgdaString}       {HTML}{\ColorCtor}
+    \definecolor{AgdaNumber}       {HTML}{\ColorCtor}
     \definecolor{AgdaSymbol}       {HTML}{\ColorKeyword}
     \definecolor{AgdaPrimitiveType}{HTML}{\ColorType}
 
@@ -264,11 +277,11 @@
     \definecolor{AgdaInductiveConstructor}  {HTML}{\ColorCtor}
     \definecolor{AgdaCoinductiveConstructor}{HTML}{8B7500}
     \definecolor{AgdaDatatype}              {HTML}{\ColorType}
-    \definecolor{AgdaField}                 {HTML}{EE1289}
+    \definecolor{AgdaField}                 {HTML}{\ColorField}
     \definecolor{AgdaFunction}              {HTML}{\ColorDef}
     \definecolor{AgdaMacro}                 {HTML}{458B74}
     \definecolor{AgdaModule}                {HTML}{A020F0}
-    \definecolor{AgdaPostulate}             {HTML}{0000CD}
+    \definecolor{AgdaPostulate}             {HTML}{\ColorField}
     \definecolor{AgdaPrimitive}             {HTML}{0000ff}
     \definecolor{AgdaRecord}                {HTML}{\ColorType}
     \definecolor{AgdaArgument}              {HTML}{404040}
