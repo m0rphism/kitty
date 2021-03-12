@@ -14,9 +14,9 @@ all: paper
 
 paper: $(TGTS)
 	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex	                               ;\
-	cp $(EXTRA_FILES) $(CACHE_DIR)/				                               ;\
+	cp -f $(EXTRA_FILES) $(CACHE_DIR)/				                           ;\
 	cd $(CACHE_DIR)												                               ;\
-	for t in "$(TGTS_INPUT)"; do                                          \
+	for t in $(TGTS_INPUT); do                                            \
 	  sed -i "s|.*SED MARKER.*|  \\\\input{$$t}\\nSED MARKER|g" main.tex ;\
 	done																	                               ;\
 	sed -i "/.*SED MARKER.*/d" main.tex		                               ;\

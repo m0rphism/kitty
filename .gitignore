@@ -1,5 +1,6 @@
 *.agdai
 paper/_build
+paper/**/auto/
 *.pdf
 *.swp
 *.swo
