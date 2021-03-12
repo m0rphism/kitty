@@ -11,8 +11,11 @@ infixl 6  _·_
 \newpage
 \section{STLC with Intrinsic Typing}
 
+
+\begin{figure}[b!]
+\centering
 \makebox[\textwidth]{
-\begin{minipage}{0.75\linewidth}
+\begin{minipage}{0.67\linewidth}
 \begin{code}
 data Type : Set where
   ∅    : Type                -- Empty Type
@@ -40,7 +43,6 @@ example₁ = (λx (` zero)) · (λx (` zero))
 
 
 
-
 \end{code}
 \end{minipage}
 %
@@ -49,7 +51,7 @@ private
   infix  4  _→ᵣ_  _→ₛ_
 \end{code}
 %
-\begin{minipage}{0.75\linewidth}
+\begin{minipage}{0.67\linewidth}
 \begin{code}
   -- Parallel Renamings and Substitutions
   _→ᵣ_ _→ₛ_ : List Type → List Type → Set
@@ -78,5 +80,30 @@ private
   subst σ (λx e)     = λx (subst (liftₛ σ) e)
   subst σ (e₁ · e₂)  = subst σ e₁ · subst σ e₂
 \end{code}
+\begin{code}[hide]
+  infix 4 _↪_
+  infixr 5 _∷ₛ_
+
+  variable e e₁ e₂ e' e₁' e₂' : Γ ⊢ t
+
+  -- Identity substitution
+  idₛ : Γ →ₛ Γ
+  idₛ = λ _ x → ` x
+
+  -- Extending a substitution
+  _∷ₛ_ : (Γ₂ ⊢ t) → (Γ₁ →ₛ Γ₂) → (t ∷ Γ₁ →ₛ Γ₂)
+  (t ∷ₛ σ) _ zero     = t
+  (t ∷ₛ σ) _ (suc x)  = σ _ x
+
+  -- Small-step reduction
+  data _↪_ : (Γ ⊢ t) → (Γ ⊢ t) → Set where
+    β-λ·  : ((λx e₁) · e₂) ↪ subst (e₂ ∷ₛ idₛ) e₁
+    ξ-λ   : (e ↪ e') → (λx e ↪ λx e')
+    ξ-·₁  : (e₁ ↪ e₁') → (e₁ · e₂ ↪ e₁' · e₂)
+    ξ-·₂  : (e₂ ↪ e₂') → (e₁ · e₂ ↪ e₁' · e₂)
+\end{code}
 \end{minipage}
 }
+\caption{STLC}
+\label{fig:stlc-intrinsic}
+\end{figure}
