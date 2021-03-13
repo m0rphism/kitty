@@ -62,6 +62,7 @@ open import KitTheory Modeᵥ Modeₜ m→M Term `_ public
 open Kit {{...}} public
 open KitTraversal {{...}} public
 
+-- Traversing a term with a renaming/substitution f.
 instance kit-traversal : KitTraversal
 KitTraversal._⋯_ kit-traversal (` x)     f = tm' (f _ x)
 KitTraversal._⋯_ kit-traversal (λ→ t)    f = λ→ (t ⋯ (f ↑ 𝕖))
@@ -79,6 +80,7 @@ instance 𝕂ₛ = kitₛ
 open ComposeKit {{...}} public
 open KitAssoc {{...}} public
 
+-- Associativity of applying a renaming/substitution after a renaming/substitution.
 instance kit-assoc : KitAssoc {{kit-traversal}}
 KitAssoc.⋯-assoc kit-assoc (` X) f g =
   tm' (f _ X) ⋯ g    ≡⟨ tm'-⋯-∘ f g X ⟩
@@ -98,13 +100,14 @@ KitAssoc.⋯-assoc kit-assoc (∀→ e) f g = cong ∀→_
 KitAssoc.⋯-assoc kit-assoc (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
 KitAssoc.⋯-assoc kit-assoc (e₁ ∙ e₂) f g = cong₂ _∙_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
 KitAssoc.⋯-assoc kit-assoc (e₁ ⇒ e₂) f g = cong₂ _⇒_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitAssoc.⋯-assoc kit-assoc ★       f g = refl
+KitAssoc.⋯-assoc kit-assoc ★         f g = refl
 
 instance 𝕂ᵣᵣ = kitᵣᵣ
 instance 𝕂ᵣₛ = kitᵣₛ
 instance 𝕂ₛᵣ = kitₛᵣ
 instance 𝕂ₛₛ = kitₛₛ
 
+-- Applying the identity renaming/substitution does nothing.
 instance kit-assoc-lemmas : KitAssocLemmas
 kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : Term μ M) → v ⋯ idₖ {{𝕂}} ≡ v
@@ -119,6 +122,7 @@ kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
 
 open KitAssocLemmas {{...}} hiding (kit-assoc; kit-traversal) public
 
+-- Each variable mode corresponds to a term mode that represents its type.
 instance kit-type : KitType
 kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 } }
 open KitType kit-type public hiding (kit-assoc-lemmas)
