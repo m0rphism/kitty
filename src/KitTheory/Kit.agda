@@ -51,7 +51,7 @@ record Kit : Set₁ where
     _◆_       : Stuff StuffMode
     m→SM      : VarMode → StuffMode
     SM→M      : StuffMode → TermMode
-    vr        : ∀ m → µ ∋ m → µ ◆ (m→SM m)
+    vr        : ∀ m → µ ∋ m → µ ◆ m→SM m
     tm        : ∀ SM → µ ◆ SM → µ ⊢ SM→M SM
     wk        : ∀ SM → µ ◆ SM → (m' ∷ µ) ◆ SM
     m→SM→M    : ∀ m → SM→M (m→SM m) ≡ m→M m
