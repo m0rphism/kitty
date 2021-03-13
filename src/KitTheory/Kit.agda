@@ -2,11 +2,11 @@ open import Data.List using (List; []; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
 
 module KitTheory.Kit
-    (VarKind  : Set)
-    (TermKind : Set)
-    (k→K      : VarKind → TermKind)
-    (_⊢_      : List VarKind → TermKind → Set)
-    (`_       : ∀ {κ k} → k ∈ κ → κ ⊢ k→K k)
+    (VarMode  : Set)
+    (TermMode : Set)
+    (m→M      : VarMode → TermMode)
+    (_⊢_      : List VarMode → TermMode → Set)
+    (`_       : ∀ {µ m} → m ∈ µ → µ ⊢ m→M m)
   where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
@@ -19,15 +19,15 @@ open import Function using (id)
 
 private
   variable
-    k k' k₁ k₂    : VarKind
-    κ κ' κ₁ κ₂ κ₃ : List VarKind
-    K K' K₁ K₂    : TermKind
-    x y z         : k ∈ κ
+    m m' m₁ m₂    : VarMode
+    µ µ' µ₁ µ₂ µ₃ : List VarMode
+    M M' M₁ M₂    : TermMode
+    x y z         : m ∈ µ
     ℓ ℓ₃          : Level
     A B C         : Set ℓ
 
 Stuff : Set → Set₁
-Stuff StuffKind = List VarKind → StuffKind → Set
+Stuff StuffMode = List VarMode → StuffMode → Set
 
 postulate fun-ext : ∀ {ℓ₁ ℓ₂} → Extensionality ℓ₁ ℓ₂
 
@@ -47,82 +47,82 @@ record Kit : Set₁ where
   infixl  5  _,ₖ_
   infixl  6  _↑_
   field
-    StuffKind : Set
-    _◆_       : Stuff StuffKind
-    k→SK      : VarKind → StuffKind
-    SK→K      : StuffKind → TermKind
-    vr        : ∀ k → κ ∋ k → κ ◆ (k→SK k)
-    tm        : ∀ SK → κ ◆ SK → κ ⊢ SK→K SK
-    wk        : ∀ SK → κ ◆ SK → (k' ∷ κ) ◆ SK
-    k→SK→K    : ∀ k → SK→K (k→SK k) ≡ k→K k
-    wk-vr     : ∀ k' (x : κ ∋ k) → wk {k' = k'} _ (vr _ x) ≡ vr _ (there x)
-    tm-vr     : ∀ (x : κ ∋ k) → subst (κ ⊢_) (k→SK→K k) (tm _ (vr _ x)) ≡ ` x
+    StuffMode : Set
+    _◆_       : Stuff StuffMode
+    m→SM      : VarMode → StuffMode
+    SM→M      : StuffMode → TermMode
+    vr        : ∀ m → µ ∋ m → µ ◆ (m→SM m)
+    tm        : ∀ SM → µ ◆ SM → µ ⊢ SM→M SM
+    wk        : ∀ SM → µ ◆ SM → (m' ∷ µ) ◆ SM
+    m→SM→M    : ∀ m → SM→M (m→SM m) ≡ m→M m
+    wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
+    tm-vr     : ∀ (x : µ ∋ m) → subst (µ ⊢_) (m→SM→M m) (tm _ (vr _ x)) ≡ ` x
 
-  _–→_ : List VarKind → List VarKind → Set
-  _–→_ κ₁ κ₂ = ∀ k → κ₁ ∋ k → κ₂ ◆ k→SK k
+  _–→_ : List VarMode → List VarMode → Set
+  _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m→SM m
 
-  tm' : ∀ {κ k} → κ ◆ k→SK k → κ ⊢ k→K k
-  tm' {κ} {k} t = subst (κ ⊢_) (k→SK→K k) (tm _ t)
+  tm' : ∀ {µ m} → µ ◆ m→SM m → µ ⊢ m→M m
+  tm' {µ} {m} t = subst (µ ⊢_) (m→SM→M m) (tm _ t)
 
-  idₖ : κ –→ κ
+  idₖ : µ –→ µ
   idₖ = λ _ x → vr _ x
 
-  _↑_ : κ₁ –→ κ₂ → (k : VarKind) → (k ∷ κ₁) –→ (k ∷ κ₂)
-  (f ↑ k) _ (here p)  = vr _ (here p)
-  (f ↑ k) _ (there x) = wk _ (f _ x)
+  _↑_ : µ₁ –→ µ₂ → (m : VarMode) → (m ∷ µ₁) –→ (m ∷ µ₂)
+  (f ↑ m) _ (here p)  = vr _ (here p)
+  (f ↑ m) _ (there x) = wk _ (f _ x)
 
-  id↑≡id : ∀ k κ → idₖ {κ = κ} ↑ k ≡ idₖ {κ = k ∷ κ}
-  id↑≡id k κ = fun-ext₂ λ where
+  id↑≡id : ∀ m µ → idₖ {µ = µ} ↑ m ≡ idₖ {µ = m ∷ µ}
+  id↑≡id m µ = fun-ext₂ λ where
     _ (here _)  → refl
-    _ (there x) → wk-vr k x
+    _ (there x) → wk-vr m x
 
-  _,ₖ_ : κ₁ –→ κ₂ → κ₂ ◆ k→SK k → (k ∷ κ₁) –→ κ₂
+  _,ₖ_ : µ₁ –→ µ₂ → µ₂ ◆ m→SM m → (m ∷ µ₁) –→ µ₂
   (f ,ₖ t) _ (here refl) = t
   (f ,ₖ t) _ (there x)   = f _ x
 
-  ⦅_⦆ : κ ◆ k→SK k → (k ∷ κ) –→ κ
+  ⦅_⦆ : µ ◆ m→SM m → (m ∷ µ) –→ µ
   ⦅ v ⦆ = idₖ ,ₖ v
 
 open Kit {{...}}
 
-_◆[_]_ : List VarKind → (𝕂 : Kit) → Kit.StuffKind 𝕂 → Set
-κ ◆[ 𝕂 ] sk = Kit._◆_ 𝕂 κ sk
+_◆[_]_ : List VarMode → (𝕂 : Kit) → Kit.StuffMode 𝕂 → Set
+µ ◆[ 𝕂 ] sm = Kit._◆_ 𝕂 µ sm
 
-_–[_]→_ : List VarKind → (_ : Kit) → List VarKind → Set _
-κ₁ –[ 𝕂 ]→ κ₂ = Kit._–→_ 𝕂 κ₁ κ₂
+_–[_]→_ : List VarMode → (_ : Kit) → List VarMode → Set _
+µ₁ –[ 𝕂 ]→ µ₂ = Kit._–→_ 𝕂 µ₁ µ₂
 
 record KitTraversal : Set₁ where
   infixl  5  _⋯_  _⋯ᵣ_  _⋯ₛ_
   field
     _⋯_   : ∀ {{𝕂 : Kit}} →
-            κ₁ ⊢ K → κ₁ –[ 𝕂 ]→ κ₂ → κ₂ ⊢ K
-    ⋯-var : ∀ {{𝕂 : Kit}} (x : κ₁ ∋ k) (f : κ₁ –→ κ₂) →
-            (` x) ⋯ f ≡ subst (κ₂ ⊢_) (k→SK→K k) (tm _ (f _ x))
+            µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+            (` x) ⋯ f ≡ subst (µ₂ ⊢_) (m→SM→M m) (tm _ (f _ x))
 
   -- TODO: This could also be defined outside of KitTraversal.
   kitᵣ : Kit
-  Kit.StuffKind kitᵣ = VarKind
+  Kit.StuffMode kitᵣ = VarMode
   Kit._◆_       kitᵣ = _∋_
-  Kit.k→SK      kitᵣ = λ x → x
-  Kit.SK→K      kitᵣ = k→K
+  Kit.m→SM      kitᵣ = λ x → x
+  Kit.SM→M      kitᵣ = m→M
   Kit.vr        kitᵣ = λ _ x → x
   Kit.tm        kitᵣ = λ _ → `_
   Kit.wk        kitᵣ = λ _ → there
-  Kit.k→SK→K    kitᵣ = λ _ → refl
+  Kit.m→SM→M    kitᵣ = λ _ → refl
   Kit.wk-vr     kitᵣ = λ _ _ → refl
   Kit.tm-vr     kitᵣ = λ _ → refl
 
   private instance _ = kitᵣ
 
   kitₛ : Kit
-  Kit.StuffKind kitₛ = TermKind
+  Kit.StuffMode kitₛ = TermMode
   Kit._◆_       kitₛ = _⊢_
-  Kit.k→SK      kitₛ = k→K
-  Kit.SK→K      kitₛ = λ x → x
+  Kit.m→SM      kitₛ = m→M
+  Kit.SM→M      kitₛ = λ x → x
   Kit.vr        kitₛ = λ _ → `_
   Kit.tm        kitₛ = λ _ x → x
   Kit.wk        kitₛ = λ _ x → x ⋯ wk
-  Kit.k→SK→K    kitₛ = λ _ → refl
+  Kit.m→SM→M    kitₛ = λ _ → refl
   Kit.wk-vr     kitₛ = λ _ x → ⋯-var x wk
   Kit.tm-vr     kitₛ = λ x → refl
 
@@ -135,22 +135,22 @@ record KitTraversal : Set₁ where
   module R = Kit kitᵣ
   module S = Kit kitₛ
 
-  _⋯ₛ_ : κ₁ ⊢ K → κ₁ →ₛ κ₂ → κ₂ ⊢ K
+  _⋯ₛ_ : µ₁ ⊢ M → µ₁ →ₛ µ₂ → µ₂ ⊢ M
   _⋯ₛ_ = _⋯_
 
-  _⋯ᵣ_ : κ₁ ⊢ K → κ₁ →ᵣ κ₂ → κ₂ ⊢ K
+  _⋯ᵣ_ : µ₁ ⊢ M → µ₁ →ᵣ µ₂ → µ₂ ⊢ M
   _⋯ᵣ_ = _⋯_
 
-  _∘ᵣ_ : {{K : Kit}} → κ₂ –[ K ]→ κ₃ → κ₁ →ᵣ κ₂ → κ₁ –[ K ]→ κ₃
+  _∘ᵣ_ : {{K : Kit}} → µ₂ –[ K ]→ µ₃ → µ₁ →ᵣ µ₂ → µ₁ –[ K ]→ µ₃
   (f ∘ᵣ ρ) _ x = f _ (ρ _ x)
 
-  _∘ₛ_ : {{K : Kit}} → κ₂ –[ K ]→ κ₃ → κ₁ →ₛ κ₂ → κ₁ →ₛ κ₃
+  _∘ₛ_ : {{K : Kit}} → µ₂ –[ K ]→ µ₃ → µ₁ →ₛ µ₂ → µ₁ →ₛ µ₃
   (f ∘ₛ σ) _ x = σ _ x ⋯ f
 
-  _ᵣ∘ᵣ_ : κ₂ →ᵣ κ₃ → κ₁ →ᵣ κ₂ → κ₁ →ᵣ κ₃
-  _ₛ∘ᵣ_ : κ₂ →ₛ κ₃ → κ₁ →ᵣ κ₂ → κ₁ →ₛ κ₃
-  _ᵣ∘ₛ_ : κ₂ →ᵣ κ₃ → κ₁ →ₛ κ₂ → κ₁ →ₛ κ₃
-  _ₛ∘ₛ_ : κ₂ →ₛ κ₃ → κ₁ →ₛ κ₂ → κ₁ →ₛ κ₃
+  _ᵣ∘ᵣ_ : µ₂ →ᵣ µ₃ → µ₁ →ᵣ µ₂ → µ₁ →ᵣ µ₃
+  _ₛ∘ᵣ_ : µ₂ →ₛ µ₃ → µ₁ →ᵣ µ₂ → µ₁ →ₛ µ₃
+  _ᵣ∘ₛ_ : µ₂ →ᵣ µ₃ → µ₁ →ₛ µ₂ → µ₁ →ₛ µ₃
+  _ₛ∘ₛ_ : µ₂ →ₛ µ₃ → µ₁ →ₛ µ₂ → µ₁ →ₛ µ₃
   _ᵣ∘ᵣ_ = _∘ᵣ_
   _ₛ∘ᵣ_ = _∘ᵣ_
   _ᵣ∘ₛ_ = _∘ₛ_
