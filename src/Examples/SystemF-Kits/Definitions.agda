@@ -57,7 +57,7 @@ variable
 
 -- Substitutions ---------------------------------------------------------------
 
-open import KitTheory.Everything Modeᵥ Modeₜ m→M Term `_ public
+open import KitTheory Modeᵥ Modeₜ m→M Term `_ public
 
 open Kit {{...}} public
 open KitTraversal {{...}} public

@@ -1,7 +1,7 @@
 open import Data.List using (List; []; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
 
-module KitTheory.Everything
+module KitTheory
     (VarMode  : Set)
     (TermMode : Set)
     (m→M      : VarMode → TermMode)
