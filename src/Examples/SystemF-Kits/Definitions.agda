@@ -125,7 +125,8 @@ open KitAssocLemmas {{...}} hiding (kit-assoc; kit-traversal) public
 -- Each variable mode corresponds to a term mode that represents its type.
 instance kit-type : KitType
 kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 } }
-open KitType kit-type public hiding (kit-assoc-lemmas)
+
+open KitType kit-type hiding (kit-assoc-lemmas) public
 
 Type : List Modeᵥ → Modeₜ → Set
 Type = _∶⊢_
