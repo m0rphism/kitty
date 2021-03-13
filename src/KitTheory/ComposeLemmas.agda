@@ -22,15 +22,15 @@ open import KitTheory.Compose VarKind TermKind k→K _⊢_ `_
 
 open Kit {{...}}
 open KitTraversal {{...}}
-open AssocAssumptions {{...}}
-open KitCompose {{...}}
+open ComposeKit {{...}}
+open KitAssoc {{...}}
 
 private instance _ = kitᵣ
 private instance _ = kitₛ
-private instance _ = AssocAssumptionsᵣᵣ
-private instance _ = AssocAssumptionsᵣₛ
-private instance _ = AssocAssumptionsₛᵣ
-private instance _ = AssocAssumptionsₛₛ
+private instance _ = kitᵣᵣ
+private instance _ = kitᵣₛ
+private instance _ = kitₛᵣ
+private instance _ = kitₛₛ
 
 private
   variable
@@ -42,7 +42,7 @@ private
     A B C         : Set ℓ
 
 dist-↑-sub : ∀ {{T : KitTraversal}}
-               {{_ : KitCompose {{T}} }}
+               {{_ : KitAssoc {{T}} }}
                (v : κ₁ ⊢ K) (σ : κ₁ →ₛ κ₂) →
   v ⋯ wk ⋯ (σ ↑ k) ≡ v ⋯ σ ⋯ wk
 dist-↑-sub {k = k} v σ =
@@ -51,7 +51,7 @@ dist-↑-sub {k = k} v σ =
   v ⋯ (wk ᵣ∘ₛ σ)        ≡⟨ sym (⋯-assoc v σ wk) ⟩
   (v ⋯ σ) ⋯ wk          ∎
 
-dist-↑-ren : ∀ {{T : KitTraversal}} {{_ : KitCompose {{T}} }}
+dist-↑-ren : ∀ {{T : KitTraversal}} {{_ : KitAssoc {{T}} }}
                (v : κ₁ ⊢ K) (ρ : κ₁ →ᵣ κ₂) →
   v ⋯ wk ⋯ (ρ ↑ k) ≡ v ⋯ ρ ⋯ wk
 dist-↑-ren {k = k} v ρ =
@@ -60,21 +60,21 @@ dist-↑-ren {k = k} v ρ =
   v ⋯ wk ∘ᵣ ρ       ≡⟨ sym (⋯-assoc v ρ wk) ⟩
   v ⋯ ρ ⋯ wk        ∎
 
-wk-cancels-,ₛ : ∀ {{T : KitTraversal}} {{_ : KitCompose {{T}} }}
+wk-cancels-,ₛ : ∀ {{T : KitTraversal}} {{_ : KitAssoc {{T}} }}
                   (v : κ₁ ⊢ K) (v' : κ₂ ⊢ k→K k) (σ : κ₁ →ₛ κ₂) →
   wk _ v ⋯ (σ ,ₛ v') ≡ v ⋯ σ
 wk-cancels-,ₛ v v' σ = ⋯-assoc v wk (σ ,ₛ v')
 
-wk-cancels-,ᵣ : ∀ {{T : KitTraversal}} {{_ : KitCompose {{T}} }}
+wk-cancels-,ᵣ : ∀ {{T : KitTraversal}} {{_ : KitAssoc {{T}} }}
                   (v : κ₁ ⊢ K) (v' : κ₂ ∋ k) (σ : κ₁ →ᵣ κ₂) →
   wk _ v ⋯ (σ ,ᵣ v') ≡ v ⋯ σ
 wk-cancels-,ᵣ v v' ρ = ⋯-assoc v wk (ρ ,ᵣ v')
 
-record KitComposeLemmas : Set₁ where
-  open AssocAssumptions {{...}}
+record KitAssocLemmas : Set₁ where
+  open ComposeKit {{...}}
   field
     {{kit-traversal}} : KitTraversal
-    {{ckit}} : KitCompose {{kit-traversal}}
+    {{kit-assoc}} : KitAssoc {{kit-traversal}}
     ⋯-id : ∀ {{𝕂 : Kit}} (v : κ ⊢ K) → v ⋯ idₖ {{𝕂}} ≡ v
 
   dist-ᵣ∘ᵣ-⦅⦆ : ∀ (t : κ₁ ∋ k) (σ : κ₁ →ᵣ κ₂) →

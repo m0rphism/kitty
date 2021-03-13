@@ -24,16 +24,16 @@ open import KitTheory.ComposeLemmas VarKind TermKind k→K _⊢_ `_
 
 open Kit {{...}}
 open KitTraversal {{...}}
-open AssocAssumptions {{...}}
-open KitCompose {{...}}
-open KitComposeLemmas {{...}}
+open ComposeKit {{...}}
+open KitAssoc {{...}}
+open KitAssocLemmas {{...}}
 
 private instance _ = kitᵣ
 private instance _ = kitₛ
-private instance _ = AssocAssumptionsᵣᵣ
-private instance _ = AssocAssumptionsᵣₛ
-private instance _ = AssocAssumptionsₛᵣ
-private instance _ = AssocAssumptionsₛₛ
+private instance _ = kitᵣᵣ
+private instance _ = kitᵣₛ
+private instance _ = kitₛᵣ
+private instance _ = kitₛₛ
 
 private
   variable
@@ -47,7 +47,7 @@ private
 record KitType : Set₁ where
   field
     -- {{term-traversal}} : KitTraversal
-    {{kit-compose-lemmas}} : KitComposeLemmas
+    {{kit-assoc-lemmas}} : KitAssocLemmas
     ↑ₜ : TermKind → TermKind
 
   _∶⊢_ : List VarKind → TermKind → Set

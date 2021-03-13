@@ -62,51 +62,51 @@ open import KitTheory.Everything Modeᵥ Modeₜ m→M Term `_ public
 open Kit {{...}} public
 open KitTraversal {{...}} public
 
-instance traversal : KitTraversal
-KitTraversal._⋯_ traversal (` x)     f = tm' (f _ x)
-KitTraversal._⋯_ traversal (λ→ t)    f = λ→ (t ⋯ (f ↑ 𝕖))
-KitTraversal._⋯_ traversal (Λ→ t)    f = Λ→ (t ⋯ (f ↑ 𝕥))
-KitTraversal._⋯_ traversal (∀→ t)    f = ∀→ (t ⋯ (f ↑ 𝕥))
-KitTraversal._⋯_ traversal (t₁ · t₂) f = (t₁ ⋯ f) · (t₂ ⋯ f)
-KitTraversal._⋯_ traversal (t₁ ∙ t₂) f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
-KitTraversal._⋯_ traversal (t₁ ⇒ t₂) f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
-KitTraversal._⋯_ traversal ★         f = ★
-KitTraversal.⋯-var traversal x f = refl
+instance kit-traversal : KitTraversal
+KitTraversal._⋯_ kit-traversal (` x)     f = tm' (f _ x)
+KitTraversal._⋯_ kit-traversal (λ→ t)    f = λ→ (t ⋯ (f ↑ 𝕖))
+KitTraversal._⋯_ kit-traversal (Λ→ t)    f = Λ→ (t ⋯ (f ↑ 𝕥))
+KitTraversal._⋯_ kit-traversal (∀→ t)    f = ∀→ (t ⋯ (f ↑ 𝕥))
+KitTraversal._⋯_ kit-traversal (t₁ · t₂) f = (t₁ ⋯ f) · (t₂ ⋯ f)
+KitTraversal._⋯_ kit-traversal (t₁ ∙ t₂) f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
+KitTraversal._⋯_ kit-traversal (t₁ ⇒ t₂) f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
+KitTraversal._⋯_ kit-traversal ★         f = ★
+KitTraversal.⋯-var kit-traversal x f = refl
 
 instance 𝕂ᵣ = kitᵣ
 instance 𝕂ₛ = kitₛ
 
-open AssocAssumptions {{...}} public
-open KitCompose {{...}} public
+open ComposeKit {{...}} public
+open KitAssoc {{...}} public
 
-instance ckit : KitCompose {{traversal}}
-KitCompose.⋯-assoc ckit (` X) f g =
+instance kit-assoc : KitAssoc {{kit-traversal}}
+KitAssoc.⋯-assoc kit-assoc (` X) f g =
   tm' (f _ X) ⋯ g    ≡⟨ tm'-⋯-∘ f g X ⟩
   tm' ((g ∘ₖ f) _ X) ∎
-KitCompose.⋯-assoc ckit (λ→ e) f g = cong λ→_
+KitAssoc.⋯-assoc kit-assoc (λ→ e) f g = cong λ→_
   (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
-KitCompose.⋯-assoc ckit (Λ→ e) f g = cong Λ→_
+KitAssoc.⋯-assoc kit-assoc (Λ→ e) f g = cong Λ→_
   (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
-KitCompose.⋯-assoc ckit (∀→ e) f g = cong ∀→_
+KitAssoc.⋯-assoc kit-assoc (∀→ e) f g = cong ∀→_
   (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
-KitCompose.⋯-assoc ckit (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitCompose.⋯-assoc ckit (e₁ ∙ e₂) f g = cong₂ _∙_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitCompose.⋯-assoc ckit (e₁ ⇒ e₂) f g = cong₂ _⇒_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitCompose.⋯-assoc ckit ★       f g = refl
+KitAssoc.⋯-assoc kit-assoc (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
+KitAssoc.⋯-assoc kit-assoc (e₁ ∙ e₂) f g = cong₂ _∙_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
+KitAssoc.⋯-assoc kit-assoc (e₁ ⇒ e₂) f g = cong₂ _⇒_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
+KitAssoc.⋯-assoc kit-assoc ★       f g = refl
 
-instance AAᵣᵣ = AssocAssumptionsᵣᵣ
-instance AAᵣₛ = AssocAssumptionsᵣₛ
-instance AAₛᵣ = AssocAssumptionsₛᵣ
-instance AAₛₛ = AssocAssumptionsₛₛ
+instance 𝕂ᵣᵣ = kitᵣᵣ
+instance 𝕂ᵣₛ = kitᵣₛ
+instance 𝕂ₛᵣ = kitₛᵣ
+instance 𝕂ₛₛ = kitₛₛ
 
-instance kit-compose-lemmas : KitComposeLemmas
-kit-compose-lemmas = record { ⋯-id = ⋯-id } where
+instance kit-assoc-lemmas : KitAssocLemmas
+kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : Term μ M) → v ⋯ idₖ {{𝕂}} ≡ v
   ⋯-id               (` x)                             = tm-vr x
   ⋯-id {μ = μ} {{𝕂}} (λ→ t)   rewrite id↑≡id {{𝕂}} 𝕖 μ = cong λ→_ (⋯-id t)
@@ -115,13 +115,13 @@ kit-compose-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id               (t₁ · t₂)                         = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id               (t₁ ∙ t₂)                         = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id               (t₁ ⇒ t₂)                         = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               ★                               = refl
+  ⋯-id               ★                                 = refl
 
-open KitComposeLemmas {{...}} hiding (ckit) public
+open KitAssocLemmas {{...}} hiding (kit-assoc; kit-traversal) public
 
 instance kit-type : KitType
 kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 } }
-open KitType kit-type public hiding (kit-compose-lemmas)
+open KitType kit-type public hiding (kit-assoc-lemmas)
 
 Type : List Modeᵥ → Modeₜ → Set
 Type = _∶⊢_

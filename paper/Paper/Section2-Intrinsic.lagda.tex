@@ -43,7 +43,7 @@ private
 \end{code}
 %
 \begin{code}
-  -- Parallel Renamings and Substitutions
+  -- Parallel renamings and substitutions
   _→ᵣ_ _→ₛ_ : List Type → List Type → Set
   Γ₁ →ᵣ Γ₂ = ∀ t → (Γ₁ ∋ t) → (Γ₂ ∋ t)
   Γ₁ →ₛ Γ₂ = ∀ t → (Γ₁ ∋ t) → (Γ₂ ⊢ t)

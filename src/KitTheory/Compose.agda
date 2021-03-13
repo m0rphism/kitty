@@ -31,10 +31,10 @@ private
     ℓ ℓ₃          : Level
     A B C         : Set ℓ
 
--- If the client provides a `KitCompose` which works for all `AssocAssumption`s,
+-- If the client provides a `KitAssoc` which works for all `ComposeKit`s,
 -- they get `⋯-assoc` for `_ᵣ∘ᵣ_`, `_ₛ∘ᵣ_`, `_ᵣ∘ₛ_`, and `_ₛ∘ₛ_`.
 
-record AssocAssumptions {{Trav : KitTraversal}} {{𝕂₁ : Kit}} {{𝕂₂ : Kit}} {{𝕂 : Kit}} : Set₁ where
+record ComposeKit {{Trav : KitTraversal}} {{𝕂₁ : Kit}} {{𝕂₂ : Kit}} {{𝕂 : Kit}} : Set₁ where
   field
     _∘ₖ_ : κ₂ –[ 𝕂₁ ]→ κ₃ → κ₁ –[ 𝕂₂ ]→ κ₂ → κ₁ –[ 𝕂 ]→ κ₃
 
@@ -44,16 +44,16 @@ record AssocAssumptions {{Trav : KitTraversal}} {{𝕂₁ : Kit}} {{𝕂₂ : Ki
     dist-↑-∘ : ∀ k (f : κ₂ –[ 𝕂₁ ]→ κ₃) (g : κ₁ –[ 𝕂₂ ]→ κ₂) →
       (f ∘ₖ g) ↑ k ≡ (f ↑ k) ∘ₖ (g ↑ k)
 
-record KitCompose {{T : KitTraversal}} : Set₁ where
-  open AssocAssumptions {{...}}
+record KitAssoc {{T : KitTraversal}} : Set₁ where
+  open ComposeKit {{...}}
   field
-    ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : AssocAssumptions {{T}} {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
+    ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{T}} {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
                 (v : κ₁ ⊢ K) (ρ₁ : κ₁ –[ 𝕂₂ ]→ κ₂) (ρ₂ : κ₂ –[ 𝕂₁ ]→ κ₃) →
       v ⋯ ρ₁ ⋯ ρ₂ ≡ v ⋯ (ρ₂ ∘ₖ ρ₁)
 
   ∘≡∘→⋯≡⋯ : ∀ {{𝕂₁ 𝕂₂ 𝕂₁' 𝕂₂' 𝕂 : Kit}}
-              {{𝔸  : AssocAssumptions {{_}} {{𝕂₂ }} {{𝕂₁ }} {{𝕂}} }}
-              {{𝔸' : AssocAssumptions {{_}} {{𝕂₂'}} {{𝕂₁'}} {{𝕂}} }}
+              {{𝔸  : ComposeKit {{_}} {{𝕂₂ }} {{𝕂₁ }} {{𝕂}} }}
+              {{𝔸' : ComposeKit {{_}} {{𝕂₂'}} {{𝕂₁'}} {{𝕂}} }}
               {κ₂'}
               {f  : κ₁ –[ 𝕂₁  ]→ κ₂ } {g  : κ₂  –[ 𝕂₂  ]→ κ₃}
               {f' : κ₁ –[ 𝕂₁' ]→ κ₂'} {g' : κ₂' –[ 𝕂₂' ]→ κ₃} →
@@ -68,39 +68,39 @@ record KitCompose {{T : KitTraversal}} : Set₁ where
 
   -- Example:
   --
-  --   instance ckit : KitCompose {{traversal}}
-  --   KitCompose.⋯-assoc ckit (` x) f g =
+  --   instance ckit : KitAssoc {{traversal}}
+  --   KitAssoc.⋯-assoc ckit (` x) f g =
   --     tm' (f _ x) ⋯ g    ≡⟨ tm'-⋯-∘ f g x ⟩
   --     tm' ((g ∘ₖ f) _ x) ∎
-  --   KitCompose.⋯-assoc ckit (λ→ e) f g = cong λ→_
+  --   KitAssoc.⋯-assoc ckit (λ→ e) f g = cong λ→_
   --     (e ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   --      e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   --      e ⋯ (g ∘ₖ f) ↑ _         ∎)
-  --   KitCompose.⋯-assoc ckit (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
+  --   KitAssoc.⋯-assoc ckit (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
 
-open KitCompose {{...}}
+open KitAssoc {{...}}
 
-AssocAssumptionsᵣᵣ : {{T : KitTraversal}} →
-                     AssocAssumptions {{T}} {{kitᵣ}} {{kitᵣ}} {{kitᵣ}}
-AssocAssumptions._∘ₖ_     AssocAssumptionsᵣᵣ = _ᵣ∘ᵣ_
-AssocAssumptions.tm'-⋯-∘  AssocAssumptionsᵣᵣ = λ ρ₁ ρ₂ x → ⋯-var (ρ₁ _ x) ρ₂ where instance _ = kitᵣ
-AssocAssumptions.dist-↑-∘ AssocAssumptionsᵣᵣ = λ _ f g → fun-ext₂ λ where
+kitᵣᵣ : {{T : KitTraversal}} →
+                     ComposeKit {{T}} {{kitᵣ}} {{kitᵣ}} {{kitᵣ}}
+ComposeKit._∘ₖ_     kitᵣᵣ = _ᵣ∘ᵣ_
+ComposeKit.tm'-⋯-∘  kitᵣᵣ = λ ρ₁ ρ₂ x → ⋯-var (ρ₁ _ x) ρ₂ where instance _ = kitᵣ
+ComposeKit.dist-↑-∘ kitᵣᵣ = λ _ f g → fun-ext₂ λ where
                                                  _ (here px) → refl
                                                  _ (there x) → refl
 
-AssocAssumptionsₛᵣ : {{T : KitTraversal}} →
-                     AssocAssumptions {{T}} {{kitₛ}} {{kitᵣ}} {{kitₛ}}
-AssocAssumptions._∘ₖ_     AssocAssumptionsₛᵣ = _ₛ∘ᵣ_
-AssocAssumptions.tm'-⋯-∘  AssocAssumptionsₛᵣ = λ σ₁ ρ₂ x → ⋯-var (σ₁ _ x) ρ₂ where instance _ = kitₛ
-AssocAssumptions.dist-↑-∘ AssocAssumptionsₛᵣ = λ _ f g → fun-ext₂ λ where
+kitₛᵣ : {{T : KitTraversal}} →
+                     ComposeKit {{T}} {{kitₛ}} {{kitᵣ}} {{kitₛ}}
+ComposeKit._∘ₖ_     kitₛᵣ = _ₛ∘ᵣ_
+ComposeKit.tm'-⋯-∘  kitₛᵣ = λ σ₁ ρ₂ x → ⋯-var (σ₁ _ x) ρ₂ where instance _ = kitₛ
+ComposeKit.dist-↑-∘ kitₛᵣ = λ _ f g → fun-ext₂ λ where
                                                  _ (here px) → refl
                                                  _ (there x) → refl
 
-AssocAssumptionsᵣₛ : {{T : KitTraversal}} {{_ : KitCompose {{T}} }} →
-                     AssocAssumptions {{T}} {{kitᵣ}} {{kitₛ}} {{kitₛ}}
-AssocAssumptions._∘ₖ_     AssocAssumptionsᵣₛ = _ᵣ∘ₛ_
-AssocAssumptions.tm'-⋯-∘  AssocAssumptionsᵣₛ = λ ρ₁ σ₂ x → refl
-AssocAssumptions.dist-↑-∘ AssocAssumptionsᵣₛ =
+kitᵣₛ : {{T : KitTraversal}} {{_ : KitAssoc {{T}} }} →
+                     ComposeKit {{T}} {{kitᵣ}} {{kitₛ}} {{kitₛ}}
+ComposeKit._∘ₖ_     kitᵣₛ = _ᵣ∘ₛ_
+ComposeKit.tm'-⋯-∘  kitᵣₛ = λ ρ₁ σ₂ x → refl
+ComposeKit.dist-↑-∘ kitᵣₛ =
   λ k₁ ρ σ → fun-ext₂ λ where
       k (here refl) →
         ((ρ ᵣ∘ₛ σ) ↑ k) k (here refl)       ≡⟨⟩
@@ -115,13 +115,13 @@ AssocAssumptions.dist-↑-∘ AssocAssumptionsᵣₛ =
         (σ k x ⋯ wk) ⋯ (ρ ↑ k₁)   ∎
     where instance _ = kitₛ
                    _ = kitᵣ
-                   _ = AssocAssumptionsᵣᵣ
+                   _ = kitᵣᵣ
 
-AssocAssumptionsₛₛ : {{T : KitTraversal}} {{_ : KitCompose {{T}} }} →
-                     AssocAssumptions {{T}} {{kitₛ}} {{kitₛ}} {{kitₛ}}
-AssocAssumptions._∘ₖ_     AssocAssumptionsₛₛ = _ₛ∘ₛ_
-AssocAssumptions.tm'-⋯-∘  AssocAssumptionsₛₛ = λ σ₁ σ₂ x → refl
-AssocAssumptions.dist-↑-∘ AssocAssumptionsₛₛ =
+kitₛₛ : {{T : KitTraversal}} {{_ : KitAssoc {{T}} }} →
+                     ComposeKit {{T}} {{kitₛ}} {{kitₛ}} {{kitₛ}}
+ComposeKit._∘ₖ_     kitₛₛ = _ₛ∘ₛ_
+ComposeKit.tm'-⋯-∘  kitₛₛ = λ σ₁ σ₂ x → refl
+ComposeKit.dist-↑-∘ kitₛₛ =
   λ k₁ σ₁ σ₂ → fun-ext₂ λ where
       k (here refl) →
         (` here refl)             ≡⟨ sym (⋯-var (here refl) (σ₁ ↑ k₁)) ⟩
@@ -133,5 +133,5 @@ AssocAssumptions.dist-↑-∘ AssocAssumptionsₛₛ =
         (σ₂ k x ⋯ wk) ⋯ (σ₁ ↑ k₁)   ∎
     where instance _ = kitₛ
                    _ = kitᵣ
-                   _ = AssocAssumptionsᵣₛ
-                   _ = AssocAssumptionsₛᵣ
+                   _ = kitᵣₛ
+                   _ = kitₛᵣ
