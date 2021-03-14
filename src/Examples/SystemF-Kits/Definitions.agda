@@ -64,15 +64,15 @@ open KitTraversal {{...}} public
 
 -- Traversing a term with a renaming/substitution f.
 instance kit-traversal : KitTraversal
-KitTraversal._⋯_ kit-traversal (` x)     f = tm' (f _ x)
-KitTraversal._⋯_ kit-traversal (λ→ t)    f = λ→ (t ⋯ (f ↑ 𝕖))
-KitTraversal._⋯_ kit-traversal (Λ→ t)    f = Λ→ (t ⋯ (f ↑ 𝕥))
-KitTraversal._⋯_ kit-traversal (∀→ t)    f = ∀→ (t ⋯ (f ↑ 𝕥))
-KitTraversal._⋯_ kit-traversal (t₁ · t₂) f = (t₁ ⋯ f) · (t₂ ⋯ f)
-KitTraversal._⋯_ kit-traversal (t₁ ∙ t₂) f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
-KitTraversal._⋯_ kit-traversal (t₁ ⇒ t₂) f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
-KitTraversal._⋯_ kit-traversal ★         f = ★
-KitTraversal.⋯-var kit-traversal x f = refl
+_⋯_ {{kit-traversal}} (` x)     f = tm' (f _ x)
+_⋯_ {{kit-traversal}} (λ→ t)    f = λ→ (t ⋯ (f ↑ 𝕖))
+_⋯_ {{kit-traversal}} (Λ→ t)    f = Λ→ (t ⋯ (f ↑ 𝕥))
+_⋯_ {{kit-traversal}} (∀→ t)    f = ∀→ (t ⋯ (f ↑ 𝕥))
+_⋯_ {{kit-traversal}} (t₁ · t₂) f = (t₁ ⋯ f) · (t₂ ⋯ f)
+_⋯_ {{kit-traversal}} (t₁ ∙ t₂) f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
+_⋯_ {{kit-traversal}} (t₁ ⇒ t₂) f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
+_⋯_ {{kit-traversal}} ★         f = ★
+⋯-var {{kit-traversal}} x f = refl
 
 instance 𝕂ᵣ = kitᵣ
 instance 𝕂ₛ = kitₛ
@@ -82,25 +82,25 @@ open KitAssoc {{...}} public
 
 -- Associativity of applying a renaming/substitution after a renaming/substitution.
 instance kit-assoc : KitAssoc {{kit-traversal}}
-KitAssoc.⋯-assoc kit-assoc (` X) f g =
+⋯-assoc {{kit-assoc}} (` X) f g =
   tm' (f _ X) ⋯ g    ≡⟨ tm'-⋯-∘ f g X ⟩
   tm' ((g ∘ₖ f) _ X) ∎
-KitAssoc.⋯-assoc kit-assoc (λ→ e) f g = cong λ→_
+⋯-assoc {{kit-assoc}} (λ→ e) f g = cong λ→_
   (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
-KitAssoc.⋯-assoc kit-assoc (Λ→ e) f g = cong Λ→_
+⋯-assoc {{kit-assoc}} (Λ→ e) f g = cong Λ→_
   (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
-KitAssoc.⋯-assoc kit-assoc (∀→ e) f g = cong ∀→_
+⋯-assoc {{kit-assoc}} (∀→ e) f g = cong ∀→_
   (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
   e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
   e ⋯ (g ∘ₖ f) ↑ _         ∎)
-KitAssoc.⋯-assoc kit-assoc (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitAssoc.⋯-assoc kit-assoc (e₁ ∙ e₂) f g = cong₂ _∙_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitAssoc.⋯-assoc kit-assoc (e₁ ⇒ e₂) f g = cong₂ _⇒_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
-KitAssoc.⋯-assoc kit-assoc ★         f g = refl
+⋯-assoc {{kit-assoc}} (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
+⋯-assoc {{kit-assoc}} (e₁ ∙ e₂) f g = cong₂ _∙_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
+⋯-assoc {{kit-assoc}} (e₁ ⇒ e₂) f g = cong₂ _⇒_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
+⋯-assoc {{kit-assoc}} ★         f g = refl
 
 instance 𝕂ᵣᵣ = kitᵣᵣ
 instance 𝕂ᵣₛ = kitᵣₛ
