@@ -45,7 +45,7 @@ data Term : List Modeᵥ → Modeₜ → Set where
   _·_   : Term μ 𝕖 → Term μ 𝕖 → Term μ 𝕖
   _∙_   : Term μ 𝕖 → Term μ 𝕥 → Term μ 𝕖
   _⇒_   : Term μ 𝕥 → Term μ 𝕥 → Term μ 𝕥
-  ★   : Term μ 𝕜
+  ★     : Term μ 𝕜
 
 pattern `_ x = `[ refl ] x
 
