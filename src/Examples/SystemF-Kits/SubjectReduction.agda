@@ -10,8 +10,8 @@ open import Function using () renaming (_∋_ to _by_)
 open import Examples.SystemF-Kits.Definitions
 
 K≡★ : ∀ (K : Term μ 𝕜) → K ≡ ★
-K≡★ (`[_]_ {m = 𝕖} () y)
-K≡★ (`[_]_ {m = 𝕥} () y)
+K≡★ (`[_]_ {m = 𝕖} () x)
+K≡★ (`[_]_ {m = 𝕥} () x)
 K≡★ ★ = refl
 
 wk-⊢' : ∀ {E : Term μ₁ M} {T : Type μ₁ M} {ρ : μ₁ →ᵣ μ₂} →
