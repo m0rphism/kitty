@@ -6,9 +6,9 @@ open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 
 infixr  3  _↪_  _⊢_∶_  _⊢*_∶_
-infixr  4  ∀→_  λ→_  Λ→_
-infixr  5  _⇒_
-infixl  5  _·_  _∙_
+infixr  5  ∀→_  λ→_  Λ→_
+infixr  6  _⇒_
+infixl  6  _·_  _∙_
 infix   7  `_
 
 -- Syntax ----------------------------------------------------------------------
@@ -163,6 +163,16 @@ _⊢*_∶_ : Ctx μ₂ → μ₁ →ₛ μ₂ → Ctx μ₁ → Set
 _⊢*_∶_ {μ₁ = μ₁} Γ₂ σ Γ₁ = ∀ {m₁} → (x : μ₁ ∋ m₁) → Γ₂ ⊢ σ _ x ∶ (wk-telescope Γ₁ x ⋯ σ)
 
 -- Semantics -------------------------------------------------------------------
+
+data Neutral : Term μ 𝕖 → Set where
+  n-`  : Neutral (` x)
+  n-·₁ : Neutral e₁ → Neutral (e₁ · e₂)
+  n-∙₁ : Neutral e → Neutral (e ∙ t)
+
+data Value : Term μ 𝕖 → Set where
+  λ→_     : Value e → Value (λ→ e)
+  Λ→_     : Value e → Value (Λ→ e)
+  neutral : Neutral e → Value e
 
 data _↪_ : Term μ 𝕖 → Term μ 𝕖 → Set where
   β-λ : ∀ {e₂ : Term μ 𝕖} →
