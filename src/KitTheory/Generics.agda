@@ -58,32 +58,85 @@ module SizeExample where
   incℕ : ∀ d s → µD d s → µD d s
   incℕ d s (µd {s'} x) = µd (mapD d (incℕ d s') x )
 
--- data Desc : Set₁ where
---   `σ : (A : Set) → (A → Desc) → Desc
---   `X : List VarMode → TermMode → Desc → Desc
---   `■ : TermMode → Desc
+module SizeExample2 where
+  open import Data.Sum using (_⊎_; inj₁; inj₂)
+  open import Data.Nat using (ℕ; zero; suc)
 
--- Scoped : Set₁
--- Scoped = List VarMode → TermMode → Set
+  data Desc : Set₁ where
+    `ℕ     : Desc
+    `Const : Set → Desc
+    `Id    : Desc
+    _`+_   : Desc → Desc → Desc
+    _`*_   : Desc → Desc → Desc
 
--- ⟦_⟧ : Desc → Scoped → Scoped
--- ⟦ `σ A d     ⟧ X µ M = Σ[ a ∈ A ] (⟦ d a ⟧ X µ M)
--- ⟦ `X µ' M' d ⟧ X µ M = X (µ' ++ µ) M' × ⟦ d ⟧ X µ M
--- ⟦ `■ M'      ⟧ X µ M = M ≡ M'
+  SSet = Size → Set
 
--- data Tm (d : Desc) : Size → Scoped where
---   `var : ∀ {µ m s} → µ ∋ m → Tm d (↑ s) µ (m→M m)
---   `con : ∀ {µ M s} → ⟦ d ⟧ (Tm d s) µ M → Tm d (↑ s) µ M
+  ⟦_⟧ : Desc → Set → Set
+  ⟦ `ℕ       ⟧ A = ℕ
+  ⟦ `Const B ⟧ A = B
+  ⟦ `Id      ⟧ A = A
+  ⟦ d₁ `+ d₂ ⟧ A = ⟦ d₁ ⟧ A × ⟦ d₂ ⟧ A
+  ⟦ d₁ `* d₂ ⟧ A = ⟦ d₁ ⟧ A ⊎ ⟦ d₂ ⟧ A
 
--- -- module TerminationTest where
--- --   map⟦⟧ : (d : Desc) → (_⊢_ _⊢'_ : Scoped) → (f : ∀ µ µ' M → µ ⊢ M → µ' ⊢' M) → ⟦ d ⟧ _⊢_ µ M → ⟦ d ⟧ _⊢'_ µ' M
--- --   map⟦⟧ (`σ A dA)  _⊢_ _⊢'_ f (a , t) = a , map⟦⟧ (dA a) _⊢_ _⊢'_ f t
--- --   map⟦⟧ (`X µ M d) _⊢_ _⊢'_ f (x , t) = f _ _ _ x , map⟦⟧ d _⊢_ _⊢'_ f t
--- --   map⟦⟧ (`■ x)     _⊢_ _⊢'_ f t       = t
+  data µD (d : Desc) (s : Size) : Set where
+    µd : ∀ {s' : Size< s} → ⟦ d ⟧ (µD d s') → µD d s
 
--- --   mapTm : (d : Desc) → (f : ∀ µ µ' M → Tm d ∞ µ M → Tm d ∞ µ' M) → ∀ µ µ' M → Tm d ∞ µ M → Tm d ∞ µ' M
--- --   mapTm d f µ µ' M (`var x) = f _ _ _ (`var x)
--- --   mapTm d f µ µ' M (`con x) = `con (map⟦⟧ d (Tm d ∞) (Tm d ∞) (mapTm d f) x)
+  private variable A B : Set
+
+  mapD : ∀ {A B : SSet} {s s'} d → (A s → B s') → ⟦ d ⟧ (A s) → ⟦ d ⟧ (B s')
+  mapD         `ℕ         f t         = t
+  mapD         (`Const x) f t         = t
+  mapD         `Id        f t         = f t
+  mapD {A} {B} (d₁ `+ d₂) f (t₁ , t₂) = mapD {A} {B} d₁ f t₁ , mapD {A} {B} d₂ f t₂
+  mapD {A} {B} (d₁ `* d₂) f (inj₁ t₁) = inj₁ (mapD {A} {B} d₁ f t₁)
+  mapD {A} {B} (d₁ `* d₂) f (inj₂ t₂) = inj₂ (mapD {A} {B} d₂ f t₂)
+
+  incℕ : ∀ d s → µD d s → µD d s
+  incℕ d s (µd {s'} x) = µd (mapD {A = µD d} {B = µD d} d (incℕ d s') x )
+
+  mapD' : ∀ {A B : SSet} {s} d → (A s → B ∞) → ⟦ d ⟧ (A s) → ⟦ d ⟧ (B ∞)
+  mapD'         `ℕ         f t         = t
+  mapD'         (`Const x) f t         = t
+  mapD'         `Id        f t         = f t
+  mapD' {A} {B} (d₁ `+ d₂) f (t₁ , t₂) = mapD {A} {B} d₁ f t₁ , mapD {A} {B} d₂ f t₂
+  mapD' {A} {B} (d₁ `* d₂) f (inj₁ t₁) = inj₁ (mapD {A} {B} d₁ f t₁)
+  mapD' {A} {B} (d₁ `* d₂) f (inj₂ t₂) = inj₂ (mapD {A} {B} d₂ f t₂)
+
+  incℕ' : ∀ d s → µD d s → µD d ∞
+  incℕ' d s (µd {s'} x) = µd (mapD' {A = µD d} {B = µD d} d (incℕ' d s') x )
+
+  -- incℕ'' : ∀ d s → µD d ∞ → µD d ∞
+  -- incℕ'' d s (µd {s'} x) = µd (mapD' {A = µD d} {B = µD d} d (incℕ'' d s') x )
+
+data Desc : Set₁ where
+  `σ : (A : Set) → (A → Desc) → Desc
+  `X : List VarMode → TermMode → Desc → Desc
+  `■ : TermMode → Desc
+
+Scoped : Set₁
+Scoped = List VarMode → TermMode → Set
+
+SScoped : Set₁
+SScoped = Size → Scoped
+
+⟦_⟧ : Desc → Scoped → Scoped
+⟦ `σ A d     ⟧ X µ M = Σ[ a ∈ A ] (⟦ d a ⟧ X µ M)
+⟦ `X µ' M' d ⟧ X µ M = X (µ' ++ µ) M' × ⟦ d ⟧ X µ M
+⟦ `■ M'      ⟧ X µ M = M ≡ M'
+
+data Tm (d : Desc) (s : Size) : Scoped where
+  `var : ∀ {µ m} → µ ∋ m → Tm d s µ (m→M m)
+  `con : ∀ {µ M} {s' : Size< s} → ⟦ d ⟧ (Tm d s') µ M → Tm d s µ M
+
+map⟦⟧ : (d : Desc) → ([_]_⊢_ [_]_⊢'_ : SScoped) → ∀ s s' → (f : ∀ µ µ' M → [ s ] µ ⊢ M → [ s' ] µ' ⊢' M) → ⟦ d ⟧ [ s ]_⊢_ µ M → ⟦ d ⟧ [ s' ]_⊢'_ µ' M
+map⟦⟧ (`σ A dA)  _⊢_ _⊢'_ s s' f (a , t) = a , map⟦⟧ (dA a) _⊢_ _⊢'_ s s' f t
+map⟦⟧ (`X µ M d) _⊢_ _⊢'_ s s' f (x , t) = f _ _ _ x , map⟦⟧ d _⊢_ _⊢'_ s s' f t
+map⟦⟧ (`■ x)     _⊢_ _⊢'_ s s' f t       = t
+
+module Test where
+  mapTm : (d : Desc) → ∀ s → (f : ∀ µ µ' M → Tm d s µ M → Tm d ∞ µ' M) → ∀ µ µ' M → Tm d s µ M → Tm d ∞ µ' M
+  mapTm d s f µ µ' M (`var x) = f _ _ _ (`var x)
+  mapTm d s f µ µ' M (`con {s' = s'} x) = `con (map⟦⟧ d (Tm d) (Tm d) s' ∞ (mapTm d s' f) x)
 
 -- _⊢[_]_ : List VarMode → Desc → TermMode → Set
 -- µ ⊢[ d ] M = Tm d _ µ M
