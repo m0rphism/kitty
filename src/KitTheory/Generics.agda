@@ -16,6 +16,12 @@ open import Size
 
 open Modes 𝕄
 
+private
+  variable
+    m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
+    M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
+    µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
+
 data Desc : Set₁ where
   `σ : (A : Set) → (A → Desc) → Desc
   `X : List VarMode → TermMode → Desc → Desc
@@ -29,41 +35,65 @@ Scoped = List VarMode → TermMode → Set
 ⟦ `X µ' M' d ⟧ X µ M = X (µ' ++ µ) M' × ⟦ d ⟧ X µ M
 ⟦ `■ M'      ⟧ X µ M = M ≡ M'
 
-data Tm (d : Desc) : Scoped where
-  `var : ∀ {µ m} → µ ∋ m → Tm d µ (m→M m)
-  `con : ∀ {µ M} → ⟦ d ⟧ (Tm d) µ M → Tm d µ M
+data Tm (d : Desc) : Size → Scoped where
+  `var : ∀ {µ m s} → µ ∋ m → Tm d (↑ s) µ (m→M m)
+  `con : ∀ {µ M s} → ⟦ d ⟧ (Tm d s) µ M → Tm d (↑ s) µ M
+
+-- module TerminationTest where
+--   map⟦⟧ : (d : Desc) → (_⊢_ _⊢'_ : Scoped) → (f : ∀ µ µ' M → µ ⊢ M → µ' ⊢' M) → ⟦ d ⟧ _⊢_ µ M → ⟦ d ⟧ _⊢'_ µ' M
+--   map⟦⟧ (`σ A dA)  _⊢_ _⊢'_ f (a , t) = a , map⟦⟧ (dA a) _⊢_ _⊢'_ f t
+--   map⟦⟧ (`X µ M d) _⊢_ _⊢'_ f (x , t) = f _ _ _ x , map⟦⟧ d _⊢_ _⊢'_ f t
+--   map⟦⟧ (`■ x)     _⊢_ _⊢'_ f t       = t
+
+--   mapTm : (d : Desc) → (f : ∀ µ µ' M → Tm d ∞ µ M → Tm d ∞ µ' M) → ∀ µ µ' M → Tm d ∞ µ M → Tm d ∞ µ' M
+--   mapTm d f µ µ' M (`var x) = f _ _ _ (`var x)
+--   mapTm d f µ µ' M (`con x) = `con (map⟦⟧ d (Tm d ∞) (Tm d ∞) (mapTm d f) x)
 
 _⊢[_]_ : List VarMode → Desc → TermMode → Set
-µ ⊢[ d ] M = Tm d µ M
+µ ⊢[ d ] M = Tm d _ µ M
 
 -- -- module DescKit (d : Desc) where
 -- module DescKit where
 
+--   -- TODO: we would need to move the `_ constructor out of Terms as ⟦ d ⟧ doesn't have variables.
 --   𝕋⟦⟧ : Desc → Terms 𝕄 → Terms 𝕄
 --   𝕋⟦⟧ d t = record { _⊢_ = ⟦ d ⟧ (Terms._⊢_ t)
 --                    ; `_ = {!!}
 --                    }
 
---   𝕋 : Desc → Terms 𝕄
---   𝕋 d = record { _⊢_ = Tm d
+--   𝕋 : Desc → Size → Terms 𝕄
+--   𝕋 d s = record { _⊢_ = Tm d (↑ s)
 --                ; `_ = `var
 --                }
 
---   open import KitTheory.Kit
---   open Kit {{...}}
+--   import KitTheory.Kit
+--   -- open import KitTheory.Kit
+--   -- open Kit {{...}}
 
 --   private
 
---     Traversal : Set → Set → Set₁
---     Traversal _⊢_ _⊢'_ = ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+--     Traversal : Terms 𝕄 → (Size → Scoped) → Set₁
+--     Traversal 𝕋 _⊢_ = let open KitTheory.Kit 𝕋 in
+--                       ∀ {{𝕂 : Kit}} {µ₁ µ₂ M} {s} → _⊢_ s µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → _⊢_ s µ₂ M
+
+--     trav : (d : Desc) → (_⊢_ : Size → Scoped) → ∀ 𝕋 → Traversal 𝕋 _⊢_ → Traversal 𝕋 (λ s → ⟦ d ⟧ (_⊢_ s))
+--     trav (`σ A dA)   _⊢_ 𝕋 T (a , t) f = a , trav (dA a) _⊢_ 𝕋 T t f
+--     trav (`X µ' M d) _⊢_ 𝕋 T (x , t) f = T x (f ↑* µ') , trav d _⊢_ 𝕋 T t f where open KitTheory.Kit.Kit {{...}}
+--     trav (`■ x)      _⊢_ 𝕋 T t       f = t
+
+--     trav' : (d : Desc) {s : Size} → Traversal (𝕋 d s) (Tm d)
+--     trav' d {s} (`var x) f = {!!}
+--     trav' d {s} (`con x) f = `con (trav d (Tm d) (𝕋 d s) (trav' d {s} ) x f)
+--     -- trav' d {s} (`var x) f = tm' (f _ x) where open KitTheory.Kit.Kit {{...}}
+--     -- trav' d {s} (`con x) f = `con (trav d (Tm d (↑ s)) (𝕋 d s) (trav' d s) x f)
 
 --     -- trav : (d : Desc) → (_⊢'_ : Scoped) → KitTraversal 𝕋' → KitTraversal (𝕋⟦⟧ d 𝕋')
 
---     kit-traversal' : (d : Desc) → (𝕋' : Terms 𝕄) → KitTraversal 𝕋' → KitTraversal (𝕋⟦⟧ d 𝕋')
---     KitTraversal._⋯_ (kit-traversal' (`σ A dA)   𝕋' T') (a , t)  f = a , {!KitTraversal._⋯_ (kit-traversal' (dA a) 𝕋' T') t f!}
---     KitTraversal._⋯_ (kit-traversal' (`X µ' M d) 𝕋' T') (t' , t) f = {!KitTraversal._⋯_ T' t' (f ↑* µ')!}
---     KitTraversal._⋯_ (kit-traversal' (`■ x₁)     𝕋' T') refl     f = refl
---     KitTraversal.⋯-var (kit-traversal' d 𝕋' T') = {!!}
+--     -- kit-traversal' : (d : Desc) → (𝕋' : Terms 𝕄) → KitTraversal 𝕋' → KitTraversal (𝕋⟦⟧ d 𝕋')
+--     -- KitTraversal._⋯_ (kit-traversal' (`σ A dA)   𝕋' T') (a , t)  f = a , {!KitTraversal._⋯_ (kit-traversal' (dA a) 𝕋' T') t f!}
+--     -- KitTraversal._⋯_ (kit-traversal' (`X µ' M d) 𝕋' T') (t' , t) f = {!KitTraversal._⋯_ T' t' (f ↑* µ')!}
+--     -- KitTraversal._⋯_ (kit-traversal' (`■ x₁)     𝕋' T') refl     f = refl
+--     -- KitTraversal.⋯-var (kit-traversal' d 𝕋' T') = {!!}
 
 -- --     kit-traversal : (d : Desc) → KitTraversal (𝕋 d)
 -- --     KitTraversal._⋯_ (kit-traversal d)            (`var x) f = {!x!}
