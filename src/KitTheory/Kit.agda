@@ -1,33 +1,19 @@
-open import Data.List using (List; []; _∷_)
-open import Data.List.Membership.Propositional using (_∈_)
+open import KitTheory.Modes
 
-module KitTheory.Kit
-    (VarMode  : Set)
-    (TermMode : Set)
-    (m→M      : VarMode → TermMode)
-    (_⊢_      : List VarMode → TermMode → Set)
-    (`_       : ∀ {µ m} → m ∈ µ → µ ⊢ m→M m)
-  where
+module KitTheory.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
-open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
-open ≡-Reasoning
-open import Data.List using (List; []; _∷_)
+open import Data.List using (List; []; _∷_; _++_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
-open import Function using (id)
+
+open Terms 𝕋
 
 private
   variable
-    m m' m₁ m₂    : VarMode
-    µ µ' µ₁ µ₂ µ₃ : List VarMode
-    M M' M₁ M₂    : TermMode
-    x y z         : m ∈ µ
-    ℓ ℓ₃          : Level
-    A B C         : Set ℓ
-
-Stuff : Set → Set₁
-Stuff StuffMode = List VarMode → StuffMode → Set
+    m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
+    M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
+    µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
 postulate fun-ext : ∀ {ℓ₁ ℓ₂} → Extensionality ℓ₁ ℓ₂
 
@@ -37,15 +23,11 @@ fun-ext₂ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A₁ : Set ℓ₁} {A₂ : A₁ → Set
     f ≡ g
 fun-ext₂ h = fun-ext λ x → fun-ext λ y → h x y
 
-infix  4  _∋_
-
-_∋_ : List A → A → Set _
-xs ∋ x = x ∈ xs
-
 record Kit : Set₁ where
   infix   4  _◆_
   infixl  5  _,ₖ_
-  infixl  6  _↑_
+  infixl  6  _↑_  _↑*_
+
   field
     StuffMode : Set
     _◆_       : Stuff StuffMode
@@ -56,20 +38,24 @@ record Kit : Set₁ where
     wk        : ∀ SM → µ ◆ SM → (m' ∷ µ) ◆ SM
     m→SM→M    : ∀ m → SM→M (m→SM m) ≡ m→M m
     wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
-    tm-vr     : ∀ (x : µ ∋ m) → subst (µ ⊢_) (m→SM→M m) (tm _ (vr _ x)) ≡ ` x
+    tm-vr     : ∀ x → subst (µ ⊢_) (m→SM→M m) (tm _ (vr _ x)) ≡ ` x
 
   _–→_ : List VarMode → List VarMode → Set
   _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m→SM m
 
-  tm' : ∀ {µ m} → µ ◆ m→SM m → µ ⊢ m→M m
+  tm' : µ ◆ m→SM m → µ ⊢ m→M m
   tm' {µ} {m} t = subst (µ ⊢_) (m→SM→M m) (tm _ t)
 
   idₖ : µ –→ µ
-  idₖ = λ _ x → vr _ x
+  idₖ = vr
 
-  _↑_ : µ₁ –→ µ₂ → (m : VarMode) → (m ∷ µ₁) –→ (m ∷ µ₂)
+  _↑_ : µ₁ –→ µ₂ → ∀ m → (m ∷ µ₁) –→ (m ∷ µ₂)
   (f ↑ m) _ (here p)  = vr _ (here p)
   (f ↑ m) _ (there x) = wk _ (f _ x)
+
+  _↑*_ : µ₁ –→ µ₂ → ∀ µ' → (µ' ++ µ₁) –→ (µ' ++ µ₂)
+  f ↑* []       = f
+  f ↑* (m ∷ µ') = (f ↑* µ') ↑ m
 
   id↑≡id : ∀ m µ → idₖ {µ = µ} ↑ m ≡ idₖ {µ = m ∷ µ}
   id↑≡id m µ = fun-ext₂ λ where
@@ -93,6 +79,7 @@ _–[_]→_ : List VarMode → (_ : Kit) → List VarMode → Set _
 
 record KitTraversal : Set₁ where
   infixl  5  _⋯_  _⋯ᵣ_  _⋯ₛ_
+
   field
     _⋯_   : ∀ {{𝕂 : Kit}} →
             µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
@@ -155,5 +142,3 @@ record KitTraversal : Set₁ where
   _ₛ∘ᵣ_ = _∘ᵣ_
   _ᵣ∘ₛ_ = _∘ₛ_
   _ₛ∘ₛ_ = _∘ₛ_
-
-open KitTraversal {{...}}

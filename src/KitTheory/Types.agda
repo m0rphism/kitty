@@ -1,71 +1,64 @@
-open import Data.List using (List; []; _∷_)
-open import Data.List.Membership.Propositional using (_∈_)
+open import KitTheory.Modes
+open import KitTheory.Kit using (KitTraversal)
+open import KitTheory.Compose using (KitAssoc)
+open KitAssoc using (KitAssocLemmas)
 
-module KitTheory.Types
-    (VarMode  : Set)
-    (TermMode : Set)
-    (m→M      : VarMode → TermMode)
-    (_⊢_      : List VarMode → TermMode → Set)
-    (`_       : ∀ {µ m} → m ∈ µ → µ ⊢ m→M m)
-  where
+module KitTheory.Types {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (A : KitAssoc 𝕋 T) (AL : KitAssocLemmas A) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Axiom.Extensionality.Propositional using (Extensionality)
 open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
 
-open import KitTheory.Kit           VarMode TermMode m→M _⊢_ `_
-open import KitTheory.Compose       VarMode TermMode m→M _⊢_ `_
-open import KitTheory.ComposeLemmas VarMode TermMode m→M _⊢_ `_
+open Terms 𝕋
+open KitTheory.Kit 𝕋
+open KitTheory.Kit.KitTraversal T
+open KitTheory.Compose 𝕋 T
+open KitTheory.Compose.KitAssoc A
+open KitTheory.Compose.KitAssoc.KitAssocLemmas AL
 
 open Kit {{...}}
-open KitTraversal {{...}}
 open ComposeKit {{...}}
-open KitAssoc {{...}}
-open KitAssocLemmas {{...}}
-
-private instance _ = kitᵣ
-private instance _ = kitₛ
-private instance _ = kitᵣᵣ
-private instance _ = kitᵣₛ
-private instance _ = kitₛᵣ
-private instance _ = kitₛₛ
 
 private
   variable
-    m m' m₁ m₂    : VarMode
-    µ µ' µ₁ µ₂ µ₃ : List VarMode
-    M M' M₁ M₂    : TermMode
-    x y z         : m ∈ µ
-    ℓ ℓ₃          : Level
-    A B C         : Set ℓ
+    m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
+    M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
+    µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
+    ℓ ℓ₁ ℓ₂ : Level
 
 record KitType : Set₁ where
+  private instance _ = kitᵣ
+  private instance _ = kitₛ
+  private instance _ = kitᵣᵣ
+  private instance _ = kitᵣₛ
+  private instance _ = kitₛᵣ
+  private instance _ = kitₛₛ
+
   field
-    -- {{term-traversal}} : KitTraversal
-    {{kit-assoc-lemmas}} : KitAssocLemmas
     ↑ₜ : TermMode → TermMode
 
   _∶⊢_ : List VarMode → TermMode → Set
   µ ∶⊢ M = µ ⊢ ↑ₜ M
 
-  depth : ∀ {x : A} {xs : List A} → x ∈ xs → ℕ
+  depth : ∀ {A : Set ℓ} {x : A} {xs : List A} → xs ∋ x → ℕ
   depth (here px) = zero
   depth (there x) = suc (depth x)
 
   -- We need to drop one extra using `suc`, because otherwise the types in a
   -- context are allowed to use themselves.
-  drop-∈ : ∀ {x : A} {xs : List A} → x ∈ xs → List A → List A
+  drop-∈ : ∀ {A : Set ℓ} {x : A} {xs : List A} → xs ∋ x → List A → List A
   drop-∈ = drop ∘ suc ∘ depth
 
   Ctx : List VarMode → Set
   Ctx µ = ∀ {m} → (x : µ ∋ m) → drop-∈ x µ ∶⊢ m→M m
 
-  private variable Γ Γ₁ Γ₂ : Ctx µ
+  private
+    variable
+      Γ Γ₁ Γ₂    : Ctx µ
 
   infixl  5  _,,_
 

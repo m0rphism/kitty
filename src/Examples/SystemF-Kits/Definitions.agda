@@ -57,8 +57,15 @@ variable
 
 -- Substitutions ---------------------------------------------------------------
 
-open import KitTheory Modeᵥ Modeₜ m→M Term `_ public
+open import KitTheory.Modes
 
+𝕄 : Modes
+𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
+
+𝕋 : Terms 𝕄
+𝕋 = record { _⊢_ = Term ; `_ = `_ }
+
+open import KitTheory.Kit 𝕋
 open Kit {{...}} public
 open KitTraversal {{...}} public
 
@@ -77,11 +84,12 @@ _⋯_ {{kit-traversal}} ★         f = ★
 instance 𝕂ᵣ = kitᵣ
 instance 𝕂ₛ = kitₛ
 
+open import KitTheory.Compose 𝕋 kit-traversal
 open ComposeKit {{...}} public
 open KitAssoc {{...}} public
 
 -- Associativity of applying a renaming/substitution after a renaming/substitution.
-instance kit-assoc : KitAssoc {{kit-traversal}}
+instance kit-assoc : KitAssoc
 ⋯-assoc {{kit-assoc}} (` X) f g =
   tm' (f _ X) ⋯ g    ≡⟨ tm'-⋯-∘ f g X ⟩
   tm' ((g ∘ₖ f) _ X) ∎
@@ -120,13 +128,15 @@ kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id               (t₁ ⇒ t₂)                         = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id               ★                                 = refl
 
-open KitAssocLemmas {{...}} hiding (kit-assoc; kit-traversal) public
+open KitAssocLemmas {{...}} public
+
+open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
 
 -- Each variable mode corresponds to a term mode that represents its type.
 instance kit-type : KitType
 kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 } }
 
-open KitType kit-type hiding (kit-assoc-lemmas) public
+open KitType kit-type public
 
 Type : List Modeᵥ → Modeₜ → Set
 Type = _∶⊢_
