@@ -5,7 +5,7 @@ open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 
-infixr  3  _↪_  _⊢_∶_  _⊢*_∶_
+infix   3  _↪_  _⊢_∶_  _⊢*_∶_
 infixr  5  ∀→_  λ→_  Λ→_
 infixr  6  _⇒_
 infixl  6  _·_  _∙_
@@ -191,15 +191,16 @@ _⊢*_∶_ {µ₁ = µ₁} Γ₂ σ Γ₁ = ∀ {m₁} → (x : µ₁ ∋ m₁) 
 
 -- Semantics -------------------------------------------------------------------
 
-data Neutral : Term µ 𝕖 → Set where
-  n-`  : Neutral (` x)
-  n-·₁ : Neutral e₁ → Neutral (e₁ · e₂)
-  n-∙₁ : Neutral e → Neutral (e ∙ t)
+mutual
+  data Neutral : Term µ 𝕖 → Set where
+    `x  : Neutral (` x)
+    _·_ : Neutral e₁ → Value e₂ → Neutral (e₁ · e₂)
+    _∙t : Neutral e → Neutral (e ∙ t)
 
-data Value : Term µ 𝕖 → Set where
-  λ→_     : Value e → Value (λ→ e)
-  Λ→_     : Value e → Value (Λ→ e)
-  neutral : Neutral e → Value e
+  data Value : Term µ 𝕖 → Set where
+    λ→_     : Value e → Value (λ→ e)
+    Λ→_     : Value e → Value (Λ→ e)
+    neutral : Neutral e → Value e
 
 data _↪_ : Term µ 𝕖 → Term µ 𝕖 → Set where
   β-λ : ∀ {e₂ : Term µ 𝕖} →
