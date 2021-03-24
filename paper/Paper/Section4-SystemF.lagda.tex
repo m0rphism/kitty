@@ -1,0 +1,83 @@
+\begin{code}[hide]
+module Paper.Section4-SystemF where
+
+open import Data.List using (List; []; _∷_)
+\end{code}
+
+\newpage
+\section{System F}
+
+The usual formalization of extrinsic STLC:
+\begin{code}[hide]
+module STLCFin where
+  open import Data.Nat
+  open import Data.Fin
+  variable n : ℕ
+\end{code}
+\begin{code}
+  data Expr : ℕ → Set where
+    `_   : Fin n → Expr n
+    λx_  : Expr (suc n) → Expr n
+    _·_  : Expr n → Expr n → Expr n
+\end{code}
+
+An isomorphic formalization of extrinsic STLC:
+\begin{code}[hide]
+module STLCUnit where
+\end{code}
+\begin{code}
+  data Type : Set where
+    ★ : Type -- Dynamic
+\end{code}
+\begin{code}[hide]
+  private variable Γ : List Type
+  private variable t t₁ t₂ : Type
+
+  infix  4  _∋_  _⊢_
+
+  data _∋_ : List Type → Type → Set where
+    zero  : (★ ∷ Γ ∋ ★)
+    suc   : (Γ ∋ ★) → (★ ∷ Γ ∋ ★)
+\end{code}
+\begin{code}
+  data _⊢_ : List Type → Type → Set where
+    `_   : (Γ ∋ ★) → (Γ ⊢ ★)
+    λx_  : (★ ∷ Γ ⊢ ★) → (Γ ⊢ ★)
+    _·_  : (Γ ⊢ ★) → (Γ ⊢ ★) → (Γ ⊢ ★)
+\end{code}
+
+System F:
+
+\begin{code}
+-- Variable Modes
+data Modeᵥ : Set where
+  𝕖 : Modeᵥ  -- Expression-level variables
+  𝕥 : Modeᵥ  -- Type-level variables
+
+-- Term Modes
+data Modeₜ : Set where
+  𝕖 : Modeₜ  -- Expressions
+  𝕥 : Modeₜ  -- Types
+  𝕜 : Modeₜ  -- Kinds
+
+variable µ : List Modeᵥ
+\end{code}
+\begin{code}[hide]
+variable m m' : Modeᵥ
+infix  4  _∋_  _⊢_
+data _∋_ : List Modeᵥ → Modeᵥ → Set where
+  zero  : (m ∷ µ ∋ m)
+  suc   : (µ ∋ m) → (m' ∷ µ ∋ m)
+\end{code}
+\begin{code}
+data _⊢_ : List Modeᵥ → Modeₜ → Set where
+  `ˣ_   : (µ ∋ 𝕖) → (µ ⊢ 𝕖)
+  `ᵅ_   : (µ ∋ 𝕥) → (µ ⊢ 𝕥)
+  λx_   : (𝕖 ∷ µ ⊢ 𝕖) → (µ ⊢ 𝕖)
+  Λα_   : (𝕥 ∷ µ ⊢ 𝕖) → (µ ⊢ 𝕖)
+  ∀α_   : (𝕥 ∷ µ ⊢ 𝕥) → (µ ⊢ 𝕥)
+  _·_   : (µ ⊢ 𝕖) → (µ ⊢ 𝕖) → (µ ⊢ 𝕖)
+  _∙_   : (µ ⊢ 𝕖) → (µ ⊢ 𝕥) → (µ ⊢ 𝕖)
+  _⇒_   : (µ ⊢ 𝕥) → (µ ⊢ 𝕥) → (µ ⊢ 𝕥)
+  ★     : (µ ⊢ 𝕜)
+\end{code}

@@ -32,6 +32,8 @@
 % \usepackage{amsfonts}
 % \usepackage{amssymb}
 
+\usepackage{bbold} % lower case mathbb letters
+
 \usepackage{newunicodechar}
 \newunicodechar{≡}{\ensuremath{\equiv}}
 \newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
@@ -48,6 +50,17 @@
 \newunicodechar{ₛ}{\ensuremath{{}_{\textsf{s}}}}
 \newunicodechar{→}{\ensuremath{\to}}
 \newunicodechar{◆}{\ensuremath{\diamond}}
+\newunicodechar{⊤}{\ensuremath{\top}}
+\newunicodechar{★}{\ensuremath{\star}}
+\newunicodechar{ˣ}{\ensuremath{{}^{\textsf{x}}}}
+\newunicodechar{ᵅ}{\ensuremath{{}^{\textsf{\alpha}}}}
+\newunicodechar{ᵥ}{\ensuremath{{}_{\textsf{v}}}}
+\newunicodechar{ₜ}{\ensuremath{{}_{\textsf{t}}}}
+\newunicodechar{𝕖}{\ensuremath{\mathbb{e}}}
+\newunicodechar{𝕥}{\ensuremath{\mathbb{t}}}
+\newunicodechar{𝕜}{\ensuremath{\mathbb{k}}}
+\newunicodechar{∙}{\ensuremath{\bullet}}
+
 % \newunicodechar{Γ}{\ensuremath{\texttt{\Gamma}}}
 % \newunicodechar{λ}{\ensuremath{\texttt{\lambda}}}
 
@@ -75,13 +88,13 @@
     renaming and substitution for all $m\cdot n$ combinations of variables and terms
     from a single term traversal and three simple lemmas for extrinsically typed
     but intrinsically scoped terms.
-    We demonstrate the technique by formalizing type soundness of System F with
+    We demonstrate this technique by formalizing type soundness of System F with
     very parallel substitutions, which replace both type and term variables at
     once, enabling a single substitution-preserves-typing lemma.
     We provide a well-documented implementation of the technique as an Agda
     library.
 
-    Since the technique is based on extrinsic typing, the metatheory of renaming
+    As the technique is based on extrinsic typing, the metatheory of renaming
     and substitution is decoupled from type preservation.
     This has the downside, that type preservation of renaming and substitution
     are not for free, but also the upside, that the library can be directly
