@@ -67,19 +67,26 @@
     $m$ different kinds of terms, we potentially need to define both
     substitution and renaming for all $m\cdot n$ combinations and prove the
     theory of those operations both in isolation and with respect to each other.
-    McBride introduced kits to define both substitution and renaming by a
-    single term traversal for intrinsically typed terms.\cite{mcbride2005kits}
+
+    % McBride introduced kits to define both substitution and renaming by a
+    % single term traversal for intrinsically typed terms.\cite{mcbride2005kits}
 
     We propose a technique to derive the implementation and metatheory of
     substitution and renaming for all $m\cdot n$ combinations of variables and terms
-    from a single term traversal and a few simple lemmas.
-    We use a slight generalization of McBride's kits but for extrinsic typing,
-    which decouples type preservation from scope preservation and the
-    theory of substitution. Hence, the technique is also suitable for
-    non-standard typing relations like dependent types, type state, or resource
-    environments.
+    from a single term traversal and three simple lemmas for extrinsically typed
+    but intrinsically scoped terms.
+    We demonstrate the technique by formalizing type soundness of System F with
+    very parallel substitutions, which replace both type and term variables at
+    once, enabling a single substitution-preserves-typing lemma.
     We provide a well-documented implementation of the technique as an Agda
-    library and show its use in several case studies including System F.
+    library.
+
+    Since the technique is based on extrinsic typing, the metatheory of renaming
+    and substitution is decoupled from type preservation.
+    This has the downside, that type preservation of renaming and substitution
+    are not for free, but also the upside, that the library can be directly
+    instantiated for object languages with non-standard typing relations like
+    dependent types, type state, or resource environments.
   \end{abstract}
 
   \maketitle
