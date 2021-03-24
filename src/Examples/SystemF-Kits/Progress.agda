@@ -16,17 +16,17 @@ progress :
   Value e ⊎ ∃[ e' ] (e ↪ e')
 progress (τ-` x) = inj₁ (neutral `x)
 progress (τ-λ ⊢e) with progress ⊢e
-... | inj₁ v           = inj₁ (λ→ v)
-... | inj₂ (e' , e↪e') = inj₂ (λ→ e' , ξ-λ e↪e')
+... | inj₁ v           = inj₁ (λx v)
+... | inj₂ (e' , e↪e') = inj₂ (λx e' , ξ-λ e↪e')
 progress (τ-Λ ⊢e) with progress ⊢e
-... | inj₁ v           = inj₁ (Λ→ v)
-... | inj₂ (e' , e↪e') = inj₂ (Λ→ e' , ξ-Λ e↪e')
+... | inj₁ v           = inj₁ (Λα v)
+... | inj₂ (e' , e↪e') = inj₂ (Λα e' , ξ-Λ e↪e')
 progress (τ-· {e₁ = e₁} {e₂ = e₂} ⊢e₁ ⊢e₂) with progress ⊢e₁ | progress ⊢e₂
 ... | inj₁ (neutral n)      | inj₁ v₂             = inj₁ (neutral (n · v₂))
-... | inj₁ (λ→_ {e = e} v₁) | inj₁ v₂             = inj₂ (e ⋯ ⦅ e₂ ⦆ , β-λ)
+... | inj₁ (λx_ {e = e} v₁) | inj₁ v₂             = inj₂ (e ⋯ ⦅ e₂ ⦆ , β-λ)
 ... | inj₁ _                | inj₂ (e₂' , e₂↪e₂') = inj₂ (e₁ · e₂' , ξ-·₂ e₂↪e₂')
 ... | inj₂ (e₁' , e₁↪e₁')   | _                   = inj₂ (e₁' · e₂ , ξ-·₁ e₁↪e₁')
 progress (τ-∙ {t = t} ⊢e) with progress ⊢e
 ... | inj₁ (neutral n)     = inj₁ (neutral (n ∙t))
-... | inj₁ (Λ→_ {e = e} v) = inj₂ (e ⋯ ⦅ t ⦆ , β-Λ)
+... | inj₁ (Λα_ {e = e} v) = inj₂ (e ⋯ ⦅ t ⦆ , β-Λ)
 ... | inj₂ (e' , e↪e')     = inj₂ (e' ∙ t , ξ-∙ e↪e')

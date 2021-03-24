@@ -1,4 +1,4 @@
-module Examples.SystemF-Kits.SubjectReduction where
+module Examples.SystemF-Kits-Uniform.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
@@ -7,7 +7,7 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Unit using (⊤; tt)
 open import Function using () renaming (_∋_ to _by_)
 
-open import Examples.SystemF-Kits.Definitions
+open import Examples.SystemF-Kits-Uniform.Definitions
 
 K≡★ : ∀ (K : Term µ 𝕜) → K ≡ ★
 K≡★ (`[_]_ {m = 𝕖} () x)
@@ -85,7 +85,7 @@ sub-𝕖-in-𝕥-id-var {µ' = m ∷ µ'}  (there α)   e₁ e₂ = cong (_⋯ w
 sub-𝕖-in-𝕥-id : ∀ (t : Term (µ' ++ 𝕖 ∷ µ) 𝕥) (e₁ e₂ : Term µ 𝕖) →
   t ⋯ (⦅ e₁ ⦆ ↑* µ') ≡ t ⋯ (⦅ e₂ ⦆ ↑* µ')
 sub-𝕖-in-𝕥-id (`[_]_ {m = 𝕥} refl x) e₁ e₂ = sub-𝕖-in-𝕥-id-var x e₁ e₂
-sub-𝕖-in-𝕥-id (∀→ t)                 e₁ e₂ = cong ∀→_ (sub-𝕖-in-𝕥-id t e₁ e₂)
+sub-𝕖-in-𝕥-id (∀α t)                 e₁ e₂ = cong ∀α_ (sub-𝕖-in-𝕥-id t e₁ e₂)
 sub-𝕖-in-𝕥-id (t₁ ⇒ t₂)              e₁ e₂ = cong₂ _⇒_ (sub-𝕖-in-𝕥-id t₁ e₁ e₂) (sub-𝕖-in-𝕥-id t₂ e₁ e₂)
 
 subject-reduction :
