@@ -65,14 +65,14 @@
     variables as DeBruijn Indices, where substitution is defined in terms of
     variable renaming. If a language has $n$ different kinds of variables, and
     $m$ different kinds of terms, we potentially need to define both
-    substitution and renaming for all $m\cdot n$ combinations and prove the
+    renaming and substitution for all $m\cdot n$ combinations and prove the
     theory of those operations both in isolation and with respect to each other.
 
     % McBride introduced kits to define both substitution and renaming by a
     % single term traversal for intrinsically typed terms.\cite{mcbride2005kits}
 
     We propose a technique to derive the implementation and metatheory of
-    substitution and renaming for all $m\cdot n$ combinations of variables and terms
+    renaming and substitution for all $m\cdot n$ combinations of variables and terms
     from a single term traversal and three simple lemmas for extrinsically typed
     but intrinsically scoped terms.
     We demonstrate the technique by formalizing type soundness of System F with
