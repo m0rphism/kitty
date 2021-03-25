@@ -9,7 +9,7 @@ infix   3  _↪_  _⊢_∶_  _⊢*_∶_
 infixr  5  ∀α_  λx_  Λα_
 infixr  6  _⇒_
 infixl  6  _·_  _∙_
-infix   7  `_
+infix   7  `ᵅ_  `ˣ_
 
 -- Syntax ----------------------------------------------------------------------
 
@@ -23,10 +23,6 @@ data Modeₜ : Set where
   𝕖 : Modeₜ  -- Expressions
   𝕥 : Modeₜ  -- Types
   𝕜 : Modeₜ  -- Kinds
-
-m→M : Modeᵥ → Modeₜ
-m→M 𝕖 = 𝕖
-m→M 𝕥 = 𝕥
 
 variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : Modeᵥ
@@ -58,17 +54,23 @@ variable
 
 -- Modes and Terms
 
-`_ : m ∈ µ → Term µ (m→M m)
-`_ {m = 𝕖} = `ˣ_
-`_ {m = 𝕥} = `ᵅ_
-
 open import KitTheory.Modes
 
 𝕄 : Modes
-𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
+𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M } where
+  m→M : Modeᵥ → Modeₜ
+  m→M 𝕖 = 𝕖
+  m→M 𝕥 = 𝕥
+
+open Modes 𝕄 public
 
 𝕋 : Terms 𝕄
-𝕋 = record { _⊢_ = Term ; `_ = `_ }
+𝕋 = record { _⊢_ = Term ; `_ = `_ } where
+  `_ : m ∈ µ → Term µ (m→M m)
+  `_ {m = 𝕖} = `ˣ_
+  `_ {m = 𝕥} = `ᵅ_
+
+open Terms 𝕋 public
 
 -- Kits and Traversals
 

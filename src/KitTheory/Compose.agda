@@ -13,6 +13,7 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
 open import Function using (id)
 
+open Modes 𝕄
 open Terms 𝕋
 open KitTheory.Kit 𝕋
 open KitTheory.Kit.KitTraversal T

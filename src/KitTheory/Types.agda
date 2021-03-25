@@ -13,6 +13,7 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
 
+open Modes 𝕄
 open Terms 𝕋
 open KitTheory.Kit 𝕋
 open KitTheory.Kit.KitTraversal T
