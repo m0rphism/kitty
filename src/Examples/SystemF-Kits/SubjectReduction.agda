@@ -14,22 +14,22 @@ K≡★ (`[_]_ {m = 𝕖} () x)
 K≡★ (`[_]_ {m = 𝕥} () x)
 K≡★ ★ = refl
 
-wk-⊢' : ∀ {E : Term µ₁ M} {T : Type µ₁ M} {ρ : µ₁ →ᵣ µ₂} →
+ope-pres-⊢ : ∀ {E : Term µ₁ M} {T : Type µ₁ M} {ρ : µ₁ →ᵣ µ₂} →
   OPE ρ Γ₁ Γ₂ →
   Γ₁ ⊢ E     ∶ T →
   Γ₂ ⊢ E ⋯ ρ ∶ T ⋯ ρ
-wk-⊢'               {ρ = ρ} ope (τ-` refl)                 = τ-` (ope-pres-telescope _ ope)
-wk-⊢' {T = t₁ ⇒ t₂} {ρ = ρ} ope (τ-λ ⊢e)                   = τ-λ (subst (_ ⊢ _ ∶_) (dist-↑-ren t₂ ρ) (wk-⊢' (ope-keep ope) ⊢e))
-wk-⊢'                       ope (τ-Λ ⊢e)                   = τ-Λ (wk-⊢' (ope-keep ope) ⊢e)
-wk-⊢'                       ope (τ-· ⊢e₁ ⊢e₂)              = τ-· (wk-⊢' ope ⊢e₁) (wk-⊢' ope ⊢e₂)
-wk-⊢'               {ρ = ρ} ope (τ-∙ {t₂ = t₂} {t = t} ⊢e) = subst (_ ⊢ _ ∶_) (sym (dist-⦅⦆ₛ-⋯ᵣ t₂ t ρ)) (τ-∙ (wk-⊢' ope ⊢e))
-wk-⊢'                       ope τ-𝕥                        = τ-𝕥
-wk-⊢'                       ope τ-𝕜                        = τ-𝕜
+ope-pres-⊢               {ρ = ρ} ope (τ-` refl)                 = τ-` (ope-pres-telescope _ ope)
+ope-pres-⊢ {T = t₁ ⇒ t₂} {ρ = ρ} ope (τ-λ ⊢e)                   = τ-λ (subst (_ ⊢ _ ∶_) (dist-↑-ren t₂ ρ) (ope-pres-⊢ (ope-keep ope) ⊢e))
+ope-pres-⊢                       ope (τ-Λ ⊢e)                   = τ-Λ (ope-pres-⊢ (ope-keep ope) ⊢e)
+ope-pres-⊢                       ope (τ-· ⊢e₁ ⊢e₂)              = τ-· (ope-pres-⊢ ope ⊢e₁) (ope-pres-⊢ ope ⊢e₂)
+ope-pres-⊢               {ρ = ρ} ope (τ-∙ {t₂ = t₂} {t = t} ⊢e) = subst (_ ⊢ _ ∶_) (sym (dist-⦅⦆ₛ-⋯ᵣ t₂ t ρ)) (τ-∙ (ope-pres-⊢ ope ⊢e))
+ope-pres-⊢                       ope τ-𝕥                        = τ-𝕥
+ope-pres-⊢                       ope τ-𝕜                        = τ-𝕜
 
-wk-⊢ : ∀ {m'} {E : Term µ M} {T : Type µ M} (T' : Type µ (m→M m')) →
+wk-pres-⊢ : ∀ {m'} {E : Term µ M} {T : Type µ M} (T' : Type µ (m→M m')) →
   Γ₂         ⊢ E      ∶ T →
   (Γ₂ ,, T') ⊢ wk _ E ∶ wk _ T
-wk-⊢ T ⊢v =  wk-⊢' (ope-drop ope-id) ⊢v
+wk-pres-⊢ T ⊢v =  ope-pres-⊢ (ope-drop ope-id) ⊢v
 
 lift-⊢* : ∀ {σ : µ₁ →ₛ µ₂} (T : Type µ₁ (m→M m)) →
   Γ₂              ⊢*  σ      ∶ Γ₁ →
@@ -40,7 +40,7 @@ lift-⊢* {m = m} {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} T ⊢σ (there x) =
   subst ((Γ₂ ,, (T ⋯ σ)) ⊢ (σ _ x ⋯ wk) ∶_)
         (sym (wk-drop-∈ x (Γ₁ x) ⋯ wk ⋯ (σ ↑ m) ≡⟨ dist-↑-sub (wk-drop-∈ x (Γ₁ x)) σ ⟩
               wk-drop-∈ x (Γ₁ x) ⋯ σ ⋯ wk       ∎))
-        (wk-⊢ (T ⋯ σ) (⊢σ x))
+        (wk-pres-⊢ (T ⋯ σ) (⊢σ x))
 
 sub-pres-⊢ : ∀ {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {E : Term µ₁ M} {T : Type µ₁ M} {σ : µ₁ →ₛ µ₂} →
   Γ₁ ⊢ E ∶ T →

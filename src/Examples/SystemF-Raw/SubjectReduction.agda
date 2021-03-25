@@ -225,7 +225,7 @@ dist-⋯-⋯ᵣ t₂ t σ =
   t₂ ⋯ (⦅ t ⋯ σ ⦆ ∘ₛ (σ ↑ ■)) ≡⟨ sym (assoc-⋯ᵣ-⋯ₛ t₂ (σ ↑ ■) (⦅ t ⋯ σ ⦆)) ⟩
   t₂ ⋯ σ ↑ ■ ⋯ ⦅ t ⋯ σ ⦆      ∎
 
--- Order Preserving Embeddings for Contexts. Required by wk-⊢', where we can't
+-- Order Preserving Embeddings for Contexts. Required by ope-pres-⊢, where we can't
 -- just say Γ₂ ≡ Γ₁ ⋯* ρ because weakenings in ρ require us to fill the gaps
 -- between the weakened Γ₁ types with new Γ₂ types (the `T` in the `ope-drop`
 -- constructor).
@@ -256,21 +256,21 @@ ope-pres-telescope x           (ope-drop {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ�
   wk-drop-∈ x (Γ₁ x) ⋯ₜ ρ        ⋯ₜ there' ≡⟨ sym (assoc-⋯ᵣ-⋯ᵣ (wk-drop-∈ x (Γ₁ x)) ρ there') ⟩
   wk-drop-∈ x (Γ₁ x) ⋯ₜ there' ∘ᵣ ρ        ∎
 
-wk-⊢' : ∀ {v : Term κ₁ k} {t : Type κ₁ k} {ρ : κ₁ →ᵣ κ₂} →
+ope-pres-⊢ : ∀ {v : Term κ₁ k} {t : Type κ₁ k} {ρ : κ₁ →ᵣ κ₂} →
   OPE ρ Γ₁ Γ₂ →
   Γ₁ ⊢ v     ∶ t →
   Γ₂ ⊢ v ⋯ ρ ∶ t ⋯ₜ ρ
-wk-⊢'               {ρ = ρ} ope (τ-` refl)                 = τ-` (ope-pres-telescope _ ope)
-wk-⊢' {t = t₁ ⇒ t₂} {ρ = ρ} ope (τ-λ ⊢v)                   = τ-λ (subst (_ ⊢ _ ∶_) (dist-lift-ren t₂ ρ) (wk-⊢' (ope-keep ope) ⊢v))
-wk-⊢'                       ope (τ-Λ ⊢v)                   = τ-Λ (wk-⊢' (ope-keep ope) ⊢v)
-wk-⊢'                       ope (τ-· ⊢v₁ ⊢v₂)              = τ-· (wk-⊢' ope ⊢v₁) (wk-⊢' ope ⊢v₂)
-wk-⊢'               {ρ = ρ} ope (τ-∙ {t₂ = t₂} {t = t} ⊢v) = subst (_ ⊢ _ ∶_) (sym (dist-⋯-⋯ᵣ t₂ t ρ)) (τ-∙ (wk-⊢' ope ⊢v))
-wk-⊢'                       ope τ-★                        = τ-★
+ope-pres-⊢               {ρ = ρ} ope (τ-` refl)                 = τ-` (ope-pres-telescope _ ope)
+ope-pres-⊢ {t = t₁ ⇒ t₂} {ρ = ρ} ope (τ-λ ⊢v)                   = τ-λ (subst (_ ⊢ _ ∶_) (dist-lift-ren t₂ ρ) (ope-pres-⊢ (ope-keep ope) ⊢v))
+ope-pres-⊢                       ope (τ-Λ ⊢v)                   = τ-Λ (ope-pres-⊢ (ope-keep ope) ⊢v)
+ope-pres-⊢                       ope (τ-· ⊢v₁ ⊢v₂)              = τ-· (ope-pres-⊢ ope ⊢v₁) (ope-pres-⊢ ope ⊢v₂)
+ope-pres-⊢               {ρ = ρ} ope (τ-∙ {t₂ = t₂} {t = t} ⊢v) = subst (_ ⊢ _ ∶_) (sym (dist-⋯-⋯ᵣ t₂ t ρ)) (τ-∙ (ope-pres-⊢ ope ⊢v))
+ope-pres-⊢                       ope τ-★                        = τ-★
 
-wk-⊢ : ∀ {k'} {v : Term κ k} {t : Type κ k} (T : Type κ k') →
+wk-pres-⊢ : ∀ {k'} {v : Term κ k} {t : Type κ k} (T : Type κ k') →
   Γ₂        ⊢ v    ∶ t →
   (Γ₂ ,, T) ⊢ wk v ∶ wkt t
-wk-⊢ T ⊢v =  wk-⊢' (ope-drop ope-id) ⊢v
+wk-pres-⊢ T ⊢v =  ope-pres-⊢ (ope-drop ope-id) ⊢v
 
 lift-⊢* : ∀ {σ : κ₁ →ₛ κ₂} (T : Type κ₁ k) →
   Γ₂               ⊢*  σ      ∶ Γ₁ →
@@ -281,7 +281,7 @@ lift-⊢* {k = k} {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} T ⊢σ (there x) =
   subst ((Γ₂ ,, (T ⋯ₜ σ)) ⊢ (σ _ x ⋯ there') ∶_)
         (sym (wk-drop-∈ x (Γ₁ x) ⋯ₜ there' ⋯ₜ (σ ↑ k) ≡⟨ dist-lift-tsub _ σ ⟩
               wk-drop-∈ x (Γ₁ x) ⋯ₜ σ ⋯ₜ there'       ∎))
-        (wk-⊢ (T ⋯ₜ σ) (⊢σ x))
+        (wk-pres-⊢ (T ⋯ₜ σ) (⊢σ x))
 
 sub-pres-⊢ : ∀ {Γ₁ : Ctx κ₁} {Γ₂ : Ctx κ₂} {v : Term κ₁ k} {t : Type κ₁ k} {σ : κ₁ →ₛ κ₂} →
   Γ₁ ⊢ v ∶ t →
