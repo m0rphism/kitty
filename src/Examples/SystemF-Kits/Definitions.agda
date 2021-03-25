@@ -38,7 +38,8 @@ variable
   X Y Z                     : m ∈ µ
 
 data Term : List Modeᵥ → Modeₜ → Set where
-  `[_]_ : M ≡ m→M m → m ∈ µ → Term µ M  -- Expr and Type Variables
+  `ˣ_   : 𝕖 ∈ µ → Term µ 𝕖
+  `ᵅ_   : 𝕥 ∈ µ → Term µ 𝕥
   λx_   : Term (𝕖 ∷ µ) 𝕖 → Term µ 𝕖
   Λα_   : Term (𝕥 ∷ µ) 𝕖 → Term µ 𝕖
   ∀α_   : Term (𝕥 ∷ µ) 𝕥 → Term µ 𝕥
@@ -46,8 +47,6 @@ data Term : List Modeᵥ → Modeₜ → Set where
   _∙_   : Term µ 𝕖 → Term µ 𝕥 → Term µ 𝕖
   _⇒_   : Term µ 𝕥 → Term µ 𝕥 → Term µ 𝕥
   ★     : Term µ 𝕜
-
-pattern `_ x = `[ refl ] x
 
 variable
   e e₁ e₂ e' e₁' e₂' : Term µ 𝕖
@@ -58,6 +57,10 @@ variable
 -- Substitutions ---------------------------------------------------------------
 
 -- Modes and Terms
+
+`_ : m ∈ µ → Term µ (m→M m)
+`_ {m = 𝕖} = `ˣ_
+`_ {m = 𝕥} = `ᵅ_
 
 open import KitTheory.Modes
 
@@ -75,7 +78,8 @@ open Kit {{...}} public
 kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ M
-  (` x)     ⋯ f = tm' (f _ x)
+  (`ˣ x)    ⋯ f = tm' (f _ x)
+  (`ᵅ x)    ⋯ f = tm' (f _ x)
   (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕖))
   (Λα t)    ⋯ f = Λα (t ⋯ (f ↑ 𝕥))
   (∀α t)    ⋯ f = ∀α (t ⋯ (f ↑ 𝕥))
@@ -85,7 +89,8 @@ kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   ★         ⋯ f = ★
   ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
           (` x) ⋯ f ≡ tm' (f _ x)
-  ⋯-var _ _ = refl
+  ⋯-var {m = 𝕖} _ _ = refl
+  ⋯-var {m = 𝕥} _ _ = refl
 
 open KitTraversal kit-traversal public
 
@@ -102,9 +107,12 @@ kit-assoc = record { ⋯-assoc = ⋯-assoc } where
   ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
               (v : Term µ₁ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
     v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
-  ⋯-assoc (` X) f g =
-    tm' (f _ X) ⋯ g    ≡⟨ tm'-⋯-∘ f g X ⟩
-    tm' ((g ∘ₖ f) _ X) ∎
+  ⋯-assoc (`ˣ x) f g =
+    tm' (f _ x) ⋯ g    ≡⟨ tm'-⋯-∘ f g x ⟩
+    tm' ((g ∘ₖ f) _ x) ∎
+  ⋯-assoc (`ᵅ α) f g =
+    tm' (f _ α) ⋯ g    ≡⟨ tm'-⋯-∘ f g α ⟩
+    tm' ((g ∘ₖ f) _ α) ∎
   ⋯-assoc (λx e) f g = cong λx_
     (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
     e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
@@ -134,7 +142,8 @@ kit-assoc-lemmas : KitAssocLemmas
 kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : Term µ M) →
          v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id               (` x)                             = tm-vr x
+  ⋯-id               (`ˣ x)                             = tm-vr x
+  ⋯-id               (`ᵅ α)                             = tm-vr α
   ⋯-id {µ = µ} {{𝕂}} (λx t)   rewrite id↑≡id {{𝕂}} 𝕖 µ = cong λx_ (⋯-id t)
   ⋯-id {µ = µ} {{𝕂}} (Λα t)   rewrite id↑≡id {{𝕂}} 𝕥 µ = cong Λα_ (⋯-id t)
   ⋯-id {µ = µ} {{𝕂}} (∀α t)   rewrite id↑≡id {{𝕂}} 𝕥 µ = cong ∀α_ (⋯-id t)

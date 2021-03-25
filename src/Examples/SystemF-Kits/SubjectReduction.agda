@@ -9,11 +9,6 @@ open import Function using () renaming (_∋_ to _by_)
 
 open import Examples.SystemF-Kits.Definitions
 
-K≡★ : ∀ (K : Term µ 𝕜) → K ≡ ★
-K≡★ (`[_]_ {m = 𝕖} () x)
-K≡★ (`[_]_ {m = 𝕥} () x)
-K≡★ ★ = refl
-
 ope-pres-⊢ : ∀ {E : Term µ₁ M} {T : Type µ₁ M} {ρ : µ₁ →ᵣ µ₂} →
   OPE ρ Γ₁ Γ₂ →
   Γ₁ ⊢ E     ∶ T →
@@ -35,7 +30,7 @@ lift-⊢* : ∀ {σ : µ₁ →ₛ µ₂} (T : Type µ₁ (m→M m)) →
   Γ₂              ⊢*  σ      ∶ Γ₁ →
   (Γ₂ ,, (T ⋯ σ)) ⊢* (σ ↑ m) ∶ (Γ₁ ,, T)
 lift-⊢* {m = 𝕖} {σ = σ} T ⊢σ (here refl) = τ-` (sym (dist-↑-sub T σ))
-lift-⊢* {m = 𝕥} {Γ₂ = Γ₂} {σ = σ} T ⊢σ (here refl) rewrite K≡★ T = τ-𝕥
+lift-⊢* {m = 𝕥}         ★ ⊢σ (here refl) = τ-𝕥
 lift-⊢* {m = m} {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} T ⊢σ (there x) =
   subst ((Γ₂ ,, (T ⋯ σ)) ⊢ (σ _ x ⋯ wk) ∶_)
         (sym (wk-drop-∈ x (Γ₁ x) ⋯ wk ⋯ (σ ↑ m) ≡⟨ dist-↑-sub (wk-drop-∈ x (Γ₁ x)) σ ⟩
@@ -64,7 +59,8 @@ _,*_ {Γ₂ = Γ₂} {E = E} {T = T} ⊢σ ⊢E (here refl) = subst (Γ₂ ⊢ E
 _,*_ {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢v (there x) = subst (Γ₂ ⊢ σ _ x ∶_) (sym (wk-cancels-,ₛ (wk-drop-∈ x (Γ₁ x)) _ _)) (⊢σ x)
 
 ⊢*-idₛ : Γ ⊢* idₛ ∶ Γ
-⊢*-idₛ {Γ = Γ} {𝕥} x rewrite K≡★ (wk-telescope Γ x) = τ-𝕥
+⊢*-idₛ {Γ = Γ} {𝕥} x with wk-telescope Γ x ⋯ idₛ
+... | ★ = τ-𝕥
 ⊢*-idₛ {Γ = Γ} {𝕖} x rewrite ⋯-id {{𝕂 = kitₛ}} (wk-telescope Γ x) = τ-` refl
 
 vsub-pres-⊢ : ∀ {Γ : Ctx µ} {e₁ : Term (𝕖 ∷ µ) 𝕖} {e₂ : Term µ 𝕖} {t₁ t₂ : Type µ 𝕖} →
