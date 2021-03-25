@@ -4,18 +4,22 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
+open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Modes using (Modes; Terms)
 
-infix   3  _↪_  _⊢_∶_  _⊢*_∶_
+-- Fixities --------------------------------------------------------------------
+
+infix   3  _⊢_  _↪_  _⊢_∶_  _⊢*_∶_
 infixr  5  ∀α_  λx_  Λα_
 infixr  6  _⇒_
 infixl  6  _·_  _∙_
 infix   7  `ᵅ_  `ˣ_
 
--- Syntax ----------------------------------------------------------------------
+-- Modes -----------------------------------------------------------------------
 
 -- Variable Modes
 data Modeᵥ : Set where
-  𝕖 : Modeᵥ  -- Value-level variables
+  𝕖 : Modeᵥ  -- Expression-level variables
   𝕥 : Modeᵥ  -- Type-level variables
 
 -- Term Modes
@@ -23,6 +27,14 @@ data Modeₜ : Set where
   𝕖 : Modeₜ  -- Expressions
   𝕥 : Modeₜ  -- Types
   𝕜 : Modeₜ  -- Kinds
+
+-- Mapping variable modes to the term modes they represent.
+m→M : Modeᵥ → Modeₜ
+m→M 𝕖 = 𝕖
+m→M 𝕥 = 𝕥
+
+𝕄 : Modes
+𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
 
 variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : Modeᵥ
@@ -33,53 +45,43 @@ variable
   α β γ                     : 𝕥 ∈ µ
   X Y Z                     : m ∈ µ
 
-data Term : List Modeᵥ → Modeₜ → Set where
-  `ˣ_   : 𝕖 ∈ µ → Term µ 𝕖
-  `ᵅ_   : 𝕥 ∈ µ → Term µ 𝕥
-  λx_   : Term (𝕖 ∷ µ) 𝕖 → Term µ 𝕖
-  Λα_   : Term (𝕥 ∷ µ) 𝕖 → Term µ 𝕖
-  ∀α_   : Term (𝕥 ∷ µ) 𝕥 → Term µ 𝕥
-  _·_   : Term µ 𝕖 → Term µ 𝕖 → Term µ 𝕖
-  _∙_   : Term µ 𝕖 → Term µ 𝕥 → Term µ 𝕖
-  _⇒_   : Term µ 𝕥 → Term µ 𝕥 → Term µ 𝕥
-  ★     : Term µ 𝕜
+-- Syntax ----------------------------------------------------------------------
 
-variable
-  e e₁ e₂ e' e₁' e₂' : Term µ 𝕖
-  t t₁ t₂ t' t₁' t₂' : Term µ 𝕥
-  k k₁ k₂ k' k₁' k₂' : Term µ 𝕜
-  E E₁ E₂ E' E₁' E₂' : Term µ M
+-- Expressions, Types, and Kinds
+data _⊢_ : List Modeᵥ → Modeₜ → Set where
+  `ˣ_   : µ ∋ 𝕖  →  µ ⊢ 𝕖
+  `ᵅ_   : µ ∋ 𝕥  →  µ ⊢ 𝕥
+  λx_   : µ , 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
+  Λα_   : µ , 𝕥 ⊢ 𝕖  →  µ ⊢ 𝕖
+  ∀α_   : µ , 𝕥 ⊢ 𝕥  →  µ ⊢ 𝕥
+  _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
+  _∙_   : µ ⊢ 𝕖  →  µ ⊢ 𝕥  →  µ ⊢ 𝕖
+  _⇒_   : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
+  ★     : µ ⊢ 𝕜
 
--- Substitutions ---------------------------------------------------------------
-
--- Modes and Terms
-
-open import KitTheory.Modes
-
-𝕄 : Modes
-𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M } where
-  m→M : Modeᵥ → Modeₜ
-  m→M 𝕖 = 𝕖
-  m→M 𝕥 = 𝕥
-
-open Modes 𝕄 public
+-- Common constructor for both expression and type variables.
+`_ : µ ∋ m → µ ⊢ m→M m
+`_ {m = 𝕖} = `ˣ_
+`_ {m = 𝕥} = `ᵅ_
 
 𝕋 : Terms 𝕄
-𝕋 = record { _⊢_ = Term ; `_ = `_ } where
-  `_ : m ∈ µ → Term µ (m→M m)
-  `_ {m = 𝕖} = `ˣ_
-  `_ {m = 𝕥} = `ᵅ_
+𝕋 = record { _⊢_ = _⊢_ ; `_ = `_ }
 
-open Terms 𝕋 public
+variable
+  e e₁ e₂ e' e₁' e₂' : µ ⊢ 𝕖
+  t t₁ t₂ t' t₁' t₂' : µ ⊢ 𝕥
+  k k₁ k₂ k' k₁' k₂' : µ ⊢ 𝕜
+  E E₁ E₂ E' E₁' E₂' : µ ⊢ M
 
--- Kits and Traversals
+-- Application of Renamings and Substitutions ----------------------------------
 
 open import KitTheory.Kit 𝕋
 open Kit {{...}} public
 
 kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
-  _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ M
+  -- Traverse a term with a renaming or substitution (depending on the kit).
+  _⋯_ : ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
   (`ˣ x)    ⋯ f = tm' (f _ x)
   (`ᵅ α)    ⋯ f = tm' (f _ α)
   (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕖))
@@ -89,8 +91,8 @@ kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   (t₁ ∙ t₂) ⋯ f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
   (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
   ★         ⋯ f = ★
-  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-          (` x) ⋯ f ≡ tm' (f _ x)
+  -- Applying a renaming or substitution to a variable does the expected thing.
+  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm' (f _ x)
   ⋯-var {m = 𝕖} _ _ = refl
   ⋯-var {m = 𝕥} _ _ = refl
 
@@ -99,7 +101,7 @@ open KitTraversal kit-traversal public
 instance 𝕂ᵣ = kitᵣ
 instance 𝕂ₛ = kitₛ
 
--- Traversal Composition
+-- Composition of Renamings and Substitutions ----------------------------------
 
 open import KitTheory.Compose 𝕋 kit-traversal
 open ComposeKit {{...}} public
@@ -107,8 +109,8 @@ open ComposeKit {{...}} public
 kit-assoc : KitAssoc
 kit-assoc = record { ⋯-assoc = ⋯-assoc } where
   ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
-              (v : Term µ₁ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
-    v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
+              (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
+    (v ⋯ f) ⋯ g ≡ v ⋯ (g ∘ₖ f)
   ⋯-assoc (`ˣ x) f g =
     tm' (f _ x) ⋯ g    ≡⟨ tm'-⋯-∘ f g x ⟩
     tm' ((g ∘ₖ f) _ x) ∎
@@ -142,21 +144,20 @@ instance 𝕂ₛₛ = kitₛₛ
 -- Applying the identity renaming/substitution does nothing.
 kit-assoc-lemmas : KitAssocLemmas
 kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
-  ⋯-id : ∀ {{𝕂 : Kit}} (v : Term µ M) →
-         v ⋯ idₖ {{𝕂}} ≡ v
+  ⋯-id : ∀ {{𝕂 : Kit}} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
   ⋯-id               (`ˣ x)                             = tm-vr x
   ⋯-id               (`ᵅ α)                             = tm-vr α
-  ⋯-id {µ = µ} {{𝕂}} (λx t)   rewrite id↑≡id {{𝕂}} 𝕖 µ = cong λx_ (⋯-id t)
-  ⋯-id {µ = µ} {{𝕂}} (Λα t)   rewrite id↑≡id {{𝕂}} 𝕥 µ = cong Λα_ (⋯-id t)
-  ⋯-id {µ = µ} {{𝕂}} (∀α t)   rewrite id↑≡id {{𝕂}} 𝕥 µ = cong ∀α_ (⋯-id t)
-  ⋯-id               (t₁ · t₂)                         = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               (t₁ ∙ t₂)                         = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               (t₁ ⇒ t₂)                         = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               ★                                 = refl
+  ⋯-id {µ = µ} {{𝕂}} (λx t)    rewrite id↑≡id {{𝕂}} 𝕖 µ = cong λx_ (⋯-id t)
+  ⋯-id {µ = µ} {{𝕂}} (Λα t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong Λα_ (⋯-id t)
+  ⋯-id {µ = µ} {{𝕂}} (∀α t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong ∀α_ (⋯-id t)
+  ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
+  ⋯-id               (t₁ ∙ t₂)                          = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
+  ⋯-id               (t₁ ⇒ t₂)                          = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
+  ⋯-id               ★                                  = refl
 
 open KitAssocLemmas kit-assoc-lemmas public
 
--- Types and Contexts
+-- Types and Contexts ----------------------------------------------------------
 
 open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
 
@@ -166,17 +167,14 @@ kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 
 
 open KitType kit-type public
 
-Type : List Modeᵥ → Modeₜ → Set
-Type = _∶⊢_
-
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
-  T T₁ T₂ T' T₁' T₂' : Type µ M
+  T T₁ T₂ T' T₁' T₂' : µ ∶⊢ M
 
 -- Type System -----------------------------------------------------------------
 
-data _⊢_∶_ : Ctx µ → Term µ M → Type µ M → Set where
-  τ-` : ∀ {Γ : Ctx µ} {t : Type µ 𝕖} {x : 𝕖 ∈ µ} →
+data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
+  τ-` : ∀ {Γ : Ctx µ} {t : µ ∶⊢ 𝕖} {x : 𝕖 ∈ µ} →
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
@@ -203,20 +201,20 @@ _⊢*_∶_ {µ₁ = µ₁} Γ₂ σ Γ₁ = ∀ {m₁} → (x : µ₁ ∋ m₁) 
 -- Semantics -------------------------------------------------------------------
 
 mutual
-  data Neutral : Term µ 𝕖 → Set where
+  data Neutral : µ ⊢ 𝕖 → Set where
     `x  : Neutral (` x)
     _·_ : Neutral e₁ → Value e₂ → Neutral (e₁ · e₂)
     _∙t : Neutral e → Neutral (e ∙ t)
 
-  data Value : Term µ 𝕖 → Set where
+  data Value : µ ⊢ 𝕖 → Set where
     λx_     : Value e → Value (λx e)
     Λα_     : Value e → Value (Λα e)
     neutral : Neutral e → Value e
 
-data _↪_ : Term µ 𝕖 → Term µ 𝕖 → Set where
-  β-λ : ∀ {e₂ : Term µ 𝕖} →
+data _↪_ : µ ⊢ 𝕖 → µ ⊢ 𝕖 → Set where
+  β-λ : ∀ {e₂ : µ ⊢ 𝕖} →
     (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
-  β-Λ : ∀ {t : Term µ 𝕥} →
+  β-Λ : ∀ {t : µ ⊢ 𝕥} →
     (Λα e) ∙ t ↪ e ⋯ ⦅ t ⦆
   ξ-λ :
     e ↪ e' →

@@ -12,6 +12,7 @@ open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
+open import KitTheory.Prelude
 
 open Modes 𝕄
 open Terms 𝕋
@@ -41,6 +42,8 @@ record KitType : Set₁ where
 
   field
     ↑ₜ : TermMode → TermMode
+
+  infix  3  _∶⊢_
 
   _∶⊢_ : List VarMode → TermMode → Set
   µ ∶⊢ M = µ ⊢ ↑ₜ M

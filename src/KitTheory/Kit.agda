@@ -6,6 +6,7 @@ open import Data.List using (List; []; _∷_; _++_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
+open import KitTheory.Prelude
 
 open Modes 𝕄
 open Terms 𝕋

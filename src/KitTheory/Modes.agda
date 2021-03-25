@@ -1,12 +1,7 @@
 module KitTheory.Modes where
 
-open import Data.List using (List; []; _∷_)
-open import Data.List.Membership.Propositional using (_∈_)
-
-infix  4  _∋_
-
-_∋_ : ∀ {ℓ} {A : Set ℓ} → List A → A → Set _
-xs ∋ x = x ∈ xs
+open import Data.List using (List)
+open import KitTheory.Prelude
 
 record Modes : Set₁ where
   field
