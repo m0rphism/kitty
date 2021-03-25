@@ -79,7 +79,7 @@ kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ M
   (`ˣ x)    ⋯ f = tm' (f _ x)
-  (`ᵅ x)    ⋯ f = tm' (f _ x)
+  (`ᵅ α)    ⋯ f = tm' (f _ α)
   (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕖))
   (Λα t)    ⋯ f = Λα (t ⋯ (f ↑ 𝕥))
   (∀α t)    ⋯ f = ∀α (t ⋯ (f ↑ 𝕥))
