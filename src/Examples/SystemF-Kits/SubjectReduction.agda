@@ -69,25 +69,14 @@ sub₁-pres-⊢ : ∀ {Γ : Ctx µ} {E₁ : Term (m₂ ∷ µ) M₁} {E₂ : Ter
   Γ ⊢ E₁ ⋯ ⦅ E₂ ⦆ ∶ T₂ ⋯ ⦅ E₂ ⦆
 sub₁-pres-⊢ {Γ = Γ} {E₂ = E₂} ⊢E₁ ⊢E₂ = sub-pres-⊢ ⊢E₁ (⊢*-idₛ ,* subst (Γ ⊢ E₂ ∶_) (sym (⋯-id _)) ⊢E₂)
 
-vsub-pres-⊢ : ∀ {Γ : Ctx µ} {e₁ : Term (𝕖 ∷ µ) 𝕖} {e₂ : Term µ 𝕖} {t₁ t₂ : Type µ 𝕖} →
-  Γ ,, t₁ ⊢ e₁ ∶ wk _ t₂ →
-  Γ ⊢ e₂ ∶ t₁ →
-  Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ t₂
-vsub-pres-⊢ {Γ = Γ} {e₁ = e₁} {e₂ = e₂} {t₂ = t₂} ⊢e₁ ⊢e₂ =
-  subst (_ ⊢ _ ∶_)
-        (wk _ t₂ ⋯ ⦅ e₂ ⦆ ≡⟨ wk-cancels-,ₛ t₂ _ _ ⟩
-         t₂ ⋯ idₛ         ≡⟨ ⋯-id t₂ ⟩
-         t₂               ∎)
-        (Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ wk _ t₂ ⋯ ⦅ e₂ ⦆ by sub₁-pres-⊢ ⊢e₁ ⊢e₂)
-
 subject-reduction :
   Γ ⊢ e ∶ t →
   e ↪ e' →
   Γ ⊢ e' ∶ t
-subject-reduction (τ-· (τ-λ ⊢e₁) ⊢e₂)  β-λ        = vsub-pres-⊢ ⊢e₁ ⊢e₂
-subject-reduction (τ-∙ (τ-Λ ⊢e))       β-Λ        = sub₁-pres-⊢ ⊢e τ-𝕥
-subject-reduction (τ-λ ⊢e)            (ξ-λ  e↪e') = τ-λ (subject-reduction ⊢e e↪e')
-subject-reduction (τ-Λ ⊢e)            (ξ-Λ  e↪e') = τ-Λ (subject-reduction ⊢e e↪e')
-subject-reduction (τ-· ⊢e₁ ⊢e₂)       (ξ-·₁ e↪e') = τ-· (subject-reduction ⊢e₁ e↪e') ⊢e₂
-subject-reduction (τ-· ⊢e₁ ⊢e₂)       (ξ-·₂ e↪e') = τ-· ⊢e₁ (subject-reduction ⊢e₂ e↪e')
-subject-reduction (τ-∙ ⊢e)            (ξ-∙  e↪e') = τ-∙ (subject-reduction ⊢e e↪e')
+subject-reduction (τ-· {t₂ = t₂} (τ-λ ⊢e₁) ⊢e₂) β-λ        = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ₛ t₂ _) (sub₁-pres-⊢ ⊢e₁ ⊢e₂)
+subject-reduction (τ-∙ (τ-Λ ⊢e))                β-Λ        = sub₁-pres-⊢ ⊢e τ-𝕥
+subject-reduction (τ-λ ⊢e)                     (ξ-λ  e↪e') = τ-λ (subject-reduction ⊢e e↪e')
+subject-reduction (τ-Λ ⊢e)                     (ξ-Λ  e↪e') = τ-Λ (subject-reduction ⊢e e↪e')
+subject-reduction (τ-· ⊢e₁ ⊢e₂)                (ξ-·₁ e↪e') = τ-· (subject-reduction ⊢e₁ e↪e') ⊢e₂
+subject-reduction (τ-· ⊢e₁ ⊢e₂)                (ξ-·₂ e↪e') = τ-· ⊢e₁ (subject-reduction ⊢e₂ e↪e')
+subject-reduction (τ-∙ ⊢e)                     (ξ-∙  e↪e') = τ-∙ (subject-reduction ⊢e e↪e')

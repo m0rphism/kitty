@@ -163,6 +163,20 @@ record KitAssoc : Set₁ where
     ⋯-idᵣ : ∀ {µ M} (v : µ ⊢ M) → v ⋯ idₖ {{kitᵣ}} ≡ v
     ⋯-idᵣ = ⋯-id
 
+    wk-cancels-⦅⦆ₛ : ∀ {µ M m} (v : µ ⊢ M) (v' : µ ⊢ m→M m) →
+      wk _ v ⋯ ⦅ v' ⦆ₛ ≡ v
+    wk-cancels-⦅⦆ₛ v v' =
+      wk _ v ⋯ ⦅ v' ⦆ₛ ≡⟨ wk-cancels-,ₛ v v' idₛ ⟩
+      v ⋯ idₛ          ≡⟨ ⋯-id v ⟩
+      v                ∎
+
+    wk-cancels-⦅⦆ᵣ : ∀ {µ M m} (v : µ ⊢ M) (v' : µ ∋ m) →
+      wk _ v ⋯ ⦅ v' ⦆ᵣ ≡ v
+    wk-cancels-⦅⦆ᵣ v v' =
+      wk _ v ⋯ ⦅ v' ⦆ᵣ ≡⟨ wk-cancels-,ᵣ v v' idᵣ ⟩
+      v ⋯ idᵣ          ≡⟨ ⋯-id v ⟩
+      v                ∎
+
     dist-ᵣ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ∋ m) (σ : µ₁ →ᵣ µ₂) →
       σ ᵣ∘ᵣ ⦅ t ⦆ ≡ ⦅ σ _ t ⦆ ᵣ∘ᵣ (σ ↑ m)
     dist-ᵣ∘ᵣ-⦅⦆ t σ = fun-ext₂ λ where
