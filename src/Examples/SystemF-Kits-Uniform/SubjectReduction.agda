@@ -66,8 +66,8 @@ _,*_ {Γ₂ = Γ₂} {E = E} {T = T} ⊢σ ⊢E (here refl) = subst (Γ₂ ⊢ E
 _,*_ {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢v (there x) = subst (Γ₂ ⊢ σ _ x ∶_) (sym (wk-cancels-,ₛ (wk-drop-∈ x (Γ₁ x)) _ _)) (⊢σ x)
 
 ⊢*-idₛ : Γ ⊢* idₛ ∶ Γ
-⊢*-idₛ {Γ = Γ} {𝕥} x rewrite K≡★ (wk-telescope Γ x) = τ-𝕥
-⊢*-idₛ {Γ = Γ} {𝕖} x rewrite ⋯-id {{𝕂 = kitₛ}} (wk-telescope Γ x) = τ-` refl
+⊢*-idₛ {Γ = Γ} {𝕥} x rewrite K≡★ (wk-telescope Γ x)   = τ-𝕥
+⊢*-idₛ {Γ = Γ} {𝕖} x rewrite ⋯-idₛ (wk-telescope Γ x) = τ-` refl
 
 sub₁-pres-⊢ : ∀ {Γ : Ctx µ} {E₁ : Term (m₂ ∷ µ) M₁} {E₂ : Term µ (m→M m₂)} {T₂ : Type (m₂ ∷ µ) M₁} {T₁ : Type µ (m→M m₂)} →
   Γ ,, T₁ ⊢ E₁ ∶ T₂ →
