@@ -59,6 +59,7 @@ variable
 
 -- Modes and Terms
 
+open import KitTheory.Prelude public
 open import KitTheory.Modes public
 
 𝕄 : Modes
