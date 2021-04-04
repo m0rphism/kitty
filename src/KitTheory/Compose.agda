@@ -129,29 +129,54 @@ record KitAssoc : Set₁ where
 
   private instance _ = kitₛₛ
 
-  dist-↑-sub : ∀ (v : µ₁ ⊢ M) (σ : µ₁ →ₛ µ₂) →
-    v ⋯ wk ⋯ (σ ↑ m) ≡ v ⋯ σ ⋯ wk
-  dist-↑-sub {m = m} v σ =
-    (v ⋯ wk) ⋯ (σ ↑ₛ m)   ≡⟨ ⋯-assoc v wk (σ ↑ m) ⟩
-    v ⋯ ((σ ↑ₛ m) ₛ∘ᵣ wk) ≡⟨ refl ⟩
-    v ⋯ (wk ᵣ∘ₛ σ)        ≡⟨ sym (⋯-assoc v σ wk) ⟩
-    (v ⋯ σ) ⋯ wk          ∎
+  record WkDistKit
+      {{𝕂 : Kit}}
+      {{𝔸₁ : ComposeKit {{𝕂}} {{kitᵣ}} {{𝕂}} }}
+      {{𝔸₂ : ComposeKit {{kitᵣ}} {{𝕂}} {{𝕂}} }}
+      : Set₁ where
+    field
+      comm-↑-wk : ∀ (f : µ₁ –[ 𝕂 ]→ µ₂) →
+        (f ↑ m) ∘ₖ wkᵣ ≡ wkᵣ ∘ₖ f
+      wk-cancels-,ₖ-∘ : ∀ (f : µ₁ –[ 𝕂 ]→ µ₂) (v : µ₂ ◆[ 𝕂 ] m→SM m) →
+        (f ,ₖ v) ∘ₖ wkᵣ ≡ f
 
-  dist-↑-ren : ∀ {µ₁ µ₂ M m} (v : µ₁ ⊢ M) (ρ : µ₁ →ᵣ µ₂) →
-    v ⋯ wk ⋯ (ρ ↑ m) ≡ v ⋯ ρ ⋯ wk
-  dist-↑-ren {m = m} v ρ =
-    v ⋯ wk ⋯ (ρ ↑ m)  ≡⟨ ⋯-assoc v wk (ρ ↑ m)  ⟩
-    v ⋯ (ρ ↑ m) ∘ᵣ wk ≡⟨ refl ⟩
-    v ⋯ wk ∘ᵣ ρ       ≡⟨ sym (⋯-assoc v ρ wk) ⟩
-    v ⋯ ρ ⋯ wk        ∎
+    -- TODO: generalize kitᵣ to arbitrary kits and include ⦅⦆ lemmas.
 
-  wk-cancels-,ₛ : ∀ {µ₁ µ₂ M m} (v : µ₁ ⊢ M) (v' : µ₂ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
-    wk _ v ⋯ (σ ,ₛ v') ≡ v ⋯ σ
-  wk-cancels-,ₛ v v' σ = ⋯-assoc v wk (σ ,ₛ v')
+    -- This isn't limited to renamings i.e. wkᵣ ...
+    dist-↑-f : ∀ (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂 ]→ µ₂) →
+      v ⋯ᵣ wkᵣ ⋯ (f ↑ m) ≡ v ⋯ f ⋯ᵣ wkᵣ
+    dist-↑-f v f =
+      v ⋯ wkᵣ ⋯ (f ↑ _)  ≡⟨ ⋯-assoc v wk (f ↑ _)  ⟩
+      v ⋯ (f ↑ _) ∘ₖ wkᵣ ≡⟨ cong (v ⋯_) (comm-↑-wk f) ⟩
+      v ⋯ wkᵣ ∘ₖ f       ≡⟨ sym (⋯-assoc v f wk) ⟩
+      v ⋯ f ⋯ wkᵣ        ∎
 
-  wk-cancels-,ᵣ : ∀ {µ₁ µ₂ M m} (v : µ₁ ⊢ M) (v' : µ₂ ∋ m) (σ : µ₁ →ᵣ µ₂) →
-    wk _ v ⋯ (σ ,ᵣ v') ≡ v ⋯ σ
-  wk-cancels-,ᵣ v v' ρ = ⋯-assoc v wk (ρ ,ᵣ v')
+    wk-cancels-,ₖ : ∀ (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂 ]→ µ₂) (v' : µ₂ ◆[ 𝕂 ] m→SM m) →
+      v ⋯ᵣ wkᵣ ⋯ (f ,ₖ v') ≡ v ⋯ f
+    wk-cancels-,ₖ v f v' =
+      v ⋯ᵣ wkᵣ ⋯ (f ,ₖ v')   ≡⟨ ⋯-assoc v wkᵣ (f ,ₖ v') ⟩
+      v ⋯ ((f ,ₖ v') ∘ₖ wkᵣ) ≡⟨ cong (v ⋯_) (wk-cancels-,ₖ-∘ f v') ⟩
+      v ⋯ f                  ∎
+
+  wk-kitᵣ : WkDistKit {{kitᵣ}} {{kitᵣᵣ}} {{kitᵣᵣ}}
+  wk-kitᵣ = record
+    { comm-↑-wk = λ f → refl
+    ; wk-cancels-,ₖ-∘ = λ f v → refl
+    }
+
+  wk-kitₛ : WkDistKit {{kitₛ}} {{kitₛᵣ}} {{kitᵣₛ}}
+  wk-kitₛ = record
+    { comm-↑-wk = λ f → refl
+    ; wk-cancels-,ₖ-∘ = λ f v → refl
+    }
+
+  private instance _ = wk-kitᵣ
+  private instance _ = wk-kitₛ
+
+  open WkDistKit {{...}}
+
+  open WkDistKit wk-kitᵣ public renaming (dist-↑-f to dist-↑-ren; wk-cancels-,ₖ to wk-cancels-,ᵣ) using ()
+  open WkDistKit wk-kitₛ public renaming (dist-↑-f to dist-↑-sub; wk-cancels-,ₖ to wk-cancels-,ₛ) using ()
 
   record KitAssocLemmas : Set₁ where
     open ComposeKit {{...}}
@@ -172,19 +197,25 @@ record KitAssoc : Set₁ where
       e ⋯ᵣ ρ ⋯ₛ idₛ    ≡⟨ ⋯-assoc e ρ vr ⟩
       e ⋯ₛ (idₛ ₛ∘ᵣ ρ) ∎
 
-    wk-cancels-⦅⦆ₛ : ∀ {µ M m} (v : µ ⊢ M) (v' : µ ⊢ m→M m) →
-      wk _ v ⋯ ⦅ v' ⦆ₛ ≡ v
-    wk-cancels-⦅⦆ₛ v v' =
-      wk _ v ⋯ ⦅ v' ⦆ₛ ≡⟨ wk-cancels-,ₛ v v' idₛ ⟩
-      v ⋯ idₛ          ≡⟨ ⋯-id v ⟩
+    wk-cancels-⦅⦆ :
+      ∀ {{𝕂 : Kit}}
+        {{𝔸₁ : ComposeKit {{𝕂}} {{kitᵣ}} {{𝕂}} }}
+        {{𝔸₂ : ComposeKit {{kitᵣ}} {{𝕂}} {{𝕂}} }}
+        {{_ : WkDistKit {{𝕂}} {{𝔸₁}} {{𝔸₂}} }} {µ M m}
+        (v : µ ⊢ M) (v' : µ ◆[ 𝕂 ] m→SM m) →
+      v ⋯ wkᵣ ⋯ ⦅ v' ⦆ ≡ v
+    wk-cancels-⦅⦆ v v' =
+      v ⋯ wkᵣ ⋯ ⦅ v' ⦆ ≡⟨ wk-cancels-,ₖ v idₖ v' ⟩
+      v ⋯ idₖ          ≡⟨ ⋯-id v ⟩
       v                ∎
 
     wk-cancels-⦅⦆ᵣ : ∀ {µ M m} (v : µ ⊢ M) (v' : µ ∋ m) →
-      wk _ v ⋯ ⦅ v' ⦆ᵣ ≡ v
-    wk-cancels-⦅⦆ᵣ v v' =
-      wk _ v ⋯ ⦅ v' ⦆ᵣ ≡⟨ wk-cancels-,ᵣ v v' idᵣ ⟩
-      v ⋯ idᵣ          ≡⟨ ⋯-id v ⟩
-      v                ∎
+      v ⋯ wkᵣ ⋯ ⦅ v' ⦆ᵣ ≡ v
+    wk-cancels-⦅⦆ᵣ = wk-cancels-⦅⦆
+
+    wk-cancels-⦅⦆ₛ : ∀ {µ M m} (v : µ ⊢ M) (v' : µ ⊢ m→M m) →
+      v ⋯ wkᵣ ⋯ ⦅ v' ⦆ₛ ≡ v
+    wk-cancels-⦅⦆ₛ = wk-cancels-⦅⦆
 
     dist-ᵣ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ∋ m) (σ : µ₁ →ᵣ µ₂) →
       σ ᵣ∘ᵣ ⦅ t ⦆ ≡ ⦅ σ _ t ⦆ ᵣ∘ᵣ (σ ↑ m)
