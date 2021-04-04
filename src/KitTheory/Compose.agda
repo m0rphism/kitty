@@ -165,6 +165,13 @@ record KitAssoc : Set₁ where
     ⋯-idᵣ : ∀ {µ M} (v : µ ⊢ M) → v ⋯ idₖ {{kitᵣ}} ≡ v
     ⋯-idᵣ = ⋯-id
 
+    ren→sub : ∀ (e : µ₁ ⊢ M) (ρ : µ₁ →ᵣ µ₂) →
+              e ⋯ᵣ ρ ≡ e ⋯ₛ (idₛ ₛ∘ᵣ ρ)
+    ren→sub e ρ =
+      e ⋯ᵣ ρ           ≡⟨ sym (⋯-idₛ (e ⋯ᵣ ρ)) ⟩
+      e ⋯ᵣ ρ ⋯ₛ idₛ    ≡⟨ ⋯-assoc e ρ vr ⟩
+      e ⋯ₛ (idₛ ₛ∘ᵣ ρ) ∎
+
     wk-cancels-⦅⦆ₛ : ∀ {µ M m} (v : µ ⊢ M) (v' : µ ⊢ m→M m) →
       wk _ v ⋯ ⦅ v' ⦆ₛ ≡ v
     wk-cancels-⦅⦆ₛ v v' =
