@@ -76,7 +76,7 @@ open Kit {{...}} public
 kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ M
-  (` x)     ⋯ f = tm' (f _ x)
+  (` x)     ⋯ f = tm _ (f _ x)
   (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕖))
   (Λα t)    ⋯ f = Λα (t ⋯ (f ↑ 𝕥))
   (∀α t)    ⋯ f = ∀α (t ⋯ (f ↑ 𝕥))
@@ -85,7 +85,7 @@ kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ (f ↑ _))
   ★         ⋯ f = ★
   ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-          (` x) ⋯ f ≡ tm' (f _ x)
+          (` x) ⋯ f ≡ tm _ (f _ x)
   ⋯-var _ _ = refl
 
 open KitTraversal kit-traversal public
@@ -104,8 +104,8 @@ kit-assoc = record { ⋯-assoc = ⋯-assoc } where
               (v : Term µ₁ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
     v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
   ⋯-assoc (` X) f g =
-    tm' (f _ X) ⋯ g    ≡⟨ tm'-⋯-∘ f g X ⟩
-    tm' ((g ∘ₖ f) _ X) ∎
+    tm _ (f _ X) ⋯ g    ≡⟨ tm-⋯-∘ f g X ⟩
+    tm _ ((g ∘ₖ f) _ X) ∎
   ⋯-assoc (λx e) f g = cong λx_
     (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
     e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩

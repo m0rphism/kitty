@@ -34,8 +34,8 @@ record ComposeKit {{𝕂₁ : Kit}} {{𝕂₂ : Kit}} {{𝕂 : Kit}} : Set₁ wh
   field
     _∘ₖ_ : µ₂ –[ 𝕂₁ ]→ µ₃ → µ₁ –[ 𝕂₂ ]→ µ₂ → µ₁ –[ 𝕂 ]→ µ₃
 
-    tm'-⋯-∘ : (ρ₁ : µ₁ –[ 𝕂₂ ]→ µ₂) (ρ₂ : µ₂ –[ 𝕂₁ ]→ µ₃) (x : µ₁ ∋ m) →
-      tm' (ρ₁ _ x) ⋯ ρ₂ ≡ tm' ((ρ₂ ∘ₖ ρ₁) _ x)
+    tm-⋯-∘ : (ρ₁ : µ₁ –[ 𝕂₂ ]→ µ₂) (ρ₂ : µ₂ –[ 𝕂₁ ]→ µ₃) (x : µ₁ ∋ m) →
+      tm _ (ρ₁ _ x) ⋯ ρ₂ ≡ tm _ ((ρ₂ ∘ₖ ρ₁) _ x)
 
     dist-↑-∘ : ∀ m (f : µ₂ –[ 𝕂₁ ]→ µ₃) (g : µ₁ –[ 𝕂₂ ]→ µ₂) →
       (f ∘ₖ g) ↑ m ≡ (f ↑ m) ∘ₖ (g ↑ m)
@@ -79,14 +79,14 @@ record KitAssoc : Set₁ where
 
   kitᵣᵣ : ComposeKit {{kitᵣ}} {{kitᵣ}} {{kitᵣ}}
   ComposeKit._∘ₖ_     kitᵣᵣ = _ᵣ∘ᵣ_
-  ComposeKit.tm'-⋯-∘  kitᵣᵣ = λ ρ₁ ρ₂ x → ⋯-var (ρ₁ _ x) ρ₂ where instance _ = kitᵣ
+  ComposeKit.tm-⋯-∘   kitᵣᵣ = λ ρ₁ ρ₂ x → ⋯-var (ρ₁ _ x) ρ₂ where instance _ = kitᵣ
   ComposeKit.dist-↑-∘ kitᵣᵣ = λ _ f g → fun-ext₂ λ where
                                                   _ (here px) → refl
                                                   _ (there x) → refl
 
   kitₛᵣ : ComposeKit {{kitₛ}} {{kitᵣ}} {{kitₛ}}
   ComposeKit._∘ₖ_     kitₛᵣ = _ₛ∘ᵣ_
-  ComposeKit.tm'-⋯-∘  kitₛᵣ = λ σ₁ ρ₂ x → ⋯-var (σ₁ _ x) ρ₂ where instance _ = kitₛ
+  ComposeKit.tm-⋯-∘   kitₛᵣ = λ σ₁ ρ₂ x → ⋯-var (σ₁ _ x) ρ₂ where instance _ = kitₛ
   ComposeKit.dist-↑-∘ kitₛᵣ = λ _ f g → fun-ext₂ λ where
                                                   _ (here px) → refl
                                                   _ (there x) → refl
@@ -96,7 +96,7 @@ record KitAssoc : Set₁ where
 
   kitᵣₛ : ComposeKit {{kitᵣ}} {{kitₛ}} {{kitₛ}}
   ComposeKit._∘ₖ_     kitᵣₛ = _ᵣ∘ₛ_
-  ComposeKit.tm'-⋯-∘  kitᵣₛ = λ ρ₁ σ₂ x → refl
+  ComposeKit.tm-⋯-∘   kitᵣₛ = λ ρ₁ σ₂ x → refl
   ComposeKit.dist-↑-∘ kitᵣₛ =
     λ m₁ ρ σ → fun-ext₂ λ where
         m (here refl) →
@@ -115,7 +115,7 @@ record KitAssoc : Set₁ where
 
   kitₛₛ : ComposeKit {{kitₛ}} {{kitₛ}} {{kitₛ}}
   ComposeKit._∘ₖ_     kitₛₛ = _ₛ∘ₛ_
-  ComposeKit.tm'-⋯-∘  kitₛₛ = λ σ₁ σ₂ x → refl
+  ComposeKit.tm-⋯-∘   kitₛₛ = λ σ₁ σ₂ x → refl
   ComposeKit.dist-↑-∘ kitₛₛ =
     λ m₁ σ₁ σ₂ → fun-ext₂ λ where
         m (here refl) →

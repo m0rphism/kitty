@@ -36,17 +36,14 @@ record Kit : Set₁ where
     m→SM      : VarMode → StuffMode
     SM→M      : StuffMode → TermMode
     vr        : ∀ m → µ ∋ m → µ ◆ m→SM m
-    tm        : ∀ SM → µ ◆ SM → µ ⊢ SM→M SM
+    tm        : ∀ m → µ ◆ m→SM m → µ ⊢ m→M m
     wk        : ∀ SM → µ ◆ SM → (m' ∷ µ) ◆ SM
     m→SM→M    : ∀ m → SM→M (m→SM m) ≡ m→M m
     wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
-    tm-vr     : ∀ x → subst (µ ⊢_) (m→SM→M m) (tm _ (vr _ x)) ≡ ` x
+    tm-vr     : ∀ x → tm {µ = µ} m (vr _ x) ≡ ` x
 
   _–→_ : List VarMode → List VarMode → Set
   _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m→SM m
-
-  tm' : µ ◆ m→SM m → µ ⊢ m→M m
-  tm' {µ} {m} t = subst (µ ⊢_) (m→SM→M m) (tm _ t)
 
   idₖ : µ –→ µ
   idₖ = vr
@@ -86,7 +83,7 @@ record KitTraversal : Set₁ where
     _⋯_   : ∀ {{𝕂 : Kit}} →
             µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
     ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-            (` x) ⋯ f ≡ subst (µ₂ ⊢_) (m→SM→M m) (tm _ (f _ x))
+            (` x) ⋯ f ≡ tm _ (f _ x)
 
   -- TODO: This could also be defined outside of KitTraversal.
   kitᵣ : Kit

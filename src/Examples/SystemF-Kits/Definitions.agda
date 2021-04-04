@@ -82,8 +82,8 @@ kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   -- Traverse a term with a renaming or substitution (depending on the kit).
   _⋯_ : ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-  (`ˣ x)    ⋯ f = tm' (f _ x)
-  (`ᵅ α)    ⋯ f = tm' (f _ α)
+  (`ˣ x)    ⋯ f = tm _ (f _ x)
+  (`ᵅ α)    ⋯ f = tm _ (f _ α)
   (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕖))
   (Λα t)    ⋯ f = Λα (t ⋯ (f ↑ 𝕥))
   (∀α t)    ⋯ f = ∀α (t ⋯ (f ↑ 𝕥))
@@ -92,7 +92,7 @@ kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
   ★         ⋯ f = ★
   -- Applying a renaming or substitution to a variable does the expected thing.
-  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm' (f _ x)
+  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm _ (f _ x)
   ⋯-var {m = 𝕖} _ _ = refl
   ⋯-var {m = 𝕥} _ _ = refl
 
@@ -112,11 +112,11 @@ kit-assoc = record { ⋯-assoc = ⋯-assoc } where
               (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
     (v ⋯ f) ⋯ g ≡ v ⋯ (g ∘ₖ f)
   ⋯-assoc (`ˣ x) f g =
-    tm' (f _ x) ⋯ g    ≡⟨ tm'-⋯-∘ f g x ⟩
-    tm' ((g ∘ₖ f) _ x) ∎
+    tm _ (f _ x) ⋯ g    ≡⟨ tm-⋯-∘ f g x ⟩
+    tm _ ((g ∘ₖ f) _ x) ∎
   ⋯-assoc (`ᵅ α) f g =
-    tm' (f _ α) ⋯ g    ≡⟨ tm'-⋯-∘ f g α ⟩
-    tm' ((g ∘ₖ f) _ α) ∎
+    tm _ (f _ α) ⋯ g    ≡⟨ tm-⋯-∘ f g α ⟩
+    tm _ ((g ∘ₖ f) _ α) ∎
   ⋯-assoc (λx e) f g = cong λx_
     (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
     e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
