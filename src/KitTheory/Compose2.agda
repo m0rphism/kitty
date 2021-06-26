@@ -299,7 +299,7 @@ record KitAssoc : Set₁ where
 open ComposeKit {{...}}
 
 ⋯-assoc' : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
-            (v : µ₁ ⊢ m→M m) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
+            (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
   v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
 ⋯-assoc' {{𝕂₁}} {{𝕂₂}} {{𝕂}} v f g =
   v ⋯ f ⋯ g                                  ≡⟨ refl ⟩
@@ -316,4 +316,4 @@ open ComposeKit {{...}}
   v ⋯ (g ∘ₖ f)       ∎
 
 kitassoc : KitAssoc
-kitassoc = record { ⋯-assoc = {!⋯-assoc'!} }
+kitassoc = record { ⋯-assoc = ⋯-assoc' }
