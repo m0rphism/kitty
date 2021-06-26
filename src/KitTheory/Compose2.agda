@@ -317,3 +317,17 @@ open ComposeKit {{...}}
 
 kitassoc : KitAssoc
 kitassoc = record { ⋯-assoc = ⋯-assoc' }
+
+open KitAssoc kitassoc
+
+⋯-id' : ∀ {{𝕂 : Kit}} {µ M} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
+⋯-id' {{𝕂}} {µ} {M} v =
+  ⋯-↑ {µ = []} (_∷_ {b = 𝕂} (idₖ {{𝕂}}) []) []
+  (λ m x →
+    ` x ⋯ idₖ {{𝕂}} ≡⟨ ⋯-var x idₖ ⟩
+    tm _ (idₖ {{𝕂}} _ x) ≡⟨ tm-vr x ⟩
+    ` x ∎)
+  v
+
+kitassoc-lemmas : KitAssocLemmas
+kitassoc-lemmas = record { ⋯-id = ⋯-id' }
