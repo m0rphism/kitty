@@ -10,6 +10,8 @@ open import Level using (Level; _⊔_)
 open import Function using (id; _∘_; const)
 open import Data.String
 
+open import KitTheory.Prelude using (_∋_; _,_) public
+
 infix   3  _↪_  _↪*_  _⊢_∶_  _⊢*_∶_  _⇓_
 infixr  5  λ→_
 infixl  6  _·_
@@ -59,13 +61,13 @@ open Kit {{...}} public
 kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ m → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ m
-  (` x)     ⋯ f = tm' (f _ x)
+  (` x)     ⋯ f = tm _ (f _ x)
   (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
   Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
   (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
   ★         ⋯ f = ★
   ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-          (` x) ⋯ f ≡ tm' (f _ x)
+          (` x) ⋯ f ≡ tm _ (f _ x)
   ⋯-var _ _ = refl
 
 open KitTraversal kit-traversal public
@@ -83,7 +85,7 @@ kit-assoc = record { ⋯-assoc = ⋯-assoc } where
   ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
               (v : Term µ₁ m) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
     v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
-  ⋯-assoc (` x)     f g = tm'-⋯-∘ f g x
+  ⋯-assoc (` x)     f g = tm-⋯-∘ f g x
   ⋯-assoc (t₁ · t₂) f g = cong₂ _·_ (⋯-assoc t₁ f g) (⋯-assoc t₂ f g)
   ⋯-assoc (λ→ t)    f g = cong λ→_
     (t ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc t (f ↑ _) (g ↑ _) ⟩
