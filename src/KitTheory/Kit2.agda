@@ -30,10 +30,21 @@ data Star {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (R : B → A → A �
   [] : ∀ {x} → Star R [] x x
   _∷_ : ∀ {x y z b bs} → R b x y → Star R bs y z → Star R (b ∷ bs) x z
 
+infixr 5 _∷[_]_
+pattern _∷[_]_  f b fs = _∷_ {b = b} f fs
+
 fold-star : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} {R : B → A → A → Set} {T : A → Set} {a} {b} {bs} →
-  T a → Star R bs a b → (∀ b x y → T x → R b x y → T y) → T b
-fold-star ta [] f = ta
-fold-star ta (rab ∷ rbc) f = fold-star (f _ _ _ ta rab) rbc f
+  (∀ b x y → T x → R b x y → T y) →
+  T a → Star R bs a b → T b
+fold-star f ta [] = ta
+fold-star f ta (rab ∷ rbc) = fold-star f (f _ _ _ ta rab) rbc
+
+fold-star' : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} {R : B → A → A → Set} {T : A → Set} {a} {b} {bs} →
+  (∀ b x y → T x → R b y x → T y) →
+  T a → Star R bs b a → T b
+fold-star' f ta [] = ta
+fold-star' f ta (rab ∷ rbc) = f _ _ _ (fold-star' f ta rbc) rab
+
 
 record Kit : Set₁ where
   infix   4  _◆_
@@ -71,6 +82,10 @@ record Kit : Set₁ where
     _ (here _)  → refl
     _ (there x) → wk-vr m x
 
+  id↑*≡id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ≡ idₖ {µ = µ' ++ µ}
+  id↑*≡id [] µ = refl
+  id↑*≡id (µ' , m) µ rewrite id↑*≡id µ' µ = id↑≡id m (µ' ++ µ)
+
   _,ₖ_ : µ₁ –→ µ₂ → µ₂ ◆ m→SM m → (m ∷ µ₁) –→ µ₂
   (f ,ₖ t) _ (here refl) = t
   (f ,ₖ t) _ (there x)   = f _ x
@@ -87,7 +102,7 @@ _–[_]→_ : List VarMode → (_ : Kit) → List VarMode → Set _
 µ₁ –[ 𝕂 ]→ µ₂ = Kit._–→_ 𝕂 µ₁ µ₂
 
 _–[_]→*_ : List VarMode → (_ : List Kit) → List VarMode → Set _
-µ₁ –[ 𝕂s ]→* µ₂ = Star (λ 𝕂 x y → x –[ 𝕂 ]→ y) 𝕂s µ₁ µ₂
+µ₁ –[ 𝕂s ]→* µ₂ = Star (λ 𝕂 x y → y –[ 𝕂 ]→ x) 𝕂s µ₂ µ₁
 
 _↑**_ : {𝕂s : List Kit} → µ₁ –[ 𝕂s ]→* µ₂ → ∀ µ' → (µ' ++ µ₁) –[ 𝕂s ]→* (µ' ++ µ₂)
 [] ↑** µ' = []
@@ -102,13 +117,13 @@ record KitTraversal : Set₁ where
 
   _⋯*_ : ∀ {𝕂s : List Kit} →
           µ₁ ⊢ M → µ₁ –[ 𝕂s ]→* µ₂ → µ₂ ⊢ M
-  t ⋯* fs = fold-star t fs (λ 𝕂 _ _ t f → _⋯_ {{𝕂}} t f)
+  t ⋯* fs = fold-star' (λ 𝕂 _ _ t f → _⋯_ {{𝕂}} t f) t fs
 
   field
     ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
             (` x) ⋯ f ≡ tm _ (f _ x)
     ⋯-↑ : ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
-          (∀ m (x : (µ ++ µ₁) ∋ m) → ` x ⋯* (f ↑** µ) ≡ ` x ⋯* (g ↑** µ)) →
+          (∀ µ m (x : (µ ++ µ₁) ∋ m) → ` x ⋯* (f ↑** µ) ≡ ` x ⋯* (g ↑** µ)) →
           (t : (µ ++ µ₁) ⊢ M) → t ⋯* (f ↑** µ) ≡ t ⋯* (g ↑** µ)
 
   -- TODO: This could also be defined outside of KitTraversal.
