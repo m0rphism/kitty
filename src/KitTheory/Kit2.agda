@@ -3,7 +3,9 @@ open import KitTheory.Modes
 module KitTheory.Kit2 {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; []; _∷_; _++_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
+open import Data.List.Properties using (++-assoc)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst; subst₂; module ≡-Reasoning)
+open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
 open import KitTheory.Prelude
@@ -44,7 +46,6 @@ fold-star' : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} {R : B → A 
   T a → Star R bs b a → T b
 fold-star' f ta [] = ta
 fold-star' f ta (rab ∷ rbc) = f _ _ _ (fold-star' f ta rbc) rab
-
 
 record Kit : Set₁ where
   infix   4  _◆_
@@ -108,6 +109,13 @@ _↑**_ : {𝕂s : List Kit} → µ₁ –[ 𝕂s ]→* µ₂ → ∀ µ' → (�
 [] ↑** µ' = []
 (_∷_ {b = 𝕂} f fs) ↑** µ' = (Kit._↑*_ 𝕂 f µ') ∷ (fs ↑** µ')
 
+instance
+  kit-[] : List Kit
+  kit-[] = []
+
+  kit-∷ : {{𝕂 : Kit}} → {{𝕂s : List Kit}} → List Kit
+  kit-∷ {{𝕂}} {{𝕂s}} = 𝕂 ∷ 𝕂s
+
 record KitTraversal : Set₁ where
   infixl  5  _⋯_  _⋯*_  _⋯ᵣ_  _⋯ₛ_
 
@@ -125,6 +133,47 @@ record KitTraversal : Set₁ where
     ⋯-↑ : ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
           (∀ µ m (x : (µ ++ µ₁) ∋ m) → ` x ⋯* (f ↑** µ) ≡ ` x ⋯* (g ↑** µ)) →
           (t : (µ ++ µ₁) ⊢ M) → t ⋯* (f ↑** µ) ≡ t ⋯* (g ↑** µ)
+
+  ⋯→⋯*₁ :
+    ∀ {𝕂s : List Kit}
+      {m} (C : ∀ µ → (m ∷ µ) ⊢ M → µ ⊢ M)
+      {µ₁ µ₂} (fs : µ₁ –[ 𝕂s ]→* µ₂)
+      {µ} {t : (m ∷ µ ++ µ₁) ⊢ M} →
+    (∀ {{𝕂}} {µ₁} {µ₂} (f : µ₁ –[ 𝕂 ]→ µ₂) t → C µ₁ t ⋯ f ≡ C µ₂ (t ⋯ f ↑ m)) →
+    C (µ ++ µ₁) t ⋯* (fs ↑** µ) ≡
+    C (µ ++ µ₂) (t ⋯* (fs ↑** (m ∷ µ)))
+  ⋯→⋯*₁ C [] ass = refl
+  ⋯→⋯*₁ {𝕂s = 𝕂 ∷ 𝕂s} {m = m} C {µ₁ = µ₁} {µ₂ = µ₂} (f ∷ fs) {µ = µ} {t = t} ass =
+    let instance _ = 𝕂 in
+    C (µ ++ µ₁) t ⋯* ((f ∷ fs) ↑** µ)                      ≡⟨ refl ⟩
+    C (µ ++ µ₁) t ⋯* (fs ↑** µ) ⋯ (f ↑* µ)                 ≡⟨ cong (_⋯ _) (⋯→⋯*₁ C fs ass) ⟩
+    C (µ ++ _ ) (t ⋯* (fs ↑** (m ∷ µ))) ⋯ (f ↑* µ)         ≡⟨ ass (f ↑* µ) _ ⟩
+    C (µ ++ µ₂) (t ⋯* (fs ↑** (m ∷ µ)) ⋯ (f ↑* (m ∷ µ))) ≡⟨ refl ⟩
+    C (µ ++ µ₂) (t ⋯* ((f ∷ fs) ↑** (m ∷ µ))) ∎
+
+  -- ⋯→⋯* :
+  --   ∀ {𝕂s : List Kit}
+  --     µ' (C : ∀ µ → (µ' ++ µ) ⊢ M → µ ⊢ M)
+  --     {µ₁ µ₂} (fs : µ₁ –[ 𝕂s ]→* µ₂)
+  --     µ {t : (µ' ++ µ ++ µ₁) ⊢ M} →
+  --   (∀ {{𝕂}} {µ₁} {µ₂} (f : µ₁ –[ 𝕂 ]→ µ₂) t → C µ₁ t ⋯ f ≡ C µ₂ (t ⋯ f ↑* µ')) →
+  --   C (µ ++ µ₁) t ⋯* (fs ↑** µ) ≡
+  --   C (µ ++ µ₂) (t ⋯* subst₂ (_–[ _ ]→*_) (++-assoc µ' µ µ₁) (++-assoc µ' µ µ₂) (fs ↑** (µ' ++ µ)))
+  -- ⋯→⋯* [] C {µ₁ = µ₁} {µ₂ = .µ₁} [] µ ass = refl
+  -- ⋯→⋯* {𝕂s = 𝕂 ∷ 𝕂s} [] C {µ₁ = µ₁} {µ₂ = µ₂} (f ∷ fs) µ {t = t} ass =
+  --   let instance _ = 𝕂 in
+  --   C (µ ++ µ₁) t ⋯* ((f ↑* µ) ∷ (fs ↑** µ))   ≡⟨ refl ⟩
+  --   C (µ ++ µ₁) t ⋯* (fs ↑** µ) ⋯ (f ↑* µ)     ≡⟨ cong (_⋯ _) (⋯→⋯* [] C fs µ ass) ⟩
+  --   C (µ ++ _ ) (t ⋯* (fs ↑** µ)) ⋯ (f ↑* µ)   ≡⟨ ass (f ↑* µ) _ ⟩
+  --   C (µ ++ µ₂) (t ⋯* (fs ↑** µ) ⋯ (f ↑* µ))   ≡⟨ refl ⟩
+  --   C (µ ++ µ₂) (t ⋯* ((f ↑* µ) ∷ (fs ↑** µ))) ∎
+  -- ⋯→⋯* {𝕂s = 𝕂s} (µ' , m) C {µ₁ = µ₁} {µ₂ = µ₂} fs µ {t = t} ass =
+  --   C (µ ++ µ₁) t ⋯* (fs ↑** µ) ≡⟨ {!!} ⟩
+  --   C (µ ++ µ₂) (t ⋯*
+  --      subst₂ (_–[ 𝕂s ]→*_)
+  --      (cong (m ∷_) (++-assoc µ' µ µ₁)) (cong (m ∷_) (++-assoc µ' µ µ₂))
+  --      (fs ↑** (m ∷ (µ' ++ µ))))
+  --      ∎
 
   -- TODO: This could also be defined outside of KitTraversal.
   kitᵣ : Kit
