@@ -141,7 +141,8 @@ m→M 𝕥 = 𝕟
 
 mutual
   data Value : List Mode → ValMode → Set where
-    `_      : m ∈ µ → Value µ (m→M m)
+    -- `_      : m ∈ µ → Value µ (m→M m)
+    `_      : 𝕥 ∈ µ → Value µ 𝕟
     _·_     : Value µ 𝕟 → Value µ 𝕧 → Value µ 𝕟
     λ→_     : Value (𝕥 ∷ µ) 𝕧 → Value µ 𝕧
     Π       : Value µ 𝕧 → Value (𝕥 ∷ µ) 𝕧 → Value µ 𝕧
@@ -152,13 +153,16 @@ module ValueSubst where
 
   -- Modes and Terms
 
+  ``_ : m ∈ µ → Value µ (m→M m)
+  ``_ {m = 𝕥} x = ` x
+
   open import KitTheory.Modes
 
   𝕄 : Modes
   𝕄 = record { VarMode = Mode ; TermMode = ValMode ; m→M = m→M }
 
   𝕋 : Terms 𝕄
-  𝕋 = record { _⊢_ = Value ; `_ = `_ }
+  𝕋 = record { _⊢_ = Value ; `_ = ``_ }
 
   -- Kits and Traversals
 
@@ -175,8 +179,8 @@ module ValueSubst where
     ★         ⋯ f = ★
     neutral n ⋯ f = neutral (n ⋯ f)
     ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-            (` x) ⋯ f ≡ tm _ (f _ x)
-    ⋯-var _ _ = refl
+            (`` x) ⋯ f ≡ tm _ (f _ x)
+    ⋯-var {m = 𝕥} _ _ = refl
 
   open KitTraversal kit-traversal public
 
@@ -241,7 +245,7 @@ open TermSubst public
 open ValueSubst using (Ctx; wk-telescope; _,,_) public
 
 ⟦_⟧ : Value µ M → Term µ 𝕥
-⟦ `_ {m = 𝕥} x ⟧ = ` x
+⟦ ` x ⟧          = ` x
 ⟦ n · v ⟧        = ⟦ n ⟧ · ⟦ v ⟧
 ⟦ λ→ v ⟧         = λ→ ⟦ v ⟧
 ⟦ Π v₁ v₂ ⟧      = Π ⟦ v₁ ⟧ ⟦ v₂ ⟧
@@ -252,6 +256,7 @@ variable
   v v₁ v₂ v₃ v' v₁' v₂' v₃' : Value µ 𝕧
   τ τ₁ τ₂ τ₃ τ' τ₁' τ₂' τ₃' : Value µ 𝕧
   n n₁ n₂ n₃ n' n₁' n₂' n₃' : Value µ 𝕟
+  Γ Γ₁ Γ₂ Γ' : Ctx µ
 
 data _⇓_ : Term µ 𝕥 → Value µ 𝕧 → Set where
   ⇓-λ :
@@ -263,12 +268,12 @@ data _⇓_ : Term µ 𝕥 → Value µ 𝕧 → Set where
     Π t₁ t₂ ⇓ Π τ₁ τ₂
   ⇓-` :
     ` x ⇓ neutral (` x)
-  ⇓-·ᵥ : {t₁ : Term (µ , 𝕥) 𝕥} →
+  ⇓-·ᵥ : {t₁ : Term µ 𝕥} →
     t₁ ⇓ λ→ v₁ →
     t₂ ⇓ v₂ →
     ⟦ v₁ ⟧ ⋯ ⦅ ⟦ v₂ ⟧ ⦆ ⇓ v →
     t₁ · t₂ ⇓ v
-  ⇓-·ₙ : {t₁ : Term (µ , 𝕥) 𝕥} →
+  ⇓-·ₙ : {t₁ : Term µ 𝕥} →
     t₁ ⇓ neutral n₁ →
     t₂ ⇓ v₂ →
     t₁ · t₂ ⇓ neutral (n₁ · v₂)
