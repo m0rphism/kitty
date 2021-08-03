@@ -5,14 +5,14 @@ open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Data.Product using (_×_)
+open import Data.Product using (_×_; ∃-syntax)
 open import Level using (Level; _⊔_)
 open import Function using (id; _∘_; const)
 open import Data.String
 
 open import KitTheory.Prelude using (_∋_; _,_) public
 
-infix   3  _↪_  _↪*_  _⊢_∶_  _⊢*_∶_  _⇓_
+infix   3  _⊢_∶_  _⊢*_∶_  _⇓_
 infixr  5  λ→_
 infixl  6  _·_
 infix   7  `_
@@ -43,129 +43,217 @@ variable
 
 -- Substitution ----------------------------------------------------------------
 
--- Modes and Terms
+module TermSubst where
 
-open import KitTheory.Modes
+  -- Modes and Terms
 
-𝕄 : Modes
-𝕄 = record { VarMode = Mode ; TermMode = Mode ; m→M = id }
+  open import KitTheory.Modes
 
-𝕋 : Terms 𝕄
-𝕋 = record { _⊢_ = Term ; `_ = `_ }
+  𝕄 : Modes
+  𝕄 = record { VarMode = Mode ; TermMode = Mode ; m→M = id }
 
--- Kits and Traversals
+  𝕋 : Terms 𝕄
+  𝕋 = record { _⊢_ = Term ; `_ = `_ }
 
-open import KitTheory.Kit 𝕋
-open Kit {{...}} public
+  -- Kits and Traversals
 
-kit-traversal : KitTraversal
-kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
-  _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ m → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ m
-  (` x)     ⋯ f = tm _ (f _ x)
-  (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
-  Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
-  (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
-  ★         ⋯ f = ★
-  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-          (` x) ⋯ f ≡ tm _ (f _ x)
-  ⋯-var _ _ = refl
+  open import KitTheory.Kit 𝕋
+  open Kit {{...}} public
 
-open KitTraversal kit-traversal public
+  kit-traversal : KitTraversal
+  kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
+    _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ m → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ m
+    (` x)     ⋯ f = tm _ (f _ x)
+    (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
+    Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
+    (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
+    ★         ⋯ f = ★
+    ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+            (` x) ⋯ f ≡ tm _ (f _ x)
+    ⋯-var _ _ = refl
 
-instance 𝕂ᵣ = kitᵣ
-instance 𝕂ₛ = kitₛ
+  open KitTraversal kit-traversal public
 
--- Traversal Composition
+  instance 𝕂ᵣ = kitᵣ
+  instance 𝕂ₛ = kitₛ
 
-open import KitTheory.Compose 𝕋 kit-traversal
-open ComposeKit {{...}} public
+  -- Traversal Composition
 
-kit-assoc : KitAssoc
-kit-assoc = record { ⋯-assoc = ⋯-assoc } where
-  ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
-              (v : Term µ₁ m) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
-    v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
-  ⋯-assoc (` x)     f g = tm-⋯-∘ f g x
-  ⋯-assoc (t₁ · t₂) f g = cong₂ _·_ (⋯-assoc t₁ f g) (⋯-assoc t₂ f g)
-  ⋯-assoc (λ→ t)    f g = cong λ→_
-    (t ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc t (f ↑ _) (g ↑ _) ⟩
-     t ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (t ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
-     t ⋯ (g ∘ₖ f) ↑ _         ∎)
-  ⋯-assoc (Π t₁ t₂) f g = cong₂ Π (⋯-assoc t₁ f g)
-    (t₂ ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc t₂ (f ↑ _) (g ↑ _) ⟩
-     t₂ ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (t₂ ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
-     t₂ ⋯ (g ∘ₖ f) ↑ _         ∎)
-  ⋯-assoc ★         f g = refl
+  open import KitTheory.Compose 𝕋 kit-traversal
+  open ComposeKit {{...}} public
 
-open KitAssoc kit-assoc public
+  kit-assoc : KitAssoc
+  kit-assoc = record { ⋯-assoc = ⋯-assoc } where
+    ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
+                (v : Term µ₁ m) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
+      v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
+    ⋯-assoc (` x)     f g = tm-⋯-∘ f g x
+    ⋯-assoc (t₁ · t₂) f g = cong₂ _·_ (⋯-assoc t₁ f g) (⋯-assoc t₂ f g)
+    ⋯-assoc (λ→ t)    f g = cong λ→_
+      (t ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc t (f ↑ _) (g ↑ _) ⟩
+      t ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (t ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
+      t ⋯ (g ∘ₖ f) ↑ _         ∎)
+    ⋯-assoc (Π t₁ t₂) f g = cong₂ Π (⋯-assoc t₁ f g)
+      (t₂ ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc t₂ (f ↑ _) (g ↑ _) ⟩
+      t₂ ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (t₂ ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
+      t₂ ⋯ (g ∘ₖ f) ↑ _         ∎)
+    ⋯-assoc ★         f g = refl
 
-instance 𝕂ᵣᵣ = kitᵣᵣ
-instance 𝕂ᵣₛ = kitᵣₛ
-instance 𝕂ₛᵣ = kitₛᵣ
-instance 𝕂ₛₛ = kitₛₛ
+  open KitAssoc kit-assoc public
 
--- Applying the identity renaming/substitution does nothing.
-kit-assoc-lemmas : KitAssocLemmas
-kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
-  ⋯-id : ∀ {{𝕂 : Kit}} (v : Term µ m) →
-         v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id               (` x)                              = tm-vr x
-  ⋯-id {µ = µ} {{𝕂}} (λ→ t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λ→_ (⋯-id t)
-  ⋯-id {µ = µ} {{𝕂}} (Π t₁ t₂) rewrite id↑≡id {{𝕂}} 𝕥 µ = cong₂ Π (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id               ★                                  = refl
+  instance 𝕂ᵣᵣ = kitᵣᵣ
+  instance 𝕂ᵣₛ = kitᵣₛ
+  instance 𝕂ₛᵣ = kitₛᵣ
+  instance 𝕂ₛₛ = kitₛₛ
 
-open KitAssocLemmas kit-assoc-lemmas public
+  -- Applying the identity renaming/substitution does nothing.
+  kit-assoc-lemmas : KitAssocLemmas
+  kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
+    ⋯-id : ∀ {{𝕂 : Kit}} (v : Term µ m) →
+          v ⋯ idₖ {{𝕂}} ≡ v
+    ⋯-id               (` x)                              = tm-vr x
+    ⋯-id {µ = µ} {{𝕂}} (λ→ t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λ→_ (⋯-id t)
+    ⋯-id {µ = µ} {{𝕂}} (Π t₁ t₂) rewrite id↑≡id {{𝕂}} 𝕥 µ = cong₂ Π (⋯-id t₁) (⋯-id t₂)
+    ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
+    ⋯-id               ★                                  = refl
 
--- Types and Contexts
+  open KitAssocLemmas kit-assoc-lemmas public
 
-open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+  -- Types and Contexts
 
--- Each variable mode corresponds to a term mode that represents its type.
-kit-type : KitType
-kit-type = record { ↑ₜ = λ { 𝕥 → 𝕥 } }
+  open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
 
-open KitType kit-type public renaming (Ctx to Ctx'; wk-telescope to wk-telescope')
+  -- Each variable mode corresponds to a term mode that represents its type.
+  kit-type : KitType
+  kit-type = record { ↑ₜ = λ { 𝕥 → 𝕥 } }
+
+  -- open KitType kit-type public renaming (Ctx to Ctx'; wk-telescope to wk-telescope')
 
 -- Semantics -------------------------------------------------------------------
 
-mutual
-  data Neutral : List Mode → Mode → Set where
-    `_  : m ∈ µ → Neutral µ m
-    _·_ : Neutral µ 𝕥 → Value µ 𝕥 → Neutral µ 𝕥
+data ValMode : Set where
+  𝕧 𝕟 : ValMode
 
-  data Value : List Mode → Mode → Set where
-    λ→_     : Value (𝕥 ∷ µ) 𝕥 → Value µ 𝕥
-    Π       : Value µ 𝕥 → Value (𝕥 ∷ µ) 𝕥 → Value µ 𝕥
-    ★       : Value µ 𝕥
-    neutral : Neutral µ 𝕥 → Value µ 𝕥
+variable M M₁ M₂ : ValMode
 
-Ctx : List Mode → Set
-Ctx µ = ∀ {m} → (x : µ ∋ m) → Value (drop-∈ x µ) m
-
-variable
-  Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
-
-wk-telescope : Ctx µ → µ ∋ m → Value µ m
-wk-telescope Γ x = wk-drop-∈ x (Γ x)
+m→M : Mode → ValMode
+m→M 𝕥 = 𝕟
 
 mutual
-  ⟦_⟧ᵥ : Value µ m → Term µ m
-  ⟦ λ→ v ⟧ᵥ      = λ→ ⟦ v ⟧ᵥ
-  ⟦ Π τ₁ τ₂ ⟧ᵥ   = Π ⟦ τ₁ ⟧ᵥ ⟦ τ₂ ⟧ᵥ
-  ⟦ ★ ⟧ᵥ         = ★
-  ⟦ neutral n ⟧ᵥ = ⟦ n ⟧ₙ
+  data Value : List Mode → ValMode → Set where
+    `_      : m ∈ µ → Value µ (m→M m)
+    _·_     : Value µ 𝕟 → Value µ 𝕧 → Value µ 𝕟
+    λ→_     : Value (𝕥 ∷ µ) 𝕧 → Value µ 𝕧
+    Π       : Value µ 𝕧 → Value (𝕥 ∷ µ) 𝕧 → Value µ 𝕧
+    ★       : Value µ 𝕧
+    neutral : Value µ 𝕟 → Value µ 𝕧
 
-  ⟦_⟧ₙ : Neutral µ m → Term µ m
-  ⟦ ` x ⟧ₙ   = ` x
-  ⟦ n · v ⟧ₙ = ⟦ n ⟧ₙ · ⟦ v ⟧ᵥ
+module ValueSubst where
+
+  -- Modes and Terms
+
+  open import KitTheory.Modes
+
+  𝕄 : Modes
+  𝕄 = record { VarMode = Mode ; TermMode = ValMode ; m→M = m→M }
+
+  𝕋 : Terms 𝕄
+  𝕋 = record { _⊢_ = Value ; `_ = `_ }
+
+  -- Kits and Traversals
+
+  open import KitTheory.Kit 𝕋
+  open Kit {{...}} public
+
+  kit-traversal : KitTraversal
+  kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
+    _⋯_ : ∀ {{𝕂 : Kit}} → Value µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Value µ₂ M
+    (` x)     ⋯ f = tm _ (f _ x)
+    (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
+    Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
+    (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
+    ★         ⋯ f = ★
+    neutral n ⋯ f = neutral (n ⋯ f)
+    ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+            (` x) ⋯ f ≡ tm _ (f _ x)
+    ⋯-var _ _ = refl
+
+  open KitTraversal kit-traversal public
+
+  instance 𝕂ᵣ = kitᵣ
+  instance 𝕂ₛ = kitₛ
+
+  -- Traversal Composition
+
+  open import KitTheory.Compose 𝕋 kit-traversal
+  open ComposeKit {{...}} public
+
+  kit-assoc : KitAssoc
+  kit-assoc = record { ⋯-assoc = ⋯-assoc } where
+    ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
+                (v : Value µ₁ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
+      v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
+    ⋯-assoc (` x)     f g = tm-⋯-∘ f g x
+    ⋯-assoc (t₁ · t₂) f g = cong₂ _·_ (⋯-assoc t₁ f g) (⋯-assoc t₂ f g)
+    ⋯-assoc (λ→ t)    f g = cong λ→_
+      (t ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc t (f ↑ _) (g ↑ _) ⟩
+      t ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (t ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
+      t ⋯ (g ∘ₖ f) ↑ _         ∎)
+    ⋯-assoc (Π t₁ t₂) f g = cong₂ Π (⋯-assoc t₁ f g)
+      (t₂ ⋯ f ↑ _ ⋯ g ↑ _        ≡⟨ ⋯-assoc t₂ (f ↑ _) (g ↑ _) ⟩
+      t₂ ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (t₂ ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
+      t₂ ⋯ (g ∘ₖ f) ↑ _         ∎)
+    ⋯-assoc ★         f g = refl
+    ⋯-assoc (neutral n) f g = cong neutral (⋯-assoc n f g)
+
+  open KitAssoc kit-assoc public
+
+  instance 𝕂ᵣᵣ = kitᵣᵣ
+  instance 𝕂ᵣₛ = kitᵣₛ
+  instance 𝕂ₛᵣ = kitₛᵣ
+  instance 𝕂ₛₛ = kitₛₛ
+
+  -- Applying the identity renaming/substitution does nothing.
+  kit-assoc-lemmas : KitAssocLemmas
+  kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
+    ⋯-id : ∀ {{𝕂 : Kit}} (v : Value µ M) →
+          v ⋯ idₖ {{𝕂}} ≡ v
+    ⋯-id               (` x)                              = tm-vr x
+    ⋯-id {µ = µ} {{𝕂}} (λ→ t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λ→_ (⋯-id t)
+    ⋯-id {µ = µ} {{𝕂}} (Π t₁ t₂) rewrite id↑≡id {{𝕂}} 𝕥 µ = cong₂ Π (⋯-id t₁) (⋯-id t₂)
+    ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
+    ⋯-id               ★                                  = refl
+    ⋯-id               (neutral n)                        = cong neutral (⋯-id n)
+
+  open KitAssocLemmas kit-assoc-lemmas public
+
+  -- Types and Contexts
+
+  open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+
+  -- Each variable mode corresponds to a term mode that represents its type.
+  kit-type : KitType
+  kit-type = record { ↑ₜ = λ { M → 𝕧 } }
+
+  open KitType kit-type public
+
+open TermSubst public
+open ValueSubst using (Ctx; wk-telescope; _,,_) public
+
+⟦_⟧ : Value µ M → Term µ 𝕥
+⟦ `_ {m = 𝕥} x ⟧ = ` x
+⟦ n · v ⟧        = ⟦ n ⟧ · ⟦ v ⟧
+⟦ λ→ v ⟧         = λ→ ⟦ v ⟧
+⟦ Π v₁ v₂ ⟧      = Π ⟦ v₁ ⟧ ⟦ v₂ ⟧
+⟦ ★ ⟧            = ★
+⟦ neutral n ⟧    = ⟦ n ⟧
 
 variable
-  v v₁ v₂ v₃ v' v₁' v₂' v₃' : Value µ 𝕥
-  τ τ₁ τ₂ τ₃ τ' τ₁' τ₂' τ₃' : Value µ 𝕥
-  n n₁ n₂ n₃ n' n₁' n₂' n₃' : Neutral µ 𝕥
+  v v₁ v₂ v₃ v' v₁' v₂' v₃' : Value µ 𝕧
+  τ τ₁ τ₂ τ₃ τ' τ₁' τ₂' τ₃' : Value µ 𝕧
+  n n₁ n₂ n₃ n' n₁' n₂' n₃' : Value µ 𝕟
 
-data _⇓_ : Term µ 𝕥 → Value µ 𝕥 → Set where
+data _⇓_ : Term µ 𝕥 → Value µ 𝕧 → Set where
   ⇓-λ :
     e ⇓ v →
     λ→ e ⇓ λ→ v
@@ -178,7 +266,7 @@ data _⇓_ : Term µ 𝕥 → Value µ 𝕥 → Set where
   ⇓-·ᵥ : {t₁ : Term (µ , 𝕥) 𝕥} →
     t₁ ⇓ λ→ v₁ →
     t₂ ⇓ v₂ →
-    ⟦ v₁ ⟧ᵥ ⋯ ⦅ ⟦ v₂ ⟧ᵥ ⦆ ⇓ v →
+    ⟦ v₁ ⟧ ⋯ ⦅ ⟦ v₂ ⟧ ⦆ ⇓ v →
     t₁ · t₂ ⇓ v
   ⇓-·ₙ : {t₁ : Term (µ , 𝕥) 𝕥} →
     t₁ ⇓ neutral n₁ →
@@ -189,27 +277,31 @@ data _⇓_ : Term µ 𝕥 → Value µ 𝕥 → Set where
 
 -- Typing ----------------------------------------------------------------------
 
-data _⊢_∶_ : Ctx µ → Term µ 𝕥 → Term µ 𝕥 → Set where
-  τ-` : ∀ {Γ : Ctx µ} {t : Term µ 𝕥} {x : 𝕥 ∈ µ} →
+data _⊢_∶_ : Ctx µ → Term µ 𝕥 → Value µ 𝕧 → Set where
+  τ-` : ∀ {Γ : Ctx µ} {t : Value µ 𝕧} {x : 𝕥 ∈ µ} →
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
     Γ ⊢ t₁ ∶ ★ →
-    t₁ ⇓ t₁' →
-    Γ ,, t₁' ⊢ e ∶ t₂ →
-    Γ ⊢ λ→ e ∶ Π t₁' t₂
+    t₁ ⇓ τ₁ →
+    Γ ,, τ₁ ⊢ e ∶ τ₂ →
+    Γ ⊢ λ→ e ∶ Π τ₁ τ₂
   τ-· : ∀ {Γ : Ctx µ} →
-    Γ ⊢ e₁ ∶ Π t₁ t₂ →
-    Γ ⊢ e₂ ∶ t₁ →
-    t₂ ⋯ ⦅ t₁ ⦆ ⇓ t₃ →
-    Γ ⊢ e₁ · e₂ ∶ t₃
-  τ-Π :
-    t₁ ⇓ t₁' →
-    Γ        ⊢ t₁      ∶ ★ →
-    Γ ,, t₁' ⊢ t₂      ∶ ★ →
-    Γ        ⊢ Π t₁ t₂ ∶ ★
-  τ-★ :
+    Γ ⊢ e₁ ∶ Π τ₁ τ₂ →
+    Γ ⊢ e₂ ∶ τ₁ →
+    ⟦ τ₂ ⟧ ⋯ ⦅ e₂ ⦆ ⇓ τ →
+    Γ ⊢ e₁ · e₂ ∶ τ
+  τ-Π : ∀ {Γ : Ctx µ} →
+    t₁ ⇓ τ₁ →
+    Γ       ⊢ t₁      ∶ ★ →
+    Γ ,, τ₁ ⊢ t₂      ∶ ★ →
+    Γ       ⊢ Π t₁ t₂ ∶ ★
+  τ-★ : ∀ {Γ : Ctx µ} →
     Γ ⊢ ★ ∶ ★
 
 _⊢*_∶_ : Ctx µ₂ → µ₁ →ₛ µ₂ → Ctx µ₁ → Set
-_⊢*_∶_ {µ₁ = µ₁} Γ₂ σ Γ₁ = (x : µ₁ ∋ 𝕥) → Γ₂ ⊢ σ _ x ∶ (wk-telescope Γ₁ x ⋯ σ)
+_⊢*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ σ Γ₁ =
+  (x : µ₁ ∋ 𝕥) → ∃[ τ ] (
+    ⟦ wk-telescope Γ₁ x ⟧ ⋯ σ ⇓ τ ×
+    Γ₂ ⊢ σ _ x ∶ τ
+  )
