@@ -22,21 +22,39 @@ subst-pres-ty = {!!}
   (subst (_⇓ wk-telescope Γ x) (sym (⋯-idₛ ⟦ wk-telescope Γ x ⟧)) (⇓-refl-val _)) ,×
   τ-` refl
 
+infixr 1 _by_
+_by_ : (T : Set) → T → T
+T by t = t
+
 ⊢*-ext : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
   Γ₂ ⊢* σ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ σ ∶ τ →
   ⟦ τ' ⟧ ⋯ σ ⇓ τ →
   Γ₂ ⊢* σ ,ₖ (e ⋯ σ) ∶ Γ₁ ,, τ'
-⊢*-ext {e = e} {τ = τ} {τ' = τ'} {σ = σ} ⊢σ ⊢e τ'σ⇓τ (here refl) =
-  τ ,×
-  -- {!!} ,×
-  -- Goal: ⟦ τ' ⟧ ⋯ wk ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ
-  subst (λ h → h ⋯ (σ ,ₖ (e ⋯ σ)) ⇓ τ) (⋯-⟦⟧-comm τ' wk)
-    (subst (_⇓ τ) (wk-cancels-,ₛ {!⟦ τ' ⟧!} {!!} {!!}) {!!})
-    ,×
-  -- subst (_⇓ τ) {!wk-cancels-,ₛ !} {!!} ,×
-  ⊢e
-⊢*-ext ⊢σ ⊢e τ'σ⇓τ (there x) = {!!}
+⊢*-ext {e = e} {τ = τ} {τ' = τ'} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢e τ'σ⇓τ (here refl) =
+  let Γx⋯σ⇓τ =
+        ⟦ wk-telescope (Γ₁ ,, τ') (here refl) ⟧ ⋯ (σ ,ₖ (e ⋯ σ)) ⇓ τ
+          by
+        ⟦ τ' ValueSubst.⋯ wk ⟧ ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ
+          by subst (λ h → h ⋯ (σ ,ₖ (e ⋯ σ)) ⇓ τ) (⋯-⟦⟧-comm τ' wk) (
+        ⟦ τ' ⟧ ⋯ wk ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ
+          by subst (_⇓ τ) (sym (wk-cancels-,ₛ ⟦ τ' ⟧ σ (e ⋯ σ))) (
+        ⟦ τ' ⟧ ⋯ σ  ⇓ τ
+          by τ'σ⇓τ))
+  in τ ,× Γx⋯σ⇓τ ,× ⊢e
+⊢*-ext {e = e} {τ = τ} {τ' = τ'} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢e τ'σ⇓τ (there x) with ⊢σ x
+⊢*-ext {e = e} {τ = τ} {τ' = τ'} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢e τ'σ⇓τ (there x) | τ₁' ,× ⇓τ₁' ,× ⊢' =
+  let Γx⋯σ⇓τ =
+        ⟦ wk-telescope (Γ₁ ,, τ') (there x) ⟧ ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ₁'
+          by
+        ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ValueSubst.⋯ wk ⟧ ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ₁'
+          by subst (λ h → h ⋯ (σ ,ₖ (e ⋯ σ)) ⇓ τ₁') (⋯-⟦⟧-comm (ValueSubst.wk-drop-∈ x (Γ₁ x)) wk) (
+        ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ ⋯ wk ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ₁'
+          by subst (_⇓ τ₁') (sym (wk-cancels-,ₛ ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ σ (e ⋯ σ))) (
+        ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ ⋯ σ ⇓ τ₁'
+          by
+        ⇓τ₁'))
+  in τ₁' ,× Γx⋯σ⇓τ ,× ⊢'
 
 subst-pres-ty₁ : {Γ : Ctx µ} →
   Γ ,, τ₂ ⊢ e₁ ∶ τ₁ →
