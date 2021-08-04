@@ -60,19 +60,22 @@ module TermSubst where
   open import KitTheory.Kit 𝕋
   open Kit {{...}} public
 
+  infixl  5  _⋯_
+  _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ m → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ m
+  (` x)     ⋯ f = tm _ (f _ x)
+  (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
+  Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
+  (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
+  ★         ⋯ f = ★
+
+  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+          (` x) ⋯ f ≡ tm _ (f _ x)
+  ⋯-var _ _ = refl
+
   kit-traversal : KitTraversal
   kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
-    _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ m → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ m
-    (` x)     ⋯ f = tm _ (f _ x)
-    (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
-    Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
-    (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
-    ★         ⋯ f = ★
-    ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-            (` x) ⋯ f ≡ tm _ (f _ x)
-    ⋯-var _ _ = refl
 
-  open KitTraversal kit-traversal public
+  open KitTraversal kit-traversal public hiding (_⋯_; ⋯-var)
 
   instance 𝕂ᵣ = kitᵣ
   instance 𝕂ₛ = kitₛ

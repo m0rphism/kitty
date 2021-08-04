@@ -42,6 +42,13 @@ mutual
 ... | refl | refl = refl
 ⇓-deterministic ⇓-★ ⇓-★ = refl
 
+subst-pres-ty₁ : {Γ : Ctx µ} →
+  Γ ,, τ₂ ⊢ e₁ ∶ τ₁ →
+  Γ ⊢ e₂ ∶ τ₂ →
+  ⟦ τ₁ ⟧ ⋯ ⦅ e₂ ⦆ ⇓ τ →
+  Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ τ
+subst-pres-ty₁ = {!!}
+
 subject-reduction :
   Γ ⊢ e ∶ τ →
   e ⇓ v →
@@ -50,9 +57,13 @@ subject-reduction (τ-λ ⊢t₁ t₁⇓τ₁ ⊢e) (⇓-λ e⇓v) =
   τ-λ ⊢t₁ t₁⇓τ₁ (subject-reduction ⊢e e⇓v )
 subject-reduction (τ-Π t₁⇓τ₃ ⊢t₁ ⊢t₂) (⇓-Π t₁⇓τ₁ t₂⇓τ₂)
     with ⇓-deterministic t₁⇓τ₁ t₁⇓τ₃
-... | refl = τ-Π (⇓-refl-val _) (subject-reduction ⊢t₁ t₁⇓τ₃) (subject-reduction ⊢t₂ t₂⇓τ₂)
+... | refl =
+  τ-Π (⇓-refl-val _) (subject-reduction ⊢t₁ t₁⇓τ₁) (subject-reduction ⊢t₂ t₂⇓τ₂)
 subject-reduction ⊢e ⇓-` = ⊢e
-subject-reduction ⊢e (⇓-·ᵥ e₁⇓λv₁ e₂⇓v₂ v₁v₂⇓v) = {!!}
+subject-reduction (τ-· ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ᵥ e₁⇓λv₁ e₂⇓v₂ v₁v₂⇓v)
+    with subject-reduction ⊢e₁ e₁⇓λv₁ | subject-reduction ⊢e₂ e₂⇓v₂
+... | τ-λ ⊢t₁ t₁⇓τ₁ ⊢v₁ | ⊢v₂ =
+  subject-reduction (subst-pres-ty₁ ⊢v₁ ⊢v₂ {!τ₂e₂⇓τ!}) v₁v₂⇓v
 subject-reduction (τ-· ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ₙ e₁⇓n e₂⇓v) =
   τ-· (subject-reduction ⊢e₁ e₁⇓n) (subject-reduction ⊢e₂ e₂⇓v) {!τ₂e₂⇓τ!}
 subject-reduction ⊢e ⇓-★ = ⊢e
