@@ -28,29 +28,29 @@ T by t = t
 
 ⊢*-ext : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
   Γ₂ ⊢* σ ∶ Γ₁ →
-  Γ₂ ⊢ e ⋯ σ ∶ τ →
+  Γ₂ ⊢ e ∶ τ →
   ⟦ τ' ⟧ ⋯ σ ⇓ τ →
-  Γ₂ ⊢* σ ,ₖ (e ⋯ σ) ∶ Γ₁ ,, τ'
+  Γ₂ ⊢* σ ,ₖ e ∶ Γ₁ ,, τ'
 ⊢*-ext {e = e} {τ = τ} {τ' = τ'} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢e τ'σ⇓τ (here refl) =
   let Γx⋯σ⇓τ =
-        ⟦ wk-telescope (Γ₁ ,, τ') (here refl) ⟧ ⋯ (σ ,ₖ (e ⋯ σ)) ⇓ τ
+        ⟦ wk-telescope (Γ₁ ,, τ') (here refl) ⟧ ⋯ (σ ,ₖ e) ⇓ τ
           by
-        ⟦ τ' ValueSubst.⋯ wk ⟧ ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ
-          by subst (λ h → h ⋯ (σ ,ₖ (e ⋯ σ)) ⇓ τ) (⋯-⟦⟧-comm τ' wk) (
-        ⟦ τ' ⟧ ⋯ wk ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ
-          by subst (_⇓ τ) (sym (wk-cancels-,ₛ ⟦ τ' ⟧ σ (e ⋯ σ))) (
+        ⟦ τ' ValueSubst.⋯ wk ⟧ ⋯ (σ ,ₛ e) ⇓ τ
+          by subst (λ h → h ⋯ (σ ,ₖ e) ⇓ τ) (⋯-⟦⟧-comm τ' wk) (
+        ⟦ τ' ⟧ ⋯ wk ⋯ (σ ,ₛ e) ⇓ τ
+          by subst (_⇓ τ) (sym (wk-cancels-,ₛ ⟦ τ' ⟧ σ e)) (
         ⟦ τ' ⟧ ⋯ σ  ⇓ τ
           by τ'σ⇓τ))
   in τ ,× Γx⋯σ⇓τ ,× ⊢e
 ⊢*-ext {e = e} {τ = τ} {τ' = τ'} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢e τ'σ⇓τ (there x) with ⊢σ x
 ⊢*-ext {e = e} {τ = τ} {τ' = τ'} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢e τ'σ⇓τ (there x) | τ₁' ,× ⇓τ₁' ,× ⊢' =
   let Γx⋯σ⇓τ =
-        ⟦ wk-telescope (Γ₁ ,, τ') (there x) ⟧ ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ₁'
+        ⟦ wk-telescope (Γ₁ ,, τ') (there x) ⟧ ⋯ (σ ,ₛ e) ⇓ τ₁'
           by
-        ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ValueSubst.⋯ wk ⟧ ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ₁'
-          by subst (λ h → h ⋯ (σ ,ₖ (e ⋯ σ)) ⇓ τ₁') (⋯-⟦⟧-comm (ValueSubst.wk-drop-∈ x (Γ₁ x)) wk) (
-        ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ ⋯ wk ⋯ (σ ,ₛ (e ⋯ σ)) ⇓ τ₁'
-          by subst (_⇓ τ₁') (sym (wk-cancels-,ₛ ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ σ (e ⋯ σ))) (
+        ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ValueSubst.⋯ wk ⟧ ⋯ (σ ,ₛ e) ⇓ τ₁'
+          by subst (λ h → h ⋯ (σ ,ₖ e) ⇓ τ₁') (⋯-⟦⟧-comm (ValueSubst.wk-drop-∈ x (Γ₁ x)) wk) (
+        ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ ⋯ wk ⋯ (σ ,ₛ e) ⇓ τ₁'
+          by subst (_⇓ τ₁') (sym (wk-cancels-,ₛ ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ σ e)) (
         ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ ⋯ σ ⇓ τ₁'
           by
         ⇓τ₁'))
@@ -62,9 +62,8 @@ subst-pres-ty₁ : {Γ : Ctx µ} →
   ⟦ τ₁ ⟧ ⋯ ⦅ e₂ ⦆ ⇓ τ →
   Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ τ
 subst-pres-ty₁ {τ₂ = τ₂} {τ₁ = τ₁} {e₂ = e₂} {Γ = Γ} ⊢e₁ ⊢e₂ τ₁e₂⇓τ =
-  subst-pres-ty ⊢e₁ (subst (λ h → Γ ⊢* ⦅ h ⦆ ∶ Γ ,, τ₂) (⋯-idₛ e₂) {!⊢*-ext {!!} {!!} {!!}!}) τ₁e₂⇓τ
-  -- subst-pres-ty ⊢e₁ (subst (λ h → Γ ⊢* ⦅ h ⦆ ∶ Γ ,, τ₂) (⋯-idₛ e₂) (⊢*-ext ⊢*id (subst (_ ⊢_∶ _) (sym (⋯-idₛ e₂)) ⊢e₂) (subst (_⇓ _) (⋯-idₛ ⟦ _ ⟧) (⇓-refl-val _)))) τ₁e₂⇓τ
-subst-pres-ty₁ {e₂ = e₂} ⊢e₁ ⊢e₂ τ₁e₂⇓τ = subst-pres-ty ⊢e₁ {!⊢*-ext ⊢*id (subst (_ ⊢_∶ _) (sym (⋯-idₛ e₂)) ⊢e₂)!} τ₁e₂⇓τ
+  let ⊢* = ⊢*-ext ⊢*id ⊢e₂ (subst (_⇓ τ₂) (sym (⋯-idₛ ⟦ τ₂ ⟧)) (⇓-refl-val τ₂))
+  in subst-pres-ty ⊢e₁ ⊢* τ₁e₂⇓τ
 
 subject-reduction :
   Γ ⊢ e ∶ τ →
