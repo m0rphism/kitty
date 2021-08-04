@@ -43,12 +43,19 @@ mutual
 ... | refl | refl = refl
 ⇓-deterministic ⇓-★ ⇓-★ = refl
 
+subst-pres-ty : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
+  Γ₁ ⊢ e₁ ∶ τ₁ →
+  Γ₂ ⊢* σ ∶ Γ₁ →
+  ⟦ τ₁ ⟧ ⋯ σ ⇓ τ →
+  Γ ⊢ e₁ ⋯ σ ∶ τ
+subst-pres-ty = {!!}
+
 subst-pres-ty₁ : {Γ : Ctx µ} →
   Γ ,, τ₂ ⊢ e₁ ∶ τ₁ →
   Γ ⊢ e₂ ∶ τ₂ →
   ⟦ τ₁ ⟧ ⋯ ⦅ e₂ ⦆ ⇓ τ →
   Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ τ
-subst-pres-ty₁ = {!!}
+subst-pres-ty₁ ⊢e₁ ⊢e₂ τ₁e₂⇓τ = subst-pres-ty ⊢e₁ {!!} τ₁e₂⇓τ
 
 _⇓ₛ_ : (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
 σ₁ ⇓ₛ σ₂ = ∀ m x → ∃[ v ] (σ₁ m x ⇓' v × σ₂ m x ≡ ⟦ v ⟧')
