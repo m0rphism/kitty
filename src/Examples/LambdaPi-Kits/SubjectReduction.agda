@@ -49,17 +49,34 @@ subst-pres-ty₁ : {Γ : Ctx µ} →
   Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ τ
 subst-pres-ty₁ = {!!}
 
--- eval-subst-eval : {t₁ : Term µ₁ 𝕥} {σ₁ σ₂ : µ₁ →ₛ µ₂} →
---   t₁ ⋯ σ₁ ⇓ v₁ →
---   (∀ m x → σ₁ m x ⇓ v × σ₂ m x ≡ ⟦ v ⟧) →
---   t₁ ⋯ σ₂ ⇓ v₁
--- eval-subst-eval ⇓t₁ ⇓t₂ = {!t₁!}
+_⇓ₛ_ : (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
+σ₁ ⇓ₛ σ₂ = ∀ m x → ∃[ v ] (σ₁ m x ⇓' v × σ₂ m x ≡ ⟦ v ⟧')
 
-eval-subst-eval₁ : {t₁ : Term (µ , 𝕥) 𝕥} {t₂ : Term µ 𝕥} →
+⇓ₛ-↑ : {σ₁ σ₂ : µ₁ →ₛ µ₂} →
+  σ₁ ⇓ₛ σ₂ →
+  (σ₁ ↑ₛ m) ⇓ₛ (σ₂ ↑ₛ m)
+⇓ₛ-↑ ⇓σ₁ 𝕥 (here px) = neutral (` here px) ,× ⇓-` ,× refl
+⇓ₛ-↑ ⇓σ₁ m (there x) with ⇓σ₁ m x
+⇓ₛ-↑ ⇓σ₁ m (there x) | v' ,× ⇓x ,× eq = v' ValueSubst.⋯ wk ,× {!!} ,× {!!}
+
+eval-subst-eval : (t₁ : Term µ₁ 𝕥) {σ₁ σ₂ : µ₁ →ₛ µ₂} →
+  t₁ ⋯ σ₁ ⇓ v₁ →
+  σ₁ ⇓ₛ σ₂ →
+  t₁ ⋯ σ₂ ⇓ v₁
+eval-subst-eval (` x)     ⇓t₁               ⇓σ₁ with ⇓σ₁ _ x
+eval-subst-eval (` x)     ⇓t₁               ⇓σ₁ | v' ,× ⇓x ,× eq with ⇓-deterministic ⇓t₁ ⇓x
+eval-subst-eval (` x)     ⇓t₁               ⇓σ₁ | v' ,× ⇓x ,× eq | refl rewrite eq = ⇓-refl-val v'
+eval-subst-eval (t₁ · t₂) (⇓-·ᵥ ⇓t₁ ⇓t₂ ⇓t) ⇓σ₁ = ⇓-·ᵥ (eval-subst-eval t₁ ⇓t₁ ⇓σ₁) (eval-subst-eval t₂ ⇓t₂ ⇓σ₁) ⇓t
+eval-subst-eval (t₁ · t₂) (⇓-·ₙ ⇓t₁ ⇓t₂)    ⇓σ₁ = ⇓-·ₙ (eval-subst-eval t₁ ⇓t₁ ⇓σ₁) (eval-subst-eval t₂ ⇓t₂ ⇓σ₁)
+eval-subst-eval (λ→ t₁)   (⇓-λ ⇓t₁)         ⇓σ₁ = ⇓-λ (eval-subst-eval t₁ ⇓t₁ (⇓ₛ-↑ ⇓σ₁))
+eval-subst-eval (Π t₁ t₂) (⇓-Π ⇓t₁ ⇓t₂)     ⇓σ₁ = ⇓-Π (eval-subst-eval t₁ ⇓t₁ ⇓σ₁) (eval-subst-eval t₂ ⇓t₂ (⇓ₛ-↑ ⇓σ₁))
+eval-subst-eval ★         ⇓t₁               ⇓σ₁ = ⇓t₁
+
+eval-subst-eval₁ : (t₁ : Term (µ , 𝕥) 𝕥) {t₂ : Term µ 𝕥} →
   t₁ ⋯ ⦅ t₂ ⦆ ⇓ v₁ →
   t₂ ⇓ v₂ →
   t₁ ⋯ ⦅ ⟦ v₂ ⟧ ⦆ ⇓ v₁
-eval-subst-eval₁ ⇓t₁ ⇓t₂ = {!t₁!}
+eval-subst-eval₁ t₁ ⇓t₁ ⇓t₂ = {!t₁!}
 
 subject-reduction :
   Γ ⊢ e ∶ τ →
@@ -75,7 +92,7 @@ subject-reduction ⊢e ⇓-` = ⊢e
 subject-reduction (τ-· {τ₂ = τ₂} ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ᵥ e₁⇓λv₁ e₂⇓v₂ v₁v₂⇓v)
     with subject-reduction ⊢e₁ e₁⇓λv₁ | subject-reduction ⊢e₂ e₂⇓v₂
 ... | τ-λ ⊢t₁ t₁⇓τ₁ ⊢v₁ | ⊢v₂ =
-  subject-reduction (subst-pres-ty₁ ⊢v₁ ⊢v₂ (eval-subst-eval₁ {t₁ = ⟦ τ₂ ⟧} τ₂e₂⇓τ e₂⇓v₂)) v₁v₂⇓v
+  subject-reduction (subst-pres-ty₁ ⊢v₁ ⊢v₂ (eval-subst-eval₁ ⟦ τ₂ ⟧ τ₂e₂⇓τ e₂⇓v₂)) v₁v₂⇓v
 subject-reduction (τ-· {τ₂ = τ₂} ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ₙ e₁⇓n e₂⇓v₂) =
-  τ-· (subject-reduction ⊢e₁ e₁⇓n) (subject-reduction ⊢e₂ e₂⇓v₂) (eval-subst-eval₁ {t₁ = ⟦ τ₂ ⟧} τ₂e₂⇓τ e₂⇓v₂)
+  τ-· (subject-reduction ⊢e₁ e₁⇓n) (subject-reduction ⊢e₂ e₂⇓v₂) (eval-subst-eval₁ ⟦ τ₂ ⟧ τ₂e₂⇓τ e₂⇓v₂)
 subject-reduction ⊢e ⇓-★ = ⊢e

@@ -172,20 +172,22 @@ module ValueSubst where
   open import KitTheory.Kit 𝕋
   open Kit {{...}} public
 
+  infixl  5  _⋯_
+  _⋯_ : ∀ {{𝕂 : Kit}} → Value µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Value µ₂ M
+  (` x)     ⋯ f = tm _ (f _ x)
+  (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
+  Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
+  (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
+  ★         ⋯ f = ★
+  neutral n ⋯ f = neutral (n ⋯ f)
+
   kit-traversal : KitTraversal
   kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
-    _⋯_ : ∀ {{𝕂 : Kit}} → Value µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Value µ₂ M
-    (` x)     ⋯ f = tm _ (f _ x)
-    (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
-    Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
-    (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
-    ★         ⋯ f = ★
-    neutral n ⋯ f = neutral (n ⋯ f)
     ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
             (`` x) ⋯ f ≡ tm _ (f _ x)
     ⋯-var {m = 𝕥} _ _ = refl
 
-  open KitTraversal kit-traversal public
+  open KitTraversal kit-traversal public hiding (_⋯_)
 
   instance 𝕂ᵣ = kitᵣ
   instance 𝕂ₛ = kitₛ
@@ -255,6 +257,9 @@ open ValueSubst using (Ctx; wk-telescope; _,,_) public
 ⟦ ★ ⟧            = ★
 ⟦ neutral n ⟧    = ⟦ n ⟧
 
+⟦_⟧' : Value µ M → Term µ m
+⟦_⟧' {m = 𝕥} = ⟦_⟧
+
 variable
   v v₁ v₂ v₃ v' v₁' v₂' v₃' : Value µ 𝕧
   τ τ₁ τ₂ τ₃ τ' τ₁' τ₂' τ₃' : Value µ 𝕧
@@ -282,6 +287,9 @@ data _⇓_ : Term µ 𝕥 → Value µ 𝕧 → Set where
     t₁ · t₂ ⇓ neutral (n₁ · v₂)
   ⇓-★ :
     ★ ⇓ ★ {µ}
+
+_⇓'_ : Term µ m → Value µ 𝕧 → Set
+_⇓'_ {m = 𝕥} = _⇓_
 
 -- Typing ----------------------------------------------------------------------
 
