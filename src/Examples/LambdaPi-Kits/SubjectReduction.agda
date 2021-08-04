@@ -8,6 +8,10 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List using (_++_; [])
 open import Data.Product renaming (_,_ to _,×_)
 
+infixr 1 _by_
+_by_ : (T : Set) → T → T
+T by t = t
+
 subst-pres-ty : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
   Γ₁ ⊢ e₁ ∶ τ₁ →
   Γ₂ ⊢* σ ∶ Γ₁ →
@@ -21,10 +25,6 @@ subst-pres-ty = {!!}
   wk-telescope Γ x ,×
   (subst (_⇓ wk-telescope Γ x) (sym (⋯-idₛ ⟦ wk-telescope Γ x ⟧)) (⇓-refl-val _)) ,×
   τ-` refl
-
-infixr 1 _by_
-_by_ : (T : Set) → T → T
-T by t = t
 
 ⊢*-ext : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
   Γ₂ ⊢* σ ∶ Γ₁ →
