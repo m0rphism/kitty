@@ -49,6 +49,18 @@ subst-pres-ty₁ : {Γ : Ctx µ} →
   Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ τ
 subst-pres-ty₁ = {!!}
 
+-- eval-subst-eval : {t₁ : Term µ₁ 𝕥} {σ₁ σ₂ : µ₁ →ₛ µ₂} →
+--   t₁ ⋯ σ₁ ⇓ v₁ →
+--   (∀ m x → σ₁ m x ⇓ v × σ₂ m x ≡ ⟦ v ⟧) →
+--   t₁ ⋯ σ₂ ⇓ v₁
+-- eval-subst-eval ⇓t₁ ⇓t₂ = {!t₁!}
+
+eval-subst-eval₁ : {t₁ : Term (µ , 𝕥) 𝕥} {t₂ : Term µ 𝕥} →
+  t₁ ⋯ ⦅ t₂ ⦆ ⇓ v₁ →
+  t₂ ⇓ v₂ →
+  t₁ ⋯ ⦅ ⟦ v₂ ⟧ ⦆ ⇓ v₁
+eval-subst-eval₁ ⇓t₁ ⇓t₂ = {!t₁!}
+
 subject-reduction :
   Γ ⊢ e ∶ τ →
   e ⇓ v →
@@ -60,10 +72,10 @@ subject-reduction (τ-Π t₁⇓τ₃ ⊢t₁ ⊢t₂) (⇓-Π t₁⇓τ₁ t₂
 ... | refl =
   τ-Π (⇓-refl-val _) (subject-reduction ⊢t₁ t₁⇓τ₁) (subject-reduction ⊢t₂ t₂⇓τ₂)
 subject-reduction ⊢e ⇓-` = ⊢e
-subject-reduction (τ-· ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ᵥ e₁⇓λv₁ e₂⇓v₂ v₁v₂⇓v)
+subject-reduction (τ-· {τ₂ = τ₂} ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ᵥ e₁⇓λv₁ e₂⇓v₂ v₁v₂⇓v)
     with subject-reduction ⊢e₁ e₁⇓λv₁ | subject-reduction ⊢e₂ e₂⇓v₂
 ... | τ-λ ⊢t₁ t₁⇓τ₁ ⊢v₁ | ⊢v₂ =
-  subject-reduction (subst-pres-ty₁ ⊢v₁ ⊢v₂ {!τ₂e₂⇓τ!}) v₁v₂⇓v
-subject-reduction (τ-· ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ₙ e₁⇓n e₂⇓v) =
-  τ-· (subject-reduction ⊢e₁ e₁⇓n) (subject-reduction ⊢e₂ e₂⇓v) {!τ₂e₂⇓τ!}
+  subject-reduction (subst-pres-ty₁ ⊢v₁ ⊢v₂ (eval-subst-eval₁ {t₁ = ⟦ τ₂ ⟧} τ₂e₂⇓τ e₂⇓v₂)) v₁v₂⇓v
+subject-reduction (τ-· {τ₂ = τ₂} ⊢e₁ ⊢e₂ τ₂e₂⇓τ) (⇓-·ₙ e₁⇓n e₂⇓v₂) =
+  τ-· (subject-reduction ⊢e₁ e₁⇓n) (subject-reduction ⊢e₂ e₂⇓v₂) (eval-subst-eval₁ {t₁ = ⟦ τ₂ ⟧} τ₂e₂⇓τ e₂⇓v₂)
 subject-reduction ⊢e ⇓-★ = ⊢e
