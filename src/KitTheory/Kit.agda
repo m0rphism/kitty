@@ -48,6 +48,7 @@ record Kit : Set₁ where
   idₖ : µ –→ µ
   idₖ = vr
 
+  -- TODO: Can we express this as weakened f + ,ₖ ?
   _↑_ : µ₁ –→ µ₂ → ∀ m → (m ∷ µ₁) –→ (m ∷ µ₂)
   (f ↑ m) _ (here p)  = vr _ (here p)
   (f ↑ m) _ (there x) = wk _ (f _ x)

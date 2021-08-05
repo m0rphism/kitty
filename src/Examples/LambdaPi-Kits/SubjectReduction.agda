@@ -12,13 +12,6 @@ infixr 1 _by_
 _by_ : (T : Set) → T → T
 T by t = t
 
-subst-pres-ty : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
-  Γ₁ ⊢ e₁ ∶ τ₁ →
-  Γ₂ ⊢* σ ∶ Γ₁ →
-  ⟦ τ₁ ⟧ ⋯ σ ⇓ τ →
-  Γ ⊢ e₁ ⋯ σ ∶ τ
-subst-pres-ty = {!!}
-
 ⊢*id :
   Γ ⊢* idₛ ∶ Γ
 ⊢*id {Γ = Γ} x =
@@ -55,6 +48,30 @@ subst-pres-ty = {!!}
           by
         ⇓τ₁'))
   in τ₁' ,× Γx⋯σ⇓τ ,× ⊢'
+
+⊢*-↑ : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
+  ⟦ τ₁ ⟧ ⋯ σ ⇓ τ₂ →
+  Γ₂       ⊢* σ      ∶ Γ₁       →
+  Γ₂ ,, τ₂ ⊢* σ ↑ₛ m ∶ Γ₁ ,, τ₁
+⊢*-↑ {τ₁ = τ₁} {τ₂ = τ₂} τ₁σ⇓τ₂ ⊢σ (here refl) = τ₂ ValueSubst.⋯ wk ,× {!!} ,× τ-` refl
+⊢*-↑ {τ₁ = τ₁} {τ₂ = τ₂} τ₁σ⇓τ₂ ⊢σ (there x) with ⊢σ x
+⊢*-↑ {τ₁ = τ₁} {τ₂ = τ₂} τ₁σ⇓τ₂ ⊢σ (there x) | τ ,× ⇓τ ,× ⊢σx = {!!} ,× {!!} ,× {!ren-pres-ty!}
+
+subst-pres-ty : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
+  Γ₁ ⊢ e₁ ∶ τ₁ →
+  Γ₂ ⊢* σ ∶ Γ₁ →
+  ⟦ τ₁ ⟧ ⋯ σ ⇓ τ →
+  Γ₂ ⊢ e₁ ⋯ σ ∶ τ
+subst-pres-ty (τ-` {x = x} refl) ⊢σ τ₁σ⇓τ with ⊢σ x
+subst-pres-ty (τ-` {x = _} refl) ⊢σ τ₁σ⇓τ | τ ,× ⇓τ ,× ⊢σx with ⇓-deterministic ⇓τ τ₁σ⇓τ
+subst-pres-ty (τ-` {x = _} refl) ⊢σ τ₁σ⇓τ | τ ,× ⇓τ ,× ⊢σx | refl = ⊢σx
+subst-pres-ty (τ-λ {t₁ = t₁} ⊢t₁ t₁⇓τ₁ ⊢e) ⊢σ (⇓-Π τ₁σ⇓τ τ₁σ⇓τ₁) =
+  τ-λ (subst-pres-ty ⊢t₁ ⊢σ ⇓-★)
+      (eval-subst-evalₗ t₁ τ₁σ⇓τ t₁⇓τ₁)
+      (subst-pres-ty ⊢e (⊢*-↑ τ₁σ⇓τ ⊢σ) τ₁σ⇓τ₁)
+subst-pres-ty (τ-· ⊢e₁ ⊢e₂ τ₃e₂⇓τ₂) ⊢σ τ₁σ⇓τ = τ-· (subst-pres-ty ⊢e₁ ⊢σ {!!}) {!subst-pres-ty ⊢e₂ ⊢σ!} {!!}
+subst-pres-ty (τ-Π x ⊢e₁ ⊢e₂) ⊢σ τ₁σ⇓τ = {!!}
+subst-pres-ty τ-★ ⊢σ ⇓-★ = τ-★
 
 subst-pres-ty₁ : {Γ : Ctx µ} →
   Γ ,, τ₂ ⊢ e₁ ∶ τ₁ →
