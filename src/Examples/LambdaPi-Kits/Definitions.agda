@@ -124,13 +124,13 @@ module TermSubst where
 
   -- Types and Contexts
 
-  open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+  -- open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
 
-  -- Each variable mode corresponds to a term mode that represents its type.
-  kit-type : KitType
-  kit-type = record { ↑ₜ = λ { 𝕥 → 𝕥 } }
+  -- -- Each variable mode corresponds to a term mode that represents its type.
+  -- kit-type : KitType
+  -- kit-type = record { ↑ₜ = λ { 𝕥 → 𝕥 } }
 
-  -- open KitType kit-type public renaming (Ctx to Ctx'; wk-telescope to wk-telescope')
+  -- -- open KitType kit-type public renaming (Ctx to Ctx'; wk-telescope to wk-telescope')
 
 -- Semantics -------------------------------------------------------------------
 
@@ -238,16 +238,16 @@ module ValueSubst where
 
   -- Types and Contexts
 
-  open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+  open import KitTheory.Types2 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
 
   -- Each variable mode corresponds to a term mode that represents its type.
   kit-type : KitType
-  kit-type = record { ↑ₜ = λ { M → 𝕧 } }
+  kit-type = record { ↑ₜ = λ { M → 𝕧 } ; m→M' = λ { m → 𝕧} }
 
   open KitType kit-type public
 
 open TermSubst public
-open ValueSubst using (Ctx; wk-telescope; _,,_; OPE; ope-keep; ope-drop; ope-id; ope-pres-telescope) renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
+open ValueSubst using (Ctx; wk-telescope; _,,_; OPE; ope-keep; ope-drop; ope-id; ope-pres-telescope; m→M') renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
 
 ⟦_⟧ : Value µ M → Term µ 𝕥
 ⟦ ` x ⟧          = ` x
