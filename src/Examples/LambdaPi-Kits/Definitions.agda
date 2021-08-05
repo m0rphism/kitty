@@ -247,7 +247,7 @@ module ValueSubst where
   open KitType kit-type public
 
 open TermSubst public
-open ValueSubst using (Ctx; wk-telescope; _,,_; OPE) renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
+open ValueSubst using (Ctx; wk-telescope; _,,_; OPE; ope-keep; ope-drop; ope-id; ope-pres-telescope) renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
 
 ⟦_⟧ : Value µ M → Term µ 𝕥
 ⟦ ` x ⟧          = ` x
