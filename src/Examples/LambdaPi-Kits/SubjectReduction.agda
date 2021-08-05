@@ -30,7 +30,7 @@ ren-pres-⊢ ope τ-★                            = τ-★
 wk-pres-⊢ : {Γ : Ctx µ₁} {τ₂ : Value µ₁ (m→M' m)} →
   Γ ⊢ e ∶ τ₁ →
   _,,_ {m = m} Γ τ₂ ⊢ e ⋯ wk ∶ τ₁ ⋯ᵥ wk
-wk-pres-⊢ = {!!}
+wk-pres-⊢ ⊢e = ren-pres-⊢ (ope-drop ope-id) ⊢e
 
 ⊢*-↑ : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
   ⟦ τ₁ ⟧ ⋯ σ ⇓ τ₂ →
@@ -55,7 +55,7 @@ wk-pres-⊢ = {!!}
             by subst (λ ■ → ■ ⇓ τ ⋯ᵥ wk) (sym (dist-↑-sub (⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧) σ)) (
           ⟦ ValueSubst.wk-drop-∈ x (Γ₁ x) ⟧ ⋯ σ ⋯ wk ⇓ τ ⋯ᵥ wk
             by ren-pres-⇓ wk ⇓τ))
-  in τ ⋯ᵥ wk ,× X ,× {!wk-pres-⊢ ⊢σx!}
+  in τ ⋯ᵥ wk ,× X ,× wk-pres-⊢ ⊢σx
 
 subst-pres-ty : {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {σ : µ₁ →ₛ µ₂} →
   Γ₁ ⊢ e₁ ∶ τ₁ →
