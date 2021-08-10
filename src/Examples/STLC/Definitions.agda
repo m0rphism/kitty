@@ -6,6 +6,7 @@ open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import KitTheory.Prelude using (_∋_; _,_) public
 open import KitTheory.Modes using (Modes; Terms)
+open import Data.Product using (_×_; ∃-syntax)
 
 -- Fixities --------------------------------------------------------------------
 
@@ -45,19 +46,22 @@ variable
 
 -- Expressions and Types
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
-  `_    : µ ∋ m  →  µ ⊢ m→M m
+  `_    : µ ∋ 𝕖  →  µ ⊢ 𝕖
   λx_   : µ , 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
   _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
   _⇒_   : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
   𝟘     : µ ⊢ 𝕥
 
+``_ : µ ∋ m → µ ⊢ m→M m
+``_ {m = 𝕖} = `_
+
 𝕋 : Terms 𝕄
-𝕋 = record { _⊢_ = _⊢_ ; `_ = `_ }
+𝕋 = record { _⊢_ = _⊢_ ; `_ = ``_ }
 
 variable
-  e e₁ e₂ e' e₁' e₂' : µ ⊢ 𝕖
-  t t₁ t₂ t' t₁' t₂' : µ ⊢ 𝕥
-  E E₁ E₂ E' E₁' E₂' : µ ⊢ M
+  e e₁ e₂ e₃ e' e₁' e₂' : µ ⊢ 𝕖
+  t t₁ t₂ t₃ t' t₁' t₂' : µ ⊢ 𝕥
+  E E₁ E₂ E₃ E' E₁' E₂' : µ ⊢ M
 
 -- Application of Renamings and Substitutions ----------------------------------
 
@@ -74,7 +78,7 @@ _⋯_ : ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ
 (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
 𝟘         ⋯ f = 𝟘
 -- Applying a renaming or substitution to a variable does the expected thing.
-⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm _ (f _ x)
+⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (`` x) ⋯ f ≡ tm _ (f _ x)
 ⋯-var {m = 𝕖} _ _ = refl
 
 kit-traversal : KitTraversal
@@ -184,3 +188,24 @@ data _↪_ : µ ⊢ 𝕖 → µ ⊢ 𝕖 → Set where
     Value e₁ →
     e₂ ↪ e₂' →
     e₁ · e₂ ↪ e₁ · e₂'
+
+data _↪*_ : µ ⊢ 𝕖 → µ ⊢ 𝕖 → Set where
+  ↪*-refl :
+    e ↪* e
+  ↪*-step :
+    e₁ ↪ e₂ →
+    e₂ ↪* e₃ →
+    e₁ ↪* e₃
+
+↪*-trans :
+  e₁ ↪* e₂ →
+  e₂ ↪* e₃ →
+  e₁ ↪* e₃
+↪*-trans ↪*-refl                  e₂↪*e₃ = e₂↪*e₃
+↪*-trans (↪*-step e₁↪e₁' e₁'↪*e₂) e₂↪*e₃ = ↪*-step e₁↪e₁' (↪*-trans e₁'↪*e₂ e₂↪*e₃)
+
+_⇓ : µ ⊢ 𝕖 → Set
+e ⇓ = ∃[ e' ] (e ↪* e' × Value e')
+
+_⇓ₙ : µ ⊢ 𝕖 → Set
+e ⇓ₙ = ∃[ e' ] (e ↪* e' × Neutral e')

@@ -60,6 +60,9 @@ record KitType : Set₁ where
   Ctx : List VarMode → Set
   Ctx µ = ∀ {m} → (x : µ ∋ m) → drop-∈ x µ ∶⊢ m→M m
 
+  ∅ : Ctx []
+  ∅ ()
+
   private
     variable
       Γ Γ₁ Γ₂    : Ctx µ

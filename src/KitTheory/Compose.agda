@@ -217,6 +217,21 @@ record KitAssoc : Set₁ where
       v ⋯ wkᵣ ⋯ ⦅ v' ⦆ₛ ≡ v
     wk-cancels-⦅⦆ₛ = wk-cancels-⦅⦆
 
+    -- TODO: prove for other combinations between ρ and σ.
+    ↑∘⦅⦆-is-,ₛ : ∀ {µ₁ µ₂ m} (t : µ₂ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
+      ⦅ t ⦆ₛ ₛ∘ₛ (σ ↑ m) ≡ σ ,ₛ t
+    ↑∘⦅⦆-is-,ₛ t σ = fun-ext₂ λ where
+      _ (here refl) → ⋯-var (here refl) ⦅ t ⦆
+      _ (there x) → wk-cancels-⦅⦆ₛ (σ _ x) t
+
+    -- TODO: prove for other combinations between ρ and σ.
+    ⋯↑⋯⦅⦆-is-⋯,ₛ : ∀ {µ₁ µ₂ m} (t' : (µ₁ , m) ⊢ M) (t : µ₂ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
+      t' ⋯ (σ ↑ m) ⋯ ⦅ t ⦆ₛ ≡ t' ⋯ (σ ,ₛ t)
+    ⋯↑⋯⦅⦆-is-⋯,ₛ {m = m} t' t σ =
+      t' ⋯ₛ (σ ↑ m) ⋯ₛ ⦅ t ⦆ₛ    ≡⟨ ⋯-assoc t' (σ ↑ m) ⦅ t ⦆ₛ ⟩
+      t' ⋯ₛ (⦅ t ⦆ₛ ₛ∘ₛ (σ ↑ m)) ≡⟨ cong (t' ⋯_) (↑∘⦅⦆-is-,ₛ t σ) ⟩
+      t' ⋯ₛ (σ ,ₛ t)             ∎
+
     dist-ᵣ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ∋ m) (σ : µ₁ →ᵣ µ₂) →
       σ ᵣ∘ᵣ ⦅ t ⦆ ≡ ⦅ σ _ t ⦆ ᵣ∘ᵣ (σ ↑ m)
     dist-ᵣ∘ᵣ-⦅⦆ t σ = fun-ext₂ λ where

@@ -63,3 +63,10 @@ subject-reduction :
 subject-reduction (τ-· {t₂ = t₂} (τ-λ ⊢e₁) ⊢e₂) (β-λ e₂-val)         = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ₛ t₂ _) (sub₁-pres-⊢ ⊢e₁ ⊢e₂)
 subject-reduction (τ-· ⊢e₁ ⊢e₂)                 (ξ-·₁ e₁↪e₁')        = τ-· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (τ-· ⊢e₁ ⊢e₂)                 (ξ-·₂ e₁-val e₂↪e₂') = τ-· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
+
+subject-reduction* :
+  Γ ⊢ e ∶ t →
+  e ↪* e' →
+  Γ ⊢ e' ∶ t
+subject-reduction* ⊢e ↪*-refl = ⊢e
+subject-reduction* ⊢e (↪*-step e₁↪e₂ e₂↪*e₃) = subject-reduction* (subject-reduction ⊢e e₁↪e₂) e₂↪*e₃
