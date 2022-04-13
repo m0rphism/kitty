@@ -12,7 +12,7 @@ open import Function using (id; _∘_; flip)
 open import Data.Nat using (ℕ; zero; suc)
 
 infixr  3  _↪_  _⊢_∶_  _⊢*_∶_
-infixr  4  ∀→_  λ→_  Λ→_
+infixr  4  ∀α_  λx_  Λα_
 infixr  5  _⇒_
 infixl  5  _·_  _∙_
 infixl  5  _,ₖ_  _,ₛ_  _,ᵣ_  _,,_
@@ -27,41 +27,41 @@ variable
 
 -- Syntax ----------------------------------------------------------------------
 
-data Kind : Set where
-  ★ : Kind -- The kind of value-level variables.
-  ■ : Kind -- The kind of type-level variables.
+data Mode : Set where
+  𝕧 : Mode -- The kind of value-level variables.
+  𝕥 : Mode -- The kind of type-level variables.
 
 variable
-  k k₁ k₂    : Kind
-  k' k₁' k₂' : Kind
-  κ κ₁ κ₂ κ₃ : List Kind
-  κ' κ₁' κ₂' : List Kind
-  κ₁₁ κ₁₂    : List Kind
-  κ₂₁ κ₂₂    : List Kind
-  x y z      : ★ ∈ κ
-  α β γ      : ■ ∈ κ
-  X Y Z      : k ∈ κ
+  m m₁ m₂    : Mode
+  m' m₁' m₂' : Mode
+  µ µ₁ µ₂ µ₃ : List Mode
+  µ' µ₁' µ₂' : List Mode
+  µ₁₁ µ₁₂    : List Mode
+  µ₂₁ µ₂₂    : List Mode
+  x y z      : 𝕧 ∈ µ
+  α β γ      : 𝕥 ∈ µ
+  X Y Z      : m ∈ µ
 
-data Term : List Kind → Kind → Set where
-  `_  : k ∈ κ → Term κ k                -- Expr and Type Variables
-  λ→_ : Term (★ ∷ κ) ★ → Term κ ★
-  Λ→_ : Term (■ ∷ κ) ★ → Term κ ★
-  ∀→_ : Term (■ ∷ κ) ■ → Term κ ■
-  _·_ : Term κ ★ → Term κ ★ → Term κ ★
-  _∙_ : Term κ ★ → Term κ ■ → Term κ ★
-  _⇒_ : Term κ ■ → Term κ ■ → Term κ ■
+data Term : List Mode → Mode → Set where
+  `_  : m ∈ µ → Term µ m                -- Expr and Type Variables
+  λx_ : Term (𝕧 ∷ µ) 𝕧 → Term µ 𝕧
+  Λα_ : Term (𝕥 ∷ µ) 𝕧 → Term µ 𝕧
+  ∀α_ : Term (𝕥 ∷ µ) 𝕥 → Term µ 𝕥
+  _·_ : Term µ 𝕧 → Term µ 𝕧 → Term µ 𝕧
+  _∙_ : Term µ 𝕧 → Term µ 𝕥 → Term µ 𝕧
+  _⇒_ : Term µ 𝕥 → Term µ 𝕥 → Term µ 𝕥
 
-Type : List Kind → Kind → Set
-Type κ ★ = Term κ ■
-Type κ ■ = ⊤
+Type : List Mode → Mode → Set
+Type µ 𝕧 = Term µ 𝕥
+Type µ 𝕥 = ⊤
 
 variable
-  e  e₁  e₂  : Term κ ★
-  e' e₁' e₂' : Term κ ★
-  t  t₁  t₂  : Type κ ★
-  t' t₁' t₂' : Type κ ★
-  v  v₁  v₂  : Term κ k
-  T  T₁  T₂  : Type κ k
+  e  e₁  e₂  : Term µ 𝕧
+  e' e₁' e₂' : Term µ 𝕧
+  t  t₁  t₂  : Type µ 𝕧
+  t' t₁' t₂' : Type µ 𝕧
+  v  v₁  v₂  : Term µ m
+  T  T₁  T₂  : Type µ m
 
 -- Kits ------------------------------------------------------------------------
 
@@ -70,190 +70,192 @@ infix  4  _∋_  _⊢_
 _∋_ : {A : Set} → List A → A → Set
 _∋_ = flip _∈_
 
-_⊢_ : List Kind → Kind → Set
+_⊢_ : List Mode → Mode → Set
 _⊢_ = Term
 
 record Kit : Set₁ where
   constructor kit
   field
-    _◆_ : List Kind → Kind → Set
-    vr : κ ∋ k → κ ◆ k
-    tm : κ ◆ k → κ ⊢ k
-    wk : κ ◆ k → (k' ∷ κ) ◆ k
-    wk-vr : ∀ k' (x : k ∈ κ) → wk {k' = k'} (vr x) ≡ vr (there x)
-    tm-vr : ∀ (x : k ∈ κ) → tm (vr x) ≡ ` x
+    _◆_ : List Mode → Mode → Set
+    vr : ∀ m → µ ∋ m → µ ◆ m
+    tm : ∀ m → µ ◆ m → µ ⊢ m
+    wk : ∀ m → µ ◆ m → (m' ∷ µ) ◆ m
+    wk-vr : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
+    tm-vr : ∀ (x : µ ∋ m) → tm _ (vr _ x) ≡ ` x
 
-  _–→_ : List Kind → List Kind → Set
-  _–→_ κ₁ κ₂ = ∀ k → κ₁ ∋ k → κ₂ ◆ k
+  -- Substitution or Renaming - depending on which kit is used.
+  _–→_ : List Mode → List Mode → Set
+  _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m
 
 open Kit {{...}}
 
-_–[_]→_ : List Kind → (K : Kit) → List Kind → Set
-κ₁ –[ K ]→ κ₂ = Kit._–→_ K κ₁ κ₂
+_–[_]→_ : List Mode → (K : Kit) → List Mode → Set
+µ₁ –[ K ]→ µ₂ = Kit._–→_ K µ₁ µ₂
 
-_↑_ : {{K : Kit}} → κ₁ –[ K ]→ κ₂ → (k : Kind) → (k ∷ κ₁) –[ K ]→ (k ∷ κ₂)
-(f ↑ k) _ (here p)  = vr (here p)
-(f ↑ k) _ (there x) = wk (f _ x)
+-- Lifting a substitution/renaming
+_↑_ : {{K : Kit}} → µ₁ –[ K ]→ µ₂ → (m : Mode) → (m ∷ µ₁) –[ K ]→ (m ∷ µ₂)
+(f ↑ m) _ (here p)  = vr _ (here p)
+(f ↑ m) _ (there x) = wk _ (f _ x)
 
-_⋯_ : {{K : Kit}} → κ₁ ⊢ k → κ₁ –[ K ]→ κ₂ → κ₂ ⊢ k
-(` x)     ⋯ f = tm (f _ x)
-(λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ ★))
-(Λ→ t)    ⋯ f = Λ→ (t ⋯ (f ↑ ■))
-(∀→ t)    ⋯ f = ∀→ (t ⋯ (f ↑ ■))
+-- Applying a substitution/renaming
+_⋯_ : {{K : Kit}} → µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
+(` x)     ⋯ f = tm _ (f _ x)
+(λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕧))
+(Λα t)    ⋯ f = Λα (t ⋯ (f ↑ 𝕥))
+(∀α t)    ⋯ f = ∀α (t ⋯ (f ↑ 𝕥))
 (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
 (t₁ ∙ t₂) ⋯ f = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
 (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
 
+-- Renaming Kit
 instance kitᵣ : Kit
 Kit._◆_   kitᵣ     = _∋_
-Kit.vr    kitᵣ     = id
-Kit.tm    kitᵣ     = `_
-Kit.wk    kitᵣ     = there
+Kit.vr    kitᵣ _   = id
+Kit.tm    kitᵣ _   = `_
+Kit.wk    kitᵣ _   = there
 Kit.wk-vr kitᵣ _ _ = refl
 Kit.tm-vr kitᵣ _   = refl
 
-_→ᵣ_ : List Kind → List Kind → Set
+_→ᵣ_ : List Mode → List Mode → Set
 _→ᵣ_ = _–[ kitᵣ ]→_
 
-there' : ∀ {k'} k → k ∈ κ → k ∈ (k' ∷ κ)
-there' _ = there
-
+-- Substitution Kit
 instance kitₛ : Kit
 Kit._◆_   kitₛ     = _⊢_
-Kit.vr    kitₛ     = `_
-Kit.tm    kitₛ     = id
-Kit.wk    kitₛ     = _⋯ there'
+Kit.vr    kitₛ _   = `_
+Kit.tm    kitₛ _   = id
+Kit.wk    kitₛ _   = _⋯ wk
 Kit.wk-vr kitₛ _ _ = refl
 Kit.tm-vr kitₛ _   = refl
 
-_→ₛ_ : List Kind → List Kind → Set
+_→ₛ_ : List Mode → List Mode → Set
 _→ₛ_ = _–[ kitₛ ]→_
 
-_⋯ₛ_ :  κ₁ ⊢ k → κ₁ →ₛ κ₂ → κ₂ ⊢ k
+_⋯ₛ_ :  µ₁ ⊢ m → µ₁ →ₛ µ₂ → µ₂ ⊢ m
 _⋯ₛ_ = _⋯_
 
-_⋯ᵣ_ :  κ₁ ⊢ k → κ₁ →ᵣ κ₂ → κ₂ ⊢ k
+_⋯ᵣ_ :  µ₁ ⊢ m → µ₁ →ᵣ µ₂ → µ₂ ⊢ m
 _⋯ᵣ_ = _⋯_
 
-_⋯ₜ_ : {{K : Kit}} → Type κ₁ k → κ₁ –[ K ]→ κ₂ → Type κ₂ k
-_⋯ₜ_ {k = ★} T f = T ⋯ f
-_⋯ₜ_ {k = ■} T f = tt
+_⋯ₜ_ : {{K : Kit}} → Type µ₁ m → µ₁ –[ K ]→ µ₂ → Type µ₂ m
+_⋯ₜ_ {m = 𝕧} T f = T ⋯ f
+_⋯ₜ_ {m = 𝕥} T f = tt
 
-_⋯ₜₛ_ : Type κ₁ k → κ₁ →ₛ κ₂ → Type κ₂ k
+_⋯ₜₛ_ : Type µ₁ m → µ₁ →ₛ µ₂ → Type µ₂ m
 _⋯ₜₛ_ = _⋯ₜ_
 
-_⋯ₜᵣ_ : Type κ₁ k → κ₁ →ᵣ κ₂ → Type κ₂ k
+_⋯ₜᵣ_ : Type µ₁ m → µ₁ →ᵣ µ₂ → Type µ₂ m
 _⋯ₜᵣ_ = _⋯ₜ_
 
-wkt : Type κ k → Type (k' ∷ κ) k
-wkt = _⋯ₜ there'
+wkt : Type µ m → Type (m' ∷ µ) m
+wkt = _⋯ₜ wk
 
-K-id : (K : Kit) → κ –[ K ]→ κ
-K-id K = λ _ → Kit.vr K
+idₖ : {{K : Kit}} → µ –[ K ]→ µ
+idₖ = vr
 
-ρ-id : κ →ᵣ κ
-ρ-id = K-id kitᵣ
+idₛ : µ →ₛ µ
+idₛ = idₖ
 
-σ-id : κ →ₛ κ
-σ-id = K-id kitₛ
+idᵣ : µ →ᵣ µ
+idᵣ = idₖ
 
-_,ₖ_ : {{K : Kit}} → κ₁ –[ K ]→ κ₂ → κ₂ ◆ k → (k ∷ κ₁) –[ K ]→ κ₂
+_,ₖ_ : {{K : Kit}} → µ₁ –[ K ]→ µ₂ → µ₂ ◆ m → (m ∷ µ₁) –[ K ]→ µ₂
 (f ,ₖ t) _ (here refl) = t
 (f ,ₖ t) _ (there x) = f _ x
 
-_,ₛ_ : κ₁ →ₛ κ₂ → Term κ₂ k → (k ∷ κ₁) →ₛ κ₂
+_,ₛ_ : µ₁ →ₛ µ₂ → Term µ₂ m → (m ∷ µ₁) →ₛ µ₂
 _,ₛ_ = _,ₖ_
 
-_,ᵣ_ : κ₁ →ᵣ κ₂ → κ₂ ∋ k → (k ∷ κ₁) →ᵣ κ₂
+_,ᵣ_ : µ₁ →ᵣ µ₂ → µ₂ ∋ m → (m ∷ µ₁) →ᵣ µ₂
 _,ᵣ_ = _,ₖ_
 
-⦅_⦆ : Term κ k → (k ∷ κ) →ₛ κ
-⦅ v ⦆ = σ-id ,ₛ v
+⦅_⦆ : Term µ m → (m ∷ µ) →ₛ µ
+⦅ v ⦆ = idₖ ,ₛ v
 
-_∘ₛ_ : {{K₁ K₂ : Kit}} → κ₂ –[ K₂ ]→ κ₃ → κ₁ –[ K₁ ]→ κ₂ → κ₁ →ₛ κ₃
-(f ∘ₛ g) _ x = tm (g _ x) ⋯ f
+_∘ₛ_ : {{K₁ K₂ : Kit}} → µ₂ –[ K₂ ]→ µ₃ → µ₁ –[ K₁ ]→ µ₂ → µ₁ →ₛ µ₃
+(f ∘ₛ g) _ x = tm _ (g _ x) ⋯ f
 
-_∘ᵣ_ : κ₂ →ᵣ κ₃ → κ₁ →ᵣ κ₂ → κ₁ →ᵣ κ₃
+_∘ᵣ_ : µ₂ →ᵣ µ₃ → µ₁ →ᵣ µ₂ → µ₁ →ᵣ µ₃
 (ρ₁ ∘ᵣ ρ₂) _ = ρ₁ _ ∘ ρ₂ _
 
-_∘ₛᵣ_ : κ₂ →ₛ κ₃ → κ₁ →ᵣ κ₂ → κ₁ →ₛ κ₃
+_∘ₛᵣ_ : µ₂ →ₛ µ₃ → µ₁ →ᵣ µ₂ → µ₁ →ₛ µ₃
 (σ₁ ∘ₛᵣ ρ₂) _ = σ₁ _ ∘ ρ₂ _
 
-_∘ᵣₛ_ : κ₂ →ᵣ κ₃ → κ₁ →ₛ κ₂ → κ₁ →ₛ κ₃
+_∘ᵣₛ_ : µ₂ →ᵣ µ₃ → µ₁ →ₛ µ₂ → µ₁ →ₛ µ₃
 (ρ₁ ∘ᵣₛ σ₂) _ x = σ₂ _ x ⋯ ρ₁
 
 -- Type System -----------------------------------------------------------------
 
+-- Interpret a scoped debruijn index `x ∈ xs` as a natural number,
+-- i.e.  the index of `x` in `xs`.
 depth : ∀ {x : A} {xs : List A} → x ∈ xs → ℕ
 depth (here px) = zero
 depth (there x) = suc (depth x)
 
--- We need to drop one extra using `suc`, because otherwise the types in a
--- context are allowed to use themselves.
+-- Given a scoped debruijn index `x ∈ xs` and some List, this function
+-- interprets the `x ∈ xs` as a natural number `n` and drops `n+1`
+-- elements from the list.
+-- Used in and motivated by the definition of `Ctx` below.
+-- We drop `n+1` instead of `n` elements, because otherwise the types
+-- in the context would be allowed to use themselves.
 drop-∈ : ∀ {x : A} {xs : List A} → x ∈ xs → List A → List A
 drop-∈ = drop ∘ suc ∘ depth
 
--- wk-drop : ∀ n → Type (List.drop n κ) k → Type κ k
--- wk-drop              zero    t = t
--- wk-drop {κ = []}     (suc n) t = t -- This case (index > length) cannot happen with drop-∈
--- wk-drop {κ = k' ∷ κ} (suc n) t = wkt (wk-drop n t)
+Ctx : List Mode → Set
+Ctx µ = ∀ {m} → (x : m ∈ µ) → Type (drop-∈ x µ) m
 
-wk-drop-∈ : (x : k ∈ κ) → Type (drop-∈ x κ) k → Type κ k
+wk-drop-∈ : (x : m ∈ µ) → Type (drop-∈ x µ) m → Type µ m
 wk-drop-∈ (here _)  t = wkt t
 wk-drop-∈ (there x) t = wkt (wk-drop-∈ x t)
 
-Ctx : List Kind → Set
-Ctx κ = ∀ {k} → (x : k ∈ κ) → Type (drop-∈ x κ) k
-
--- Our context is defined as a telescope.
--- This function automatically weakens all the types in a `Ctx κ` such that they
--- refer to `κ` instead of a `κ`-suffix.
-wk-telescope : Ctx κ → k ∈ κ → Type κ k
+-- Access a `Ctx µ` and weaken the resulting type, such that it refers
+-- to `µ` instead of a `µ`-suffix.
+wk-telescope : Ctx µ → m ∈ µ → Type µ m
 wk-telescope Γ x = wk-drop-∈ x (Γ x)
 
 variable
-  Γ  Γ₁  Γ₂  : Ctx κ
+  Γ  Γ₁  Γ₂  : Ctx µ
 
-_,,_ : Ctx κ → Type κ k → Ctx (k ∷ κ)
+_,,_ : Ctx µ → Type µ m → Ctx (m ∷ µ)
 (Γ ,, t) (here refl) = t
 (Γ ,, t) (there x) = Γ x
 
-data _⊢_∶_ : Ctx κ → Term κ k → Type κ k → Set where
-  τ-` : ∀ {Γ : Ctx κ} {t : Type κ ★} {x : ★ ∈ κ} →
+data _⊢_∶_ : Ctx µ → Term µ m → Type µ m → Set where
+  τ-` : ∀ {Γ : Ctx µ} {t : Type µ 𝕧} {x : 𝕧 ∈ µ} →
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
-  τ-λ : ∀ {Γ : Ctx κ} →
-    Γ ,, t₁ ⊢ e ∶ wk t₂ →
-    Γ ⊢ λ→ e ∶ t₁ ⇒ t₂
+  τ-λ : ∀ {Γ : Ctx µ} →
+    Γ ,, t₁ ⊢ e ∶ t₂ ⋯ wk →
+    Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-Λ :
     Γ ,, tt ⊢ e ∶ t₂ →
-    Γ ⊢ Λ→ e ∶ ∀→ t₂
+    Γ ⊢ Λα e ∶ ∀α t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →
     Γ ⊢ e₂ ∶ t₁ →
     Γ ⊢ e₁ · e₂ ∶ t₂
-  τ-∙ : ∀ {Γ : Ctx κ} →
-    Γ ⊢ e ∶ ∀→ t₂ →
+  τ-∙ : ∀ {Γ : Ctx µ} →
+    Γ ⊢ e ∶ ∀α t₂ →
     Γ ⊢ e ∙ t ∶ t₂ ⋯ ⦅ t ⦆
-  τ-★ :
+  τ-𝕥 :
     Γ ⊢ t ∶ tt
 
-_⊢*_∶_ : Ctx κ₂ → κ₁ →ₛ κ₂ → Ctx κ₁ → Set
-_⊢*_∶_ {κ₁ = κ₁} Γ₂ σ Γ₁ = ∀ {k₁} → (x : k₁ ∈ κ₁) → Γ₂ ⊢ σ _ x ∶ (wk-telescope Γ₁ x ⋯ₜ σ)
+_⊢*_∶_ : Ctx µ₂ → µ₁ →ₛ µ₂ → Ctx µ₁ → Set
+_⊢*_∶_ {µ₁ = µ₁} Γ₂ σ Γ₁ = ∀ {m₁} → (x : m₁ ∈ µ₁) → Γ₂ ⊢ σ _ x ∶ (wk-telescope Γ₁ x ⋯ₜ σ)
 
 -- Semantics -------------------------------------------------------------------
 
-data _↪_ : Term κ ★ → Term κ ★ → Set where
-  β-λ : ∀ {e₂ : Term κ ★} →
-    (λ→ e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
-  β-Λ : ∀ {t : Term κ ■} →
-    (Λ→ e) ∙ t ↪ e ⋯ ⦅ t ⦆
+data _↪_ : Term µ 𝕧 → Term µ 𝕧 → Set where
+  β-λ : ∀ {e₂ : Term µ 𝕧} →
+    (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
+  β-Λ : ∀ {t : Term µ 𝕥} →
+    (Λα e) ∙ t ↪ e ⋯ ⦅ t ⦆
   ξ-λ :
     e ↪ e' →
-    λ→ e ↪ λ→ e'
+    λx e ↪ λx e'
   ξ-Λ :
     e ↪ e' →
-    Λ→ e ↪ Λ→ e'
+    Λα e ↪ Λα e'
   ξ-·₁ :
     e₁ ↪ e₁' →
     e₁ · e₂ ↪ e₁' · e₂

@@ -43,6 +43,10 @@ record Kit : Set₁ where
     wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
     tm-vr     : ∀ x → tm {µ = µ} m (vr _ x) ≡ ` x
 
+  wk* : ∀ SM → µ ◆ SM → (µ' ++ µ) ◆ SM
+  wk* {µ' = []} sm x = x
+  wk* {µ' = µ' , m} sm x = wk sm (wk* sm x)
+
   _–→_ : List VarMode → List VarMode → Set
   _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m→SM m
 
@@ -70,10 +74,12 @@ record Kit : Set₁ where
     idₖ ↑ m         ≡⟨ id↑≡id m (µ' ++ µ) ⟩
     idₖ             ∎
 
+  -- Extending a renaming/substitution
   _,ₖ_ : µ₁ –→ µ₂ → µ₂ ◆ m→SM m → (m ∷ µ₁) –→ µ₂
   (f ,ₖ t) _ (here refl) = t
   (f ,ₖ t) _ (there x)   = f _ x
 
+  -- Singleton renaming/substitution
   ⦅_⦆ : µ ◆ m→SM m → (m ∷ µ) –→ µ
   ⦅ v ⦆ = idₖ ,ₖ v
 
