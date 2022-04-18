@@ -246,7 +246,7 @@ record KitAssoc : Set₁ where
       ρ ᵣ∘ᵣ ⦅ x ⦆ ≡ ⦅ ρ _ x ⦆ ᵣ∘ᵣ (ρ ↑ m)
     dist-ᵣ∘ᵣ-⦅⦆ x σ = fun-ext₂ λ where
       _ (here refl) → refl
-      _ (there x) → refl
+      _ (there y) → refl
 
     dist-ᵣ∘ₛ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ⊢ m→M m) (ρ : µ₁ →ᵣ µ₂) →
       ρ ᵣ∘ₛ ⦅ t ⦆ ≡ ⦅ t ⋯ ρ ⦆ ₛ∘ᵣ (ρ ↑ m)
@@ -276,20 +276,20 @@ record KitAssoc : Set₁ where
         σ _ x ⋯ ((idₖ ,ₖ (t ⋯ σ)) ₛ∘ᵣ wk) ≡⟨ sym (⋯-assoc (σ _ x) wk ⦅ t ⋯ σ ⦆) ⟩
         (σ _ x ⋯ wk) ⋯ (idₖ ,ₖ (t ⋯ σ))   ∎
 
-    dist-⦅⦆ᵣ-⋯ᵣ : ∀ {µ₁ µ₂ m M} (t₂ : (m ∷ µ₁) ⊢ M) (t : µ₁ ∋ m) (σ : µ₁ →ᵣ µ₂) →
-      t₂ ⋯ ⦅ t ⦆ ⋯ σ ≡ t₂ ⋯ (σ ↑ m) ⋯ ⦅ σ _ t ⦆
-    dist-⦅⦆ᵣ-⋯ᵣ t₂ t σ = ∘≡∘→⋯≡⋯ (dist-ᵣ∘ᵣ-⦅⦆ t σ) t₂
+    dist-⦅⦆ᵣ-⋯ᵣ : ∀ {µ₁ µ₂ m M} (t : (m ∷ µ₁) ⊢ M) (x : µ₁ ∋ m) (ρ : µ₁ →ᵣ µ₂) →
+      t ⋯ ⦅ x ⦆ ⋯ ρ ≡ t ⋯ (ρ ↑ m) ⋯ ⦅ ρ _ x ⦆
+    dist-⦅⦆ᵣ-⋯ᵣ t x ρ = ∘≡∘→⋯≡⋯ (dist-ᵣ∘ᵣ-⦅⦆ x ρ) t
 
-    dist-⦅⦆ₛ-⋯ᵣ : ∀ {µ₁ µ₂ m M} (t₂ : (m ∷ µ₁) ⊢ M) (t : µ₁ ⊢ m→M m) (σ : µ₁ →ᵣ µ₂) →
-      t₂ ⋯ ⦅ t ⦆ ⋯ σ ≡ t₂ ⋯ (σ ↑ m) ⋯ ⦅ t ⋯ σ ⦆
-    dist-⦅⦆ₛ-⋯ᵣ t₂ t σ = ∘≡∘→⋯≡⋯ (dist-ᵣ∘ₛ-⦅⦆ t σ) t₂
+    dist-⦅⦆ₛ-⋯ᵣ : ∀ {µ₁ µ₂ m M} (t : (m ∷ µ₁) ⊢ M) (t' : µ₁ ⊢ m→M m) (ρ : µ₁ →ᵣ µ₂) →
+      t ⋯ ⦅ t' ⦆ ⋯ ρ ≡ t ⋯ (ρ ↑ m) ⋯ ⦅ t' ⋯ ρ ⦆
+    dist-⦅⦆ₛ-⋯ᵣ t t' ρ = ∘≡∘→⋯≡⋯ (dist-ᵣ∘ₛ-⦅⦆ t' ρ) t
 
-    dist-⦅⦆ᵣ-⋯ₛ : ∀ {µ₁ µ₂ m M} (t₂ : (m ∷ µ₁) ⊢ M) (t : µ₁ ∋ m) (σ : µ₁ →ₛ µ₂) →
-      t₂ ⋯ ⦅ t ⦆ ⋯ σ ≡ t₂ ⋯ (σ ↑ m) ⋯ ⦅ σ _ t ⦆
+    dist-⦅⦆ᵣ-⋯ₛ : ∀ {µ₁ µ₂ m M} (t : (m ∷ µ₁) ⊢ M) (x : µ₁ ∋ m) (σ : µ₁ →ₛ µ₂) →
+      t ⋯ ⦅ x ⦆ ⋯ σ ≡ t ⋯ (σ ↑ m) ⋯ ⦅ σ _ x ⦆
     dist-⦅⦆ᵣ-⋯ₛ t₂ t σ = ∘≡∘→⋯≡⋯ (dist-ₛ∘ᵣ-⦅⦆ t σ) t₂
 
-    dist-⦅⦆ₛ-⋯ₛ : ∀ {µ₁ µ₂ m M} (t₂ : (m ∷ µ₁) ⊢ M) (t : µ₁ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
-      t₂ ⋯ ⦅ t ⦆ ⋯ σ ≡ t₂ ⋯ (σ ↑ m) ⋯ ⦅ t ⋯ σ ⦆
+    dist-⦅⦆ₛ-⋯ₛ : ∀ {µ₁ µ₂ m M} (t : (m ∷ µ₁) ⊢ M) (t' : µ₁ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
+      t ⋯ ⦅ t' ⦆ ⋯ σ ≡ t ⋯ (σ ↑ m) ⋯ ⦅ t' ⋯ σ ⦆
     dist-⦅⦆ₛ-⋯ₛ t₂ t σ = ∘≡∘→⋯≡⋯ (dist-ₛ∘ₛ-⦅⦆ t σ) t₂
 
   -- record KitTraversalLemmas : Set₁ where
