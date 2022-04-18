@@ -242,26 +242,26 @@ record KitAssoc : Set₁ where
       t' ⋯ₛ (⦅ t ⦆ₛ ₛ∘ₛ (σ ↑ m)) ≡⟨ cong (t' ⋯_) (↑∘⦅⦆-is-,ₛ t σ) ⟩
       t' ⋯ₛ (σ ,ₛ t)             ∎
 
-    dist-ᵣ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ∋ m) (σ : µ₁ →ᵣ µ₂) →
-      σ ᵣ∘ᵣ ⦅ t ⦆ ≡ ⦅ σ _ t ⦆ ᵣ∘ᵣ (σ ↑ m)
-    dist-ᵣ∘ᵣ-⦅⦆ t σ = fun-ext₂ λ where
+    dist-ᵣ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (x : µ₁ ∋ m) (ρ : µ₁ →ᵣ µ₂) →
+      ρ ᵣ∘ᵣ ⦅ x ⦆ ≡ ⦅ ρ _ x ⦆ ᵣ∘ᵣ (ρ ↑ m)
+    dist-ᵣ∘ᵣ-⦅⦆ x σ = fun-ext₂ λ where
       _ (here refl) → refl
       _ (there x) → refl
 
-    dist-ᵣ∘ₛ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ⊢ m→M m) (σ : µ₁ →ᵣ µ₂) →
-      σ ᵣ∘ₛ ⦅ t ⦆ ≡ ⦅ t ⋯ σ ⦆ ₛ∘ᵣ (σ ↑ m)
+    dist-ᵣ∘ₛ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ⊢ m→M m) (ρ : µ₁ →ᵣ µ₂) →
+      ρ ᵣ∘ₛ ⦅ t ⦆ ≡ ⦅ t ⋯ ρ ⦆ ₛ∘ᵣ (ρ ↑ m)
     dist-ᵣ∘ₛ-⦅⦆ t σ = fun-ext₂ λ where
       _ (here refl) → refl
       _ (there x) → ⋯-var x σ
 
-    dist-ₛ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ∋ m) (σ : µ₁ →ₛ µ₂) →
-      σ ₛ∘ᵣ ⦅ t ⦆ ≡ ⦅ σ _ t ⦆ ₛ∘ₛ (σ ↑ m)
-    dist-ₛ∘ᵣ-⦅⦆ t σ = fun-ext₂ λ where
-      _ (here refl) → sym (⋯-var (here refl) ⦅ σ _ t ⦆)
-      _ (there x) →
-        σ _ x                             ≡⟨ sym (⋯-id (σ _ x)) ⟩
-        σ _ x ⋯ ((idₖ ,ₖ (σ _ t)) ₛ∘ᵣ wk) ≡⟨ sym (⋯-assoc (σ _ x) wk ⦅ σ _ t ⦆) ⟩
-        (σ _ x ⋯ wk) ⋯ (idₖ ,ₖ (σ _ t))   ∎
+    dist-ₛ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (x : µ₁ ∋ m) (σ : µ₁ →ₛ µ₂) →
+      σ ₛ∘ᵣ ⦅ x ⦆ ≡ ⦅ σ _ x ⦆ ₛ∘ₛ (σ ↑ m)
+    dist-ₛ∘ᵣ-⦅⦆ x σ = fun-ext₂ λ where
+      _ (here refl) → sym (⋯-var (here refl) ⦅ σ _ x ⦆)
+      _ (there y) →
+        σ _ y                             ≡⟨ sym (⋯-id (σ _ y)) ⟩
+        σ _ y ⋯ ((idₖ ,ₖ (σ _ x)) ₛ∘ᵣ wk) ≡⟨ sym (⋯-assoc (σ _ y) wk ⦅ σ _ x ⦆) ⟩
+        (σ _ y ⋯ wk) ⋯ (idₖ ,ₖ (σ _ x))   ∎
 
     dist-ₛ∘ₛ-⦅⦆ : ∀ {µ₁ µ₂ m} (t : µ₁ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
       σ ₛ∘ₛ ⦅ t ⦆ ≡ ⦅ t ⋯ σ ⦆ ₛ∘ₛ (σ ↑ m)
