@@ -15,10 +15,10 @@ open import Examples.STLC.SubjectReduction
 open import Examples.STLC.Progress
 
 mutual
-  SN : Ctx µ → µ ∶⊢ 𝕖 → µ ⊢ 𝕖 → Set
+  SN : Ctx µ → µ ⊢ 𝕥 → µ ⊢ 𝕖 → Set
   SN Γ t e = (Γ ⊢ e ∶ t) × (e ⇓) × SN-Pres Γ t e
 
-  SN-Pres : Ctx µ → µ ∶⊢ 𝕖 → µ ⊢ 𝕖 → Set
+  SN-Pres : Ctx µ → µ ⊢ 𝕥 → µ ⊢ 𝕖 → Set
   SN-Pres Γ 𝟘         e = ⊤
   SN-Pres Γ (t₁ ⇒ t₂) e = ∀ e' → SN Γ t₁ e' → SN Γ t₂ (e · e')
 
