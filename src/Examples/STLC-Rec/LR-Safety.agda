@@ -19,10 +19,14 @@ open import Relation.Nullary using (¬_)
 
 -- Lemmas ----------------------------------------------------------------------
 
+infixr 0 _by_
+_by_ : ∀ {ℓ} (A : Set ℓ) → A → A
+A by a = a
+
 wk-ih : ∀ {ℓ j k} {P : ℕ → Set ℓ} →
   j ≤ k →
-  WfRec _<_ P k →
-  WfRec _<_ P j
+  WfRec _<_ P k →  -- (∀ i → i < k → P i) →
+  WfRec _<_ P j    -- (∀ i → i < j → P i)
 wk-ih j≤k ih i i<j = ih i (≤-trans i<j j≤k)
 
 k∸j≤k : ∀ k j → k ∸ j ≤ k
@@ -81,7 +85,6 @@ Irred e = ∀ e' → ¬ (e ↪ e')
 -- Type of the `_∈𝕍_⟦_⟧` and `_∈𝔼_⟦_⟧` relations, but without the `Gas`-parameter.
 RelTy : Set₁
 RelTy = ∀ µ → µ ⊢ 𝕖 → µ ∶⊢ 𝕖 → Set
-
 
 -- Field accessors for the R𝕍 and R𝔼 components of the induction hypothesis.
 R𝕍< : ∀ {k} → (∀ j → j < k → A × B) → (∀ j → j < k → A)
@@ -175,28 +178,56 @@ module Unfold-𝕍-𝔼 where
     (e ∈𝔼 k ⟦ t ⟧) → R𝔼 k (λ j j<k → ∈𝕍𝔼 j) µ e t
   unfold-∈𝔼 p = subst (λ x → x) unfold-∈𝔼-≡ p
 
-
 open Unfold-𝕍-𝔼
 
-infixr 0 _by_
-_by_ : ∀ {ℓ} (A : Set ℓ) → A → A
-A by a = a
-
 Monotonicity-𝕍 : Gas → Set
-Monotonicity-𝕍 k = (µ : List Modeᵥ) (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → v ∈𝕍 k ⟦ t ⟧ → j ≤ k → v ∈𝕍 j ⟦ t ⟧
+Monotonicity-𝕍 k = (µ : List Modeᵥ) (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → v ∈𝕍 k ⟦ t ⟧ → j < k → v ∈𝕍 j ⟦ t ⟧
 
 Monotonicity-𝔼 : Gas → Set
-Monotonicity-𝔼 k = (µ : List Modeᵥ) (e : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → e ∈𝔼 k ⟦ t ⟧ → j ≤ k → e ∈𝔼 j ⟦ t ⟧
+Monotonicity-𝔼 k = (µ : List Modeᵥ) (e : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → e ∈𝔼 k ⟦ t ⟧ → j < k → e ∈𝔼 j ⟦ t ⟧
 
 Monotonicity : Gas → Set
 Monotonicity k = Monotonicity-𝕍 k × Monotonicity-𝔼 k
+
+Monotonicity≤-𝕍 : Gas → Set
+Monotonicity≤-𝕍 k = (µ : List Modeᵥ) (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → v ∈𝕍 k ⟦ t ⟧ → j ≤ k → v ∈𝕍 j ⟦ t ⟧
+
+Monotonicity≤-𝔼 : Gas → Set
+Monotonicity≤-𝔼 k = (µ : List Modeᵥ) (e : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → e ∈𝔼 k ⟦ t ⟧ → j ≤ k → e ∈𝔼 j ⟦ t ⟧
+
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+
+≤→<∨≡ : ∀ {x y} → x ≤ y → x ≡ y ⊎ x < y
+≤→<∨≡ {.zero} {zero} z≤n = inj₁ refl
+≤→<∨≡ {.zero} {suc y} z≤n = inj₂ (s≤s z≤n)
+≤→<∨≡ {suc x} {suc y} (s≤s x≤y) with ≤→<∨≡ x≤y
+... | inj₁ x≡y = inj₁ (cong suc x≡y)
+... | inj₂ x<y = inj₂ (s≤s x<y)
+
+mono-<→≤' : (P : ℕ → Set ℓ) → (∀ k j → P k → j < k → P j) → (∀ k j → P k → j ≤ k → P j)
+mono-<→≤' P mono-< k j Pk j≤k with ≤→<∨≡ j≤k
+... | inj₁ j≡k = subst P (sym j≡k) Pk
+... | inj₂ j<k = mono-< k j Pk j<k
+
+mono-<→≤-𝕍 : ∀ {k} → Monotonicity-𝕍 k → Monotonicity≤-𝕍 k
+mono-<→≤-𝕍 {k} mono-< µ e t j e∈𝕍k⟦t⟧ j≤k with ≤→<∨≡ j≤k
+... | inj₁ refl = e∈𝕍k⟦t⟧
+... | inj₂ j<k = mono-< µ e t j e∈𝕍k⟦t⟧ j<k
+
+mono-<→≤-𝔼 : ∀ {k} → Monotonicity-𝔼 k → Monotonicity≤-𝔼 k
+mono-<→≤-𝔼 {k} mono-< µ e t j e∈𝔼k⟦t⟧ j≤k with ≤→<∨≡ j≤k
+... | inj₁ refl = e∈𝔼k⟦t⟧
+... | inj₂ j<k = mono-< µ e t j e∈𝔼k⟦t⟧ j<k
+
+<→≤ : ∀ {x y} → x < y → x ≤ y
+<→≤ = {!!}
 
 MM : ∀ k → (∀ j → j < k → Monotonicity j) → Monotonicity k
 MM k ih = MM-𝕍 k ih , MM-𝔼 k ih
   where
 
   MM-𝕍 : ∀ k → (∀ j → j < k → Monotonicity j) → Monotonicity-𝕍 k
-  MM-𝕍 k ih µ (λx e)   (t₁ ⇒ t₂) j λxe∈𝕍k[t₁⇒t₂] j≤k =
+  MM-𝕍 k ih µ (λx e)   (t₁ ⇒ t₂) j λxe∈𝕍k[t₁⇒t₂] j<k =
     (λx e) ∈𝕍 j ⟦ t₁ ⇒ t₂ ⟧
       by fold-∈𝕍 {e = λx e} {t = t₁ ⇒ t₂} (
     (∀ {i v} → (i≤j : i ≤ j) → R𝕍 i (λ j j<k → ∈𝕍𝔼 j) µ v t₁ → R𝔼 i (λ j j<k → ∈𝕍𝔼 j) µ (e ⋯ ⦅ v ⦆) t₂)
@@ -207,7 +238,14 @@ MM k ih = MM-𝕍 k ih , MM-𝔼 k ih
       --   {! (λxe∈𝕍k[t₁⇒t₂] {i} {!i<k!} (≤-trans i<j j≤k))!}
       by unfold-∈𝔼 (
     e ⋯ ⦅ v ⦆ ∈𝔼 i ⟦ t₂ ⟧
-      by {!MM-𝔼 k ih µ (e ⋯ ⦅ v ⦆) t₂ i!}
+      by let R𝔼-j-e⋯v-t₂ = R𝔼 j (wk-ih (<→≤ j<k) (λ j j<k → ∈𝕍𝔼 j)) µ (e ⋯ ⦅ v ⦆) t₂ by {! λxe∈𝕍k[t₁⇒t₂] {j} (<→≤ j<k) ? !} in
+         let R𝔼-j-e⋯v-t₂' = R𝔼 j (λ j j<k → ∈𝕍𝔼 j) µ (e ⋯ ⦅ v ⦆) t₂ by {! λxe∈𝕍k[t₁⇒t₂] {j} (<→≤ j<k) ? !} in
+         let [e⋯v]∈𝔼j⟦t₂⟧ = e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by fold-∈𝔼 {!λxe∈𝕍k[t₁⇒t₂] {j} {!j≤k!} ?!} in
+         let [e⋯v]∈𝔼j⟦t₂⟧' = e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by {!λxe∈𝕍k[t₁⇒t₂] {j} {!j≤k!} ?!} in
+         -- let [e⋯v]∈𝔼j⟦t₂⟧ = e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by {!!} in
+         mono-<→≤-𝔼 (π₂ (ih j j<k)) µ (e ⋯ ⦅ v ⦆) t₂ i [e⋯v]∈𝔼j⟦t₂⟧ i≤j
+         -- π₂ (ih j j<k) µ (e ⋯ ⦅ v ⦆) t₂ i (e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by {!!}) {!i<j!}
+      -- by {!MM-𝔼 k ih µ (e ⋯ ⦅ v ⦆) t₂ i!}
       -- by {!λxe∈𝕍k[t₁⇒t₂] {i} {!i<k!} ?!}
     )
       -- by λ {i} {v} i≤j R𝕍-v {i'} {e'} i'<i → {!!} , (λ irred-e' → {!ih (i ∸ i') _ µ e' t₂ !})
@@ -231,7 +269,7 @@ MM k ih = MM-𝕍 k ih , MM-𝔼 k ih
       by unfold-∈𝕍 (
     e' ∈𝕍 j ∸ i ⟦ t ⟧
       by
-        let i<k = ≤-trans i<j j≤k in
+        let i<k = ≤-trans i<j {!j≤k!} in
         let R𝕍[k-i]e' = e∈k[t] {i} {e'} i<k e↪[i]e' irred-e' in
         -- let e'∈𝕍k∸i[t] = R𝕍[k-i]e' in
         -- let e'∈𝕍j∸i[t] = π₁ (ih (k ∸ i) {!!}) µ e' t (j ∸ i) {!!} {!!} in
@@ -249,7 +287,28 @@ monotonicity-𝕍 :
   v ∈𝕍 k ⟦ t ⟧ →
   j ≤ k →
   v ∈𝕍 j ⟦ t ⟧
-monotonicity-𝕍 = {!!}
+-- monotonicity-𝕍 = {!!}
+monotonicity-𝕍 k µ (λx e)   (t₁ ⇒ t₂) j λxe∈𝕍k⟦t₁⇒t₂⟧   j≤k {i} {v} i≤j v∈𝕍i⟦t₁⟧ {h} {e'} h<i e⋯v↪^[h]e' irred-e' =
+  {!!}
+  -- let i≤k = i ≤ k by {!!} in
+  -- -- {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} i≤k {!v∈𝕍i⟦t₁⟧!} h<i e⋯v↪^[h]e' irred-e'!}
+  -- R𝕍 (i ∸ h)
+  --     (wk-ih (k∸j≤k i h)
+  --      (wk-ih i≤j
+  --       -- (WF.All.wfRecBuilder <-wellFounded (Level.suc Level.zero)
+  --       --  (λ _ → RelTy × RelTy) (λ k₁ ih → R𝕍 k₁ ih , R𝔼 k₁ ih) j)
+  --       (λ i _ → ∈𝕍𝔼 i)
+  --       ))
+  --     µ e' t₂
+  -- by
+  -- {!fold-∈𝔼 (λxe∈𝕍k⟦t₁⇒t₂⟧ {i} i≤k {!v∈𝕍i⟦t₁⟧!})!}
+ 
+-- monotonicity-𝕍 k µ (λx e)   (t₁ ⇒ t₂) j λxe∈𝕍k⟦t₁⇒t₂⟧   j≤k {i} {v} i≤j v∈𝕍i⟦t₁⟧ =
+--   -- (e ⋯ ⦅ v ⦆) ∈𝔼 i ⟦ t₂ ⟧
+--   -- let e⋯v∈𝔼i⟦t₂⟧ = (e ⋯ ⦅ v ⦆) ∈𝔼 i ⟦ t₂ ⟧ by {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} {!i≤k!} {!v∈𝕍i⟦t₁⟧!}!} in
+--   let e⋯v∈𝔼i⟦t₂⟧ = (e ⋯ ⦅ v ⦆) ∈𝔼 i ⟦ t₂ ⟧ by {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} {!i≤k!} {!v∈𝕍i⟦t₁⟧!}!} in
+--   {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} {!i≤k!} {!v∈𝕍i⟦t₁⟧!}!}
+monotonicity-𝕍 k µ (fold v) (µα t)    j foldv∈𝕍k⟦µαt⟧ j≤k = {!!}
 
 -- RecTy : Gas → Set
 -- RecTy k = (µ : List Modeᵥ) (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → v ∈𝕍 k ⟦ t ⟧ → j ≤ k → v ∈𝕍 j ⟦ t ⟧
