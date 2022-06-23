@@ -7,15 +7,16 @@ open import Data.Empty using (⊥; ⊥-elim)
 open import Data.List using (List; []; _∷_)
 open import Data.Nat hiding (_⊔_)
 open import Data.Nat.Induction using (<-rec; <-wellFounded)
-open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-step)
+open import Data.Nat.Properties using (≤-trans; ≤-refl; ≤-step; ∸-monoˡ-≤; <⇒≤)
 open import Data.Product using (Σ; _×_; _,_; Σ-syntax; ∃-syntax) renaming (proj₁ to π₁; proj₂ to π₂) 
+open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Unit.Polymorphic
 open import Function using (_$_)
 open import Induction
 open import Induction.WellFounded as WF using (WfRec)
 open import Level using (Level; _⊔_)
 open import Relation.Binary.PropositionalEquality hiding ([_])
-open import Relation.Nullary using (¬_)
+open import Relation.Nullary using (¬_; Dec; yes; no)
 
 -- Lemmas ----------------------------------------------------------------------
 
@@ -76,279 +77,455 @@ data _↪^[_]_ : µ ⊢ 𝕖 → Gas → µ ⊢ 𝕖 → Set where
 -- ↪^→↪* : e₁ ↪^[ k ] e₂ → e₁ ↪* e₂
 -- ↪^→↪* p = ?
 
--- ↪*→↪^ : e₁ ↪* e₂ → ∃[ k ] (e₁ ↪^[ k ] e₂)
--- ↪*→↪^ p = ?
+↪*→↪^ : e₁ ↪* e₂ → ∃[ k ] (e₁ ↪^[ k ] e₂)
+↪*→↪^ p = {!!}
+
+Red : µ ⊢ 𝕖 → Set
+Red e = ∃[ e' ] (e ↪ e')
 
 Irred : µ ⊢ 𝕖 → Set
-Irred e = ∀ e' → ¬ (e ↪ e')
+Irred e = ¬ Red e
 
--- Type of the `_∈𝕍_⟦_⟧` and `_∈𝔼_⟦_⟧` relations, but without the `Gas`-parameter.
-RelTy : Set₁
-RelTy = ∀ µ → µ ⊢ 𝕖 → µ ∶⊢ 𝕖 → Set
+-- Recursive Definitions -------------------------------------------------------
 
--- Field accessors for the R𝕍 and R𝔼 components of the induction hypothesis.
-R𝕍< : ∀ {k} → (∀ j → j < k → A × B) → (∀ j → j < k → A)
-R𝕍< ih j j<k = π₁ (ih j j<k)
-R𝔼< : ∀ {k} → (∀ j → j < k → A × B) → (∀ j → j < k → B)
-R𝔼< ih j j<k = π₂ (ih j j<k)
+module Rec where
 
-R𝕍 R𝔼 : ∀ (k : Gas) → (∀ j → j < k → RelTy × RelTy) → RelTy
-R𝕍 k ih µ _        (`[ p ] x) = ⊥
-R𝕍 k ih µ (λx e)   (t₁ ⇒ t₂)  = ∀ {j v} →
+  -- Type of the `_∈𝕍_⟦_⟧` and `_∈𝔼_⟦_⟧` relations, but without the `Gas`-parameter.
+  RelTy : Set₁
+  RelTy = [] ⊢ 𝕖 → [] ∶⊢ 𝕖 → Set
+
+
+  -- Field accessors for the R𝕍 and R𝔼 components of the induction hypothesis.
+  R𝕍< : ∀ {k} → (∀ j → j < k → A × B) → (∀ j → j < k → A)
+  R𝕍< ih j j<k = π₁ (ih j j<k)
+  R𝔼< : ∀ {k} → (∀ j → j < k → A × B) → (∀ j → j < k → B)
+  R𝔼< ih j j<k = π₂ (ih j j<k)
+
+  R𝕍 R𝔼 : ∀ (k : Gas) → (∀ j → j < k → RelTy × RelTy) → RelTy
+  R𝕍 k ih _        (`[ p ] x) = ⊥
+  R𝕍 k ih (λx e)   (t₁ ⇒ t₂)  = ∀ {j v} →
                               (j≤k : j ≤ k) →
-                              R𝕍 j (wk-ih j≤k ih) µ v t₁ →
-                              R𝔼 j (wk-ih j≤k ih) µ (e ⋯ ⦅ v ⦆) t₂
-R𝕍 k ih µ _        (t₁ ⇒ t₂)  = ⊥
-R𝕍 k ih µ _        𝟘          = ⊥
-R𝕍 k ih µ (fold v) (µα t)     = ∀ {j} →
+                              R𝕍 j (wk-ih j≤k ih) v t₁ →
+                              R𝔼 j (wk-ih j≤k ih) (e ⋯ ⦅ v ⦆) t₂
+  R𝕍 k ih _        (t₁ ⇒ t₂)  = ⊥
+  R𝕍 k ih _        𝟘          = ⊥
+  R𝕍 k ih (fold v) (µα t)     = ∀ {j} →
                               (j<k : j < k) →
-                              R𝕍< ih j j<k µ v (t ⋯ ⦅ µα t ⦆)
-R𝕍 k ih µ _        (µα t)     = ⊥
-R𝔼 k ih µ e        t          = ∀ {j e'} →
+                              R𝕍< ih j j<k v (t ⋯ ⦅ µα t ⦆)
+  R𝕍 k ih _        (µα t)     = ⊥
+  R𝔼 k ih e        t          = ∀ {j e'} →
                               (j<k : j < k) →
                               e ↪^[ j ] e' →
                               Irred e' →
-                              R𝕍 (k ∸ j) (wk-ih (k∸j≤k k j) ih) µ e' t
+                              R𝕍 (k ∸ j) (wk-ih (k∸j≤k k j) ih) e' t
 
-R : ∀ (k : Gas) →
-  (∀ j → j < k → RelTy × RelTy) →
-  RelTy × RelTy
-R k ih = R𝕍 k ih , R𝔼 k ih
+  R : ∀ (k : Gas) →
+    (∀ j → j < k → RelTy × RelTy) →
+    RelTy × RelTy
+  R k ih = R𝕍 k ih , R𝔼 k ih
 
-infix 3 _∈𝕍_⟦_⟧  _∈𝔼_⟦_⟧  _∈𝔾_⟦_⟧  _⊧_∶_
+  infix 3 _∈𝕍_⟦_⟧  _∈𝔼_⟦_⟧  _∈𝔾_⟦_⟧  _⊧_∶_
 
-∈𝕍𝔼 : Gas → RelTy × RelTy
-∈𝕍𝔼 = <-rec _ R
+  ∈𝕍𝔼 : Gas → RelTy × RelTy
+  ∈𝕍𝔼 = <-rec _ R
 
-_∈𝕍_⟦_⟧ _∈𝔼_⟦_⟧ : ∀ {µ} → µ ⊢ 𝕖 → Gas → µ ∶⊢ 𝕖 → Set
-v ∈𝕍 k ⟦ t ⟧ = π₁ (∈𝕍𝔼 k) _ v t
-e ∈𝔼 k ⟦ t ⟧ = π₂ (∈𝕍𝔼 k) _ e t
+  _∈𝕍_⟦_⟧ _∈𝔼_⟦_⟧ : [] ⊢ 𝕖 → Gas → [] ∶⊢ 𝕖 → Set
+  v ∈𝕍 k ⟦ t ⟧ = π₁ (∈𝕍𝔼 k) v t
+  e ∈𝔼 k ⟦ t ⟧ = π₂ (∈𝕍𝔼 k) e t
 
-data _∈𝔾_⟦_⟧ : ∀ {µ₁ µ₂} → µ₁ →ₛ µ₂ → Gas → Ctx µ₁ → Set where
-  [] : idₛ ∈𝔾 k ⟦ ∅ ⟧
-  _∷_ : {σ : µ₁ →ₛ µ₂} {k : Gas} {Γ : Ctx µ₁} {v : µ₂ ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} →
-    v        ∈𝕍 k ⟦ t ⋯ σ  ⟧ →
-    σ        ∈𝔾 k ⟦ Γ      ⟧ →
-    (σ ,ₛ v) ∈𝔾 k ⟦ Γ ,, t ⟧
+  data _∈𝔾_⟦_⟧ : ∀ {µ₁} → µ₁ →ₛ [] → Gas → Ctx µ₁ → Set where
+    [] : idₛ ∈𝔾 k ⟦ ∅ ⟧
+    _∷_ : {σ : µ₁ →ₛ []} {k : Gas} {Γ : Ctx µ₁} {v : [] ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} →
+      v        ∈𝕍 k ⟦ t ⋯ σ  ⟧ →
+      σ        ∈𝔾 k ⟦ Γ      ⟧ →
+      (σ ,ₛ v) ∈𝔾 k ⟦ Γ ,, t ⟧
 
-_⊧_∶_ : Ctx µ → µ ⊢ 𝕖 → µ ∶⊢ 𝕖 → Set
-Γ ⊧ e ∶ t = ∀ {k σ} →
-  σ       ∈𝔾 k ⟦ Γ ⟧ →
-  (e ⋯ σ) ∈𝔼 k ⟦ t ⟧
+  _⊧_∶_ : Ctx µ → µ ⊢ 𝕖 → µ ∶⊢ 𝕖 → Set
+  Γ ⊧ e ∶ t = ∀ {k σ} →
+    σ       ∈𝔾 k ⟦ Γ ⟧ →
+    (e ⋯ σ) ∈𝔼 k ⟦ t ⋯ σ ⟧
 
-module Unfold-𝕍-𝔼 where
+  module Unfold-𝕍-𝔼 where
 
-  open import Induction.WellFounded using (module FixPoint)
-  open import Data.Nat.Induction using (<-wellFounded; <-rec)
+    open import Induction.WellFounded using (module FixPoint)
+    open import Data.Nat.Induction using (<-wellFounded; <-rec)
 
-  open FixPoint-FunExt <-wellFounded (λ _ → RelTy × RelTy) R
-    renaming (unfold-wfRec to unfold-∈𝕍𝔼'-≡) public
+    open FixPoint-FunExt <-wellFounded (λ _ → RelTy × RelTy) R
+      renaming (unfold-wfRec to unfold-∈𝕍𝔼'-≡) public
 
-  unfold-∈𝕍𝔼-≡ : {k : Gas} → ∈𝕍𝔼 k ≡ R k (λ j j<k → ∈𝕍𝔼 j)
-  unfold-∈𝕍𝔼-≡ = unfold-∈𝕍𝔼'-≡
+    unfold-∈𝕍𝔼-≡ : {k : Gas} → ∈𝕍𝔼 k ≡ R k (λ j j<k → ∈𝕍𝔼 j)
+    unfold-∈𝕍𝔼-≡ = unfold-∈𝕍𝔼'-≡
 
-  unfold-∈𝕍'-≡ : ∀ {k : Gas} → π₁ (∈𝕍𝔼 k) ≡ π₁ (R k (λ j j<k → ∈𝕍𝔼 j))
-  unfold-∈𝕍'-≡ = cong π₁ unfold-∈𝕍𝔼-≡
+    unfold-∈𝕍'-≡ : ∀ {k : Gas} → π₁ (∈𝕍𝔼 k) ≡ π₁ (R k (λ j j<k → ∈𝕍𝔼 j))
+    unfold-∈𝕍'-≡ = cong π₁ unfold-∈𝕍𝔼-≡
 
-  unfold-∈𝕍-≡ : ∀ {k : Gas} {µ} {e : µ ⊢ 𝕖} {t : µ ⊢ 𝕥} →
-    (e ∈𝕍 k ⟦ t ⟧) ≡ R𝕍 k (λ j j<k → ∈𝕍𝔼 j) µ e t
-  unfold-∈𝕍-≡ {k = k} rewrite unfold-∈𝕍'-≡ {k} = refl
+    unfold-∈𝕍-≡ : ∀ {k : Gas} {e : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} →
+      (e ∈𝕍 k ⟦ t ⟧) ≡ R𝕍 k (λ j j<k → ∈𝕍𝔼 j) e t
+    unfold-∈𝕍-≡ {k = k} rewrite unfold-∈𝕍'-≡ {k} = refl
 
-  fold-∈𝕍 : ∀ {k : Gas} {µ} {e : µ ⊢ 𝕖} {t : µ ⊢ 𝕥} →
-    R𝕍 k (λ j j<k → ∈𝕍𝔼 j) µ e t → (e ∈𝕍 k ⟦ t ⟧)
-  fold-∈𝕍 p = subst (λ x → x) (sym unfold-∈𝕍-≡) p
+    fold-∈𝕍 : ∀ {k : Gas} {e : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} →
+      R𝕍 k (λ j j<k → ∈𝕍𝔼 j) e t → (e ∈𝕍 k ⟦ t ⟧)
+    fold-∈𝕍 p = subst (λ x → x) (sym unfold-∈𝕍-≡) p
 
-  unfold-∈𝕍 : ∀ {k : Gas} {µ} {e : µ ⊢ 𝕖} {t : µ ⊢ 𝕥} →
-    (e ∈𝕍 k ⟦ t ⟧) → R𝕍 k (λ j j<k → ∈𝕍𝔼 j) µ e t
-  unfold-∈𝕍 p = subst (λ x → x) unfold-∈𝕍-≡ p
+    unfold-∈𝕍 : ∀ {k : Gas} {e : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} →
+      (e ∈𝕍 k ⟦ t ⟧) → R𝕍 k (λ j j<k → ∈𝕍𝔼 j) e t
+    unfold-∈𝕍 p = subst (λ x → x) unfold-∈𝕍-≡ p
 
-  unfold-∈𝔼'-≡ : ∀ {k : Gas} → π₂ (∈𝕍𝔼 k) ≡ π₂ (R k (λ j j<k → ∈𝕍𝔼 j))
-  unfold-∈𝔼'-≡ = cong π₂ unfold-∈𝕍𝔼-≡
+    unfold-∈𝔼'-≡ : ∀ {k : Gas} → π₂ (∈𝕍𝔼 k) ≡ π₂ (R k (λ j j<k → ∈𝕍𝔼 j))
+    unfold-∈𝔼'-≡ = cong π₂ unfold-∈𝕍𝔼-≡
 
-  unfold-∈𝔼-≡ : ∀ {k : Gas} {µ} {e : µ ⊢ 𝕖} {t : µ ⊢ 𝕥} →
-    (e ∈𝔼 k ⟦ t ⟧) ≡ R𝔼 k (λ j j<k → ∈𝕍𝔼 j) µ e t
-  -- unfold-𝔼 {k = k} rewrite unfold-𝔼'-≡ {k} = {!refl!}
-  unfold-∈𝔼-≡ {k = k} = {!!}
+    unfold-∈𝔼-≡ : ∀ {k : Gas} {e : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} →
+      (e ∈𝔼 k ⟦ t ⟧) ≡ R𝔼 k (λ j j<k → ∈𝕍𝔼 j) e t
+    -- unfold-𝔼 {k = k} rewrite unfold-𝔼'-≡ {k} = {!refl!}
+    unfold-∈𝔼-≡ {k = k} = {!!}
 
-  fold-∈𝔼 : ∀ {k : Gas} {µ} {e : µ ⊢ 𝕖} {t : µ ⊢ 𝕥} →
-    R𝔼 k (λ j j<k → ∈𝕍𝔼 j) µ e t → (e ∈𝔼 k ⟦ t ⟧)
-  fold-∈𝔼 p = subst (λ x → x) (sym unfold-∈𝔼-≡) p
+    fold-∈𝔼 : ∀ {k : Gas} {e : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} →
+      R𝔼 k (λ j j<k → ∈𝕍𝔼 j) e t → (e ∈𝔼 k ⟦ t ⟧)
+    fold-∈𝔼 p = subst (λ x → x) (sym unfold-∈𝔼-≡) p
 
-  unfold-∈𝔼 : ∀ {k : Gas} {µ} {e : µ ⊢ 𝕖} {t : µ ⊢ 𝕥} →
-    (e ∈𝔼 k ⟦ t ⟧) → R𝔼 k (λ j j<k → ∈𝕍𝔼 j) µ e t
-  unfold-∈𝔼 p = subst (λ x → x) unfold-∈𝔼-≡ p
+    unfold-∈𝔼 : ∀ {k : Gas} {e : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} →
+      (e ∈𝔼 k ⟦ t ⟧) → R𝔼 k (λ j j<k → ∈𝕍𝔼 j) e t
+    unfold-∈𝔼 p = subst (λ x → x) unfold-∈𝔼-≡ p
 
-open Unfold-𝕍-𝔼
+  open Unfold-𝕍-𝔼 public
 
-Monotonicity-𝕍 : Gas → Set
-Monotonicity-𝕍 k = (µ : List Modeᵥ) (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → v ∈𝕍 k ⟦ t ⟧ → j < k → v ∈𝕍 j ⟦ t ⟧
+--------------------------------------------------------------------------------
 
-Monotonicity-𝔼 : Gas → Set
-Monotonicity-𝔼 k = (µ : List Modeᵥ) (e : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → e ∈𝔼 k ⟦ t ⟧ → j < k → e ∈𝔼 j ⟦ t ⟧
+module Ind where
 
-Monotonicity : Gas → Set
-Monotonicity k = Monotonicity-𝕍 k × Monotonicity-𝔼 k
+  infix 3 _∈𝕍_⟦_⟧  _∈𝔼_⟦_⟧  _∈𝔾_⟦_⟧  _⊧_∶_
 
-Monotonicity≤-𝕍 : Gas → Set
-Monotonicity≤-𝕍 k = (µ : List Modeᵥ) (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → v ∈𝕍 k ⟦ t ⟧ → j ≤ k → v ∈𝕍 j ⟦ t ⟧
-
-Monotonicity≤-𝔼 : Gas → Set
-Monotonicity≤-𝔼 k = (µ : List Modeᵥ) (e : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → e ∈𝔼 k ⟦ t ⟧ → j ≤ k → e ∈𝔼 j ⟦ t ⟧
-
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-
-≤→<∨≡ : ∀ {x y} → x ≤ y → x ≡ y ⊎ x < y
-≤→<∨≡ {.zero} {zero} z≤n = inj₁ refl
-≤→<∨≡ {.zero} {suc y} z≤n = inj₂ (s≤s z≤n)
-≤→<∨≡ {suc x} {suc y} (s≤s x≤y) with ≤→<∨≡ x≤y
-... | inj₁ x≡y = inj₁ (cong suc x≡y)
-... | inj₂ x<y = inj₂ (s≤s x<y)
-
-mono-<→≤' : (P : ℕ → Set ℓ) → (∀ k j → P k → j < k → P j) → (∀ k j → P k → j ≤ k → P j)
-mono-<→≤' P mono-< k j Pk j≤k with ≤→<∨≡ j≤k
-... | inj₁ j≡k = subst P (sym j≡k) Pk
-... | inj₂ j<k = mono-< k j Pk j<k
-
-mono-<→≤-𝕍 : ∀ {k} → Monotonicity-𝕍 k → Monotonicity≤-𝕍 k
-mono-<→≤-𝕍 {k} mono-< µ e t j e∈𝕍k⟦t⟧ j≤k with ≤→<∨≡ j≤k
-... | inj₁ refl = e∈𝕍k⟦t⟧
-... | inj₂ j<k = mono-< µ e t j e∈𝕍k⟦t⟧ j<k
-
-mono-<→≤-𝔼 : ∀ {k} → Monotonicity-𝔼 k → Monotonicity≤-𝔼 k
-mono-<→≤-𝔼 {k} mono-< µ e t j e∈𝔼k⟦t⟧ j≤k with ≤→<∨≡ j≤k
-... | inj₁ refl = e∈𝔼k⟦t⟧
-... | inj₂ j<k = mono-< µ e t j e∈𝔼k⟦t⟧ j<k
-
-<→≤ : ∀ {x y} → x < y → x ≤ y
-<→≤ = {!!}
-
-MM : ∀ k → (∀ j → j < k → Monotonicity j) → Monotonicity k
-MM k ih = MM-𝕍 k ih , MM-𝔼 k ih
-  where
-
-  MM-𝕍 : ∀ k → (∀ j → j < k → Monotonicity j) → Monotonicity-𝕍 k
-  MM-𝕍 k ih µ (λx e)   (t₁ ⇒ t₂) j λxe∈𝕍k[t₁⇒t₂] j<k =
-    (λx e) ∈𝕍 j ⟦ t₁ ⇒ t₂ ⟧
-      by fold-∈𝕍 {e = λx e} {t = t₁ ⇒ t₂} (
-    (∀ {i v} → (i≤j : i ≤ j) → R𝕍 i (λ j j<k → ∈𝕍𝔼 j) µ v t₁ → R𝔼 i (λ j j<k → ∈𝕍𝔼 j) µ (e ⋯ ⦅ v ⦆) t₂)
-      by λ {i} {v} i≤j R𝕍-v →
-    R𝔼 i (λ j j<k → ∈𝕍𝔼 j) µ (e ⋯ ⦅ v ⦆) t₂
-      -- by
-      --   {! MM-𝕍 k ih!}
-      --   {! (λxe∈𝕍k[t₁⇒t₂] {i} {!i<k!} (≤-trans i<j j≤k))!}
-      by unfold-∈𝔼 (
-    e ⋯ ⦅ v ⦆ ∈𝔼 i ⟦ t₂ ⟧
-      by let R𝔼-j-e⋯v-t₂ = R𝔼 j (wk-ih (<→≤ j<k) (λ j j<k → ∈𝕍𝔼 j)) µ (e ⋯ ⦅ v ⦆) t₂ by {! λxe∈𝕍k[t₁⇒t₂] {j} (<→≤ j<k) ? !} in
-         let R𝔼-j-e⋯v-t₂' = R𝔼 j (λ j j<k → ∈𝕍𝔼 j) µ (e ⋯ ⦅ v ⦆) t₂ by {! λxe∈𝕍k[t₁⇒t₂] {j} (<→≤ j<k) ? !} in
-         let [e⋯v]∈𝔼j⟦t₂⟧ = e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by fold-∈𝔼 {!λxe∈𝕍k[t₁⇒t₂] {j} {!j≤k!} ?!} in
-         let [e⋯v]∈𝔼j⟦t₂⟧' = e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by {!λxe∈𝕍k[t₁⇒t₂] {j} {!j≤k!} ?!} in
-         -- let [e⋯v]∈𝔼j⟦t₂⟧ = e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by {!!} in
-         mono-<→≤-𝔼 (π₂ (ih j j<k)) µ (e ⋯ ⦅ v ⦆) t₂ i [e⋯v]∈𝔼j⟦t₂⟧ i≤j
-         -- π₂ (ih j j<k) µ (e ⋯ ⦅ v ⦆) t₂ i (e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ by {!!}) {!i<j!}
-      -- by {!MM-𝔼 k ih µ (e ⋯ ⦅ v ⦆) t₂ i!}
-      -- by {!λxe∈𝕍k[t₁⇒t₂] {i} {!i<k!} ?!}
+  open Rec using () renaming
+    ( _∈𝕍_⟦_⟧ to _∈𝕍_⟦_⟧ᵣ
+    ; _∈𝔼_⟦_⟧ to _∈𝔼_⟦_⟧ᵣ
+    ; _∈𝔾_⟦_⟧ to _∈𝔾_⟦_⟧ᵣ
+    ; _⊧_∶_ to _⊧ᵣ_∶_
     )
-      -- by λ {i} {v} i≤j R𝕍-v {i'} {e'} i'<i → {!!} , (λ irred-e' → {!ih (i ∸ i') _ µ e' t₂ !})
-    )
-  MM-𝕍 k ih µ (fold v) (µα t)    j v∈V j≤k =
-    fold v ∈𝕍 j ⟦ µα t ⟧          by
-    fold v ∈𝕍 j ⟦ µα t ⟧          by {!!}
+  mutual
+    data _∈𝕍_⟦_⟧ : [] ⊢ 𝕖 → Gas → [] ∶⊢ 𝕖 → Set where
+      𝕍-⇒ : ∀ {k} →
+        (∀ {j v} → (j≤k : j ≤ k) →
+          v           ∈𝕍 j ⟦ t₁ ⟧ᵣ →
+          (e ⋯ ⦅ v ⦆) ∈𝔼 j ⟦ t₂ ⟧) →
+        (λx e) ∈𝕍 k ⟦ t₁ ⇒ t₂ ⟧
+      𝕍-µ : ∀ {k} →
+        (∀ {j} (j<k : j < k) →
+          v ∈𝕍 j ⟦ t ⋯ ⦅ µα t ⦆ ⟧) →
+        (fold v) ∈𝕍 k ⟦ µα t ⟧
 
-  -- R𝕍 k ih µ (λx e)   (t₁ ⇒ t₂)  = ∀ {j v} →
-  --                               (j≤k : j ≤ k) →
-  --                               R𝕍 j (wk-ih j≤k ih) µ v t₁ →
-  --                               R𝔼 j (wk-ih j≤k ih) µ (e ⋯ ⦅ v ⦆) t₂
+    data _∈𝔼_⟦_⟧ : [] ⊢ 𝕖 → Gas → [] ∶⊢ 𝕖 → Set where
+      𝔼 : ∀ {k} →
+        (∀ {j e'} → (j<k : j < k) →
+          e ↪^[ j ] e' →
+          Irred e' →
+          e' ∈𝕍 (k ∸ j) ⟦ t ⟧) →
+        e ∈𝔼 k ⟦ t ⟧
 
-  MM-𝔼 : ∀ k → (∀ j → j < k → Monotonicity j) → Monotonicity-𝔼 k
-  MM-𝔼 k ih µ e t j e∈k[t] j≤k =
-    e ∈𝔼 j ⟦ t ⟧
-      by fold-∈𝔼 (
-    (∀ {i} {e'} → i < j → e ↪^[ i ] e' → Irred e' → R𝕍 (j ∸ i) (wk-ih (k∸j≤k j i) (λ j' j'<k → ∈𝕍𝔼 j')) µ e' t)
-      by λ {i} {e'} i<j e↪[i]e' irred-e' →
-    R𝕍 (j ∸ i) (wk-ih (k∸j≤k j i) (λ j' j'<k → ∈𝕍𝔼 j')) µ e' t
-      by unfold-∈𝕍 (
-    e' ∈𝕍 j ∸ i ⟦ t ⟧
-      by
-        let i<k = ≤-trans i<j {!j≤k!} in
-        let R𝕍[k-i]e' = e∈k[t] {i} {e'} i<k e↪[i]e' irred-e' in
-        -- let e'∈𝕍k∸i[t] = R𝕍[k-i]e' in
-        -- let e'∈𝕍j∸i[t] = π₁ (ih (k ∸ i) {!!}) µ e' t (j ∸ i) {!!} {!!} in
-        let e'∈𝕍j∸i[t] = π₁ (ih i i<k) µ e' t (j ∸ i) {!!} {!!} in
-        {!fold-∈𝕍 R𝕍[k-i]e'!}
-    )
+  unwrap-𝔼 : e ∈𝔼 k ⟦ t ⟧ → (∀ {j e'} → (j<k : j < k) →
+        e ↪^[ j ] e' →
+        Irred e' →
+        e' ∈𝕍 (k ∸ j) ⟦ t ⟧)
+  unwrap-𝔼 (𝔼 e) = e
+
+  data _∈𝔾_⟦_⟧ : ∀ {µ₁} → µ₁ →ₛ [] → Gas → Ctx µ₁ → Set where
+    [] : idₛ ∈𝔾 k ⟦ ∅ ⟧
+    _∷_ : {σ : µ₁ →ₛ []} {k : Gas} {Γ : Ctx µ₁} {v : [] ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} →
+      v        ∈𝕍 k ⟦ t ⋯ σ  ⟧ →
+      σ        ∈𝔾 k ⟦ Γ      ⟧ →
+      (σ ,ₛ v) ∈𝔾 k ⟦ Γ ,, t ⟧
+
+  _⊧_∶_ : Ctx µ → µ ⊢ 𝕖 → µ ∶⊢ 𝕖 → Set
+  Γ ⊧ e ∶ t = ∀ {k σ} →
+    σ       ∈𝔾 k ⟦ Γ ⟧ →
+    (e ⋯ σ) ∈𝔼 k ⟦ t ⋯ σ ⟧
+
+
+module Rec→Ind where
+  open Ind
+  open Rec using ([]; _∷_) renaming
+    ( _∈𝕍_⟦_⟧ to _∈𝕍_⟦_⟧ᵣ
+    ; _∈𝔼_⟦_⟧ to _∈𝔼_⟦_⟧ᵣ
+    ; _∈𝔾_⟦_⟧ to _∈𝔾_⟦_⟧ᵣ
+    ; _⊧_∶_ to _⊧ᵣ_∶_
     )
 
-monotonicity : 
-  ∀ k → Monotonicity k
-monotonicity = <-rec _ MM
+  RelTy : ℕ → Set _
+  RelTy k = (∀ {e t} → e ∈𝕍 k ⟦ t ⟧ᵣ → e ∈𝕍 k ⟦ t ⟧)
+          × (∀ {e t} → e ∈𝔼 k ⟦ t ⟧ᵣ → e ∈𝔼 k ⟦ t ⟧)
 
-monotonicity-𝕍 : 
-  ∀ k µ (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) j →
-  v ∈𝕍 k ⟦ t ⟧ →
+  mutual
+    𝕍-R→I : ∀ k → (∀ j → j < k → RelTy j) → (∀ {e t} → e ∈𝕍 k ⟦ t ⟧ᵣ → e ∈𝕍 k ⟦ t ⟧)
+    𝕍-R→I k ih {λx e}   {t₁ ⇒ t₂} λxe∈𝕍 = 𝕍-⇒ λ {j} {v} j≤k v∈𝕍ᵣ → 𝔼-R→I j (wk-ih j≤k ih) (
+        e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ᵣ
+      by let λxe∈𝕍' = Rec.unfold-∈𝕍 {k = k} {e = λx e} {t = t₁ ⇒ t₂} λxe∈𝕍 in
+          Rec.fold-∈𝔼 (λxe∈𝕍' j≤k (Rec.unfold-∈𝕍 v∈𝕍ᵣ)))
+    𝕍-R→I k ih {fold e} {µα t}    fold-e∈𝕍 =
+      let fold-e∈𝕍' = Rec.unfold-∈𝕍 {k = k} {e = fold e} {t = µα t} fold-e∈𝕍 in
+      𝕍-µ λ {j} j<k → π₁ (ih j j<k) (fold-e∈𝕍' j<k)
+
+    𝔼-R→I : ∀ k → (∀ j → j < k → RelTy j) → (∀ {e t} → e ∈𝔼 k ⟦ t ⟧ᵣ → e ∈𝔼 k ⟦ t ⟧)
+    𝔼-R→I k ih {e} {t} e∈𝔼 = 𝔼 (λ {j} {e'} j<k e→e' irred-e' → 𝕍-R→I (k ∸ j) (wk-ih (k∸j≤k k j) ih)
+      (Rec.fold-∈𝕍 (Rec.unfold-∈𝔼 {k = k} {e = e} {t = t} e∈𝔼 j<k e→e' irred-e')))
+
+  R→I : ∀ k → RelTy k
+  R→I = <-rec _ λ k ih → 𝕍-R→I k ih , 𝔼-R→I k ih
+
+  RelTy' : ℕ → Set _
+  RelTy' k = (∀ {e t} → e ∈𝕍 k ⟦ t ⟧ → e ∈𝕍 k ⟦ t ⟧ᵣ)
+           × (∀ {e t} → e ∈𝔼 k ⟦ t ⟧ → e ∈𝔼 k ⟦ t ⟧ᵣ)
+
+  mutual
+    𝕍-I→R : ∀ k → (∀ j → j < k → RelTy' j) → (∀ {e t} → e ∈𝕍 k ⟦ t ⟧ → e ∈𝕍 k ⟦ t ⟧ᵣ)
+    𝕍-I→R = {!!}
+    -- 𝕍-I→R k ih {λx e}   {t₁ ⇒ t₂} λxe∈𝕍 = 𝕍-⇒ λ {j} {v} j≤k v∈𝕍ᵣ → 𝔼-I→R j (wk-ih j≤k ih) (
+    --     e ⋯ ⦅ v ⦆ ∈𝔼 j ⟦ t₂ ⟧ᵣ
+    --   by let λxe∈𝕍' = Rec.unfold-∈𝕍 {k = k} {e = λx e} {t = t₁ ⇒ t₂} λxe∈𝕍 in
+    --       Rec.fold-∈𝔼 (λxe∈𝕍' j≤k (Rec.unfold-∈𝕍 v∈𝕍ᵣ)))
+    -- 𝕍-I→R k ih {fold e} {µα t}    fold-e∈𝕍 =
+    --   let fold-e∈𝕍' = Rec.unfold-∈𝕍 {k = k} {e = fold e} {t = µα t} fold-e∈𝕍 in
+    --   𝕍-µ λ {j} j<k → π₁ (ih j j<k) (fold-e∈𝕍' j<k)
+
+    𝔼-I→R : ∀ k → (∀ j → j < k → RelTy' j) → (∀ {e t} → e ∈𝔼 k ⟦ t ⟧ → e ∈𝔼 k ⟦ t ⟧ᵣ)
+    𝔼-I→R = {!!}
+    -- 𝔼-I→R k ih {e} {t} e∈𝔼 = 𝔼 (λ {j} {e'} j<k e→e' irred-e' → 𝕍-I→R (k ∸ j) (wk-ih (k∸j≤k k j) ih)
+    --   (Rec.fold-∈𝕍 (Rec.unfold-∈𝔼 {k = k} {e = e} {t = t} e∈𝔼 j<k e→e' irred-e')))
+
+  I→R : ∀ k → RelTy' k
+  I→R = <-rec _ λ k ih → 𝕍-I→R k ih , 𝔼-I→R k ih
+
+  𝕍ᵣ→𝕍ᵢ : e ∈𝕍 k ⟦ t ⟧ᵣ → e ∈𝕍 k ⟦ t ⟧
+  𝕍ᵣ→𝕍ᵢ {e} {k} {t} = π₁ (R→I k) {e} {t}
+
+  𝔼ᵣ→𝔼ᵢ : e ∈𝔼 k ⟦ t ⟧ᵣ → e ∈𝔼 k ⟦ t ⟧
+  𝔼ᵣ→𝔼ᵢ {e} {k} {t} = π₂ (R→I k) {e} {t}
+
+  𝕍ᵢ→𝕍ᵣ : e ∈𝕍 k ⟦ t ⟧ → e ∈𝕍 k ⟦ t ⟧ᵣ
+  𝕍ᵢ→𝕍ᵣ {e} {k} {t} = π₁ (I→R k) {e} {t}
+
+  𝔼ᵢ→𝔼ᵣ : e ∈𝔼 k ⟦ t ⟧ → e ∈𝔼 k ⟦ t ⟧ᵣ
+  𝔼ᵢ→𝔼ᵣ {e} {k} {t} = π₂ (I→R k) {e} {t}
+
+  𝔾ᵣ→𝔾ᵢ : ∀ {σ} → σ ∈𝔾 k ⟦ Γ ⟧ᵣ → σ ∈𝔾 k ⟦ Γ ⟧
+  𝔾ᵣ→𝔾ᵢ []          = []
+  𝔾ᵣ→𝔾ᵢ (v∈𝕍 ∷ σ∈𝔾) = 𝕍ᵣ→𝕍ᵢ v∈𝕍 ∷ 𝔾ᵣ→𝔾ᵢ σ∈𝔾
+
+  𝔾ᵢ→𝔾ᵣ : ∀ {σ} → σ ∈𝔾 k ⟦ Γ ⟧ → σ ∈𝔾 k ⟦ Γ ⟧ᵣ
+  𝔾ᵢ→𝔾ᵣ []          = []
+  𝔾ᵢ→𝔾ᵣ (v∈𝕍 ∷ σ∈𝔾) = 𝕍ᵢ→𝕍ᵣ v∈𝕍 ∷ 𝔾ᵢ→𝔾ᵣ σ∈𝔾
+
+  ⊧ᵣ→⊧ᵢ : Γ ⊧ᵣ e ∶ t → Γ ⊧ e ∶ t
+  ⊧ᵣ→⊧ᵢ ⊧e σ∈𝔾 = 𝔼ᵣ→𝔼ᵢ (⊧e (𝔾ᵢ→𝔾ᵣ σ∈𝔾))
+
+  ⊧ᵢ→⊧ᵣ : Γ ⊧ e ∶ t → Γ ⊧ᵣ e ∶ t
+  ⊧ᵢ→⊧ᵣ ⊧e σ∈𝔾 = 𝔼ᵢ→𝔼ᵣ (⊧e (𝔾ᵣ→𝔾ᵢ σ∈𝔾))
+
+
+open Rec
+open Ind using ([]; _∷_; 𝕍-⇒; 𝕍-µ; 𝔼; unwrap-𝔼) renaming
+  ( _∈𝕍_⟦_⟧ to _∈𝕍_⟦_⟧ᵢ
+  ; _∈𝔼_⟦_⟧ to _∈𝔼_⟦_⟧ᵢ
+  ; _∈𝔾_⟦_⟧ to _∈𝔾_⟦_⟧ᵢ
+  ; _⊧_∶_ to _⊧ᵢ_∶_
+  )
+open Rec→Ind
+
+--------------------------------------------------------------------------------
+
+monotonicity-𝕍ᵢ : 
+  ∀ {k} {v : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} {j} →
   j ≤ k →
+  v ∈𝕍 k ⟦ t ⟧ᵢ →
+  v ∈𝕍 j ⟦ t ⟧ᵢ
+monotonicity-𝕍ᵢ {k} {.(λx e)} {.(t₁ ⇒ t₂)} {j} j≤k (𝕍-⇒ {t₁ = t₁} {e = e} {t₂ = t₂} p) =
+  𝕍-⇒ λ {i} {v} i≤j v∈𝕍i →
+    let i≤k = i ≤ k by ≤-trans i≤j j≤k in
+    p i≤k v∈𝕍i
+monotonicity-𝕍ᵢ {k} {.(fold v)} {.(µα t)}  {j} j≤k (𝕍-µ {v = v} {t = t} p) =
+  𝕍-µ λ {i} i<j →
+    let i<k = i < k by ≤-trans i<j j≤k in
+    p i<k
+
+monotonicity-𝔼ᵢ : 
+  ∀ k (e : [] ⊢ 𝕖) (t : [] ⊢ 𝕥) j →
+  j ≤ k →
+  e ∈𝔼 k ⟦ t ⟧ᵢ →
+  e ∈𝔼 j ⟦ t ⟧ᵢ
+monotonicity-𝔼ᵢ k e t j j≤k (𝔼 p) =
+  𝔼 λ {i} {e'} i<j e→[i]e' irred-e' →
+    let i<k = i < k by ≤-trans i<j j≤k in
+    let P = e' ∈𝕍 k ∸ i ⟦ t ⟧ᵢ by p i<k e→[i]e' irred-e' in
+    let j∸i≤k∸i = j ∸ i ≤ k ∸ i by ∸-monoˡ-≤ i j≤k in
+    monotonicity-𝕍ᵢ j∸i≤k∸i P
+
+monotonicity-𝕍ᵣ : 
+  ∀ {k} {v : [] ⊢ 𝕖} {t : [] ⊢ 𝕥} {j} →
+  j ≤ k →
+  v ∈𝕍 k ⟦ t ⟧ →
   v ∈𝕍 j ⟦ t ⟧
--- monotonicity-𝕍 = {!!}
-monotonicity-𝕍 k µ (λx e)   (t₁ ⇒ t₂) j λxe∈𝕍k⟦t₁⇒t₂⟧   j≤k {i} {v} i≤j v∈𝕍i⟦t₁⟧ {h} {e'} h<i e⋯v↪^[h]e' irred-e' =
-  {!!}
-  -- let i≤k = i ≤ k by {!!} in
-  -- -- {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} i≤k {!v∈𝕍i⟦t₁⟧!} h<i e⋯v↪^[h]e' irred-e'!}
-  -- R𝕍 (i ∸ h)
-  --     (wk-ih (k∸j≤k i h)
-  --      (wk-ih i≤j
-  --       -- (WF.All.wfRecBuilder <-wellFounded (Level.suc Level.zero)
-  --       --  (λ _ → RelTy × RelTy) (λ k₁ ih → R𝕍 k₁ ih , R𝔼 k₁ ih) j)
-  --       (λ i _ → ∈𝕍𝔼 i)
-  --       ))
-  --     µ e' t₂
-  -- by
-  -- {!fold-∈𝔼 (λxe∈𝕍k⟦t₁⇒t₂⟧ {i} i≤k {!v∈𝕍i⟦t₁⟧!})!}
- 
--- monotonicity-𝕍 k µ (λx e)   (t₁ ⇒ t₂) j λxe∈𝕍k⟦t₁⇒t₂⟧   j≤k {i} {v} i≤j v∈𝕍i⟦t₁⟧ =
---   -- (e ⋯ ⦅ v ⦆) ∈𝔼 i ⟦ t₂ ⟧
---   -- let e⋯v∈𝔼i⟦t₂⟧ = (e ⋯ ⦅ v ⦆) ∈𝔼 i ⟦ t₂ ⟧ by {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} {!i≤k!} {!v∈𝕍i⟦t₁⟧!}!} in
---   let e⋯v∈𝔼i⟦t₂⟧ = (e ⋯ ⦅ v ⦆) ∈𝔼 i ⟦ t₂ ⟧ by {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} {!i≤k!} {!v∈𝕍i⟦t₁⟧!}!} in
---   {!λxe∈𝕍k⟦t₁⇒t₂⟧ {i} {!i≤k!} {!v∈𝕍i⟦t₁⟧!}!}
-monotonicity-𝕍 k µ (fold v) (µα t)    j foldv∈𝕍k⟦µαt⟧ j≤k = {!!}
-
--- RecTy : Gas → Set
--- RecTy k = (µ : List Modeᵥ) (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) (j : ℕ) → v ∈𝕍 k ⟦ t ⟧ → j ≤ k → v ∈𝕍 j ⟦ t ⟧
-
--- MM : ∀ k → (∀ j → j < k → RecTy j) → RecTy k
--- -- MM : ∀ k → WfRec _<_ RecTy k → RecTy k
--- MM k ih µ (λx e)   (t₁ ⇒ t₂) j v∈V j≤k =
---   (λx e) ∈𝕍 j ⟦ t₁ ⇒ t₂ ⟧
---     by fold-∈𝕍 {e = λx e} {t = t₁ ⇒ t₂} (
---   (∀ {i v} → (i≤j : i ≤ j) → R𝕍 i (λ j j<k → ∈𝕍𝔼 j) µ v t₁ → R𝔼 i (λ j j<k → ∈𝕍𝔼 j) µ (e ⋯ ⦅ v ⦆) t₂)
---     -- by λ {i} {v} i≤j R𝕍-v → {!!}
---     by λ {i} {v} i≤j R𝕍-v {i'} {e'} i'<i → {!!} , (λ irred-e' → {!ih (i ∸ i') _ µ e' t₂ !})
---   )
--- MM k ih µ (fold v) (µα t)    j v∈V j≤k =
---   fold v ∈𝕍 j ⟦ µα t ⟧          by
---   fold v ∈𝕍 j ⟦ µα t ⟧          by {!!}
-
--- -- R𝕍 k ih µ (λx e)   (t₁ ⇒ t₂)  = ∀ {j v} →
--- --                               (j≤k : j ≤ k) →
--- --                               R𝕍 j (wk-ih j≤k ih) µ v t₁ →
--- --                               R𝔼 j (wk-ih j≤k ih) µ (e ⋯ ⦅ v ⦆) t₂
-
--- monotonicity : 
---   ∀ k µ (v : µ ⊢ 𝕖) (t : µ ⊢ 𝕥) j →
---   v ∈𝕍 k ⟦ t ⟧ →
---   j ≤ k →
---   v ∈𝕍 j ⟦ t ⟧
--- monotonicity = <-rec _ MM
+monotonicity-𝕍ᵣ j≤k v∈𝕍 = 𝕍ᵢ→𝕍ᵣ (monotonicity-𝕍ᵢ j≤k (𝕍ᵣ→𝕍ᵢ v∈𝕍))
 
 -- Fundamental Property
+
+inv-Irred-fold :
+  Irred (fold e) →
+  Irred e
+inv-Irred-fold irred-fold-e (e' , e↪e') = irred-fold-e (fold e' , ξ-fold e↪e')
+
+inv-↪^-fold :
+  fold e ↪^[ k ] e' →
+  Irred e' →
+  ∃[ e'' ] e ↪^[ k ] e'' × Irred e'' × e' ≡ fold e''
+inv-↪^-fold ↪-refl irred-folde = _ , ↪-refl , inv-Irred-fold irred-folde , refl
+inv-↪^-fold (↪-step (ξ-fold e↪e′) fold-e′↪^e″) irred-e″ with inv-↪^-fold fold-e′↪^e″ irred-e″
+... | e‴ , e′↪ʲe‴ , irred-e‴ , e′≡folde‴ = e‴ , ↪-step e↪e′ e′↪ʲe‴ , irred-e‴ , e′≡folde‴
+
+
+⊢→⊧ᵢ :
+  Γ ⊢ e ∶ t →
+  Γ ⊧ᵢ e ∶ t
+⊢→⊧ᵢ {µ} {Γ} {.(` x)}      {t}        (τ-` {x = x} p) =
+    Γ ⊧ᵢ ` x ∶ t
+  by λ {k} {σ} σ∈𝔾 →
+    σ 𝕖 x ∈𝔼 k ⟦ t ⋯ σ ⟧ᵢ
+  by {!σ∈𝔾 x!}
+⊢→⊧ᵢ {µ} {Γ} {.(λx _)}     {.(_ ⇒ _)} (τ-λ ⊢e) = {!!}
+⊢→⊧ᵢ {µ} {Γ} {.(_ · _)}    {t}        (τ-· ⊢e ⊢e₁) = {!!}
+⊢→⊧ᵢ {µ} {Γ} {.(fold e)}   {.(µα t)}  (τ-fold {e = e} {t = t} ⊢e) =
+    Γ ⊧ᵢ fold e ∶ µα t
+  by λ {k} {σ} σ∈𝔾 →
+    fold (e ⋯ σ) ∈𝔼 k ⟦ (µα t) ⋯ σ ⟧ᵢ
+  by 𝔼 λ {j} {e'} j<k [folde⋯σ]↪ʲ[e'] irred-e' →
+    e' ∈𝕍 k ∸ j ⟦ (µα t) ⋯ σ ⟧ᵢ
+  by let (e'' , e⋯σ↪e'' , irred-e'' , e'≡folde'') = inv-↪^-fold [folde⋯σ]↪ʲ[e'] irred-e' in -- TODO: if we would be able to match on the eq, stuff would be simpler...
+     let [e⋯σ]∈𝔼ᵏ = e ⋯ σ ∈𝔼 k ⟦ t ⋯ ⦅ µα t ⦆ ⋯ σ ⟧ᵢ by ⊢→⊧ᵢ ⊢e σ∈𝔾 in
+     let e''∈𝕍[k-j] = e'' ∈𝕍 k ∸ j ⟦ t ⋯ ⦅ µα t ⦆ ⋯ σ ⟧ᵢ by unwrap-𝔼 [e⋯σ]∈𝔼ᵏ j<k e⋯σ↪e'' irred-e'' in
+     subst (_∈𝕍 _ ⟦ _ ⟧ᵢ) (sym e'≡folde'') (
+    fold e'' ∈𝕍 k ∸ j ⟦ (µα t) ⋯ σ ⟧ᵢ
+  by 𝕍-µ λ {i} i<k∸j →
+    e'' ∈𝕍 i ⟦ t ⋯ σ ↑ 𝕥 ⋯ ⦅ (µα t) ⋯ σ ⦆ ⟧ᵢ
+  by monotonicity-𝕍ᵢ (i ≤ k ∸ j by <⇒≤ i<k∸j) (
+    e'' ∈𝕍 k ∸ j ⟦ t ⋯ σ ↑ 𝕥 ⋯ ⦅ (µα t) ⋯ σ ⦆ ⟧ᵢ
+  by subst (_ ∈𝕍 _ ⟦_⟧ᵢ) (dist-⦅⦆ₛ-⋯ₛ t (µα t) σ) (
+    e'' ∈𝕍 k ∸ j ⟦ t ⋯ ⦅ µα t ⦆ ⋯ σ ⟧ᵢ
+  by e''∈𝕍[k-j] )))
+⊢→⊧ᵢ {µ} {Γ} {.(unfold _)} {_} (τ-unfold ⊢e) = {!!}
+-- ⊢→⊧ᵢ {µ} {Γ} {.(unfold _)} {.(_ ⋯ ⦅ µα _ ⦆)} (τ-unfold ⊢e) = {!!}
+
+-- ⊢→⊧ᵢ (τ-` x)       = {!!}
+-- ⊢→⊧ᵢ (τ-λ ⊢e)      = {!!}
+-- ⊢→⊧ᵢ (τ-· ⊢e₁ ⊢e₂) = {!!}
+-- ⊢→⊧ᵢ (τ-fold ⊢e)   =
+--     Γ ⊧ᵢ fold e ∶
+-- fold (e ⋯ σ) ∈𝔼 k ⟦ µα (t ⋯ σ S.↑ 𝕥) ⟧ᵢ
+-- {!!}
+-- ⊢→⊧ᵢ (τ-unfold ⊢e) = {!!}
+
 ⊢→⊧ :
   Γ ⊢ e ∶ t →
   Γ ⊧ e ∶ t
-⊢→⊧ ⊢e = {!!}
+⊢→⊧ (τ-` x)       = {!!}
+⊢→⊧ (τ-λ ⊢e)      = {!!}
+⊢→⊧ (τ-· ⊢e₁ ⊢e₂) = {!!}
+⊢→⊧ (τ-fold ⊢e)   {k} σ∈𝔾 = {!!}
+⊢→⊧ (τ-unfold ⊢e) = {!!}
+
+
+
+
+-- Safe : [] ⊢ 𝕖 → Set
+-- Safe e = ∀ e' → e ↪* e' → Value e' ⊎ Red e'
+
+-- Red? : ∀ (e : [] ⊢ 𝕖) → Dec (Red e)
+-- Red? e = {!!}
+
+-- -- TODO: use func rep for 𝔾 or remove.
+-- idₛ∈𝔾⟦∅⟧ : idₛ ∈𝔾 k ⟦ ∅ ⟧
+-- idₛ∈𝔾⟦∅⟧ = []
+
+-- 𝕍ᵢ→Value : e ∈𝕍 k ⟦ t ⟧ᵢ → Value e
+-- 𝕍ᵢ→Value (𝕍-⇒ x) = λxe
+-- 𝕍ᵢ→Value {e = fold v} {k = k} {t = µα t} (𝕍-µ {v = v} foldv∈𝕍) =
+--   let foldv∈𝕍ᵣ = v ∈𝕍 k ⟦ t ⋯ ⦅ µα t ⦆ ⟧  by {!Rec.unfold-∈𝕍 foldv∈𝕍!} in
+--   let foldv∈𝕍ᵢ = v ∈𝕍 k ⟦ t ⋯ ⦅ µα t ⦆ ⟧ᵢ by 𝕍ᵣ→𝕍ᵢ foldv∈𝕍ᵣ in
+--   {!!}
+--   -- fold (𝕍ᵢ→Value (𝕍ᵣ→𝕍ᵢ foldv∈𝕍))
+-- -- 𝕍ᵢ→Value {fold e} {k} {µα t}    fold-e∈𝕍⟦t⟧ = fold (𝕍→Value {!fold-e∈𝕍⟦t⟧ {!j<k!}!})
+
+-- 𝕍ᵢ→Value' : (∀ k → e ∈𝕍 k ⟦ t ⟧ᵢ) → Value e
+-- 𝕍ᵢ→Value' = {!!}
+-- -- 𝕍ᵢ→Value' {e = λx e}     {t = t₁ ⇒ t₂} f = λxe
+-- -- 𝕍ᵢ→Value' {e = fold e}   {t = µα t}    f = fold (𝕍ᵢ→Value' {e = e} λ k → {!let 𝕍-µ x = f (suc k) in ? !})
+-- --                                             -- fold (𝕍ᵢ→Value' {e = e} λ k →
+-- --                                             -- let folde∈𝕍sk = Rec.unfold-∈𝕍 {k = suc k} {e = fold e} {t = µα t} (f (suc k)) in
+-- --                                             -- folde∈𝕍sk (k < suc k by (≤-refl {suc k})))
+-- -- -- 𝕍ᵢ→Value' {e = λx e}     {t = 𝟘}       f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = λx e}     {t = µα t}    f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = e₁ · e₂}  {t = t ⇒ t₁}  f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = e₁ · e₂}  {t = 𝟘}       f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = e₁ · e₂}  {t = µα t}    f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = fold e}   {t = t ⇒ t₁}  f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = fold e}   {t = 𝟘}       f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = unfold e} {t = t ⇒ t₁}  f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = unfold e} {t = 𝟘}       f = ⊥-elim (f 0)
+-- -- -- 𝕍ᵢ→Value' {e = unfold e} {t = µα t}    f = ⊥-elim (f 0)
+
+-- 𝕍→Value' : (∀ k → e ∈𝕍 k ⟦ t ⟧) → Value e
+-- 𝕍→Value' {e = λx e}     {t = t₁ ⇒ t₂} f = λxe
+-- 𝕍→Value' {e = fold e}   {t = µα t}    f = fold (𝕍→Value' {e = e} λ k →
+--                                             let folde∈𝕍sk = Rec.unfold-∈𝕍 {k = suc k} {e = fold e} {t = µα t} (f (suc k)) in
+--                                             folde∈𝕍sk (k < suc k by (≤-refl {suc k})))
+-- 𝕍→Value' {e = λx e}     {t = 𝟘}       f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = λx e}     {t = µα t}    f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = e₁ · e₂}  {t = t ⇒ t₁}  f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = e₁ · e₂}  {t = 𝟘}       f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = e₁ · e₂}  {t = µα t}    f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = fold e}   {t = t ⇒ t₁}  f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = fold e}   {t = 𝟘}       f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = unfold e} {t = t ⇒ t₁}  f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = unfold e} {t = 𝟘}       f = ⊥-elim (f 0)
+-- 𝕍→Value' {e = unfold e} {t = µα t}    f = ⊥-elim (f 0)
+
+-- 𝕍→Value : e ∈𝕍 k ⟦ t ⟧ → Value e
+-- 𝕍→Value {λx e}   {k} {t₁ ⇒ t₂} λxe∈𝕍⟦t⟧    = λxe
+-- 𝕍→Value {fold e} {k} {µα t}    fold-e∈𝕍⟦t⟧ = fold (𝕍→Value {!fold-e∈𝕍⟦t⟧ {!j<k!}!})
+
+-- ⊧ᵢ→safe :
+--   ∅ ⊧ᵢ e ∶ t →
+--   Safe e
+-- ⊧ᵢ→safe {e} {t} ⊧e e′ e↪*e′ with Red? e′
+-- ... | yes red-e′                  = inj₂ red-e′
+-- ... | no irred-e′ rewrite ⋯-idₛ e = inj₁
+--   let (k , e↪*[k]e′) = ↪*→↪^ e↪*e′ in
+--   let e⋯id∈𝔼⟦t⋯id⟧ = ⊧e {k = k} [] in
+--   let e∈𝔼⟦t⟧ = subst₂ (_∈𝔼 k ⟦_⟧ᵢ) (⋯-idₛ e) (⋯-idₛ t) e⋯id∈𝔼⟦t⋯id⟧ in
+--   𝕍→Value' {!!}
+--   -- (𝕍→Value' (λ k →
+--   --   let e⋯id∈𝔼⟦t⋯id⟧ = ⊧e {k = suc k} [] in
+--   --   let e∈𝔼⟦t⟧ = subst₂ (_∈𝔼 suc k ⟦_⟧ᵢ) (⋯-idₛ e) (⋯-idₛ t) e⋯id∈𝔼⟦t⋯id⟧ in
+--   --   let e′∈𝕍⟦t⟧ = unwrap-𝔼 e∈𝔼⟦t⟧ (k < suc k by {!!}) {!e↪*[k]e′!} irred-e′ in
+--   --   {!e′∈𝕍⟦t⟧!}))
+--   -- (𝕍→Value' (λ k →
+--   --   let e⋯id∈𝔼⟦t⋯id⟧ = ⊧e {k = suc k} [] in
+--   --   let e∈𝔼⟦t⟧ = subst₂ (_∈𝔼 suc k ⟦_⟧ᵢ) (⋯-idₛ e) (⋯-idₛ t) e⋯id∈𝔼⟦t⋯id⟧ in
+--   --   let e′∈𝕍⟦t⟧ = unwrap-𝔼 e∈𝔼⟦t⟧ (k < suc k by {!!}) {!e↪*[k]e′!} irred-e′ in
+--   --   {!e′∈𝕍⟦t⟧!}))
 
 -- ⊧→safe :
---   Γ ⊧ e ∶ t →
---   safe
--- ⊧→⊢ ⊧e = {!!}
+--   ∅ ⊧ e ∶ t →
+--   Safe e
+-- ⊧→safe {e} {t} ⊧e e′ e↪*e′ with Red? e′
+-- ... | yes red-e′                  = inj₂ red-e′
+-- ... | no irred-e′ rewrite ⋯-idₛ e = inj₁
+--   let (k , e↪*[k]e′) = ↪*→↪^ e↪*e′ in
+--   let e⋯id∈𝔼⟦t⋯id⟧ = ⊧e {k = k} idₛ∈𝔾⟦∅⟧ in
+--   let e∈𝔼⟦t⟧ = subst₂ (_∈𝔼 k ⟦_⟧) (⋯-idₛ e) (⋯-idₛ t) e⋯id∈𝔼⟦t⋯id⟧ in
+--   let e′∈𝕍⟦t⟧ = e∈𝔼⟦t⟧ {!impossible!} e↪*[k]e′ irred-e′ in
+--   𝕍→Value' (λ k →
+--     let e⋯id∈𝔼⟦t⋯id⟧ = ⊧e {k = k} idₛ∈𝔾⟦∅⟧ in
+--     let e∈𝔼⟦t⟧ = subst₂ (_∈𝔼 k ⟦_⟧) (⋯-idₛ e) (⋯-idₛ t) e⋯id∈𝔼⟦t⋯id⟧ in
+--     let e′∈𝕍⟦t⟧ = e∈𝔼⟦t⟧ {!impossible!} e↪*[k]e′ irred-e′ in
+--     {!e′∈𝕍⟦t⟧!})
+--   -- let e′∈𝕍⟦t⟧ = e∈𝔼⟦t⟧ e↪*e′ irred-e′ in
+--   -- 𝕍→Value e′∈𝕍⟦t⟧
 
--- -- mutual      
--- --   𝕍→Value : e ∈𝕍⟦ t ⟧ k → Value e
--- --   𝕍→Value = {!!}
+
