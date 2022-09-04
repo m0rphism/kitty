@@ -73,7 +73,7 @@ module TermSubst where
   ⋯-var _ _ = refl
 
   kit-traversal : KitTraversal
-  kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
+  kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
 
   open KitTraversal kit-traversal public hiding (_⋯_; ⋯-var)
 
@@ -238,16 +238,17 @@ module ValueSubst where
 
   -- Types and Contexts
 
-  open import KitTheory.Types2 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+  open import KitTheory.Types 𝕋
 
-  -- Each variable mode corresponds to a term mode that represents its type.
   kit-type : KitType
-  kit-type = record { ↑ₜ = λ { M → 𝕧 } ; m→M' = λ { m → 𝕧} }
+  kit-type = record { ↑ₜ = λ { M → 𝕧 } }
+
+  open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
 
   open KitType kit-type public
 
 open TermSubst public
-open ValueSubst using (Ctx; wk-telescope; _,,_; OPE; ope-keep; ope-drop; ope-id; ope-pres-telescope; m→M') renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
+open ValueSubst using (Ctx; wk-telescope; _,,_; OPE; ope-keep; ope-drop; ope-id; ope-pres-telescope) renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
 
 ⟦_⟧ : Value µ M → Term µ 𝕥
 ⟦ ` x ⟧          = ` x

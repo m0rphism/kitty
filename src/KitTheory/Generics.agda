@@ -9,9 +9,9 @@ open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using (id; _$_)
 
-open import Data.Product using (Σ; ∃-syntax; Σ-syntax; _×_; _,_)
-open import Size
+open import Data.Product using (Σ; ∃-syntax; Σ-syntax; _×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
 
+open import KitTheory.Prelude
 open Modes 𝕄
 
 private
@@ -19,13 +19,9 @@ private
     m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
     M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
     µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
-    s s₁ s₂ s₃ s' s₁' s₂' s₃' : Size
 
 Scoped : Set₁
 Scoped = List VarMode → TermMode → Set
-
-SScoped : Set₁
-SScoped = Size → Scoped
 
 data Desc : Set₁ where
   `σ : (A : Set) → (A → Desc) → Desc
@@ -37,112 +33,81 @@ data Desc : Set₁ where
 ⟦ `X µ' M' d ⟧ X µ M = X (µ' ++ µ) M' × ⟦ d ⟧ X µ M
 ⟦ `■ M'      ⟧ X µ M = M ≡ M'
 
-data Tm (d : Desc) (s : Size) : Scoped where
-  `var : ∀ {µ m} → µ ∋ m → Tm d s µ (m→M m)
-  `con : ∀ {µ M} {s' : Size< s} → ⟦ d ⟧ (Tm d s') µ M → Tm d s µ M
+data Tm (d : Desc) : Scoped where
+  `var : ∀ {µ m} → µ ∋ m → Tm d µ (m→M m)
+  `con : ∀ {µ M} → ⟦ d ⟧ (Tm d) µ M → Tm d µ M
 
-module KitCopy (_;_⊢_ : SScoped) (`_ : ∀ {µ m s} → µ ∋ m → s ; µ ⊢ m→M m)  where
+𝕋 : Desc → Terms 𝕄
+𝕋 d = record { _⊢_ = Tm d ; `_ = `var }
 
-  record Kit : Set₁ where
-    infix   4  _;_◆_
-    infixl  6  _↑_  _↑*_
+open import KitTheory.Kit
+open Kit {{...}}
 
-    field
-      StuffMode : Set
-      _;_◆_     : Size → List VarMode → StuffMode → Set
-      m→SM      : VarMode → StuffMode
-      SM→M      : StuffMode → TermMode
-      vr        : ∀ m → µ ∋ m → s ; µ ◆ m→SM m
-      tm        : ∀ SM → s ; µ ◆ SM → s ; µ ⊢ SM→M SM
-      wk        : ∀ SM → s ; µ ◆ SM → s ; (m' ∷ µ) ◆ SM
-      m→SM→M    : ∀ m → SM→M (m→SM m) ≡ m→M m
-      wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
-      tm-vr     : ∀ x → subst (s ; µ ⊢_) (m→SM→M m) (tm _ (vr _ x)) ≡ ` x
+mutual
+  _⋯_ : ∀ {d} {µ₁ : List VarMode} {M : TermMode} {µ₂ : List VarMode}
+      ⦃ 𝕂 : Kit (𝕋 d) ⦄ →
+      Tm d µ₁ M → _–[_]→_ (𝕋 d) µ₁ 𝕂 µ₂ → Tm d µ₂ M
+  _⋯_ (`var x)  f = tm _ (f _ x)
+  _⋯_ (`con e') f = `con (e' ⋯' f)
 
-    _–→_;_ : List VarMode → Size → List VarMode → Set
-    _–→_;_ µ₁ s₂ µ₂ = ∀ m → µ₁ ∋ m → s₂ ; µ₂ ◆ m→SM m
+  _⋯'_ : ∀ {d} {d'} {µ₁ : List VarMode} {M : TermMode} {µ₂ : List VarMode}
+      ⦃ 𝕂 : Kit (𝕋 d) ⦄ →
+      ⟦ d' ⟧ (Tm d) µ₁ M → _–[_]→_ (𝕋 d) µ₁ 𝕂 µ₂ → ⟦ d' ⟧ (Tm d) µ₂ M
+  _⋯'_ {d' = `σ A d'}     ⟨ a , D' ⟩ f = ⟨ a , D' ⋯' f ⟩
+  _⋯'_ {d' = `X µ' M' d'} ⟨ e , e' ⟩ f = ⟨ e ⋯ (f ↑* µ') , e' ⋯' f ⟩
+  _⋯'_ {d' = `■ M'}       e          f = e
 
-    tm' : s ; µ ◆ m→SM m → s ; µ ⊢ m→M m
-    tm' {s} {µ} {m} t = subst (s ; µ ⊢_) (m→SM→M m) (tm _ t)
+⋯-var : ∀ {d} {µ₁ : List VarMode} {m : VarMode} {µ₂ : List VarMode}
+      ⦃ 𝕂 : Kit (𝕋 d) ⦄ (x : µ₁ ∋ m) (ϕ : (𝕂 Kit.–→ µ₁) µ₂) →
+      Kit.tm 𝕂 m (ϕ m x) ≡ Kit.tm 𝕂 m (ϕ m x)
+⋯-var x ϕ = refl
 
-    _↑_ : µ₁ –→ s ; µ₂ → ∀ m → (m ∷ µ₁) –→ s ; (m ∷ µ₂)
-    (f ↑ m) _ (here p)  = vr _ (here p)
-    (f ↑ m) _ (there x) = wk _ (f _ x)
+KT : (d : Desc) → KitTraversal (𝕋 d)
+KT d = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
 
-    _↑*_ : µ₁ –→ s ; µ₂ → ∀ µ' → (µ' ++ µ₁) –→ s ; (µ' ++ µ₂)
-    f ↑* []       = f
-    f ↑* (m ∷ µ') = (f ↑* µ') ↑ m
+open import KitTheory.Compose
+open ComposeKit {{...}}
 
-  open Kit {{...}}
+mutual
+  ⋯-assoc : ∀ {d} {µ₁ : List VarMode} {M : TermMode} {µ₂ µ₃ : List VarMode}
+        ⦃ 𝕂₁ 𝕂₂ 𝕂 : Kit (𝕋 d) ⦄
+        ⦃ 𝔸 : ComposeKit (𝕋 d) (KT d) {{𝕂₁}} {{𝕂₂}} {{𝕂}} ⦄
+        (e : Tm d µ₁ M)
+        (ϕ₁ : _–[_]→_ (𝕋 d) µ₁ 𝕂₂ µ₂)
+        (ϕ₂ : _–[_]→_ (𝕋 d) µ₂ 𝕂₁ µ₃) →
+        ((e ⋯ ϕ₁) ⋯ ϕ₂) ≡ (e ⋯ (ϕ₂ ∘ₖ ϕ₁))
+  ⋯-assoc (`var x)  ϕ₁ ϕ₂ = tm-⋯-∘ ϕ₁ ϕ₂ x
+  ⋯-assoc (`con e') ϕ₁ ϕ₂ = cong `con (⋯-assoc' e' ϕ₁ ϕ₂)
 
-  _–[_]→_;_ : List VarMode → (_ : Kit) → Size → List VarMode → Set _
-  µ₁ –[ 𝕂 ]→ s₂ ; µ₂ = Kit._–→_;_ 𝕂 µ₁ s₂ µ₂
+  ⋯-assoc' : ∀ {d} {d'} {µ₁ : List VarMode} {M : TermMode} {µ₂ µ₃ : List VarMode}
+        ⦃ 𝕂₁ 𝕂₂ 𝕂 : Kit (𝕋 d) ⦄
+        ⦃ 𝔸 : ComposeKit (𝕋 d) (KT d) {{𝕂₁}} {{𝕂₂}} {{𝕂}} ⦄
+        (e : ⟦ d' ⟧ (Tm d) µ₁ M)
+        (ϕ₁ : _–[_]→_ (𝕋 d) µ₁ 𝕂₂ µ₂)
+        (ϕ₂ : _–[_]→_ (𝕋 d) µ₂ 𝕂₁ µ₃) →
+        ((e ⋯' ϕ₁) ⋯' ϕ₂) ≡ (e ⋯' (ϕ₂ ∘ₖ ϕ₁))
+  ⋯-assoc' {d' = `σ A d'}     ⟨ a , D' ⟩  ϕ₁ ϕ₂ = cong ⟨ a ,_⟩ (⋯-assoc' D' ϕ₁ ϕ₂)
+  ⋯-assoc' {d' = `X µ' M' d'} ⟨ e₁ , e₂ ⟩ ϕ₁ ϕ₂ = cong₂ ⟨_,_⟩ (trans (⋯-assoc e₁ (ϕ₁ ↑* µ') (ϕ₂ ↑* µ'))
+                                                                     (cong (e₁ ⋯_) (sym (dist-↑*-∘ µ' ϕ₂ ϕ₁))) )
+                                                              (⋯-assoc' e₂ ϕ₁ ϕ₂)
+  ⋯-assoc' {d' = `■ M'}       refl        ϕ₁ ϕ₂ = refl
 
-  record KitTraversal : Set₁ where
-    infixl  5  _⋯_
+KA : (d : Desc) → KitAssoc (𝕋 d) (KT d)
+KA d = record { ⋯-assoc = ⋯-assoc }
 
-    field
-      _⋯_   : ∀ {{𝕂 : Kit}} →
-              s₁ ; µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ s₂ ; µ₂ → (s₁ ⊔ˢ s₂) ; µ₂ ⊢ M
-      ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ ∞ ; µ₂) →
-              (` x) ⋯ f ≡ subst (∞ ; µ₂ ⊢_) (m→SM→M m) (tm _ (f _ x))
+mutual
+  ⋯-id : ∀ {d} ⦃ 𝕂 : Kit (𝕋 d) ⦄ {µ : List VarMode} {M : TermMode}
+        (e : Tm d µ M) →
+        (e ⋯ Kit.idₖ 𝕂) ≡ e
+  ⋯-id (`var x) = tm-vr x
+  ⋯-id (`con e) = cong `con (⋯-id' e)
 
-    kitᵣ : Kit
-    Kit.StuffMode kitᵣ = VarMode
-    Kit._;_◆_     kitᵣ = λ _ → _∋_
-    Kit.m→SM      kitᵣ = λ x → x
-    Kit.SM→M      kitᵣ = m→M
-    Kit.vr        kitᵣ = λ _ x → x
-    Kit.tm        kitᵣ = λ _ → `_
-    Kit.wk        kitᵣ = λ _ → there
-    Kit.m→SM→M    kitᵣ = λ _ → refl
-    Kit.wk-vr     kitᵣ = λ _ _ → refl
-    Kit.tm-vr     kitᵣ = λ _ → refl
+  ⋯-id' : ∀ {d} {d'} ⦃ 𝕂 : Kit (𝕋 d) ⦄ {µ : List VarMode} {M : TermMode}
+        (e : ⟦ d' ⟧ (Tm d) µ M) →
+        (e ⋯' Kit.idₖ 𝕂) ≡ e
+  ⋯-id' {d' = `σ A d'}     ⟨ a , D' ⟩  = cong ⟨ a ,_⟩ (⋯-id' D')
+  ⋯-id' {d' = `X µ' M' d'} ⟨ e₁ , e₂ ⟩ = cong₂ ⟨_,_⟩ (trans (cong (e₁ ⋯_) (id↑*≡id µ' _)) (⋯-id e₁)) (⋯-id' e₂)
+  ⋯-id' {d' = `■ M'}       refl        = refl
 
-    private instance _ = kitᵣ
-
-    kitₛ : Kit
-    Kit.StuffMode kitₛ = TermMode
-    Kit._;_◆_     kitₛ = _;_⊢_
-    Kit.m→SM      kitₛ = m→M
-    Kit.SM→M      kitₛ = λ x → x
-    Kit.vr        kitₛ = λ _ → `_
-    Kit.tm        kitₛ = λ _ x → x
-    Kit.wk        kitₛ = λ _ x → x ⋯ wk
-    Kit.m→SM→M    kitₛ = λ _ → refl
-    Kit.wk-vr     kitₛ = λ _ x → ⋯-var x wk
-    Kit.tm-vr     kitₛ = λ x → refl
-
-module Mapping (_;_⊢₁_ _;_⊢₂_ : SScoped) where
-  _;_–→_;_ : Size → List VarMode → Size → List VarMode → Set
-  s₁ ; µ₁ –→ s₂ ; µ₂ = ∀ M → s₁ ; µ₁ ⊢₁ M → s₂ ; µ₂ ⊢₂ M
-
-  Lift : Set
-  Lift = ∀ {s₁ s₂ µ₁ µ₂} µ → (s₁ ; µ₁ –→ s₂ ; µ₂) → (s₁ ; (µ ++ µ₁) –→ s₂ ; (µ ++ µ₂))
-
-  map⟦⟧ : ∀ {µ₁ µ₂} s₁ s₂ (d : Desc) →
-    (∀ µ → s₁ ; (µ ++ µ₁) –→ s₂ ; (µ ++ µ₂)) →
-    ⟦ d ⟧ (s₁ ;_⊢₁_) µ₁ M →
-    ⟦ d ⟧ (s₂ ;_⊢₂_) µ₂ M
-  map⟦⟧ s₁ s₂ (`σ A dA)  f (a , t) = a , map⟦⟧ s₁ s₂ (dA a) f t
-  map⟦⟧ s₁ s₂ (`X µ M d) f (x , t) = f µ _ x , map⟦⟧ s₁ s₂ d f t
-  map⟦⟧ s₁ s₂ (`■ x)     f t       = t
-
-module GenKit (d : Desc) where
-  open KitCopy (Tm d) (λ x → `var x)
-  open Kit {{...}}
-  open Mapping
-
-  -- instance trav : KitTraversal
-  -- KitTraversal._⋯_ trav (`var x) f = tm' (f _ x)
-  -- KitTraversal._⋯_ trav {s₁ = s₁} {s₂ = s₂} (`con {s' = s'} t) f = `con {s' = s' ⊔ˢ s₂} {!!}
-
-  -- -- KitTraversal._⋯_ trav {s₁ = s₁} {s₂ = s₂} (`con {s' = s'} t) f = `con (map⟦⟧ (Tm d) (Tm d) _ _ d (λ µ _ t → KitTraversal._⋯_ trav t (f ↑* µ)) t)
-
-  -- -- KitTraversal._⋯_ trav {s₁ = s₁} {s₂ = s₂} (`con {s' = s'} t) f = {!`con {s' = s' ⊔ˢ s₂} (trav⟦⟧ {s₁ = s₁} {s' = s'} t f)!} where
-  -- --     trav⟦⟧ : ∀ {d µ₁ µ₂ s₁ s₂ M} {s' : Size< s₁} {{𝕂 : Kit}} → ⟦ d ⟧ (Tm d s') µ₁ M → µ₁ –[ 𝕂 ]→ s₂ ; µ₂ → ⟦ d ⟧ (Tm d (s' ⊔ˢ s₂)) µ₂ M
-  -- --     trav⟦⟧ {`σ A dA}  (a , t')  f = a , {!trav⟦⟧ {dA a} t' !} -- doesn't work because we have Tm inside the ⟦⟧ of t'
-  -- --     trav⟦⟧ {`X µ M d} (t' , t) f = {!!}
-  -- --     trav⟦⟧ {`■ _}     t        f = t
-
-  -- KitTraversal.⋯-var trav t f = refl
+KAL : (d : Desc) → KitAssoc.KitAssocLemmas (KA d)
+KAL d = record { ⋯-id = ⋯-id }

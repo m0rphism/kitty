@@ -149,13 +149,15 @@ open KitAssocLemmas kit-assoc-lemmas public
 
 -- Types and Contexts
 
-open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+open import KitTheory.Types 𝕋
 
 -- Each variable mode corresponds to a term mode that represents its type.
 kit-type : KitType
 kit-type = record { ↑ₜ = λ { _ → 𝕧 } }
 
 open KitType kit-type public
+
+open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ

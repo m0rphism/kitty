@@ -307,9 +307,3 @@ open KitAssocLemmas kit-assoc-lemmas public
 -- Types and Contexts ----------------------------------------------------------
 
 open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
-
--- Each variable mode corresponds to a term mode that represents its type.
-kit-ope : KitOPE
-kit-ope = record {}
-
-open KitOPE kit-ope public

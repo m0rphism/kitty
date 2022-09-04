@@ -113,15 +113,15 @@ id⇓ₛid 𝕥 x = neutral (` x) ,× ⇓-refl-val _ ,× refl
 
 postulate
   eval-subst-evalₗ : (t : Term µ₁ 𝕥) {σ : µ₁ →ₛ µ₂} →
-    ⟦ v' ⟧ ⋯ σ ⇓ v →
+    ⟦ v' ⟧ ⋯ₛ σ ⇓ v →
     t ⇓ v' →
-    t ⋯ σ ⇓ v
+    t ⋯ₛ σ ⇓ v
 -- eval-subst-evalₗ t⋯σ⇓v t⇓v' = {!!}
 
 eval-subst-eval : (t₁ : Term µ₁ 𝕥) {σ₁ σ₂ : µ₁ →ₛ µ₂} →
-  t₁ ⋯ σ₁ ⇓ v₁ →
+  t₁ ⋯ₛ σ₁ ⇓ v₁ →
   σ₁ ⇓ₛ σ₂ →
-  t₁ ⋯ σ₂ ⇓ v₁
+  t₁ ⋯ₛ σ₂ ⇓ v₁
 eval-subst-eval (` x)     ⇓t₁               ⇓σ₁ with ⇓σ₁ _ x
 eval-subst-eval (` x)     ⇓t₁               ⇓σ₁ | v' ,× ⇓x ,× eq with ⇓-deterministic ⇓t₁ ⇓x
 eval-subst-eval (` x)     ⇓t₁               ⇓σ₁ | v' ,× ⇓x ,× eq | refl rewrite eq = ⇓-refl-val v'
@@ -132,9 +132,9 @@ eval-subst-eval (Π t₁ t₂) (⇓-Π ⇓t₁ ⇓t₂)     ⇓σ₁ = ⇓-Π (e
 eval-subst-eval ★         ⇓t₁               ⇓σ₁ = ⇓t₁
 
 eval-subst-eval₁ : (t₁ : Term (µ , 𝕥) 𝕥) {t₂ : Term µ 𝕥} →
-  t₁ ⋯ ⦅ t₂ ⦆ ⇓ v₁ →
+  t₁ ⋯ₛ ⦅ t₂ ⦆ₛ ⇓ v₁ →
   t₂ ⇓ v₂ →
-  t₁ ⋯ ⦅ ⟦ v₂ ⟧ ⦆ ⇓ v₁
+  t₁ ⋯ₛ ⦅ ⟦ v₂ ⟧ ⦆ₛ ⇓ v₁
 eval-subst-eval₁ t₁ ⇓t₁ ⇓t₂ = eval-subst-eval t₁ ⇓t₁ (⇓ₛ-ext id⇓ₛid ⇓t₂)
 
 infixr 1 _by_

@@ -27,7 +27,7 @@ ren-pres-⊢ {τ = τ} {ρ = ρ} ope (τ-· {τ₁ = τ₁} {τ₂ = τ₂} {e�
 ren-pres-⊢ ope (τ-Π t₁⇓τ₁ ⊢t₁ ⊢t₂) rewrite ↑≡ = τ-Π (ren-pres-⇓ _ t₁⇓τ₁) (ren-pres-⊢ ope ⊢t₁) (ren-pres-⊢ (ope-keep ope) ⊢t₂)
 ren-pres-⊢ ope τ-★                            = τ-★
 
-wk-pres-⊢ : {Γ : Ctx µ₁} {τ₂ : Value µ₁ (m→M' m)} →
+wk-pres-⊢ : {Γ : Ctx µ₁} {τ₂ : Value µ₁ 𝕧} →
   Γ ⊢ e ∶ τ₁ →
   _,,_ {m = m} Γ τ₂ ⊢ e ⋯ wk ∶ τ₁ ⋯ᵥ wk
 wk-pres-⊢ ⊢e = ren-pres-⊢ (ope-drop ope-id) ⊢e

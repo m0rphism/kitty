@@ -1,4 +1,4 @@
-module Examples.SystemF-Kits.Definitions2 where
+module Examples.SystemF-Kits.Definitions-KitAlt where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
@@ -9,7 +9,7 @@ open import KitTheory.Modes using (Modes; Terms)
 
 -- Fixities --------------------------------------------------------------------
 
-infix   3  _⊢_  _↪_  _⊢_∶_  _⊢*_∶_
+infix   3  _⊢_ --  _↪_  _⊢_∶_  _⊢*_∶_
 infixr  5  ∀α_  λx_  Λα_
 infixr  6  _⇒_
 infixl  6  _·_  _∙_
@@ -75,11 +75,12 @@ variable
 
 -- Application of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Kit2 𝕋
+open import KitTheory.Kit 𝕋
+open import KitTheory.KitAlt 𝕋
 open Kit {{...}} public
 
-kit-traversal : KitTraversal
-kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var; ⋯-↑ = ⋯-↑ } where
+kit-traversal-alt : KitTraversalAlt
+kit-traversal-alt = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var; ⋯-↑ = ⋯-↑ } where
   -- Traverse a term with a renaming or substitution (depending on the kit).
   _⋯_ : ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
   (`ˣ x)    ⋯ f = tm _ (f _ x)
@@ -210,10 +211,10 @@ kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var; ⋯-↑ = ⋯-↑ } 
     ★              ≡⟨ sym (⋯-↑-★ µ g) ⟩
     ★ ⋯* (g ↑** µ) ∎
 
-open KitTraversal kit-traversal public
+open KitTraversalAlt kit-traversal-alt public
 
-instance 𝕂ᵣ = kitᵣ
-instance 𝕂ₛ = kitₛ
+-- instance 𝕂ᵣ = kitᵣ
+-- instance 𝕂ₛ = kitₛ
 
 -- -- Composition of Renamings and Substitutions ----------------------------------
 

@@ -5,7 +5,7 @@ open import KitTheory.Types using (KitType)
 open import KitTheory.ITerms using (ITerms)
 open KitAssoc using (KitAssocLemmas)
 
-module KitTheory.IKit {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (A : KitAssoc 𝕋 T) (AL : KitAssocLemmas A) (KT : KitType 𝕋 T A AL) (IT : ITerms 𝕋 T A AL KT) where
+module KitTheory.IKit {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (A : KitAssoc 𝕋 T) (AL : KitAssocLemmas A) (KT : KitType 𝕋) (IT : ITerms 𝕋 T A AL KT) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -24,6 +24,7 @@ open KitTheory.Compose 𝕋 T
 open KitTheory.Compose.KitAssoc A
 open KitTheory.Compose.KitAssoc.KitAssocLemmas AL
 open KitTheory.Types.KitType KT
+open import KitTheory.OPE 𝕋 T A AL KT
 open KitTheory.ITerms 𝕋 T A AL KT
 open KitTheory.ITerms.ITerms IT
 
