@@ -3,7 +3,7 @@ open import KitTheory.Kit using (KitTraversal)
 
 module KitTheory.Compose {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) where
 
-open import Data.List using (List; []; _∷_)
+open import Data.List using (List; [])
 open import Data.List.Membership.Propositional using (_∈_)
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -43,12 +43,12 @@ record ComposeKit {{𝕂₁ : Kit}} {{𝕂₂ : Kit}} {{𝕂 : Kit}} : Set₁ wh
   dist-↑*-∘ : ∀ µ (ϕ₁ : µ₂ –[ 𝕂₁ ]→ µ₃) (ϕ₂ : µ₁ –[ 𝕂₂ ]→ µ₂) →
     (ϕ₁ ∘ₖ ϕ₂) ↑* µ ≡ (ϕ₁ ↑* µ) ∘ₖ (ϕ₂ ↑* µ)
   dist-↑*-∘ []      ϕ₁ ϕ₂ = refl
-  dist-↑*-∘ (µ , m) ϕ₁ ϕ₂ =
-    (ϕ₁ ∘ₖ ϕ₂) ↑* (µ , m)                ≡⟨ refl ⟩
+  dist-↑*-∘ (µ ▷ m) ϕ₁ ϕ₂ =
+    (ϕ₁ ∘ₖ ϕ₂) ↑* (µ ▷ m)                ≡⟨ refl ⟩
     ((ϕ₁ ∘ₖ ϕ₂) ↑* µ) ↑ m                ≡⟨ cong (_↑ m) (dist-↑*-∘ µ ϕ₁ ϕ₂) ⟩
     ((ϕ₁ ↑* µ) ∘ₖ (ϕ₂ ↑* µ)) ↑ m         ≡⟨ dist-↑-∘ m (ϕ₁ ↑* µ) (ϕ₂ ↑* µ) ⟩
     (((ϕ₁ ↑* µ) ↑ m) ∘ₖ ((ϕ₂ ↑* µ) ↑ m)) ≡⟨ refl ⟩
-    ((ϕ₁ ↑* (µ , m)) ∘ₖ (ϕ₂ ↑* (µ , m))) ∎
+    ((ϕ₁ ↑* (µ ▷ m)) ∘ₖ (ϕ₂ ↑* (µ ▷ m))) ∎
 
 record KitAssoc : Set₁ where
   open ComposeKit {{...}}
@@ -235,7 +235,7 @@ record KitAssoc : Set₁ where
       _ (there x) → wk-cancels-⦅⦆ₛ (σ _ x) t
 
     -- TODO: prove for other combinations between ρ and σ.
-    ⋯↑⋯⦅⦆-is-⋯,ₛ : ∀ {µ₁ µ₂ m} (t' : (µ₁ , m) ⊢ M) (t : µ₂ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
+    ⋯↑⋯⦅⦆-is-⋯,ₛ : ∀ {µ₁ µ₂ m} (t' : (µ₁ ▷ m) ⊢ M) (t : µ₂ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
       t' ⋯ (σ ↑ m) ⋯ ⦅ t ⦆ₛ ≡ t' ⋯ (σ ,ₛ t)
     ⋯↑⋯⦅⦆-is-⋯,ₛ {m = m} t' t σ =
       t' ⋯ₛ (σ ↑ m) ⋯ₛ ⦅ t ⦆ₛ    ≡⟨ ⋯-assoc t' (σ ↑ m) ⦅ t ⦆ₛ ⟩

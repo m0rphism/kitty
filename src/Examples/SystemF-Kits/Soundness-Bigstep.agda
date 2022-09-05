@@ -2,7 +2,7 @@ module Examples.SystemF-Kits.Soundness-Bigstep where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Unit using (⊤; tt)
 open import Function using () renaming (_∋_ to _by_)
@@ -20,8 +20,8 @@ mutual
     _∙_ : Neutral µ → µ ⊢ 𝕥 → Neutral µ
 
   data Value : List Modeᵥ → Set where
-    λx_     : Value (µ , 𝕖)  →  Value µ
-    Λα_     : Value (µ , 𝕥)  →  Value µ
+    λx_     : Value (µ ▷ 𝕖)  →  Value µ
+    Λα_     : Value (µ ▷ 𝕥)  →  Value µ
     neutral : Neutral µ → Value µ
 
 variable

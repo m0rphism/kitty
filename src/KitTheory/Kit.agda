@@ -2,7 +2,7 @@ open import KitTheory.Modes
 
 module KitTheory.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
-open import Data.List using (List; []; _∷_; _++_)
+open import Data.List using (List; [])
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
@@ -38,14 +38,14 @@ record Kit : Set₁ where
     SM→M      : StuffMode → TermMode
     vr        : ∀ m → µ ∋ m → µ ◆ m→SM m
     tm        : ∀ m → µ ◆ m→SM m → µ ⊢ m→M m
-    wk        : ∀ SM → µ ◆ SM → (m' ∷ µ) ◆ SM
+    wk        : ∀ SM → µ ◆ SM → (µ ▷ m') ◆ SM
     m→SM→M    : ∀ m → SM→M (m→SM m) ≡ m→M m
     wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
     tm-vr     : ∀ x → tm {µ = µ} m (vr _ x) ≡ ` x
 
-  wk* : ∀ SM → µ ◆ SM → (µ' ++ µ) ◆ SM
+  wk* : ∀ SM → µ ◆ SM → (µ ▷▷ µ') ◆ SM
   wk* {µ' = []} sm x = x
-  wk* {µ' = µ' , m} sm x = wk sm (wk* sm x)
+  wk* {µ' = µ' ▷ m} sm x = wk sm (wk* sm x)
 
   _–→_ : List VarMode → List VarMode → Set
   _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m→SM m
@@ -54,33 +54,33 @@ record Kit : Set₁ where
   idₖ = vr
 
   -- TODO: Can we express this as weakened f + ,ₖ ?
-  _↑_ : µ₁ –→ µ₂ → ∀ m → (m ∷ µ₁) –→ (m ∷ µ₂)
+  _↑_ : µ₁ –→ µ₂ → ∀ m → (µ₁ ▷ m) –→ (µ₂ ▷ m)
   (ϕ ↑ m) _ (here p)  = vr _ (here p)
   (ϕ ↑ m) _ (there x) = wk _ (ϕ _ x)
 
-  _↑*_ : µ₁ –→ µ₂ → ∀ µ' → (µ' ++ µ₁) –→ (µ' ++ µ₂)
+  _↑*_ : µ₁ –→ µ₂ → ∀ µ' → (µ₁ ▷▷ µ') –→ (µ₂ ▷▷ µ')
   ϕ ↑* []       = ϕ
-  ϕ ↑* (m ∷ µ') = (ϕ ↑* µ') ↑ m
+  ϕ ↑* (µ' ▷ m) = (ϕ ↑* µ') ↑ m
 
-  id↑≡id : ∀ m µ → idₖ {µ = µ} ↑ m ≡ idₖ {µ = m ∷ µ}
+  id↑≡id : ∀ m µ → idₖ {µ = µ} ↑ m ≡ idₖ {µ = µ ▷ m}
   id↑≡id m µ = fun-ext₂ λ where
     _ (here _)  → refl
     _ (there x) → wk-vr m x
 
-  id↑*≡id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ≡ idₖ {µ = µ' ++ µ}
+  id↑*≡id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ≡ idₖ {µ = µ ▷▷ µ'}
   id↑*≡id []       µ = refl
-  id↑*≡id (µ' , m) µ =
+  id↑*≡id (µ' ▷ m) µ =
     (idₖ ↑* µ') ↑ m ≡⟨ cong (_↑ m) (id↑*≡id µ' µ) ⟩
-    idₖ ↑ m         ≡⟨ id↑≡id m (µ' ++ µ) ⟩
+    idₖ ↑ m         ≡⟨ id↑≡id m (µ ▷▷ µ') ⟩
     idₖ             ∎
 
   -- Extending a renaming/substitution
-  _,ₖ_ : µ₁ –→ µ₂ → µ₂ ◆ m→SM m → (m ∷ µ₁) –→ µ₂
+  _,ₖ_ : µ₁ –→ µ₂ → µ₂ ◆ m→SM m → (µ₁ ▷ m) –→ µ₂
   (ϕ ,ₖ t) _ (here refl) = t
   (ϕ ,ₖ t) _ (there x)   = ϕ _ x
 
   -- Singleton renaming/substitution
-  ⦅_⦆ : µ ◆ m→SM m → (m ∷ µ) –→ µ
+  ⦅_⦆ : µ ◆ m→SM m → (µ ▷ m) –→ µ
   ⦅ v ⦆ = idₖ ,ₖ v
 
 open Kit {{...}}

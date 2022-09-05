@@ -2,7 +2,7 @@ module Examples.STLC.Normalization where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning; inspect; [_])
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Product using (_×_; ∃-syntax; _,_; Σ)
@@ -10,7 +10,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 
-open import Examples.STLC.Definitions hiding (_,_)
+open import Examples.STLC.Definitions
 open import Examples.STLC.SubjectReduction
 open import Examples.STLC.Progress
 
@@ -156,10 +156,10 @@ SNSub-ext : {σ : µ₁ →ₛ µ₂} →
   SNSub Γ₁ σ Γ₂ →
   Value e →
   SN Γ₂ (t ⋯ σ) e →
-  SNSub (Γ₁ ,, t) (σ ,ₛ e) Γ₂
+  SNSub (Γ₁ ▶ t) (σ ,ₛ e) Γ₂
 SNSub-ext {Γ₁ = Γ₁} {Γ₂ = Γ₂} {e = e} {t = t} {σ = σ} sn-σ val-e sn-e (here refl) =
   let sn-e' =
-        SN Γ₂ (wk-telescope (Γ₁ ,, t) (here refl) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (here refl))
+        SN Γ₂ (wk-telescope (Γ₁ ▶ t) (here refl) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (here refl))
           by (
         SN Γ₂ (t ⋯ wk ⋯ (σ ,ₛ e)) e
           by subst (λ ■ → SN Γ₂ ■ e) (sym (wk-cancels-,ₛ t σ e)) (
@@ -169,7 +169,7 @@ SNSub-ext {Γ₁ = Γ₁} {Γ₂ = Γ₂} {e = e} {t = t} {σ = σ} sn-σ val-e 
 SNSub-ext {Γ₁ = Γ₁} {Γ₂ = Γ₂} {e = e} {t = t} {σ = σ} sn-σ val-e sn-e (there x) with sn-σ x
 ... | sn-σx , val-σx =
   let sn-σx' =
-        SN Γ₂ (wk-telescope (Γ₁ ,, t) (there x) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (there x))
+        SN Γ₂ (wk-telescope (Γ₁ ▶ t) (there x) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (there x))
           by (
         SN Γ₂ (wk-telescope Γ₁ x ⋯ wk ⋯ (σ ,ₛ e)) (σ 𝕖 x)
           by subst (λ ■ → SN Γ₂ ■ (σ 𝕖 x)) (sym (wk-cancels-,ₛ (wk-telescope Γ₁ x) σ e)) (
@@ -187,11 +187,11 @@ sub-SN snsub (τ-· ⊢e₁ ⊢e₂) with sub-SN snsub ⊢e₁
 ... | ⊢e₁σ , e₁σ⇓ , e₁σ-pres = e₁σ-pres _ (sub-SN snsub ⊢e₂)
 sub-SN {Γ₁ = Γ₁} {Γ₂ = Γ₂} {σ = σ} snsub (τ-λ {t₁ = t₁} {e = e} {t₂ = t₂} ⊢e) =
   let ⊢λx[e⋯σ] = τ-λ (
-        Γ₂ ,, (t₁ ⋯ σ) ⊢ e ⋯ σ ↑ₛ 𝕖 ∶ t₂ ⋯ σ ⋯ wk
-          by subst (λ ■ → Γ₂ ,, (t₁ ⋯ σ) ⊢ e ⋯ σ ↑ₛ 𝕖 ∶ ■) (dist-↑-sub t₂ σ) (
-        Γ₂ ,, (t₁ ⋯ σ) ⊢ e ⋯ σ ↑ₛ 𝕖 ∶ t₂ ⋯ wk ⋯ (σ ↑ₛ 𝕖)
+        Γ₂ ▶ (t₁ ⋯ σ) ⊢ e ⋯ σ ↑ₛ 𝕖 ∶ t₂ ⋯ σ ⋯ wk
+          by subst (λ ■ → Γ₂ ▶ (t₁ ⋯ σ) ⊢ e ⋯ σ ↑ₛ 𝕖 ∶ ■) (dist-↑-sub t₂ σ) (
+        Γ₂ ▶ (t₁ ⋯ σ) ⊢ e ⋯ σ ↑ₛ 𝕖 ∶ t₂ ⋯ wk ⋯ (σ ↑ₛ 𝕖)
           by sub-pres-⊢ ⊢e (
-        Γ₂ ,, (t₁ ⋯ σ) ⊢* σ ↑ₛ 𝕖 ∶ Γ₁ ,, t₁
+        Γ₂ ▶ (t₁ ⋯ σ) ⊢* σ ↑ₛ 𝕖 ∶ Γ₁ ▶ t₁
           by lift-⊢* t₁ (
         Γ₂             ⊢* σ      ∶ Γ₁
           by SNSub→⊢* {Γ₁ = Γ₁} snsub

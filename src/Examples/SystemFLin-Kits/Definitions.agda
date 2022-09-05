@@ -2,9 +2,11 @@ module Examples.SystemFLin-Kits.Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
+
 open import Substructural.Usage
+open import KitTheory.Prelude public
 
 infix   3  _↪_  _;_⊢_∶_  _;_⊢*_∶_
 infixr  5  ∀[_]→_  λ→_  Λ→_
@@ -40,9 +42,9 @@ variable
 
 data Term : List Modeᵥ → Modeₜ → Set where
   `[_]_  : M ≡ m→M m → m ∈ µ → Term µ M  -- Expr and Type Variables
-  λ→_    : Term (𝕖 ∷ µ) 𝕖 → Term µ 𝕖
-  Λ→_    : Term (𝕥 ∷ µ) 𝕖 → Term µ 𝕖
-  ∀[_]→_ : Usage → Term (𝕥 ∷ µ) 𝕥 → Term µ 𝕥
+  λ→_    : Term (µ ▷ 𝕖) 𝕖 → Term µ 𝕖
+  Λ→_    : Term (µ ▷ 𝕥) 𝕖 → Term µ 𝕖
+  ∀[_]→_ : Usage → Term (µ ▷ 𝕥) 𝕥 → Term µ 𝕥
   _·_    : Term µ 𝕖 → Term µ 𝕖 → Term µ 𝕖
   _∙_    : Term µ 𝕖 → Term µ 𝕥 → Term µ 𝕖
   _⇒[_]_ : Term µ 𝕥 → Usage → Term µ 𝕥 → Term µ 𝕥
@@ -61,7 +63,6 @@ variable
 
 -- Modes and Terms
 
-open import KitTheory.Prelude public
 open import KitTheory.Modes
 
 𝕄 : Modes
@@ -191,9 +192,9 @@ instance
   _ = Lattice-Usage
   _ = Lattice-∀
 
-_,,Ψ_ : UCtx µ → Usage → UCtx (m ∷ µ)
-(Ψ ,,Ψ u) _ (here refl) = u
-(Ψ ,,Ψ u) _ (there x) = Ψ _ x
+_▶ᵤ_ : UCtx µ → Usage → UCtx (µ ▷ m)
+(Ψ ▶ᵤ u) _ (here refl) = u
+(Ψ ▶ᵤ u) _ (there x) = Ψ _ x
 
 -- Type System -----------------------------------------------------------------
 
@@ -206,10 +207,10 @@ data _;_⊢_∶_ : Ctx µ → UCtx µ → Term µ M → Type µ M → Set where
   τ-λ : ∀ {Γ : Ctx µ} →
     Γ ; Ψ ⊢ t₁ ∶ ★ u →
     Ψ ≡ Ψ * ⟦ u ⟧ →
-    Γ ,, t₁ ; Ψ ,,Ψ u ⊢ e ∶ wk _ t₂ →
+    Γ ▶ t₁ ; Ψ ▶ᵤ u ⊢ e ∶ wk _ t₂ →
     Γ ; Ψ ⊢ λ→ e ∶ t₁ ⇒[ u ] t₂
   τ-Λ :
-    Γ ,, ★ u ; Ψ ,,Ψ [0] ⊢ e ∶ t₂ →
+    Γ ▶ ★ u ; Ψ ▶ᵤ [0] ⊢ e ∶ t₂ →
     Γ ; Ψ ⊢ Λ→ e ∶ ∀[ u ]→ t₂
   τ-· :
     Γ ; Ψ₁ ⊢ e₁ ∶ t₁ ⇒[ u ] t₂ →
@@ -225,7 +226,7 @@ data _;_⊢_∶_ : Ctx µ → UCtx µ → Term µ M → Type µ M → Set where
   τ-⇒ :
     Γ ; Ψ ⊢ t₁ ⇒[ u ] t₂ ∶ ★ u
   τ-∀ :
-    Γ ,, ★ u₁ ; Ψ ,,Ψ [0] ⊢ t ∶ ★ u₂ →
+    Γ ▶ ★ u₁ ; Ψ ▶ᵤ [0] ⊢ t ∶ ★ u₂ →
     Γ ; Ψ ⊢ ∀[ u₁ ]→ t ∶ ★ u₂
   τ-★ :
     Γ ; Ψ ⊢ ★ u ∶ ★ [0]

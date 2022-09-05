@@ -1,10 +1,10 @@
 module Examples.STLC-Rec.LR-Safety where
 
-open import Examples.STLC-Rec.Definitions hiding (_,_)
+open import Examples.STLC-Rec.Definitions
 open import Examples.STLC-Rec.SubjectReduction
 
 open import Data.Empty using (⊥; ⊥-elim)
-open import Data.List using (List; []; _∷_)
+open import Data.List using (List; [])
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Nat hiding (_⊔_)
 open import Data.Nat.Induction using (<-rec; <-wellFounded)
@@ -162,18 +162,18 @@ module Rec where
   []𝔾 ()
 
   _∷𝔾_ : {σ : µ₁ →ₛ []} {k : Gas} {Γ : Ctx µ₁} {v : [] ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} →
-    v        ∈𝕍 k ⟦ t ⋯ σ  ⟧ →
-    σ        ∈𝔾 k ⟦ Γ      ⟧ →
-    (σ ,ₛ v) ∈𝔾 k ⟦ Γ ,, t ⟧
+    v        ∈𝕍 k ⟦ t ⋯ σ ⟧ →
+    σ        ∈𝔾 k ⟦ Γ     ⟧ →
+    (σ ,ₛ v) ∈𝔾 k ⟦ Γ ▶ t ⟧
   _∷𝔾_ {µ₁} {σ} {k} {Γ} {v} {t} v∈𝕍 σ∈𝔾 (here refl) =
-      (σ ,ₛ v) 𝕖 (here refl) ∈𝕍 k ⟦ wk-telescope (Γ ,, t) (here refl) ⋯ (σ ,ₛ v) ⟧
+      (σ ,ₛ v) 𝕖 (here refl) ∈𝕍 k ⟦ wk-telescope (Γ ▶ t) (here refl) ⋯ (σ ,ₛ v) ⟧
     by (
       v ∈𝕍 k ⟦ t ⋯ wk ⋯ (σ ,ₛ v) ⟧
     by subst (λ ■ → v ∈𝕍 k ⟦ ■ ⟧) (sym (wk-cancels-,ₛ t σ v)) (
       v ∈𝕍 k ⟦ t ⋯ σ ⟧
     by v∈𝕍))
   _∷𝔾_ {µ₁} {σ} {k} {Γ} {v} {t} v∈𝕍 σ∈𝔾 (there x) =
-      σ 𝕖 x ∈𝕍 k ⟦ wk-telescope (Γ ,, t) (there x) ⋯ (σ ,ₛ v) ⟧
+      σ 𝕖 x ∈𝕍 k ⟦ wk-telescope (Γ ▶ t) (there x) ⋯ (σ ,ₛ v) ⟧
     by (
       σ 𝕖 x ∈𝕍 k ⟦ wk-telescope Γ x ⋯ wk ⋯ (σ ,ₛ v) ⟧
     by subst (λ ■ → σ 𝕖 x ∈𝕍 k ⟦ ■ ⟧) (sym (wk-cancels-,ₛ (wk-telescope Γ x) σ v)) (
@@ -274,18 +274,18 @@ module Ind where
   []𝔾 ()
 
   _∷𝔾_ : {σ : µ₁ →ₛ []} {k : Gas} {Γ : Ctx µ₁} {v : [] ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} →
-    v        ∈𝕍 k ⟦ t ⋯ σ  ⟧ →
-    σ        ∈𝔾 k ⟦ Γ      ⟧ →
-    (σ ,ₛ v) ∈𝔾 k ⟦ Γ ,, t ⟧
+    v        ∈𝕍 k ⟦ t ⋯ σ ⟧ →
+    σ        ∈𝔾 k ⟦ Γ     ⟧ →
+    (σ ,ₛ v) ∈𝔾 k ⟦ Γ ▶ t ⟧
   _∷𝔾_ {µ₁} {σ} {k} {Γ} {v} {t} v∈𝕍 σ∈𝔾 (here refl) =
-      (σ ,ₛ v) 𝕖 (here refl) ∈𝕍 k ⟦ wk-telescope (Γ ,, t) (here refl) ⋯ (σ ,ₛ v) ⟧
+      (σ ,ₛ v) 𝕖 (here refl) ∈𝕍 k ⟦ wk-telescope (Γ ▶ t) (here refl) ⋯ (σ ,ₛ v) ⟧
     by (
       v ∈𝕍 k ⟦ t ⋯ wk ⋯ (σ ,ₛ v) ⟧
     by subst (λ ■ → v ∈𝕍 k ⟦ ■ ⟧) (sym (wk-cancels-,ₛ t σ v)) (
       v ∈𝕍 k ⟦ t ⋯ σ ⟧
     by v∈𝕍))
   _∷𝔾_ {µ₁} {σ} {k} {Γ} {v} {t} v∈𝕍 σ∈𝔾 (there x) =
-      σ 𝕖 x ∈𝕍 k ⟦ wk-telescope (Γ ,, t) (there x) ⋯ (σ ,ₛ v) ⟧
+      σ 𝕖 x ∈𝕍 k ⟦ wk-telescope (Γ ▶ t) (there x) ⋯ (σ ,ₛ v) ⟧
     by (
       σ 𝕖 x ∈𝕍 k ⟦ wk-telescope Γ x ⋯ wk ⋯ (σ ,ₛ v) ⟧
     by subst (λ ■ → σ 𝕖 x ∈𝕍 k ⟦ ■ ⟧) (sym (wk-cancels-,ₛ (wk-telescope Γ x) σ v)) (
@@ -541,7 +541,7 @@ Value→Irred {µ} {e} (neutral x) = {!irrelevant!}
   by subst₂ (_∈𝔼 j ⟦_⟧ᵢ) (sym (⋯↑⋯⦅⦆-is-⋯,ₛ e v σ)) (wk-cancels-,ₛ t₂ σ v) (
     (e ⋯ (σ ,ₛ v)) ∈𝔼 j ⟦ t₂ ⋯ wk ⋯ (σ ,ₛ v) ⟧ᵢ
   by ⊢→⊧ᵢ ⊢e (
-    σ ,ₛ v ∈𝔾 j ⟦ Γ ,, t₁ ⟧ᵢ
+    σ ,ₛ v ∈𝔾 j ⟦ Γ ▶ t₁ ⟧ᵢ
   by 𝕍ᵣ→𝕍ᵢ v∈𝕍⟦t₁⋯σ⟧ ∷𝔾ᵢ monotonicity-𝔾ᵢ j≤k σ∈𝔾⟦Γ⟧)))
 
 ⊢→⊧ᵢ {µ} {Γ} {.(_ · _)}    {t}        (τ-· ⊢e₁ ⊢e₂) = {!!}

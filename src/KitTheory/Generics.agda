@@ -9,7 +9,7 @@ open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using (id; _$_)
 
-open import Data.Product using (Σ; ∃-syntax; Σ-syntax; _×_; proj₁; proj₂) renaming (_,_ to ⟨_,_⟩)
+open import Data.Product using (Σ; ∃-syntax; Σ-syntax; _×_; proj₁; proj₂; _,_)
 
 open import KitTheory.Prelude
 open Modes 𝕄
@@ -53,9 +53,9 @@ private mutual
   _⋯'_ : ∀ {d} {d'} {µ₁ : List VarMode} {M : TermMode} {µ₂ : List VarMode}
       ⦃ 𝕂 : Kit (𝕋 d) ⦄ →
       ⟦ d' ⟧ (Tm d) µ₁ M → _–[_]→_ (𝕋 d) µ₁ 𝕂 µ₂ → ⟦ d' ⟧ (Tm d) µ₂ M
-  _⋯'_ {d' = `σ A d'}     ⟨ a , D' ⟩ f = ⟨ a , D' ⋯' f ⟩
-  _⋯'_ {d' = `X µ' M' d'} ⟨ e , e' ⟩ f = ⟨ e ⋯ (f ↑* µ') , e' ⋯' f ⟩
-  _⋯'_ {d' = `■ M'}       e          f = e
+  _⋯'_ {d' = `σ A d'}     (a , D') f = a , D' ⋯' f
+  _⋯'_ {d' = `X µ' M' d'} (e , e') f = e ⋯ (f ↑* µ') , e' ⋯' f
+  _⋯'_ {d' = `■ M'}       e        f = e
 
 private 
   ⋯-var : ∀ {d} {µ₁ : List VarMode} {m : VarMode} {µ₂ : List VarMode}
@@ -87,11 +87,11 @@ private mutual
         (ϕ₁ : _–[_]→_ (𝕋 d) µ₁ 𝕂₂ µ₂)
         (ϕ₂ : _–[_]→_ (𝕋 d) µ₂ 𝕂₁ µ₃) →
         ((e ⋯' ϕ₁) ⋯' ϕ₂) ≡ (e ⋯' (ϕ₂ ∘ₖ ϕ₁))
-  ⋯-assoc' {d' = `σ A d'}     ⟨ a , D' ⟩  ϕ₁ ϕ₂ = cong ⟨ a ,_⟩ (⋯-assoc' D' ϕ₁ ϕ₂)
-  ⋯-assoc' {d' = `X µ' M' d'} ⟨ e₁ , e₂ ⟩ ϕ₁ ϕ₂ = cong₂ ⟨_,_⟩ (trans (⋯-assoc e₁ (ϕ₁ ↑* µ') (ϕ₂ ↑* µ'))
-                                                                     (cong (e₁ ⋯_) (sym (dist-↑*-∘ µ' ϕ₂ ϕ₁))) )
-                                                              (⋯-assoc' e₂ ϕ₁ ϕ₂)
-  ⋯-assoc' {d' = `■ M'}       refl        ϕ₁ ϕ₂ = refl
+  ⋯-assoc' {d' = `σ A d'}     (a , D')  ϕ₁ ϕ₂ = cong (a ,_) (⋯-assoc' D' ϕ₁ ϕ₂)
+  ⋯-assoc' {d' = `X µ' M' d'} (e₁ , e₂) ϕ₁ ϕ₂ = cong₂ _,_ (trans (⋯-assoc e₁ (ϕ₁ ↑* µ') (ϕ₂ ↑* µ'))
+                                                                 (cong (e₁ ⋯_) (sym (dist-↑*-∘ µ' ϕ₂ ϕ₁))) )
+                                                          (⋯-assoc' e₂ ϕ₁ ϕ₂)
+  ⋯-assoc' {d' = `■ M'}       refl      ϕ₁ ϕ₂ = refl
 
 KA : (d : Desc) → KitAssoc (𝕋 d) (KT d)
 KA d = record { ⋯-assoc = ⋯-assoc }
@@ -106,9 +106,9 @@ private mutual
   ⋯-id' : ∀ {d} {d'} ⦃ 𝕂 : Kit (𝕋 d) ⦄ {µ : List VarMode} {M : TermMode}
         (e : ⟦ d' ⟧ (Tm d) µ M) →
         (e ⋯' Kit.idₖ 𝕂) ≡ e
-  ⋯-id' {d' = `σ A d'}     ⟨ a , D' ⟩  = cong ⟨ a ,_⟩ (⋯-id' D')
-  ⋯-id' {d' = `X µ' M' d'} ⟨ e₁ , e₂ ⟩ = cong₂ ⟨_,_⟩ (trans (cong (e₁ ⋯_) (id↑*≡id µ' _)) (⋯-id e₁)) (⋯-id' e₂)
-  ⋯-id' {d' = `■ M'}       refl        = refl
+  ⋯-id' {d' = `σ A d'}     (a , D')  = cong (a ,_) (⋯-id' D')
+  ⋯-id' {d' = `X µ' M' d'} (e₁ , e₂) = cong₂ _,_ (trans (cong (e₁ ⋯_) (id↑*≡id µ' _)) (⋯-id e₁)) (⋯-id' e₂)
+  ⋯-id' {d' = `■ M'}       refl      = refl
 
 KAL : (d : Desc) → KitAssoc.KitAssocLemmas (KA d)
 KAL d = record { ⋯-id = ⋯-id }

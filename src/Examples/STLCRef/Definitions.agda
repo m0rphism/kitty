@@ -2,10 +2,10 @@ module Examples.STLCRef.Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_) public
 open import KitTheory.Modes using (Modes; Terms)
 
 -- Fixities --------------------------------------------------------------------
@@ -53,7 +53,7 @@ variable
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
   `ˣ_   : µ ∋ 𝕧  →  µ ⊢ 𝕖
   `ʳ_   : µ ∋ 𝕣  →  µ ⊢ 𝕖
-  λx_   : µ , 𝕧 ⊢ 𝕖  →  µ ⊢ 𝕖
+  λx_   : µ ▷ 𝕧 ⊢ 𝕖  →  µ ⊢ 𝕖
   _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
   _⇒_   : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
   new   : µ ⊢ 𝕖  →  µ ⊢ 𝕖
@@ -190,7 +190,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
-    Γ ,, t₁ ⊢ e ∶ wk _ t₂ →
+    Γ ▶ t₁ ⊢ e ∶ wk _ t₂ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →
@@ -219,7 +219,7 @@ _⊢*_∶_ {µ₁ = µ₁} Γ₂ σ Γ₁ = ∀ {m₁} → (x : µ₁ ∋ m₁) 
 Store : List Modeᵥ → Set
 Store µ = (x : µ ∋ 𝕣) → µ ⊢ 𝕖
 
-_↑Σ_ : Store µ → ∀ m → Store (µ , m)
+_↑Σ_ : Store µ → ∀ m → Store (µ ▷ m)
 (Σ ↑Σ .𝕣) (here refl) = `ʳ here refl
 (Σ ↑Σ m) (there x) = wk _ (Σ x)
 
@@ -237,7 +237,7 @@ _,Σ[_≔_] : Store µ → (α : µ ∋ 𝕣) → µ ⊢ 𝕖 → Store µ
 ... | yes p = e
 ... | no  p = Σ x
 
-_,Σ_ : Store µ → µ ⊢ 𝕖 → Store (µ , 𝕣)
+_,Σ_ : Store µ → µ ⊢ 𝕖 → Store (µ ▷ 𝕣)
 (Σ ,Σ e) (here px) = wk _ e
 (Σ ,Σ e) (there x) = wk _ (Σ x)
 
@@ -265,10 +265,10 @@ data _;_↪_;_ : Store µ₁ → µ₁ ⊢ 𝕖 → Store µ₂ → µ₂ ⊢ 
     Σ ; (`ʳ α) ≔ e ↪ (Σ ,Σ[ α ≔ e ]) ; unit
   β-new : ∀ {e₂ : µ ⊢ 𝕖} →
     Σ ; new e ↪ (Σ ,Σ e) ; `ʳ here refl
-  ξ-! : ∀ {e : µ , 𝕧 ⊢ 𝕖} {Σ : Store µ} →
+  ξ-! : ∀ {e : µ ▷ 𝕧 ⊢ 𝕖} {Σ : Store µ} →
     Σ₁ ; e ↪ Σ₂ ; e' →
     Σ₁ ; ! e ↪ Σ₂ ; ! e'
-  ξ-new : ∀ {e : µ , 𝕧 ⊢ 𝕖} {Σ : Store µ} →
+  ξ-new : ∀ {e : µ ▷ 𝕧 ⊢ 𝕖} {Σ : Store µ} →
     Σ₁ ; e ↪ Σ₂ ; e' →
     Σ₁ ; new e ↪ Σ₂ ; new e'
   ξ-≔₁ :
@@ -277,7 +277,7 @@ data _;_↪_;_ : Store µ₁ → µ₁ ⊢ 𝕖 → Store µ₂ → µ₂ ⊢ 
   ξ-≔₂ :
     Σ₁ ; e₂      ↪ Σ₂ ; e₂' →
     Σ₁ ; e₁ ≔ e₂ ↪ Σ₂ ; e₁ ≔ e₂'
-  ξ-λ : ∀ {e : µ , 𝕧 ⊢ 𝕖} {Σ : Store µ} →
+  ξ-λ : ∀ {e : µ ▷ 𝕧 ⊢ 𝕖} {Σ : Store µ} →
     (Σ₁ ↑Σ 𝕧) ; e ↪ (Σ₂ ↑Σ 𝕧) ; e' →
     Σ₁ ; λx e ↪ Σ₂ ; λx e'
   ξ-·₁ :

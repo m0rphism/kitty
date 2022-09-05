@@ -2,7 +2,7 @@ module Examples.STLC-CBV-NoTySubst.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Unit using (⊤; tt)
 open import Function using () renaming (_∋_ to _by_)
@@ -13,11 +13,11 @@ data OPE : µ₁ →ᵣ µ₂ → Ctx µ₁ → Ctx µ₂ → Set where
   ope-id : ∀ {Γ : Ctx µ} →
     OPE idᵣ Γ Γ
   ope-keep  : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : Type} →
-    OPE  ρ       Γ₁        Γ₂ →
-    OPE (ρ ↑ m) (Γ₁ ,, T) (Γ₂ ,, T)
+    OPE  ρ       Γ₁       Γ₂ →
+    OPE (ρ ↑ m) (Γ₁ ▶ T) (Γ₂ ▶ T)
   ope-drop  : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : Type} {m'} →
     OPE  ρ        Γ₁  Γ₂ →
-    OPE (wk {m' = m'} ∘ᵣ ρ) Γ₁ (Γ₂ ,, T)
+    OPE (wk {m' = m'} ∘ᵣ ρ) Γ₁ (Γ₂ ▶ T)
 
 ope-pres-telescope : ∀ {ρ : µ₁ →ᵣ µ₂} (x : µ₁ ∋ m) →
   OPE ρ Γ₁ Γ₂ →
@@ -37,12 +37,12 @@ ope-pres-⊢                       ope (τ-· ⊢e₁ ⊢e₂)              = τ
 
 wk-pres-⊢ : ∀ {e : µ ⊢ 𝕖} {t : Type} (t' : Type) →
   Γ₂         ⊢ e      ∶ t →
-  (_,,_ {m = 𝕖} Γ₂ t') ⊢ wk _ e ∶ t
+  (_▶_ {m = 𝕖} Γ₂ t') ⊢ wk _ e ∶ t
 wk-pres-⊢ t ⊢v =  ope-pres-⊢ (ope-drop ope-id) ⊢v
 
 lift-⊢* : ∀ {σ : µ₁ →ₛ µ₂} (t : Type) →
   Γ₂              ⊢*  σ      ∶ Γ₁ →
-  (Γ₂ ,, t) ⊢* (σ ↑ 𝕖) ∶ (Γ₁ ,, t)
+  (Γ₂ ▶ t) ⊢* (σ ↑ 𝕖) ∶ (Γ₁ ▶ t)
 lift-⊢* {σ = σ} t ⊢σ (here px) = τ-` refl
 lift-⊢* {σ = σ} t ⊢σ (there x) = wk-pres-⊢ t (⊢σ x)
 
@@ -57,15 +57,15 @@ sub-pres-⊢                     (τ-· ⊢e₁ ⊢e₂)      ⊢σ = τ-· (sub
 _,*_ : ∀ {σ : µ₁ →ₛ µ₂} {t : Type} →
   Γ₂ ⊢* σ ∶ Γ₁ →
   Γ₂ ⊢  e ∶ t →
-  Γ₂ ⊢* σ ,ₛ e ∶ Γ₁ ,, t
+  Γ₂ ⊢* σ ,ₛ e ∶ Γ₁ ▶ t
 _,*_ ⊢σ ⊢e (here refl) = ⊢e
 _,*_ ⊢σ ⊢v (there x) = ⊢σ x
 
 ⊢*-idₛ : Γ ⊢* idₛ ∶ Γ
 ⊢*-idₛ x = τ-` refl
 
-sub₁-pres-⊢ : ∀ {Γ : Ctx µ} {e₁ : 𝕖 ∷ µ ⊢ 𝕖} {e₂ : µ ⊢ 𝕖} {t₁ t₂ : Type} →
-  Γ ,, t₁ ⊢ e₁ ∶ t₂ →
+sub₁-pres-⊢ : ∀ {Γ : Ctx µ} {e₁ : µ ▷ 𝕖 ⊢ 𝕖} {e₂ : µ ⊢ 𝕖} {t₁ t₂ : Type} →
+  Γ ▶ t₁ ⊢ e₁ ∶ t₂ →
   Γ ⊢ e₂ ∶ t₁ →
   Γ ⊢ e₁ ⋯ ⦅ e₂ ⦆ ∶ t₂
 sub₁-pres-⊢ {Γ = Γ} {e₂ = e₂} ⊢e₁ ⊢e₂ = sub-pres-⊢ ⊢e₁ (⊢*-idₛ ,* ⊢e₂)

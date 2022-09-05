@@ -3,7 +3,7 @@ module Examples.STLC-CBV.Normalization where
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning; inspect; [_])
 open import Relation.Nullary using (¬_)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Product using (_×_; ∃-syntax; _,_; Σ; proj₁; proj₂)
@@ -11,7 +11,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 
-open import Examples.STLC-CBV.Definitions hiding (_,_)
+open import Examples.STLC-CBV.Definitions
 open import Examples.STLC-CBV.SubjectReduction
 open import Examples.STLC-CBV.Progress
 
@@ -128,16 +128,16 @@ SNSub-ext : {σ : µ₁ →ₛ []} →
   SNSub Γ₁ σ →
   Value e →
   SN (t ⋯ σ) e →
-  SNSub (Γ₁ ,, t) (σ ,ₛ e)
+  SNSub (Γ₁ ▶ t) (σ ,ₛ e)
 SNSub-ext {Γ₁ = Γ₁} {e = e} {t = t} {σ = σ} SN-σ val-e SN-e (here refl) =
-  SN (wk-telescope (Γ₁ ,, t) (here refl) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (here refl))
+  SN (wk-telescope (Γ₁ ▶ t) (here refl) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (here refl))
     by (
   SN (t ⋯ wk ⋯ (σ ,ₛ e)) e
     by subst (λ ■ → SN ■ e) (sym (wk-cancels-,ₛ t σ e)) (
   SN (t ⋯ σ) e
     by SN-e))
 SNSub-ext {Γ₁ = Γ₁} {e = e} {t = t} {σ = σ} SN-σ val-e SN-e (there x) =
-  SN (wk-telescope (Γ₁ ,, t) (there x) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (there x))
+  SN (wk-telescope (Γ₁ ▶ t) (there x) ⋯ (σ ,ₛ e)) ((σ ,ₛ e) 𝕖 (there x))
     by (
   SN (wk-telescope Γ₁ x ⋯ wk ⋯ (σ ,ₛ e)) (σ 𝕖 x)
     by subst (λ ■ → SN ■ (σ 𝕖 x)) (sym (wk-cancels-,ₛ (wk-telescope Γ₁ x) σ e)) (

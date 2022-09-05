@@ -5,7 +5,7 @@ open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_) public
 open import KitTheory.Modes using (Modes; Terms)
 open import Data.Product using (_×_; ∃-syntax)
 
@@ -47,7 +47,7 @@ variable
 -- Expressions and Types
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
   `_    : µ ∋ 𝕖  →  µ ⊢ 𝕖
-  λx_   : µ , 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
+  λx_   : µ ▷ 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
   _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
 
 data Type : Set where
@@ -133,9 +133,9 @@ Ctx µ = ∀ {m} → µ ∋ m → Type
 ∅ : Ctx []
 ∅ ()
 
-_,,_ : Ctx µ → Type → Ctx (µ , m)
-(Γ ,, t) (here px) = t
-(Γ ,, t) (there x) = Γ x
+_▶_ : Ctx µ → Type → Ctx (µ ▷ m)
+(Γ ▶ t) (here px) = t
+(Γ ▶ t) (there x) = Γ x
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -147,7 +147,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ 𝕖 → Type → Set where
     Γ x ≡ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
-    Γ ,, t₁ ⊢ e ∶ t₂ →
+    Γ ▶ t₁ ⊢ e ∶ t₂ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →

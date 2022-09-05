@@ -10,7 +10,7 @@ open import Level using (Level; _⊔_)
 open import Function using (id; _∘_; const)
 open import Data.String
 
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_) public
 
 infix   3  _⊢_∶_  _⊢*_∶_  _⇓_
 infixr  5  λ→_
@@ -248,7 +248,7 @@ module ValueSubst where
   open KitType kit-type public
 
 open TermSubst public
-open ValueSubst using (Ctx; wk-telescope; _,,_; OPE; ope-keep; ope-drop; ope-id; ope-pres-telescope) renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
+open ValueSubst using (Ctx; wk-telescope; _▶_; OPE; ope-keep; ope-drop; ope-id; ope-pres-telescope) renaming (_⋯_ to _⋯ᵥ_; _↑_ to _↑ᵥ_) public
 
 ⟦_⟧ : Value µ M → Term µ 𝕥
 ⟦ ` x ⟧          = ` x
@@ -301,7 +301,7 @@ data _⊢_∶_ : Ctx µ → Term µ 𝕥 → Value µ 𝕧 → Set where
   τ-λ : ∀ {Γ : Ctx µ} →
     Γ ⊢ t₁ ∶ ★ →
     t₁ ⇓ τ₁ →
-    Γ ,, τ₁ ⊢ e ∶ τ₂ →
+    Γ ▶ τ₁ ⊢ e ∶ τ₂ →
     Γ ⊢ λ→ e ∶ Π τ₁ τ₂
   τ-· : ∀ {Γ : Ctx µ} →
     Γ ⊢ e₁ ∶ Π τ₁ τ₂ →
@@ -310,9 +310,9 @@ data _⊢_∶_ : Ctx µ → Term µ 𝕥 → Value µ 𝕧 → Set where
     Γ ⊢ e₁ · e₂ ∶ τ
   τ-Π : ∀ {Γ : Ctx µ} →
     t₁ ⇓ τ₁ →
-    Γ       ⊢ t₁      ∶ ★ →
-    Γ ,, τ₁ ⊢ t₂      ∶ ★ →
-    Γ       ⊢ Π t₁ t₂ ∶ ★
+    Γ      ⊢ t₁      ∶ ★ →
+    Γ ▶ τ₁ ⊢ t₂      ∶ ★ →
+    Γ      ⊢ Π t₁ t₂ ∶ ★
   τ-★ : ∀ {Γ : Ctx µ} →
     Γ ⊢ ★ ∶ ★
 

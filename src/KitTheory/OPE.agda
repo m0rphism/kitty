@@ -9,7 +9,7 @@ module KitTheory.OPE {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop; _++_)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (id; _∘_)
@@ -72,10 +72,10 @@ data OPE : µ₁ →ᵣ µ₂ → Ctx µ₁ → Ctx µ₂ → Set where
     OPE idᵣ Γ Γ
   ope-keep  : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : µ₁ ∶⊢ m→M m} →
     OPE  ρ       Γ₁        Γ₂ →
-    OPE (ρ ↑ m) (Γ₁ ,, T) (Γ₂ ,, (T ⋯ ρ))
+    OPE (ρ ↑ m) (Γ₁ ▶ T) (Γ₂ ▶ (T ⋯ ρ))
   ope-drop  : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : µ₂ ∶⊢ m→M m} →
     OPE  ρ        Γ₁  Γ₂ →
-    OPE (wk ∘ᵣ ρ) Γ₁ (Γ₂ ,, T)
+    OPE (wk ∘ᵣ ρ) Γ₁ (Γ₂ ▶ T)
 
 ope-pres-telescope : ∀ {ρ : µ₁ →ᵣ µ₂} (x : µ₁ ∋ m) →
   OPE ρ Γ₁ Γ₂ →

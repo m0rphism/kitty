@@ -2,14 +2,14 @@ module Examples.STLC-CBV.Progress where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Unit using (⊤; tt)
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Product using (_×_; ∃-syntax; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 
-open import Examples.STLC-CBV.Definitions hiding (_,_)
+open import Examples.STLC-CBV.Definitions
 
 progress :
   ∅ ⊢ e ∶ t →

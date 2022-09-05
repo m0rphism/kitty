@@ -2,7 +2,7 @@ module Examples.SystemF-Kits-Uniform.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Unit using (⊤; tt)
 open import Function using () renaming (_∋_ to _by_)
@@ -27,17 +27,17 @@ ope-pres-⊢                       ope τ-𝕥                               = �
 ope-pres-⊢                       ope τ-𝕜                               = τ-𝕜
 
 wk-pres-⊢ : ∀ {m'} {E : Term µ M} {T : Type µ M} (T' : Type µ (m→M m')) →
-  Γ₂         ⊢ E      ∶ T →
-  (Γ₂ ,, T') ⊢ wk _ E ∶ wk _ T
+  Γ₂        ⊢ E      ∶ T →
+  (Γ₂ ▶ T') ⊢ wk _ E ∶ wk _ T
 wk-pres-⊢ T ⊢v =  ope-pres-⊢ (ope-drop ope-id) ⊢v
 
 lift-⊢* : ∀ {σ : µ₁ →ₛ µ₂} (T : Type µ₁ (m→M m)) →
-  Γ₂              ⊢*  σ      ∶ Γ₁ →
-  (Γ₂ ,, (T ⋯ σ)) ⊢* (σ ↑ m) ∶ (Γ₁ ,, T)
+  Γ₂             ⊢*  σ      ∶ Γ₁ →
+  (Γ₂ ▶ (T ⋯ σ)) ⊢* (σ ↑ m) ∶ (Γ₁ ▶ T)
 lift-⊢* {m = 𝕖} {σ = σ} T ⊢σ (here refl) = τ-` (sym (dist-↑-sub T σ))
 lift-⊢* {m = 𝕥} {Γ₂ = Γ₂} {σ = σ} T ⊢σ (here refl) rewrite K≡★ T = τ-𝕥
 lift-⊢* {m = m} {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} T ⊢σ (there x) =
-  subst ((Γ₂ ,, (T ⋯ σ)) ⊢ (σ _ x ⋯ wk) ∶_)
+  subst ((Γ₂ ▶ (T ⋯ σ)) ⊢ (σ _ x ⋯ wk) ∶_)
         (sym (wk-drop-∈ x (Γ₁ x) ⋯ wk ⋯ (σ ↑ m) ≡⟨ dist-↑-sub (wk-drop-∈ x (Γ₁ x)) σ ⟩
               wk-drop-∈ x (Γ₁ x) ⋯ σ ⋯ wk       ∎))
         (wk-pres-⊢ (T ⋯ σ) (⊢σ x))
@@ -61,7 +61,7 @@ sub-pres-⊢ {M = 𝕖} {σ = σ}             (τ-∙ {e = e} {t₂ = t₂} {t =
 _,*_ : ∀ {σ : µ₁ →ₛ µ₂} {T : Type µ₁ (m→M m₁)} →
   Γ₂ ⊢* σ ∶ Γ₁ →
   Γ₂ ⊢  E ∶ T ⋯ σ →
-  Γ₂ ⊢* σ ,ₛ E ∶ Γ₁ ,, T
+  Γ₂ ⊢* σ ,ₛ E ∶ Γ₁ ▶ T
 _,*_ {Γ₂ = Γ₂} {E = E} {T = T} ⊢σ ⊢E (here refl) = subst (Γ₂ ⊢ E ∶_) (sym (wk-cancels-,ₛ T _ _)) ⊢E
 _,*_ {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢v (there x) = subst (Γ₂ ⊢ σ _ x ∶_) (sym (wk-cancels-,ₛ (wk-drop-∈ x (Γ₁ x)) _ _)) (⊢σ x)
 
@@ -69,20 +69,20 @@ _,*_ {Γ₂ = Γ₂} {Γ₁ = Γ₁} {σ = σ} ⊢σ ⊢v (there x) = subst (Γ�
 ⊢*-idₛ {Γ = Γ} {𝕥} x rewrite K≡★ (wk-telescope Γ x)   = τ-𝕥
 ⊢*-idₛ {Γ = Γ} {𝕖} x rewrite ⋯-idₛ (wk-telescope Γ x) = τ-` refl
 
-sub₁-pres-⊢ : ∀ {Γ : Ctx µ} {E₁ : Term (m₂ ∷ µ) M₁} {E₂ : Term µ (m→M m₂)} {T₂ : Type (m₂ ∷ µ) M₁} {T₁ : Type µ (m→M m₂)} →
-  Γ ,, T₁ ⊢ E₁ ∶ T₂ →
+sub₁-pres-⊢ : ∀ {Γ : Ctx µ} {E₁ : Term (µ ▷ m₂) M₁} {E₂ : Term µ (m→M m₂)} {T₂ : Type (µ ▷ m₂) M₁} {T₁ : Type µ (m→M m₂)} →
+  Γ ▶ T₁ ⊢ E₁ ∶ T₂ →
   Γ ⊢ E₂ ∶ T₁ →
   Γ ⊢ E₁ ⋯ ⦅ E₂ ⦆ ∶ T₂ ⋯ ⦅ E₂ ⦆
 sub₁-pres-⊢ {Γ = Γ} {E₂ = E₂} ⊢E₁ ⊢E₂ = sub-pres-⊢ ⊢E₁ (⊢*-idₛ ,* subst (Γ ⊢ E₂ ∶_) (sym (⋯-id _)) ⊢E₂)
 
 open import Data.List using (_++_)
 
-sub-𝕖-in-𝕥-id-var : ∀ (α : µ' ++ 𝕖 ∷ µ ∋ 𝕥) (e₁ e₂ : Term µ 𝕖) → (⦅ e₁ ⦆ ↑* µ') 𝕥 α ≡ (⦅ e₂ ⦆ ↑* µ') 𝕥 α
+sub-𝕖-in-𝕥-id-var : ∀ (α : (µ ▷ 𝕖 ▷▷ µ') ∋ 𝕥) (e₁ e₂ : Term µ 𝕖) → (⦅ e₁ ⦆ ↑* µ') 𝕥 α ≡ (⦅ e₂ ⦆ ↑* µ') 𝕥 α
 sub-𝕖-in-𝕥-id-var {µ' = []}      (there α)   e₁ e₂ = refl
-sub-𝕖-in-𝕥-id-var {µ' = .𝕥 ∷ µ'} (here refl) e₁ e₂ = refl
-sub-𝕖-in-𝕥-id-var {µ' = m ∷ µ'}  (there α)   e₁ e₂ = cong (_⋯ wk) (sub-𝕖-in-𝕥-id-var α e₁ e₂)
+sub-𝕖-in-𝕥-id-var {µ' = µ' ▷ .𝕥} (here refl) e₁ e₂ = refl
+sub-𝕖-in-𝕥-id-var {µ' = µ' ▷ m}  (there α)   e₁ e₂ = cong (_⋯ wk) (sub-𝕖-in-𝕥-id-var α e₁ e₂)
 
-sub-𝕖-in-𝕥-id : ∀ (t : Term (µ' ++ 𝕖 ∷ µ) 𝕥) (e₁ e₂ : Term µ 𝕖) →
+sub-𝕖-in-𝕥-id : ∀ (t : Term (µ ▷ 𝕖 ▷▷ µ') 𝕥) (e₁ e₂ : Term µ 𝕖) →
   t ⋯ (⦅ e₁ ⦆ ↑* µ') ≡ t ⋯ (⦅ e₂ ⦆ ↑* µ')
 sub-𝕖-in-𝕥-id (`[_]_ {m = 𝕥} refl x) e₁ e₂ = sub-𝕖-in-𝕥-id-var x e₁ e₂
 sub-𝕖-in-𝕥-id (∀α t)                 e₁ e₂ = cong ∀α_ (sub-𝕖-in-𝕥-id t e₁ e₂)

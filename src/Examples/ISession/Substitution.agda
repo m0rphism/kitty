@@ -2,10 +2,10 @@ module Examples.ISession.Substitution where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop; _++_)
+open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_) public
 open import KitTheory.Modes using (Modes; Terms)
 open import Examples.ISession.Definitions
 
@@ -84,17 +84,17 @@ mutual
   -- kit-type-subst = record {}
   -- open KitTypeSubst kit-type-subst
 
-  drop-∈-++₁ : (x : µ' ∋ m) → drop-∈ x (µ' ++ µ) ≡ drop-∈ x µ' ++ µ
-  drop-∈-++₁ (here px) = refl
-  drop-∈-++₁ {µ' = m' ∷ µ'} {m = m} {µ = µ} (there x) = drop-∈-++₁ x
+  drop-∈-▷▷₁ : (x : µ' ∋ m) → drop-∈ x (µ ▷▷ µ') ≡ µ ▷▷ drop-∈ x µ'
+  drop-∈-▷▷₁ (here px) = refl
+  drop-∈-▷▷₁ {µ' = µ' ▷ m'} {m = m} {µ = µ} (there x) = drop-∈-▷▷₁ x
 
   infixl  5  _⋯Ctx'_
   _⋯Ctx'_ : ∀ {{𝕂 : Kit}} → Ctx' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx' µ₂ µ'
   _⋯Ctx'_ {µ' = µ'} {{𝕂}} Γ f x = Γ x ⋯ f' where
     f' = subst₂
            (λ x y → x –[ 𝕂 ]→ y)
-           (sym (drop-∈-++₁ x))
-           (sym (drop-∈-++₁ x))
+           (sym (drop-∈-▷▷₁ x))
+           (sym (drop-∈-▷▷₁ x))
            (f ↑* drop-∈ x µ')
 
   -- TODO: Provide derived kits for contexts.
@@ -242,9 +242,9 @@ kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : Term µ M) → v ⋯ idₖ {{𝕂}} ≡ v
   ⋯-id ⟨ t ⟩                  = cong ⟨_⟩ (⋯-id t)
   ⋯-id (t₁ ∥ t₂)              = cong₂ _∥_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id {µ = µ} {{𝕂}} (ν[α,x]→ t) rewrite id↑*≡id {{𝕂}} ([] , 𝕥 , 𝕧) µ = cong ν[α,x]→_ (⋯-id t)
+  ⋯-id {µ = µ} {{𝕂}} (ν[α,x]→ t) rewrite id↑*≡id {{𝕂}} ([] ▷ 𝕥 ▷ 𝕧) µ = cong ν[α,x]→_ (⋯-id t)
   ⋯-id ⟨ t ⟩ᵥ                 = cong ⟨_⟩ᵥ (⋯-id t)
-  ⋯-id {µ = µ} {{𝕂}} (let[x=_]in_ {µ' = µ'} t₁ t₂) rewrite id↑*≡id {{𝕂}} (𝕧 ∷ µ') µ = cong₂ let[x=_]in_ (⋯-id t₁) (⋯-id t₂)
+  ⋯-id {µ = µ} {{𝕂}} (let[x=_]in_ {µ' = µ'} t₁ t₂) rewrite id↑*≡id {{𝕂}} (µ' ▷ 𝕧) µ = cong₂ let[x=_]in_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id (fork t)               = cong fork (⋯-id t)
   ⋯-id (t₁ · t₂)              = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id (send t₁ on t₂)        = cong₂ send_on_ (⋯-id t₁) (⋯-id t₂)
@@ -256,7 +256,7 @@ kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id (t₁ ∙ t₂)              = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id (`ᵛ x)                 = tm-vr x
   ⋯-id {µ = µ} {{𝕂}} (λx→ t) rewrite id↑≡id {{𝕂}} 𝕧 µ = cong λx→_ (⋯-id t)
-  ⋯-id {µ = µ} {{𝕂}} (Λα→ t) rewrite id↑*≡id {{𝕂}} (𝕧 ∷ 𝕥 ∷ []) µ = cong Λα→_ (⋯-id t)
+  ⋯-id {µ = µ} {{𝕂}} (Λα→ t) rewrite id↑*≡id {{𝕂}} ([] ▷ 𝕥 ▷ 𝕧) µ = cong Λα→_ (⋯-id t)
   ⋯-id unit                   = refl
   ⋯-id (t₁ ,ᵉ t₂)             = cong₂ _,ᵉ_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id Type                   = refl
@@ -270,7 +270,7 @@ kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id (`ᵗ α)                 = tm-vr α
   ⋯-id (t₁ ·ᵗ t₂)             = cong₂ _·ᵗ_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id {µ = µ} {{𝕂}} (λα→ t)  rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λα→_ (⋯-id t)
-  ⋯-id {µ = µ} {{𝕂}} (∀α[ ℂ ]→ t)  rewrite id↑*≡id {{𝕂}} (𝕧 ∷ 𝕥 ∷ []) µ | id↑≡id {{𝕂}} 𝕥 µ = cong₂ ∀α[_]→_ (⋯-id ℂ) (⋯-id t)
+  ⋯-id {µ = µ} {{𝕂}} (∀α[ ℂ ]→ t)  rewrite id↑*≡id {{𝕂}} ([] ▷ 𝕥 ▷ 𝕧) µ | id↑≡id {{𝕂}} 𝕥 µ = cong₂ ∀α[_]→_ (⋯-id ℂ) (⋯-id t)
   ⋯-id {µ = µ} {{𝕂}} (⟨_;_–→∃_;_;_⟩ {µ' = µ'} Σ₁ t₁ Γ Σ₂ t₂) rewrite (id↑*≡id {{𝕂}} µ' µ) = cong₅ ⟨_;_–→∃_;_;_⟩
     (⋯-id Σ₁)
     (⋯-id t₁)

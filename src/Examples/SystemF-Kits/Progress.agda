@@ -9,7 +9,7 @@ open import Function using () renaming (_∋_ to _by_)
 open import Data.Product using (_×_; ∃-syntax; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 
-open import Examples.SystemF-Kits.Definitions hiding (_,_)
+open import Examples.SystemF-Kits.Definitions
 
 progress :
   Γ ⊢ e ∶ t →

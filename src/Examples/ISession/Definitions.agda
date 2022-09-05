@@ -2,9 +2,9 @@ module Examples.ISession.Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop; _++_)
+open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_; _▷▷_) public
 open import KitTheory.Modes using (Modes; Terms)
 
 -- Fixities --------------------------------------------------------------------
@@ -59,11 +59,11 @@ mutual
     -- Configurations
     ⟨_⟩      : Term µ 𝕖 → Term µ 𝕔
     _∥_      : Term µ 𝕔 → Term µ 𝕔 → Term µ 𝕔
-    ν[α,x]→_ : Term (µ , 𝕥 , 𝕧) 𝕔 → Term µ 𝕔
+    ν[α,x]→_ : Term (µ ▷ 𝕥 ▷ 𝕧) 𝕔 → Term µ 𝕔
 
     -- Expressions
     ⟨_⟩ᵥ         : Term µ 𝕧 → Term µ 𝕖
-    let[x=_]in_  : Term µ 𝕖 → Term (𝕧 ∷ µ' ++ µ) 𝕖 → Term µ 𝕖
+    let[x=_]in_  : Term µ 𝕖 → Term (µ ▷▷ µ' ▷ 𝕧) 𝕖 → Term µ 𝕖
     fork         : Term µ 𝕖 → Term µ 𝕖
     _·_          : Term µ 𝕧 → Term µ 𝕧 → Term µ 𝕖
     send_on_     : Term µ 𝕧 → Term µ 𝕧 → Term µ 𝕖
@@ -76,8 +76,8 @@ mutual
 
     -- Values
     `ᵛ_   : µ ∋ 𝕧 → Term µ 𝕧
-    λx→_  : Term (µ , 𝕧) 𝕖 → Term µ 𝕧
-    Λα→_  : Term (µ , 𝕥 , 𝕧) 𝕧 → Term µ 𝕧
+    λx→_  : Term (µ ▷ 𝕧) 𝕖 → Term µ 𝕧
+    Λα→_  : Term (µ ▷ 𝕥 ▷ 𝕧) 𝕧 → Term µ 𝕧
     unit  : Term µ 𝕧
     _,ᵉ_ : Term µ 𝕧 → Term µ 𝕧 → Term µ 𝕧
 
@@ -96,18 +96,18 @@ mutual
     -- Types
     `ᵗ_   : µ ∋ 𝕥 → Term µ 𝕥
     _·ᵗ_  : Term µ 𝕥 → Term µ 𝕥 → Term µ 𝕥
-    λα→_  : Term (µ , 𝕥) 𝕥 → Term µ 𝕥
+    λα→_  : Term (µ ▷ 𝕥) 𝕥 → Term µ 𝕥
 
     --   Expression Types
-    ∀α[_]→_       : Term (µ , 𝕥) 𝕥 → Term (µ , 𝕥 , 𝕧) 𝕥 → Term µ 𝕥
-    ⟨_;_–→∃_;_;_⟩ : Term µ 𝕥 → Term µ 𝕥 → Ctx'' µ µ' → Term (µ' ++ µ) 𝕥 → Term (µ' ++ µ) 𝕥 → Term µ 𝕥
+    ∀α[_]→_       : Term (µ ▷ 𝕥) 𝕥 → Term (µ ▷ 𝕥 ▷ 𝕧) 𝕥 → Term µ 𝕥
+    ⟨_;_–→∃_;_;_⟩ : Term µ 𝕥 → Term µ 𝕥 → Ctx'' µ µ' → Term (µ ▷▷ µ') 𝕥 → Term (µ ▷▷ µ') 𝕥 → Term µ 𝕥
     Chan          : Term µ 𝕥 → Term µ 𝕥
     Unit          : Term µ 𝕥
     _×_           : Term µ 𝕥 → Term µ 𝕥 → Term µ 𝕥
 
     --   Session Types
-    ![∃α→_;_]_ : Term (µ , 𝕥) 𝕥 → Term (µ , 𝕥) 𝕥 → Term µ 𝕥 → Term µ 𝕥
-    ?[∃α→_;_]_ : Term (µ , 𝕥) 𝕥 → Term (µ , 𝕥) 𝕥 → Term µ 𝕥 → Term µ 𝕥
+    ![∃α→_;_]_ : Term (µ ▷ 𝕥) 𝕥 → Term (µ ▷ 𝕥) 𝕥 → Term µ 𝕥 → Term µ 𝕥
+    ?[∃α→_;_]_ : Term (µ ▷ 𝕥) 𝕥 → Term (µ ▷ 𝕥) 𝕥 → Term µ 𝕥 → Term µ 𝕥
     _⊕_        : Term µ 𝕥 → Term µ 𝕥 → Term µ 𝕥
     _&_        : Term µ 𝕥 → Term µ 𝕥 → Term µ 𝕥
     End        : Term µ 𝕥
@@ -158,11 +158,11 @@ data EvalCtx : List Modeᵥ → Modeₜ → List Modeᵥ → Modeₜ → Set whe
   □           : EvalCtx µ M µ M
 
   -- Expressions
-  let[x=_]in_ : EvalCtx µ 𝕖 µ' 𝕖 → Term (µ , 𝕧) 𝕖 → EvalCtx µ 𝕖 µ' 𝕖
+  let[x=_]in_ : EvalCtx µ 𝕖 µ' 𝕖 → Term (µ ▷ 𝕧) 𝕖 → EvalCtx µ 𝕖 µ' 𝕖
 
   -- Configurations
   _∥_         : EvalCtx µ 𝕔 µ' 𝕔 → Term µ 𝕔 → EvalCtx µ 𝕔 µ' 𝕔
-  ν[α,x]→_    : EvalCtx (µ , 𝕥 , 𝕧) 𝕔 µ' 𝕔 → EvalCtx µ 𝕔 µ' 𝕔
+  ν[α,x]→_    : EvalCtx (µ ▷ 𝕥 ▷ 𝕧) 𝕔 µ' 𝕔 → EvalCtx µ 𝕔 µ' 𝕔
 
 _[_] : EvalCtx µ M µ' M' → Term µ' M' → Term µ M
 □                [ t ] = t

@@ -1,8 +1,8 @@
 module KitTheory.Generics-Example where
 
-open import Data.List using (List; []; _∷_)
+open import Data.List using (List; [])
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Data.Product renaming (_,_ to ⟨_,_⟩)
+open import Data.Product
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂)
 
 open import KitTheory.Modes
@@ -22,7 +22,7 @@ data STLCCon : Set where
 
 STLC : Desc
 STLC = `σ STLCCon λ where
-  con-λ → `X (𝕖 ∷ []) 𝕖 (`■ 𝕖)
+  con-λ → `X ([] ▷ 𝕖) 𝕖 (`■ 𝕖)
   con-· → `X [] 𝕖 (`X [] 𝕖 (`■ 𝕖))
 
 variable
@@ -51,8 +51,8 @@ module With-Patterns where
     𝕂ₛₛ = kitₛₛ
   open Terms (𝕋 STLC) using (_⊢_)
 
-  pattern `λ_ e     = `con ⟨ con-λ , ⟨ e , refl ⟩ ⟩
-  pattern _·_ e₁ e₂ = `con ⟨ con-· , ⟨ e₁ , ⟨ e₂ , refl ⟩ ⟩ ⟩
+  pattern `λ_ e     = `con (con-λ , e , refl)
+  pattern _·_ e₁ e₂ = `con (con-· , e₁ , e₂ , refl)
   pattern `_ x      = `var x
 
   id : Tm STLC [] 𝕖
@@ -61,26 +61,27 @@ module With-Patterns where
   id·id : Tm STLC [] 𝕖
   id·id = (`λ ` here refl) · (`λ ` here refl)
 
-  -- foo : ∀ {µ} → µ ⊢ 𝕖 → µ ⊢ 𝕖
-  -- foo (` x)     = {!!}
-  -- foo (`λ e)    = {!!}
-  -- foo (e₁ · e₂) = {!!}
+  sub : ([] ▷ 𝕖) ⊢ 𝕖
+  sub = (` here refl) ⋯ idₛ
+
+  test : sub ≡ ` here refl
+  test = refl
 
 module With-Iso where
   data _⊢_ : List VarMode → TermMode → Set where
     `_    : µ ∋ 𝕖  →  µ ⊢ 𝕖
-    `λ_   : (µ , 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
+    `λ_   : (µ ▷ 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
     _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
 
   to : (µ ⊢ M) → Tm STLC µ M
   to (` x)     = `var x
-  to (`λ e)    = `con ⟨ con-λ , ⟨ to e , refl ⟩ ⟩
-  to (e₁ · e₂) = `con ⟨ con-· , ⟨ to e₁ , ⟨ to e₂ , refl ⟩ ⟩ ⟩
+  to (`λ e)    = `con (con-λ , to e , refl)
+  to (e₁ · e₂) = `con (con-· , to e₁ , to e₂ , refl)
 
   from : Tm STLC µ M → (µ ⊢ M)
-  from {M = 𝕖} (`var x)                          = ` x
-  from (`con ⟨ con-λ , ⟨ e , refl ⟩ ⟩)           = `λ (from e)
-  from (`con ⟨ con-· , ⟨ e₁ , ⟨ e₂ , refl ⟩ ⟩ ⟩) = from e₁ · from e₂
+  from {M = 𝕖} (`var x)                = ` x
+  from (`con (con-λ , e , refl))       = `λ (from e)
+  from (`con (con-· , e₁ , e₂ , refl)) = from e₁ · from e₂
 
   from∘to : (a : µ ⊢ M) → from (to a) ≡ a
   from∘to (` x) = refl
@@ -89,8 +90,8 @@ module With-Iso where
 
   to∘from : (b : Tm STLC µ M) → to (from b) ≡ b
   to∘from {M = 𝕖} (`var x) = refl
-  to∘from (`con ⟨ con-λ , ⟨ e , refl ⟩ ⟩) rewrite to∘from e = refl
-  to∘from (`con ⟨ con-· , ⟨ e₁ , ⟨ e₂ , refl ⟩ ⟩ ⟩) rewrite to∘from e₁ | to∘from e₂ = refl
+  to∘from (`con (con-λ , e , refl)) rewrite to∘from e = refl
+  to∘from (`con (con-· , e₁ , e₂ , refl)) rewrite to∘from e₁ | to∘from e₂ = refl
 
   iso : ∀ {µ M} → (µ ⊢ M) ≃ Tm STLC µ M
   iso = record
@@ -123,12 +124,11 @@ module With-Iso where
   id·id : [] ⊢ 𝕖
   id·id = (`λ ` here refl) · (`λ ` here refl)
 
-  sub : ([] , 𝕖) ⊢ 𝕖
+  sub : ([] ▷ 𝕖) ⊢ 𝕖
   sub = (` here refl) ⋯ idₛ
 
   test : sub ≡ ` here refl
   test = refl
-
 
 
 

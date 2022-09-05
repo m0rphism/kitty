@@ -2,9 +2,9 @@ module Examples.STLC-Rec.Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_) public
 open import KitTheory.Modes using (Modes; Terms)
 open import Data.Product using (_×_; ∃-syntax)
 
@@ -51,14 +51,14 @@ variable
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
 
   `[_]_  : M ≡ m→M m  →  µ ∋ m  →  µ ⊢ M 
-  λx_    : µ , 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
+  λx_    : µ ▷ 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
   _·_    : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
   fold   : µ ⊢ 𝕖  →  µ ⊢ 𝕖
   unfold : µ ⊢ 𝕖  →  µ ⊢ 𝕖
 
   _⇒_    : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
   𝟘      : µ ⊢ 𝕥
-  µα_    : µ , 𝕥 ⊢ 𝕥  →  µ ⊢ 𝕥
+  µα_    : µ ▷ 𝕥 ⊢ 𝕥  →  µ ⊢ 𝕥
 
   ★      : µ ⊢ 𝕜
 
@@ -181,7 +181,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
-    Γ ,, t₁ ⊢ e ∶ wk _ t₂ →
+    Γ ▶ t₁ ⊢ e ∶ wk _ t₂ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →

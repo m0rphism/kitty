@@ -2,8 +2,10 @@ module Examples.SystemF-Kits-Uniform.Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
+
+open import KitTheory.Prelude public
 
 infix   3  _↪_  _⊢_∶_  _⊢*_∶_
 infixr  5  ∀α_  λx_  Λα_
@@ -39,12 +41,12 @@ variable
 
 data Term : List Modeᵥ → Modeₜ → Set where
   `[_]_ : M ≡ m→M m → m ∈ µ → Term µ M  -- Expr and Type Variables
-  λx_   : Term (𝕖 ∷ µ) 𝕖 → Term µ 𝕖
-  Λα_   : Term (𝕥 ∷ µ) 𝕖 → Term µ 𝕖
-  ∀α_   : Term (𝕥 ∷ µ) 𝕥 → Term µ 𝕥
+  λx_   : Term (µ ▷ 𝕖) 𝕖 → Term µ 𝕖
+  Λα_   : Term (µ ▷ 𝕥) 𝕖 → Term µ 𝕖
+  ∀α_   : Term (µ ▷ 𝕥) 𝕥 → Term µ 𝕥
   _·_   : Term µ 𝕖 → Term µ 𝕖 → Term µ 𝕖
   _∙_   : Term µ 𝕖 → Term µ 𝕥 → Term µ 𝕖
-  _⇒_   : Term µ 𝕥 → Term (𝕖 ∷ µ) 𝕥 → Term µ 𝕥
+  _⇒_   : Term µ 𝕥 → Term (µ ▷ 𝕖) 𝕥 → Term µ 𝕥
   ★     : Term µ 𝕜
 
 pattern `_ x = `[ refl ] x
@@ -59,7 +61,6 @@ variable
 
 -- Modes and Terms
 
-open import KitTheory.Prelude public
 open import KitTheory.Modes public
 
 𝕄 : Modes
@@ -174,10 +175,10 @@ data _⊢_∶_ : Ctx µ → Term µ M → Type µ M → Set where
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
-    Γ ,, t₁ ⊢ e ∶ t₂ →
+    Γ ▶ t₁ ⊢ e ∶ t₂ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-Λ :
-    Γ ,, ★ ⊢ e ∶ t₂ →
+    Γ ▶ ★ ⊢ e ∶ t₂ →
     Γ ⊢ Λα e ∶ ∀α t₂
   τ-· : ∀ {Γ : Ctx µ} →
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →

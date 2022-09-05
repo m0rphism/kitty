@@ -3,7 +3,7 @@ module Examples.STLC-CBV-NoTySubst.Normalization where
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning; inspect; [_])
 open import Relation.Nullary using (¬_)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Product using (_×_; ∃-syntax; _,_; Σ; proj₁; proj₂)
@@ -11,7 +11,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Unit using (⊤; tt)
 open import Data.Empty using (⊥; ⊥-elim)
 
-open import Examples.STLC-CBV-NoTySubst.Definitions hiding (_,_)
+open import Examples.STLC-CBV-NoTySubst.Definitions
 open import Examples.STLC-CBV-NoTySubst.SubjectReduction
 
 -- Definition of the Logical Relation ------------------------------------------
@@ -127,7 +127,7 @@ SNSub-ext : {σ : µ₁ →ₛ []} →
   SNSub Γ₁ σ →
   Value e →
   SN t e →
-  SNSub (Γ₁ ,, t) (σ ,ₛ e)
+  SNSub (Γ₁ ▶ t) (σ ,ₛ e)
 SNSub-ext {Γ₁ = Γ₁} {e = e} {t = t} {σ = σ} SN-σ val-e SN-e (here refl) = SN-e
 SNSub-ext {Γ₁ = Γ₁} {e = e} {t = t} {σ = σ} SN-σ val-e SN-e (there x) = SN-σ x
 

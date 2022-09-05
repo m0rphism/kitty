@@ -2,9 +2,9 @@ module Examples.SystemF-TypingKits.Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_) public
 open import KitTheory.Modes using (Modes; Terms)
 open import Data.Product using (∃-syntax)
 
@@ -52,9 +52,9 @@ variable
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
   `ˣ_   : µ ∋ 𝕖  →  µ ⊢ 𝕖
   `ᵅ_   : µ ∋ 𝕥  →  µ ⊢ 𝕥
-  λx_   : µ , 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
-  Λα_   : µ , 𝕥 ⊢ 𝕖  →  µ ⊢ 𝕖
-  ∀α_   : µ , 𝕥 ⊢ 𝕥  →  µ ⊢ 𝕥
+  λx_   : µ ▷ 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
+  Λα_   : µ ▷ 𝕥 ⊢ 𝕖  →  µ ⊢ 𝕖
+  ∀α_   : µ ▷ 𝕥 ⊢ 𝕥  →  µ ⊢ 𝕥
   _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
   _∙_   : µ ⊢ 𝕖  →  µ ⊢ 𝕥  →  µ ⊢ 𝕖
   _⇒_   : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
@@ -184,10 +184,10 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ∋   x ∶ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
-    Γ ,, t₁ ⊢ e ∶ wk _ t₂ →
+    Γ ▶ t₁ ⊢ e ∶ wk _ t₂ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-Λ :
-    Γ ,, ★ ⊢ e ∶ t₂ →
+    Γ ▶ ★ ⊢ e ∶ t₂ →
     Γ ⊢ Λα e ∶ ∀α t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →

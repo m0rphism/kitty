@@ -4,7 +4,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
-open import KitTheory.Prelude using (_∋_; _,_) public
+open import KitTheory.Prelude using (_∋_; _▷_) public
 open import KitTheory.Modes using (Modes; Terms)
 open import Data.Product using (_×_; ∃-syntax)
 
@@ -47,7 +47,7 @@ variable
 -- Expressions and Types
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
   `_    : µ ∋ 𝕖  →  µ ⊢ 𝕖
-  λx_   : µ , 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
+  λx_   : µ ▷ 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
   _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
   _⇒_   : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
   𝟘     : µ ⊢ 𝕥
@@ -152,7 +152,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ 𝕖 → µ ∶⊢ 𝕖 → Set where
     wk-telescope Γ x ≡ t →
     Γ ⊢ ` x ∶ t
   τ-λ : ∀ {Γ : Ctx µ} →
-    Γ ,, t₁ ⊢ e ∶ wk _ t₂ →
+    Γ ▶ t₁ ⊢ e ∶ wk _ t₂ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →

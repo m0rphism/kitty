@@ -44,7 +44,7 @@ open import Examples.SystemFLin-Kits.Definitions
 --         (wk-⊢ (T ⋯ σ) (⊢σ x))
 
 sub-pres-⊢' : ∀ {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {E : Term (m ∷ µ₁) M}  {E' : Term µ₁ (m→M m)} {T : Type (m ∷ µ₁) M} {σ : µ₁ →ₛ µ₂} →
-  Γ₁ ,, T' ; Ψ₁ ,,Ψ u ⊢ E ∶ T →
+  Γ₁ ▶ T' ; Ψ₁ ▶ᵤ u ⊢ E ∶ T →
   Γ₁ ; Ψ₁ ⊢ E' ∶ T' →
   Γ₁ ; Ψ₁ ⊢ E ⋯ ⦅ E' ⦆ ∶ T ⋯ ⦅ E' ⦆
 sub-pres-⊢' = {!!}
