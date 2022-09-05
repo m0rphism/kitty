@@ -32,25 +32,23 @@ variable
   x y z                     : µ ∋ 𝕖
   e e₁ e₂ e₃ e' e₁' e₂' e₃' : Tm STLC µ 𝕖
 
-
-open import KitTheory.Kit (𝕋 STLC)
-open import KitTheory.Compose (𝕋 STLC) (KT STLC)
-
-open KitTraversal (KT STLC)
-open KitAssoc (KA STLC)
-
-open Kit {{...}}
-open ComposeKit {{...}}
-
-instance
-  𝕂ᵣ = kitᵣ
-  𝕂ₛ = kitₛ
-  𝕂ᵣᵣ = kitᵣᵣ
-  𝕂ᵣₛ = kitᵣₛ
-  𝕂ₛᵣ = kitₛᵣ
-  𝕂ₛₛ = kitₛₛ
-
 module With-Patterns where
+  open import KitTheory.Kit (𝕋 STLC)
+  open import KitTheory.Compose (𝕋 STLC) (KT STLC)
+
+  open KitTraversal (KT STLC)
+  open KitAssoc (KA STLC)
+
+  open Kit {{...}}
+  open ComposeKit {{...}}
+
+  instance
+    𝕂ᵣ = kitᵣ
+    𝕂ₛ = kitₛ
+    𝕂ᵣᵣ = kitᵣᵣ
+    𝕂ᵣₛ = kitᵣₛ
+    𝕂ₛᵣ = kitₛᵣ
+    𝕂ₛₛ = kitₛₛ
   open Terms (𝕋 STLC) using (_⊢_)
 
   pattern `λ_ e     = `con ⟨ con-λ , ⟨ e , refl ⟩ ⟩
@@ -63,38 +61,30 @@ module With-Patterns where
   id·id : Tm STLC [] 𝕖
   id·id = (`λ ` here refl) · (`λ ` here refl)
 
-  foo : ∀ {µ} → µ ⊢ 𝕖 → µ ⊢ 𝕖
-  foo (` x)     = {!!}
-  foo (`λ e)    = {!!}
-  foo (e₁ · e₂) = {!!}
+  -- foo : ∀ {µ} → µ ⊢ 𝕖 → µ ⊢ 𝕖
+  -- foo (` x)     = {!!}
+  -- foo (`λ e)    = {!!}
+  -- foo (e₁ · e₂) = {!!}
 
 module With-Iso where
-  open Agda.Primitive using (Level; _⊔_; lsuc)
-  record _≃_ {a b} (A : Set a) (B : Set b) : Set (a ⊔ b) where
-    field
-      to      : A → B
-      from    : B → A
-      from∘to : ∀ a → from (to a) ≡ a
-      to∘from : ∀ b → to (from b) ≡ b
-
   data _⊢_ : List VarMode → TermMode → Set where
     `_    : µ ∋ 𝕖  →  µ ⊢ 𝕖
-    λx_   : (µ , 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
+    `λ_   : (µ , 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
     _·_   : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
 
   to : (µ ⊢ M) → Tm STLC µ M
   to (` x)     = `var x
-  to (λx e)    = `con ⟨ con-λ , ⟨ to e , refl ⟩ ⟩
+  to (`λ e)    = `con ⟨ con-λ , ⟨ to e , refl ⟩ ⟩
   to (e₁ · e₂) = `con ⟨ con-· , ⟨ to e₁ , ⟨ to e₂ , refl ⟩ ⟩ ⟩
 
   from : Tm STLC µ M → (µ ⊢ M)
   from {M = 𝕖} (`var x)                          = ` x
-  from (`con ⟨ con-λ , ⟨ e , refl ⟩ ⟩)           = λx (from e)
+  from (`con ⟨ con-λ , ⟨ e , refl ⟩ ⟩)           = `λ (from e)
   from (`con ⟨ con-· , ⟨ e₁ , ⟨ e₂ , refl ⟩ ⟩ ⟩) = from e₁ · from e₂
 
   from∘to : (a : µ ⊢ M) → from (to a) ≡ a
   from∘to (` x) = refl
-  from∘to (λx e) rewrite from∘to e = refl
+  from∘to (`λ e) rewrite from∘to e = refl
   from∘to (e₁ · e₂) rewrite from∘to e₁ | from∘to e₂ = refl
 
   to∘from : (b : Tm STLC µ M) → to (from b) ≡ b
@@ -109,6 +99,36 @@ module With-Iso where
     ; from∘to = from∘to
     ; to∘from = to∘from
     }
+
+  open FromIso iso
+  open import KitTheory.Kit terms
+  open KitTraversal kit-traversal
+  open import KitTheory.Compose terms kit-traversal
+  open KitAssoc kit-assoc
+
+  open Kit {{...}}
+  open ComposeKit {{...}}
+
+  instance
+    𝕂ᵣ = kitᵣ
+    𝕂ₛ = kitₛ
+    𝕂ᵣᵣ = kitᵣᵣ
+    𝕂ᵣₛ = kitᵣₛ
+    𝕂ₛᵣ = kitₛᵣ
+    𝕂ₛₛ = kitₛₛ
+
+  id : [] ⊢ 𝕖
+  id = `λ ` here refl
+
+  id·id : [] ⊢ 𝕖
+  id·id = (`λ ` here refl) · (`λ ` here refl)
+
+  sub : ([] , 𝕖) ⊢ 𝕖
+  sub = (` here refl) ⋯ idₛ
+
+  test : sub ≡ ` here refl
+  test = refl
+
 
 
 
