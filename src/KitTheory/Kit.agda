@@ -83,6 +83,17 @@ record Kit : Set₁ where
   ⦅_⦆ : µ ◆ m→SM m → (µ ▷ m) –→ µ
   ⦅ v ⦆ = idₖ ,ₖ v
 
+  -- Empty renaming/substitution
+  emptyₖ : [] –→ µ
+  emptyₖ _ ()
+
+  -- Singleton renaming/substitution for terms with 1 free variable.
+  -- Allows the term to be substituted to have arbitrary free variables.
+  -- This is useful for things like pattern matching in combination with `_∥_`,
+  -- where a matching substitution needs to be built up piece by piece.
+  ⦅_⦆₀ : µ ◆ m→SM m → ([] ▷ m) –→ µ
+  ⦅ v ⦆₀ = emptyₖ ,ₖ v
+
 open Kit {{...}}
 
 _◆[_]_ : List VarMode → (𝕂 : Kit) → Kit.StuffMode 𝕂 → Set
