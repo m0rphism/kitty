@@ -12,6 +12,7 @@ open import Function using (id; _$_)
 open import Data.Product using (Σ; ∃-syntax; Σ-syntax; _×_; proj₁; proj₂; _,_)
 
 open import KitTheory.Prelude
+open import KitTheory.Iso
 open Modes 𝕄
 
 private
@@ -113,14 +114,6 @@ private mutual
 KAL : (d : Desc) → KitAssoc.KitAssocLemmas (KA d)
 KAL d = record { ⋯-id = ⋯-id }
 
-open Agda.Primitive using (Level; _⊔_; lsuc)
-record _≃_ {a b} (A : Set a) (B : Set b) : Set (a ⊔ b) where
-  field
-    to      : A → B
-    from    : B → A
-    from∘to : ∀ a → from (to a) ≡ a
-    to∘from : ∀ b → to (from b) ≡ b
-
 module FromIso {_⊢_ : Scoped} {d : Desc} (iso : ∀ {µ} {e} → (µ ⊢ e) ≃ Tm d µ e) where 
   open _≃_ 
 
@@ -192,7 +185,7 @@ module FromIso {_⊢_ : Scoped} {d : Desc} (iso : ∀ {µ} {e} → (µ ⊢ e) �
         trans (cong (λ ■ → from iso (■ ⋯ ϕ₂)) (to∘from iso _)) (cong (from iso) (⋯-assoc (to iso e) ϕ₁ ϕ₂))
     }
 
-  open KitAssoc kit-assoc
+  open KitAssoc kit-assoc public
 
   kit-assoc-lemmas : KitAssocLemmas
   kit-assoc-lemmas = record
@@ -200,4 +193,7 @@ module FromIso {_⊢_ : Scoped} {d : Desc} (iso : ∀ {µ} {e} → (µ ⊢ e) �
         let instance _ = Kit→Kit 𝕂 in
         trans (cong (from iso) (⋯-id (to iso v))) (from∘to iso v)
     }
+
+  open KitTraversal kit-traversal public
+  open KitAssocLemmas kit-assoc-lemmas public
 

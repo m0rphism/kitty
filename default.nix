@@ -8,6 +8,7 @@ agdaPackages.mkDerivation {
   src = ./.;
   buildInputs = [
     agdaPackages.standard-library
+    myAgdaPackages.reflection-lib
   ];
 
   libraryName = "kit-theory";  # has to match the .agda-lib
