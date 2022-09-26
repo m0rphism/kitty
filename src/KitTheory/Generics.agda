@@ -48,7 +48,7 @@ private mutual
   _⋯_ : ∀ {d} {µ₁ : List VarMode} {M : TermMode} {µ₂ : List VarMode}
       ⦃ 𝕂 : Kit (𝕋 d) ⦄ →
       Tm d µ₁ M → _–[_]→_ (𝕋 d) µ₁ 𝕂 µ₂ → Tm d µ₂ M
-  _⋯_ (`var x)  f = tm _ (f _ x)
+  _⋯_ (`var x)  f = `/id _ (f _ x)
   _⋯_ (`con e') f = `con (e' ⋯' f)
 
   _⋯'_ : ∀ {d} {d'} {µ₁ : List VarMode} {M : TermMode} {µ₂ : List VarMode}
@@ -61,7 +61,7 @@ private mutual
 private 
   ⋯-var : ∀ {d} {µ₁ : List VarMode} {m : VarMode} {µ₂ : List VarMode}
         ⦃ 𝕂 : Kit (𝕋 d) ⦄ (x : µ₁ ∋ m) (ϕ : (𝕂 Kit.–→ µ₁) µ₂) →
-        Kit.tm 𝕂 m (ϕ m x) ≡ Kit.tm 𝕂 m (ϕ m x)
+        Kit.`/id 𝕂 m (ϕ m x) ≡ Kit.`/id 𝕂 m (ϕ m x)
   ⋯-var x ϕ = refl
 
 KT : (d : Desc) → KitTraversal (𝕋 d)
@@ -101,7 +101,7 @@ private mutual
   ⋯-id : ∀ {d} ⦃ 𝕂 : Kit (𝕋 d) ⦄ {µ : List VarMode} {M : TermMode}
         (e : Tm d µ M) →
         (e ⋯ Kit.idₖ 𝕂) ≡ e
-  ⋯-id (`var x) = tm-vr x
+  ⋯-id (`var x) = id/`/id x
   ⋯-id (`con e) = cong `con (⋯-id' e)
 
   ⋯-id' : ∀ {d} {d'} ⦃ 𝕂 : Kit (𝕋 d) ⦄ {µ : List VarMode} {M : TermMode}
@@ -127,16 +127,16 @@ module FromIso {_⊢_ : Scoped} {d : Desc} (iso : ∀ {µ} {e} → (µ ⊢ e) �
 
   Kit→Kit : Kit terms → Kit (𝕋 d)
   Kit→Kit k = record
-    { StuffMode = Kit.StuffMode k
-    ; _◆_       = Kit._◆_ k
-    ; m→SM      = Kit.m→SM k
-    ; SM→M      = Kit.SM→M k
-    ; vr        = Kit.vr k
-    ; tm        = λ m x → to iso (Kit.tm k m x)
-    ; wk        = Kit.wk k
-    ; m→SM→M    = Kit.m→SM→M k
-    ; wk-vr     = Kit.wk-vr k
-    ; tm-vr     = λ x → trans (cong (to iso) (Kit.tm-vr k x)) (to∘from iso (`var x))
+    { VarMode/TermMode = Kit.VarMode/TermMode k
+    ; _∋/⊢_            = Kit._∋/⊢_ k
+    ; id/m→M           = Kit.id/m→M k
+    ; m→M/id           = Kit.m→M/id k
+    ; id/m→M/id        = Kit.id/m→M/id k
+    ; id/`             = Kit.id/` k
+    ; `/id             = λ m x → to iso (Kit.`/id k m x)
+    ; id/`/id          = λ x → trans (cong (to iso) (Kit.id/`/id k x)) (to∘from iso (`var x))
+    ; wk               = Kit.wk k
+    ; wk-id/`          = Kit.wk-id/` k
     }
 
   kit-traversal : KitTraversal terms

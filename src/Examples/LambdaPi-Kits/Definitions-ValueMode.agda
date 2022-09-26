@@ -81,7 +81,7 @@ open Kit {{...}} public
 kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ M
-  (` x)     ⋯ f = tm _ (f _ x)
+  (` x)     ⋯ f = `/id _ (f _ x)
   (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
   Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
   (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
@@ -95,7 +95,7 @@ kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   neutralᵛ n ⋯ f = neutralᵛ (n ⋯ f)
 
   ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-          (` x) ⋯ f ≡ tm _ (f _ x)
+          (` x) ⋯ f ≡ `/id _ (f _ x)
   ⋯-var _ _ = refl
 
 open KitTraversal kit-traversal public
@@ -138,7 +138,7 @@ kit-assoc-lemmas : KitAssocLemmas
 kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : Term µ M) →
          v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id               (` x)                              = tm-vr x
+  ⋯-id               (` x)                              = id/`/id x
   ⋯-id {µ = µ} {{𝕂}} (λ→ t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λ→_ (⋯-id t)
   ⋯-id {µ = µ} {{𝕂}} (Π t₁ t₂) rewrite id↑≡id {{𝕂}} 𝕥 µ = cong₂ Π (⋯-id t₁) (⋯-id t₂)
   ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)

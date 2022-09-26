@@ -76,7 +76,7 @@ record KitTraversalAlt : Set₁ where
 
   field
     ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-            (` x) ⋯ f ≡ tm _ (f _ x)
+            (` x) ⋯ f ≡ `/id _ (f _ x)
     ⋯-↑ : ∀ {𝕂s₁ 𝕂s₂ : List Kit} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
           (∀ m (x : µ₁ ∋ m) → ` x ⋯* f ≡ ` x ⋯* g) →
           (t : µ₁ ⊢ M) → t ⋯* f ≡ t ⋯* g
@@ -103,9 +103,9 @@ module Derive (KT : KitTraversalAlt) where
              ((g ∘ₖ f) ∷[ 𝕂 ] [])
              (λ m₁ x →
                ` x ⋯ f ⋯ g               ≡⟨ cong (_⋯ g) (⋯-var x f) ⟩
-               (tm _ (f _ x)) ⋯ g        ≡⟨ tm-⋯-∘ f g x ⟩
-               tm _ ((g ∘ₖ f) _ x)       ≡⟨ cong (λ h → tm _ (h _ x)) (sym (dist-↑*-∘ [] g f)) ⟩
-               tm _ ((g ∘ₖ f) _ x)       ≡⟨ sym (⋯-var x (g ∘ₖ f)) ⟩
+               (`/id _ (f _ x)) ⋯ g      ≡⟨ tm-⋯-∘ f g x ⟩
+               `/id _ ((g ∘ₖ f) _ x)     ≡⟨ cong (λ h → `/id _ (h _ x)) (sym (dist-↑*-∘ [] g f)) ⟩
+               `/id _ ((g ∘ₖ f) _ x)     ≡⟨ sym (⋯-var x (g ∘ₖ f)) ⟩
                ` x ⋯ (g ∘ₖ f)            ∎)
              v
       ⟩
@@ -122,11 +122,11 @@ module Derive (KT : KitTraversalAlt) where
     ⋯-↑ (idₖ ∷[ 𝕂 ] [])
         []
         (λ m x →
-          ` x ⋯ idₖ {{𝕂}}         ≡⟨ ⋯-var x idₖ ⟩
-          tm _ ((idₖ {{𝕂}}) _ x)  ≡⟨ cong (λ h → tm _ (h _ x)) (id↑*≡id [] _) ⟩
-          tm _ (idₖ {{𝕂}} _ x)    ≡⟨⟩
-          tm _ (vr _ x)           ≡⟨ tm-vr x ⟩
-          ` x                     ∎)
+          ` x ⋯ idₖ {{𝕂}}           ≡⟨ ⋯-var x idₖ ⟩
+          `/id _ ((idₖ {{𝕂}}) _ x)  ≡⟨ cong (λ h → `/id _ (h _ x)) (id↑*≡id [] _) ⟩
+          `/id _ (idₖ {{𝕂}} _ x)    ≡⟨⟩
+          `/id _ (id/` _ x)         ≡⟨ id/`/id x ⟩
+          ` x                       ∎)
         v
 
   kitassoc-lemmas : KitAssocLemmas

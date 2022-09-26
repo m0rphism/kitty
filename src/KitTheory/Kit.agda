@@ -27,36 +27,39 @@ fun-ext₂ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A₁ : Set ℓ₁} {A₂ : A₁ → Set
 fun-ext₂ h = fun-ext λ x → fun-ext λ y → h x y
 
 record Kit : Set₁ where
-  infix   4  _◆_
+  infix   4  _∋/⊢_
   infixl  5  _,ₖ_
   infixl  6  _↑_  _↑*_
   infixl  5  _∥_
 
   field
-    StuffMode : Set
-    _◆_       : Stuff StuffMode
-    m→SM      : VarMode → StuffMode
-    SM→M      : StuffMode → TermMode
-    vr        : ∀ m → µ ∋ m → µ ◆ m→SM m
-    tm        : ∀ m → µ ◆ m→SM m → µ ⊢ m→M m
-    wk        : ∀ SM → µ ◆ SM → (µ ▷ m') ◆ SM
-    m→SM→M    : ∀ m → SM→M (m→SM m) ≡ m→M m
-    wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
-    tm-vr     : ∀ x → tm {µ = µ} m (vr _ x) ≡ ` x
+    VarMode/TermMode : Set
+    _∋/⊢_            : List VarMode → VarMode/TermMode → Set 
 
-  wk* : ∀ SM → µ ◆ SM → (µ ▷▷ µ') ◆ SM
-  wk* {µ' = []} sm x = x
-  wk* {µ' = µ' ▷ m} sm x = wk sm (wk* sm x)
+    id/m→M           : VarMode → VarMode/TermMode
+    m→M/id           : VarMode/TermMode → TermMode
+    id/m→M/id        : ∀ m → m→M/id (id/m→M m) ≡ m→M m
+
+    id/`             : ∀ m → µ ∋ m → µ ∋/⊢ id/m→M m
+    `/id             : ∀ m → µ ∋/⊢ id/m→M m → µ ⊢ m→M m
+    id/`/id          : ∀ x → `/id {µ = µ} m (id/` _ x) ≡ ` x
+
+    wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
+    wk-id/`          : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
+
+  wk* : ∀ SM → µ ∋/⊢ SM → (µ ▷▷ µ') ∋/⊢ SM
+  wk* {µ' = []}     m/M x = x
+  wk* {µ' = µ' ▷ m} m/M x = wk m/M (wk* m/M x)
 
   _–→_ : List VarMode → List VarMode → Set
-  _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m→SM m
+  _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ∋/⊢ id/m→M m
 
   idₖ : µ –→ µ
-  idₖ = vr
+  idₖ = id/`
 
   -- TODO: Can we express this as weakened f + ,ₖ ?
   _↑_ : µ₁ –→ µ₂ → ∀ m → (µ₁ ▷ m) –→ (µ₂ ▷ m)
-  (ϕ ↑ m) _ (here p)  = vr _ (here p)
+  (ϕ ↑ m) _ (here p)  = id/` _ (here p)
   (ϕ ↑ m) _ (there x) = wk _ (ϕ _ x)
 
   _↑*_ : µ₁ –→ µ₂ → ∀ µ' → (µ₁ ▷▷ µ') –→ (µ₂ ▷▷ µ')
@@ -66,7 +69,7 @@ record Kit : Set₁ where
   id↑≡id : ∀ m µ → idₖ {µ = µ} ↑ m ≡ idₖ {µ = µ ▷ m}
   id↑≡id m µ = fun-ext₂ λ where
     _ (here _)  → refl
-    _ (there x) → wk-vr m x
+    _ (there x) → wk-id/` m x
 
   id↑*≡id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ≡ idₖ {µ = µ ▷▷ µ'}
   id↑*≡id []       µ = refl
@@ -76,12 +79,12 @@ record Kit : Set₁ where
     idₖ             ∎
 
   -- Extending a renaming/substitution
-  _,ₖ_ : µ₁ –→ µ₂ → µ₂ ◆ m→SM m → (µ₁ ▷ m) –→ µ₂
+  _,ₖ_ : µ₁ –→ µ₂ → µ₂ ∋/⊢ id/m→M m → (µ₁ ▷ m) –→ µ₂
   (ϕ ,ₖ t) _ (here refl) = t
   (ϕ ,ₖ t) _ (there x)   = ϕ _ x
 
   -- Singleton renaming/substitution
-  ⦅_⦆ : µ ◆ m→SM m → (µ ▷ m) –→ µ
+  ⦅_⦆ : µ ∋/⊢ id/m→M m → (µ ▷ m) –→ µ
   ⦅ v ⦆ = idₖ ,ₖ v
 
   -- Empty renaming/substitution
@@ -92,7 +95,7 @@ record Kit : Set₁ where
   -- Allows the term to be substituted to have arbitrary free variables.
   -- This is useful for things like pattern matching in combination with `_∥_`,
   -- where a matching substitution needs to be built up piece by piece.
-  ⦅_⦆₀ : µ ◆ m→SM m → ([] ▷ m) –→ µ
+  ⦅_⦆₀ : µ ∋/⊢ id/m→M m → ([] ▷ m) –→ µ
   ⦅ v ⦆₀ = emptyₖ ,ₖ v
 
   _∥_ : ∀ {µ₁ µ₂ µ} → (µ₁ –→ µ) → (µ₂ –→ µ) → ((µ₁ ▷▷ µ₂) –→ µ)
@@ -102,71 +105,71 @@ record Kit : Set₁ where
 
   -- A weakening renaming/substitution
   wk' : µ –→ (µ ▷ m)
-  wk' _ x = wk _ (vr _ x)
+  wk' _ x = wk _ (id/` _ x)
 
   wk'* : µ –→ (µ ▷▷ µ')
-  wk'* _ x = wk* _ (vr _ x)
+  wk'* _ x = wk* _ (id/` _ x)
 
   idₖ' : µ –→ (µ' ▷▷ µ )
-  idₖ' _ x = vr _ (∈-▷▷ₗ x)  where
+  idₖ' _ x = id/` _ (∈-▷▷ₗ x)  where
     ∈-▷▷ₗ : µ ∋ m → (µ' ▷▷ µ) ∋ m
     ∈-▷▷ₗ (here px) = here px
     ∈-▷▷ₗ (there x) = there (∈-▷▷ₗ x)
 
   idₖ'' : ∀ {µ µ' µ''} → µ –→ (µ' ▷▷ µ ▷▷ µ'')
-  idₖ'' {µ} {µ'} {µ''} _ x = wk* {µ' = µ''} _ (vr _ (∈-▷▷ₗ x))  where
+  idₖ'' {µ} {µ'} {µ''} _ x = wk* {µ' = µ''} _ (id/` _ (∈-▷▷ₗ x))  where
     ∈-▷▷ₗ :  ∀ {µ} {µ'} → µ ∋ m → (µ' ▷▷ µ) ∋ m
     ∈-▷▷ₗ (here px) = here px
     ∈-▷▷ₗ (there x) = there (∈-▷▷ₗ x)
 
-  -- ⦅_⦆' : (µ ▷▷ µ') ◆ m→SM m → (µ ▷ m ▷▷ µ') –→ (µ ▷▷ µ')
+  -- ⦅_⦆' : (µ ▷▷ µ') ∋/⊢ m→[m/M] m → (µ ▷ m ▷▷ µ') –→ (µ ▷▷ µ')
   -- ⦅ v ⦆' = idₖ'' ∥ ⦅ v ⦆₀ ∥ idₖ''
   -- ⦅ v ⦆' = {!!} ∥ ⦅ v ⦆₀ ∥ {!!}
   -- -- ⦅ v ⦆' = (idₖ ∥ ⦅ v ⦆₀) ↑* _
 
 open Kit {{...}}
 
-_◆[_]_ : List VarMode → (𝕂 : Kit) → Kit.StuffMode 𝕂 → Set
-µ ◆[ 𝕂 ] sm = Kit._◆_ 𝕂 µ sm
+_∋/⊢[_]_ : List VarMode → (𝕂 : Kit) → Kit.VarMode/TermMode 𝕂 → Set
+µ ∋/⊢[ 𝕂 ] sm = Kit._∋/⊢_ 𝕂 µ sm
 
-_–[_]→_ : List VarMode → (_ : Kit) → List VarMode → Set _
+_–[_]→_ : List VarMode → Kit → List VarMode → Set
 µ₁ –[ 𝕂 ]→ µ₂ = Kit._–→_ 𝕂 µ₁ µ₂
 
 record KitTraversal : Set₁ where
   infixl  5  _⋯_  _⋯ᵣ_  _⋯ₛ_
 
   field
-    _⋯_   : ∀ {{𝕂 : Kit}} →
-            µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-    ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (ϕ : µ₁ –→ µ₂) →
-            (` x) ⋯ ϕ ≡ tm _ (ϕ _ x)
+    _⋯_   : ∀ ⦃ 𝕂 : Kit ⦄
+            → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –→ µ₂)
+            → (` x) ⋯ ϕ ≡ `/id _ (ϕ _ x)
 
   -- TODO: This could also be defined outside of KitTraversal.
   kitᵣ : Kit
-  Kit.StuffMode kitᵣ = VarMode
-  Kit._◆_       kitᵣ = _∋_
-  Kit.m→SM      kitᵣ = λ x → x
-  Kit.SM→M      kitᵣ = m→M
-  Kit.vr        kitᵣ = λ _ x → x
-  Kit.tm        kitᵣ = λ _ → `_
-  Kit.wk        kitᵣ = λ _ → there
-  Kit.m→SM→M    kitᵣ = λ _ → refl
-  Kit.wk-vr     kitᵣ = λ _ _ → refl
-  Kit.tm-vr     kitᵣ = λ _ → refl
+  Kit.VarMode/TermMode kitᵣ = VarMode
+  Kit._∋/⊢_            kitᵣ = _∋_
+  Kit.id/m→M           kitᵣ = λ m → m
+  Kit.m→M/id           kitᵣ = m→M
+  Kit.id/m→M/id        kitᵣ = λ m → refl
+  Kit.id/`             kitᵣ = λ m x → x
+  Kit.`/id             kitᵣ = λ m x → ` x
+  Kit.id/`/id          kitᵣ = λ x → refl
+  Kit.wk               kitᵣ = λ m x → there x
+  Kit.wk-id/`          kitᵣ = λ m x → refl
 
   private instance _ = kitᵣ
 
   kitₛ : Kit
-  Kit.StuffMode kitₛ = TermMode
-  Kit._◆_       kitₛ = _⊢_
-  Kit.m→SM      kitₛ = m→M
-  Kit.SM→M      kitₛ = λ x → x
-  Kit.vr        kitₛ = λ _ → `_
-  Kit.tm        kitₛ = λ _ x → x
-  Kit.wk        kitₛ = λ _ x → x ⋯ wk
-  Kit.m→SM→M    kitₛ = λ _ → refl
-  Kit.wk-vr     kitₛ = λ _ x → ⋯-var x wk
-  Kit.tm-vr     kitₛ = λ x → refl
+  Kit.VarMode/TermMode kitₛ = TermMode
+  Kit._∋/⊢_            kitₛ = _⊢_
+  Kit.id/m→M           kitₛ = m→M
+  Kit.m→M/id           kitₛ = λ M → M
+  Kit.id/m→M/id        kitₛ = λ m → refl
+  Kit.id/`             kitₛ = λ m x → ` x
+  Kit.`/id             kitₛ = λ M t → t
+  Kit.id/`/id          kitₛ = λ x → refl
+  Kit.wk               kitₛ = λ M t → t ⋯ wk
+  Kit.wk-id/`          kitₛ = λ m x → ⋯-var x wk
 
   private instance _ = kitₛ
 

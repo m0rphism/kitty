@@ -12,7 +12,7 @@ open import Examples.ISession.Definitions
 -- Application of Renamings and Substitutions ----------------------------------
 
 open import KitTheory.Kit 𝕋
-open Kit {{...}} public
+open Kit {{...}} public hiding (_∥_)
 
 mutual
 
@@ -34,7 +34,7 @@ mutual
   close t ⋯ f                = close (t ⋯ f)
   π l t ⋯ f                  = π l (t ⋯ f)
   (t₁ ∙ t₂) ⋯ f              = (t₁ ⋯ f) ∙ (t₂ ⋯ f)
-  (`ᵛ x) ⋯ f                 = tm _ (f _ x)
+  (`ᵛ x) ⋯ f                 = `/id _ (f _ x)
   (λx→ t) ⋯ f                = λx→ (t ⋯ (f ↑ _))
   (Λα→ t) ⋯ f                = Λα→ (t ⋯ (f ↑* _))
   unit ⋯ f                   = unit
@@ -47,7 +47,7 @@ mutual
   Dom t ⋯ f                  = Dom (t ⋯ f)
   (t₁ ⇒ t₂) ⋯ f              = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
   Kind ⋯ f                   = Kind
-  (`ᵗ x) ⋯ f                 = tm _ (f _ x)
+  (`ᵗ x) ⋯ f                 = `/id _ (f _ x)
   (t₁ ·ᵗ t₂) ⋯ f             = (t₁ ⋯ f) ·ᵗ (t₂ ⋯ f)
   (λα→ t) ⋯ f                = λα→ (t ⋯ (f ↑ _))
   (∀α[ ℂ ]→ t) ⋯ f           = ∀α[ ℂ ⋯ (f ↑ _) ]→ (t ⋯ (f ↑* _))
@@ -76,7 +76,7 @@ mutual
   kit-traversal : KitTraversal
   kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
     -- Applying a renaming or substitution to a variable does the expected thing.
-    ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm _ (f _ x)
+    ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ `/id _ (f _ x)
     ⋯-var {m = 𝕧} _ _ = refl
     ⋯-var {m = 𝕥} _ _ = refl
 
@@ -254,7 +254,7 @@ kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id (close t)              = cong close (⋯-id t)
   ⋯-id (π l t)                = cong (π l) (⋯-id t)
   ⋯-id (t₁ ∙ t₂)              = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
-  ⋯-id (`ᵛ x)                 = tm-vr x
+  ⋯-id (`ᵛ x)                 = id/`/id x
   ⋯-id {µ = µ} {{𝕂}} (λx→ t) rewrite id↑≡id {{𝕂}} 𝕧 µ = cong λx→_ (⋯-id t)
   ⋯-id {µ = µ} {{𝕂}} (Λα→ t) rewrite id↑*≡id {{𝕂}} ([] ▷ 𝕥 ▷ 𝕧) µ = cong Λα→_ (⋯-id t)
   ⋯-id unit                   = refl
@@ -267,7 +267,7 @@ kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id (Dom t)                = cong Dom (⋯-id t)
   ⋯-id (t₁ ⇒ t₂)              = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id Kind                   = refl
-  ⋯-id (`ᵗ α)                 = tm-vr α
+  ⋯-id (`ᵗ α)                 = id/`/id α
   ⋯-id (t₁ ·ᵗ t₂)             = cong₂ _·ᵗ_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id {µ = µ} {{𝕂}} (λα→ t)  rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λα→_ (⋯-id t)
   ⋯-id {µ = µ} {{𝕂}} (∀α[ ℂ ]→ t)  rewrite id↑*≡id {{𝕂}} ([] ▷ 𝕥 ▷ 𝕧) µ | id↑≡id {{𝕂}} 𝕥 µ = cong₂ ∀α[_]→_ (⋯-id ℂ) (⋯-id t)

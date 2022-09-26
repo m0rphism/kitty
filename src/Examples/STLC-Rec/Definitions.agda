@@ -85,7 +85,7 @@ infixl  5  _⋯_
 
 -- Traverse a term with a renaming or substitution (depending on the kit).
 _⋯_ : ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-(` x)     ⋯ f = tm _ (f _ x)
+(` x)     ⋯ f = `/id _ (f _ x)
 (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕖))
 (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
 (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
@@ -95,7 +95,7 @@ unfold e  ⋯ f = unfold (e ⋯ f)
 (µα t)    ⋯ f = µα (t ⋯ (f ↑ 𝕥))
 ★         ⋯ f = ★
 -- Applying a renaming or substitution to a variable does the expected thing.
-⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm _ (f _ x)
+⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ `/id _ (f _ x)
 ⋯-var {m = 𝕖} _ _ = refl
 ⋯-var {m = 𝕥} _ _ = refl
 
@@ -118,8 +118,8 @@ kit-assoc = record { ⋯-assoc = ⋯-assoc } where
               (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
     (v ⋯ f) ⋯ g ≡ v ⋯ (g ∘ₖ f)
   ⋯-assoc (` x) f g =
-    tm _ (f _ x) ⋯ g    ≡⟨ tm-⋯-∘ f g x ⟩
-    tm _ ((g ∘ₖ f) _ x) ∎
+    `/id _ (f _ x) ⋯ g    ≡⟨ tm-⋯-∘ f g x ⟩
+    `/id _ ((g ∘ₖ f) _ x) ∎
   ⋯-assoc (λx e) f g = cong λx_
     (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
     e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
@@ -146,7 +146,7 @@ instance 𝕂ₛₛ = kitₛₛ
 kit-assoc-lemmas : KitAssocLemmas
 kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id               (` x)                              = tm-vr x
+  ⋯-id               (` x)                              = id/`/id x
   ⋯-id {µ = µ} {{𝕂}} (λx t)    rewrite id↑≡id {{𝕂}} 𝕖 µ = cong λx_ (⋯-id t)
   ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id               (fold t)                           = cong fold (⋯-id t)

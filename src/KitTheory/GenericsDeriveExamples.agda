@@ -6,7 +6,7 @@ open import KitTheory.Generics
 open import KitTheory.GenericsDerive
 
 open import Data.List using (List; []; _∷_)
-
+    
 module STLC where
 
   data VarMode : Set where

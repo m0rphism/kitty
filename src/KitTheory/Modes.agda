@@ -9,9 +9,6 @@ record Modes : Set₁ where
     TermMode : Set
     m→M      : VarMode → TermMode
 
-  Stuff : Set → Set₁
-  Stuff StuffMode = List VarMode → StuffMode → Set
-
 record Terms (𝕄 : Modes) : Set₁ where
   open Modes 𝕄
   field

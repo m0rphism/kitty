@@ -27,11 +27,11 @@ id↑≡id : ∀ {{K : Kit}} m µ →
   idₖ {µ = µ} {{K}} ↑ m ≡ idₖ {µ = m ∷ µ} {{K}}
 id↑≡id m µ = fun-ext₂ λ where
   _ (here _)  → refl
-  _ (there x) → wk-vr m x
+  _ (there x) → wk-id/` m x
 
 ⋯-id : ∀ {{K : Kit}} (t : Term µ m) →
   t ⋯ idₖ {{K}} ≡ t
-⋯-id               (` x)                             = tm-vr x
+⋯-id               (` x)                             = id/`/id x
 ⋯-id {µ = µ} {{K}} (λx t)   rewrite id↑≡id {{K}} 𝕧 µ = cong λx_ (⋯-id t)
 ⋯-id {µ = µ} {{K}} (Λα t)   rewrite id↑≡id {{K}} 𝕥 µ = cong Λα_ (⋯-id t)
 ⋯-id {µ = µ} {{K}} (∀α t)   rewrite id↑≡id {{K}} 𝕥 µ = cong ∀α_ (⋯-id t)

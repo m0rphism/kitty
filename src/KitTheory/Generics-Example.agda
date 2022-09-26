@@ -7,6 +7,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong
 
 open import KitTheory.Modes
 open import KitTheory.Prelude
+open import KitTheory.Iso
 
 data Mode : Set where
   𝕖 : Mode
@@ -42,7 +43,7 @@ module With-Patterns where
   open Kit {{...}}
   open ComposeKit {{...}}
 
-  instance
+  private instance
     𝕂ᵣ = kitᵣ
     𝕂ₛ = kitₛ
     𝕂ᵣᵣ = kitᵣᵣ
@@ -93,24 +94,22 @@ module With-Iso where
   to∘from (`con (con-λ , e , refl)) rewrite to∘from e = refl
   to∘from (`con (con-· , e₁ , e₂ , refl)) rewrite to∘from e₁ | to∘from e₂ = refl
 
-  iso : ∀ {µ M} → (µ ⊢ M) ≃ Tm STLC µ M
-  iso = record
+  Iso : ∀ {µ M} → (µ ⊢ M) ≃ Tm STLC µ M
+  Iso = record
     { to      = to
     ; from    = from
     ; from∘to = from∘to
     ; to∘from = to∘from
     }
 
-  open FromIso iso
+  open FromIso Iso
   open import KitTheory.Kit terms
-  open KitTraversal kit-traversal
   open import KitTheory.Compose terms kit-traversal
-  open KitAssoc kit-assoc
 
   open Kit {{...}}
   open ComposeKit {{...}}
 
-  instance
+  private instance
     𝕂ᵣ = kitᵣ
     𝕂ₛ = kitₛ
     𝕂ᵣᵣ = kitᵣᵣ

@@ -62,14 +62,14 @@ module TermSubst where
 
   infixl  5  _⋯_
   _⋯_ : ∀ {{𝕂 : Kit}} → Term µ₁ m → µ₁ –[ 𝕂 ]→ µ₂ → Term µ₂ m
-  (` x)     ⋯ f = tm _ (f _ x)
+  (` x)     ⋯ f = `/id _ (f _ x)
   (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
   Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
   (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
   ★         ⋯ f = ★
 
   ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-          (` x) ⋯ f ≡ tm _ (f _ x)
+          (` x) ⋯ f ≡ `/id _ (f _ x)
   ⋯-var _ _ = refl
 
   kit-traversal : KitTraversal
@@ -114,7 +114,7 @@ module TermSubst where
   kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
     ⋯-id : ∀ {{𝕂 : Kit}} (v : Term µ m) →
           v ⋯ idₖ {{𝕂}} ≡ v
-    ⋯-id               (` x)                              = tm-vr x
+    ⋯-id               (` x)                              = id/`/id x
     ⋯-id {µ = µ} {{𝕂}} (λ→ t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λ→_ (⋯-id t)
     ⋯-id {µ = µ} {{𝕂}} (Π t₁ t₂) rewrite id↑≡id {{𝕂}} 𝕥 µ = cong₂ Π (⋯-id t₁) (⋯-id t₂)
     ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
@@ -174,7 +174,7 @@ module ValueSubst where
 
   infixl  5  _⋯_
   _⋯_ : ∀ {{𝕂 : Kit}} → Value µ₁ M → µ₁ –[ 𝕂 ]→ µ₂ → Value µ₂ M
-  (` x)     ⋯ f = tm _ (f _ x)
+  (` x)     ⋯ f = `/id _ (f _ x)
   (λ→ t)    ⋯ f = λ→ (t ⋯ (f ↑ 𝕥))
   Π t₁ t₂   ⋯ f = Π (t₁ ⋯ f) (t₂ ⋯ (f ↑ 𝕥))
   (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
@@ -184,7 +184,7 @@ module ValueSubst where
   kit-traversal : KitTraversal
   kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
     ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-            (`` x) ⋯ f ≡ tm _ (f _ x)
+            (`` x) ⋯ f ≡ `/id _ (f _ x)
     ⋯-var {m = 𝕥} _ _ = refl
 
   open KitTraversal kit-traversal public hiding (_⋯_)
@@ -227,7 +227,7 @@ module ValueSubst where
   kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
     ⋯-id : ∀ {{𝕂 : Kit}} (v : Value µ M) →
           v ⋯ idₖ {{𝕂}} ≡ v
-    ⋯-id               (` x)                              = tm-vr x
+    ⋯-id               (` x)                              = id/`/id x
     ⋯-id {µ = µ} {{𝕂}} (λ→ t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong λ→_ (⋯-id t)
     ⋯-id {µ = µ} {{𝕂}} (Π t₁ t₂) rewrite id↑≡id {{𝕂}} 𝕥 µ = cong₂ Π (⋯-id t₁) (⋯-id t₂)
     ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)

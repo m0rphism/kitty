@@ -9,7 +9,9 @@ open import KitTheory.Compose using ()
 open import KitTheory.Types using ()
 open import KitTheory.OPE using ()
 open import KitTheory.Generics using ()
+open import KitTheory.GenericsDerive using ()
 open import KitTheory.Generics-Example using () -- TODO
+open import KitTheory.GenericsDeriveExamples using ()
 open import KitTheory.Classes using ()
 
 -- Alternative formulation using the agda-stdlib approach.

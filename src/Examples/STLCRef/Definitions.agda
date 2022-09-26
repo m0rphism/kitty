@@ -86,8 +86,8 @@ kit-traversal : KitTraversal
 kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   -- Traverse a term with a renaming or substitution (depending on the kit).
   _⋯_ : ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-  (`ˣ x)    ⋯ f = tm _ (f _ x)
-  (`ʳ α)    ⋯ f = tm _ (f _ α)
+  (`ˣ x)    ⋯ f = `/id _ (f _ x)
+  (`ʳ α)    ⋯ f = `/id _ (f _ α)
   (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕧))
   (t₁ · t₂) ⋯ f = (t₁ ⋯ f) · (t₂ ⋯ f)
   (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
@@ -99,7 +99,7 @@ kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var } where
   unit      ⋯ f = unit
   ★         ⋯ f = ★
   -- Applying a renaming or substitution to a variable does the expected thing.
-  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm _ (f _ x)
+  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ `/id _ (f _ x)
   ⋯-var {m = 𝕧} _ _ = refl
   ⋯-var {m = 𝕣} _ _ = refl
 
@@ -119,11 +119,11 @@ kit-assoc = record { ⋯-assoc = ⋯-assoc } where
               (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
     (v ⋯ f) ⋯ g ≡ v ⋯ (g ∘ₖ f)
   ⋯-assoc (`ˣ x) f g =
-    tm _ (f _ x) ⋯ g    ≡⟨ tm-⋯-∘ f g x ⟩
-    tm _ ((g ∘ₖ f) _ x) ∎
+    `/id _ (f _ x) ⋯ g    ≡⟨ tm-⋯-∘ f g x ⟩
+    `/id _ ((g ∘ₖ f) _ x) ∎
   ⋯-assoc (`ʳ α) f g =
-    tm _ (f _ α) ⋯ g    ≡⟨ tm-⋯-∘ f g α ⟩
-    tm _ ((g ∘ₖ f) _ α) ∎
+    `/id _ (f _ α) ⋯ g    ≡⟨ tm-⋯-∘ f g α ⟩
+    `/id _ ((g ∘ₖ f) _ α) ∎
   ⋯-assoc (λx e) f g = cong λx_
     (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
     e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
@@ -149,8 +149,8 @@ instance 𝕂ₛₛ = kitₛₛ
 kit-assoc-lemmas : KitAssocLemmas
 kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
   ⋯-id : ∀ {{𝕂 : Kit}} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id               (`ˣ x)                             = tm-vr x
-  ⋯-id               (`ʳ α)                             = tm-vr α
+  ⋯-id               (`ˣ x)                             = id/`/id x
+  ⋯-id               (`ʳ α)                             = id/`/id α
   ⋯-id {µ = µ} {{𝕂}} (λx t)    rewrite id↑≡id {{𝕂}} 𝕧 µ = cong λx_ (⋯-id t)
   ⋯-id               (t₁ · t₂)                          = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
   ⋯-id               (t₁ ⇒ t₂)                          = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)

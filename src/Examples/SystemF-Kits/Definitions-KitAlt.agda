@@ -83,8 +83,8 @@ kit-traversal-alt : KitTraversalAlt
 kit-traversal-alt = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var; ⋯-↑ = ⋯-↑ } where
   -- Traverse a term with a renaming or substitution (depending on the kit).
   _⋯_ : ∀ {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-  (`ˣ x)    ⋯ f = tm _ (f _ x)
-  (`ᵅ α)    ⋯ f = tm _ (f _ α)
+  (`ˣ x)    ⋯ f = `/id _ (f _ x)
+  (`ᵅ α)    ⋯ f = `/id _ (f _ α)
   (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕖))
   (Λα t)    ⋯ f = Λα (t ⋯ (f ↑ 𝕥))
   (∀α t)    ⋯ f = ∀α (t ⋯ (f ↑ 𝕥))
@@ -93,7 +93,7 @@ kit-traversal-alt = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var; ⋯-↑ = ⋯-�
   (t₁ ⇒ t₂) ⋯ f = (t₁ ⋯ f) ⇒ (t₂ ⋯ f)
   ★         ⋯ f = ★
   -- Applying a renaming or substitution to a variable does the expected thing.
-  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ tm _ (f _ x)
+  ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) → (` x) ⋯ f ≡ `/id _ (f _ x)
   ⋯-var {m = 𝕖} _ _ = refl
   ⋯-var {m = 𝕥} _ _ = refl
 
@@ -227,11 +227,11 @@ open KitTraversalAlt kit-traversal-alt public
 --               (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
 --     (v ⋯ f) ⋯ g ≡ v ⋯ (g ∘ₖ f)
 --   ⋯-assoc (`ˣ x) f g =
---     tm _ (f _ x) ⋯ g    ≡⟨ tm-⋯-∘ f g x ⟩
---     tm _ ((g ∘ₖ f) _ x) ∎
+--     `/id _ (f _ x) ⋯ g    ≡⟨ tm-⋯-∘ f g x ⟩
+--     `/id _ ((g ∘ₖ f) _ x) ∎
 --   ⋯-assoc (`ᵅ α) f g =
---     tm _ (f _ α) ⋯ g    ≡⟨ tm-⋯-∘ f g α ⟩
---     tm _ ((g ∘ₖ f) _ α) ∎
+--     `/id _ (f _ α) ⋯ g    ≡⟨ tm-⋯-∘ f g α ⟩
+--     `/id _ ((g ∘ₖ f) _ α) ∎
 --   ⋯-assoc (λx e) f g = cong λx_
 --     (e ⋯ f ↑ _ ⋯ g ↑ _       ≡⟨ ⋯-assoc e (f ↑ _) (g ↑ _) ⟩
 --     e ⋯ ((g ↑ _) ∘ₖ (f ↑ _)) ≡⟨ cong (e ⋯_) (sym (dist-↑-∘ _ g f)) ⟩
@@ -260,8 +260,8 @@ open KitTraversalAlt kit-traversal-alt public
 -- kit-assoc-lemmas : KitAssocLemmas
 -- kit-assoc-lemmas = record { ⋯-id = ⋯-id } where
 --   ⋯-id : ∀ {{𝕂 : Kit}} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
---   ⋯-id               (`ˣ x)                             = tm-vr x
---   ⋯-id               (`ᵅ α)                             = tm-vr α
+--   ⋯-id               (`ˣ x)                             = id/`/id x
+--   ⋯-id               (`ᵅ α)                             = id/`/id α
 --   ⋯-id {µ = µ} {{𝕂}} (λx t)    rewrite id↑≡id {{𝕂}} 𝕖 µ = cong λx_ (⋯-id t)
 --   ⋯-id {µ = µ} {{𝕂}} (Λα t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong Λα_ (⋯-id t)
 --   ⋯-id {µ = µ} {{𝕂}} (∀α t)    rewrite id↑≡id {{𝕂}} 𝕥 µ = cong ∀α_ (⋯-id t)

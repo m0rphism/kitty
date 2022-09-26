@@ -76,16 +76,16 @@ _⊢_ = Term
 record Kit : Set₁ where
   constructor kit
   field
-    _◆_ : List Mode → Mode → Set
-    vr : ∀ m → µ ∋ m → µ ◆ m
-    tm : ∀ m → µ ◆ m → µ ⊢ m
-    wk : ∀ m → µ ◆ m → (m' ∷ µ) ◆ m
-    wk-vr : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
-    tm-vr : ∀ (x : µ ∋ m) → tm _ (vr _ x) ≡ ` x
+    _∋/⊢_   : List Mode → Mode → Set
+    id/`    : ∀ m → µ ∋ m → µ ∋/⊢ m
+    `/id    : ∀ m → µ ∋/⊢ m → µ ⊢ m
+    id/`/id : ∀ (x    : µ ∋ m) → `/id _ (id/` _ x) ≡ ` x
+    wk      : ∀ m → µ ∋/⊢ m → (m' ∷ µ) ∋/⊢ m
+    wk-id/` : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
 
   -- Substitution or Renaming - depending on which kit is used.
   _–→_ : List Mode → List Mode → Set
-  _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ◆ m
+  _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ∋/⊢ m
 
 open Kit {{...}}
 
@@ -94,12 +94,12 @@ _–[_]→_ : List Mode → (K : Kit) → List Mode → Set
 
 -- Lifting a substitution/renaming
 _↑_ : {{K : Kit}} → µ₁ –[ K ]→ µ₂ → (m : Mode) → (m ∷ µ₁) –[ K ]→ (m ∷ µ₂)
-(f ↑ m) _ (here p)  = vr _ (here p)
+(f ↑ m) _ (here p)  = id/` _ (here p)
 (f ↑ m) _ (there x) = wk _ (f _ x)
 
 -- Applying a substitution/renaming
 _⋯_ : {{K : Kit}} → µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
-(` x)     ⋯ f = tm _ (f _ x)
+(` x)     ⋯ f = `/id _ (f _ x)
 (λx t)    ⋯ f = λx (t ⋯ (f ↑ 𝕧))
 (Λα t)    ⋯ f = Λα (t ⋯ (f ↑ 𝕥))
 (∀α t)    ⋯ f = ∀α (t ⋯ (f ↑ 𝕥))
@@ -109,24 +109,24 @@ _⋯_ : {{K : Kit}} → µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
 
 -- Renaming Kit
 instance kitᵣ : Kit
-Kit._◆_   kitᵣ     = _∋_
-Kit.vr    kitᵣ _   = id
-Kit.tm    kitᵣ _   = `_
-Kit.wk    kitᵣ _   = there
-Kit.wk-vr kitᵣ _ _ = refl
-Kit.tm-vr kitᵣ _   = refl
+Kit._∋/⊢_   kitᵣ     = _∋_
+Kit.id/`    kitᵣ _   = id
+Kit.`/id    kitᵣ _   = `_
+Kit.id/`/id kitᵣ _   = refl
+Kit.wk      kitᵣ _   = there
+Kit.wk-id/` kitᵣ _ _ = refl
 
 _→ᵣ_ : List Mode → List Mode → Set
 _→ᵣ_ = _–[ kitᵣ ]→_
 
 -- Substitution Kit
 instance kitₛ : Kit
-Kit._◆_   kitₛ     = _⊢_
-Kit.vr    kitₛ _   = `_
-Kit.tm    kitₛ _   = id
-Kit.wk    kitₛ _   = _⋯ wk
-Kit.wk-vr kitₛ _ _ = refl
-Kit.tm-vr kitₛ _   = refl
+Kit._∋/⊢_   kitₛ     = _⊢_
+Kit.id/`    kitₛ _   = `_
+Kit.`/id    kitₛ _   = id
+Kit.id/`/id kitₛ _   = refl
+Kit.wk      kitₛ _   = _⋯ wk
+Kit.wk-id/` kitₛ _ _ = refl
 
 _→ₛ_ : List Mode → List Mode → Set
 _→ₛ_ = _–[ kitₛ ]→_
@@ -151,7 +151,7 @@ wkt : Type µ m → Type (m' ∷ µ) m
 wkt = _⋯ₜ wk
 
 idₖ : {{K : Kit}} → µ –[ K ]→ µ
-idₖ = vr
+idₖ = id/`
 
 idₛ : µ →ₛ µ
 idₛ = idₖ
@@ -159,7 +159,7 @@ idₛ = idₖ
 idᵣ : µ →ᵣ µ
 idᵣ = idₖ
 
-_,ₖ_ : {{K : Kit}} → µ₁ –[ K ]→ µ₂ → µ₂ ◆ m → (m ∷ µ₁) –[ K ]→ µ₂
+_,ₖ_ : {{K : Kit}} → µ₁ –[ K ]→ µ₂ → µ₂ ∋/⊢ m → (m ∷ µ₁) –[ K ]→ µ₂
 (f ,ₖ t) _ (here refl) = t
 (f ,ₖ t) _ (there x) = f _ x
 
@@ -173,7 +173,7 @@ _,ᵣ_ = _,ₖ_
 ⦅ v ⦆ = idₖ ,ₛ v
 
 _∘ₛ_ : {{K₁ K₂ : Kit}} → µ₂ –[ K₂ ]→ µ₃ → µ₁ –[ K₁ ]→ µ₂ → µ₁ →ₛ µ₃
-(f ∘ₛ g) _ x = tm _ (g _ x) ⋯ f
+(f ∘ₛ g) _ x = `/id _ (g _ x) ⋯ f
 
 _∘ᵣ_ : µ₂ →ᵣ µ₃ → µ₁ →ᵣ µ₂ → µ₁ →ᵣ µ₃
 (ρ₁ ∘ᵣ ρ₂) _ = ρ₁ _ ∘ ρ₂ _
