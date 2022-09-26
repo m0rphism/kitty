@@ -2,86 +2,86 @@ module Everything where
 
 -- Library ---------------------------------------------------------------------
 
-open import KitTheory.Prelude using ()
-open import KitTheory.Modes using ()
-open import KitTheory.Kit using ()
-open import KitTheory.Compose using ()
-open import KitTheory.Types using ()
-open import KitTheory.OPE using ()
-open import KitTheory.Generics using ()
-open import KitTheory.GenericsDerive using ()
-open import KitTheory.Generics-Example using () -- TODO
-open import KitTheory.GenericsDeriveExamples using ()
-open import KitTheory.Classes using ()
+import KitTheory.Prelude
+import KitTheory.Modes
+import KitTheory.Kit
+import KitTheory.Compose
+import KitTheory.Types
+import KitTheory.OPE
+import KitTheory.Generics
+import KitTheory.GenericsDerive
+import KitTheory.Generics-Example -- TODO
+import KitTheory.GenericsDeriveExamples
+import KitTheory.Classes
 
 -- Alternative formulation using the agda-stdlib approach.
-open import KitTheory.KitAlt using ()
-open import KitTheory.KitAltSimple using ()
+import KitTheory.KitAlt
+import KitTheory.KitAltSimple
 
 -- Kits for deriving Substitution-Preserves-Typing for Typing
 -- Relations in standard form i.e. `Γ ⊢ e ∶ t`.
-open import KitTheory.ITerms using ()
--- open import KitTheory.IKit using ()
+import KitTheory.ITerms
+-- import KitTheory.IKit
 
--- open import KitTheory.ComposeCat using ()
+-- import KitTheory.ComposeCat
 
 -- Examples --------------------------------------------------------------------
 
-open import Examples.ISession.Definitions using ()
-open import Examples.ISession.Substitution using ()
--- open import Examples.ISession.Typing using ()
+import Examples.ISession.Definitions
+import Examples.ISession.Substitution
+-- import Examples.ISession.Typing
 
--- open import Examples.LambdaPi-Kits.Definitions-ValueMode using ()
-open import Examples.LambdaPi-Kits.Definitions using ()
-open import Examples.LambdaPi-Kits.EvalLemmas using ()
--- open import Examples.LambdaPi-Kits.SubjectReduction using ()
+-- import Examples.LambdaPi-Kits.Definitions-ValueMode
+import Examples.LambdaPi-Kits.Definitions
+import Examples.LambdaPi-Kits.EvalLemmas
+-- import Examples.LambdaPi-Kits.SubjectReduction
 
-open import Examples.LinearSTLC.Definitions using ()
+import Examples.LinearSTLC.Definitions
 
-open import Examples.STLC.Definitions using ()
--- open import Examples.STLC.Normalization using ()
-open import Examples.STLC.Progress using ()
-open import Examples.STLC.SubjectReduction using ()
+import Examples.STLC.Definitions
+-- import Examples.STLC.Normalization
+import Examples.STLC.Progress
+import Examples.STLC.SubjectReduction
 
-open import Examples.STLC-CBV.Definitions using ()
-open import Examples.STLC-CBV.Normalization using ()
-open import Examples.STLC-CBV.Progress using ()
--- open import Examples.STLC-CBV.SemSoundness using ()
-open import Examples.STLC-CBV.SubjectReduction using ()
+import Examples.STLC-CBV.Definitions
+import Examples.STLC-CBV.Normalization
+import Examples.STLC-CBV.Progress
+-- import Examples.STLC-CBV.SemSoundness
+import Examples.STLC-CBV.SubjectReduction
 
-open import Examples.STLC-CBV-NoTySubst.Definitions using ()
-open import Examples.STLC-CBV-NoTySubst.Normalization using ()
-open import Examples.STLC-CBV-NoTySubst.Progress using ()
-open import Examples.STLC-CBV-NoTySubst.SubjectReduction using ()
+import Examples.STLC-CBV-NoTySubst.Definitions
+import Examples.STLC-CBV-NoTySubst.Normalization
+import Examples.STLC-CBV-NoTySubst.Progress
+import Examples.STLC-CBV-NoTySubst.SubjectReduction
 
-open import Examples.STLC-Rec.Definitions using ()
-open import Examples.STLC-Rec.SubjectReduction using ()
--- open import Examples.STLC-Rec.LR-Safety-MutRec using ()
--- open import Examples.STLC-Rec.LR-Safety-NoUniv using ()
--- open import Examples.STLC-Rec.LR-Safety.bak using ()
--- open import Examples.STLC-Rec.LR-Safety.bak.post-µ-removal using ()
--- open import Examples.STLC-Rec.LR-Safety using ()
+import Examples.STLC-Rec.Definitions
+import Examples.STLC-Rec.SubjectReduction
+-- import Examples.STLC-Rec.LR-Safety-MutRec
+-- import Examples.STLC-Rec.LR-Safety-NoUniv
+-- import Examples.STLC-Rec.LR-Safety.bak
+-- import Examples.STLC-Rec.LR-Safety.bak.post-µ-removal
+-- import Examples.STLC-Rec.LR-Safety
 
-open import Examples.STLCRef.Definitions using ()
--- open import Examples.STLCRef.SubjectReduction using ()
+import Examples.STLCRef.Definitions
+-- import Examples.STLCRef.SubjectReduction
 
-open import Examples.SystemF-Kits.Definitions using ()
-open import Examples.SystemF-Kits.Definitions-KitAlt using ()
-open import Examples.SystemF-Kits.Progress using ()
-open import Examples.SystemF-Kits.Soundness-Bigstep using ()
-open import Examples.SystemF-Kits.SubjectReduction using ()
+import Examples.SystemF-Kits.Definitions
+import Examples.SystemF-Kits.Definitions-KitAlt
+import Examples.SystemF-Kits.Progress
+import Examples.SystemF-Kits.Soundness-Bigstep
+import Examples.SystemF-Kits.SubjectReduction
 
-open import Examples.SystemF-Kits-Uniform.Definitions using ()
-open import Examples.SystemF-Kits-Uniform.Progress using ()
-open import Examples.SystemF-Kits-Uniform.SubjectReduction using ()
+import Examples.SystemF-Kits-Uniform.Definitions
+import Examples.SystemF-Kits-Uniform.Progress
+import Examples.SystemF-Kits-Uniform.SubjectReduction
 
-open import Examples.SystemF-Raw.Definitions using ()
-open import Examples.SystemF-Raw.SubjectReduction using ()
+import Examples.SystemF-Raw.Definitions
+import Examples.SystemF-Raw.SubjectReduction
 
--- open import Examples.SystemF-TypingKits.Definitions using ()
--- open import Examples.SystemF-TypingKits.SubjectReduction using ()
--- open import Examples.SystemF-TypingKits.Progress using ()
+-- import Examples.SystemF-TypingKits.Definitions
+-- import Examples.SystemF-TypingKits.SubjectReduction
+-- import Examples.SystemF-TypingKits.Progress
 
-open import Examples.SystemFLin-Kits.Definitions using ()
--- open import Examples.SystemFLin-Kits.SubjectReduction using ()
--- open import Examples.SystemFLin-Kits.Progress using ()
+import Examples.SystemFLin-Kits.Definitions
+-- import Examples.SystemFLin-Kits.SubjectReduction
+-- import Examples.SystemFLin-Kits.Progress
