@@ -206,3 +206,29 @@ record KitTraversal : Set₁ where
 
   _∥ₛ_ : ∀ {µ₁ µ₂ µ} → (µ₁ →ₛ µ) → (µ₂ →ₛ µ) → ((µ₁ ▷▷ µ₂) →ₛ µ)
   _∥ₛ_ = _∥_
+
+  toₛ : {{K : Kit}} → µ₁ –[ K ]→ µ₂ → µ₁ →ₛ µ₂
+  toₛ ϕ = λ m x → `/id m (ϕ m x)
+  -- toₛ ϕ = idₛ ∘ₖ ϕ
+
+  ᵣtoₛ : µ₁ →ᵣ µ₂ → µ₁ →ₛ µ₂
+  ᵣtoₛ ϕ = toₛ ϕ
+
+  fromᵣ : {{K : Kit}} → µ₁ →ᵣ µ₂ → µ₁ –[ K ]→ µ₂
+  fromᵣ ϕ = λ m x → id/` m (ϕ m x)
+
+  ₛfromᵣ : µ₁ →ᵣ µ₂ → µ₁ →ₛ µ₂
+  ₛfromᵣ ϕ = fromᵣ ϕ
+
+  ₛfromᵣ' : µ₁ →ᵣ µ₂ → µ₁ →ₛ µ₂
+  ₛfromᵣ' ϕ = λ m x → ` (ϕ m x)
+
+  toₛ∘fromᵣ : {{K : Kit}} → (ϕ : µ₁ →ᵣ µ₂) → toₛ ⦃ K ⦄ (fromᵣ ⦃ K ⦄ ϕ) ≡ ₛfromᵣ ϕ
+  toₛ∘fromᵣ ϕ = fun-ext₂ λ m x → id/`/id (ϕ m x)
+
+  ₛfromᵣ≡ᵣtoₛ : (λ {µ₁} {µ₂} → ₛfromᵣ {µ₁} {µ₂}) ≡ (λ {µ₁} {µ₂} → ᵣtoₛ {µ₁} {µ₂})
+  ₛfromᵣ≡ᵣtoₛ = refl
+
+  ₛfromᵣ'≡ᵣtoₛ : (λ {µ₁} {µ₂} → ₛfromᵣ' {µ₁} {µ₂}) ≡ (λ {µ₁} {µ₂} → ᵣtoₛ {µ₁} {µ₂})
+  ₛfromᵣ'≡ᵣtoₛ = refl
+  
