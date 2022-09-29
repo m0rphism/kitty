@@ -31,7 +31,7 @@ open import Data.Nat as Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
 open import Data.Fin as Fin using (Fin; zero; suc)
 open import Function using (_∘_; _$_; case_of_)
 
-open import KitTheory.Prelude using (_∋_)
+open import KitTheory.Prelude using (_∋_; _▷▷_)
 open import KitTheory.Modes
 open import KitTheory.Generics
 open import KitTheory.Iso
@@ -102,5 +102,8 @@ uip {p = refl} {q = refl} = refl
 un-++ : Term' → Maybe (Term' × Term')
 un-++ (def (quote _++_) args) = case drop (length args ∸ 2) args of λ where
                                   [ argᵥ xs ; argᵥ ys ] → just (xs , ys)
+                                  _                     → nothing
+un-++ (def (quote _▷▷_) args) = case drop (length args ∸ 2) args of λ where
+                                  [ argᵥ xs ; argᵥ ys ] → just (ys , xs)
                                   _                     → nothing
 un-++ _ = nothing

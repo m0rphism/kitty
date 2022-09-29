@@ -1,3 +1,5 @@
+{-# OPTIONS -vreflection-debug:10 #-}
+
 module KitTheory.GenericsDeriveExamples where
 
 open import KitTheory.Prelude
@@ -98,6 +100,13 @@ module Patterns where
     _`∷_   : ∀ {µ} → µ ⊢ 𝕔 → µ ⊢ 𝕔𝕤 → µ ⊢ 𝕔𝕤
     _`⇒_   : ∀ {µ µ'} → Pat µ' → (µ ▷▷ µ') ⊢ 𝕖 → µ ⊢ 𝕔
 
+  unquoteDecl desc    = deriveDesc   (quote 𝕄) (quote _⊢_) desc
+  unquoteDecl to      = deriveTo     (quote 𝕄) (quote _⊢_) (quote desc) to
+  unquoteDecl from    = deriveFrom   (quote 𝕄) (quote _⊢_) (quote desc) from
+  unquoteDecl from∘to = deriveFromTo (quote 𝕄) (quote _⊢_) (quote desc) (quote to) (quote from) from∘to
+  -- unquoteDecl to∘from = deriveToFrom (quote 𝕄) (quote _⊢_) (quote desc) (quote to) (quote from) to∘from
+
+  -- xx = {!desc!}
   -- unquoteDecl Iso = deriveIso' 𝕄 _⊢_ Iso
 
   -- open FromIso 𝕄 Iso

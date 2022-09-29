@@ -68,8 +68,8 @@ deriveFrom modes-nm Term-nm desc-nm from-nm = runFreshT $ do
       nothing        → liftTC $ failStr "No µ found."
     let ts = List.map (λ { (x , arg i tx) → case unterm Term-nm tx of λ where
             (just (µ , M)) → argᵥ (def from-nm [ argᵥ (var x []) ])
-            nothing        → argᵥ (var x [])
-          }) c-tel'
+            nothing        → arg i (var x [])
+          }) c-tel
     let p = foldr
           (λ { (x , arg i tx) p → con (quote _,_) [ argᵥ (var x) ; argᵥ p ] })
           (con (quote refl) [])

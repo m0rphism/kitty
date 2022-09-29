@@ -66,8 +66,6 @@ deriveDesc modes-nm Term-nm desc-nm = runFreshT do
   clauses ← forM (enumerate term-cons) λ (i , c) → do
     c-ty ← getType' c
     c-ty ← liftTC $ µ→[] c-ty
-    liftTC $ printAST "Post-Subst:"
-    liftTC $ printAST c-ty
     let (c-tel , c-ret) = pi→tel c-ty
     end-ty ← case c-ret of λ where
       (def f [ µ ; M ]) → pure (Term' by con (quote `■) [ M ])
