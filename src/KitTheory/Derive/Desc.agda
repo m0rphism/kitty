@@ -34,14 +34,11 @@ open import Function using (_∘_; _$_; case_of_)
 open import KitTheory.Prelude using (_∋_)
 open import KitTheory.Modes
 open import KitTheory.Generics
-open import KitTheory.Iso
 open import KitTheory.Derive.Common
 
 private variable
   ℓ ℓ₁ ℓ₂ ℓ₃ ℓ' : Level
   A B C : Set ℓ
-  F : Functor' ℓ
-  VM TM : Set
 
 -- Deriving Desc ---------------------------------------------------------------
 

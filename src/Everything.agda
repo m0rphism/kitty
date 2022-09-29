@@ -13,6 +13,13 @@ import KitTheory.GenericsDerive
 import KitTheory.Generics-Example -- TODO
 import KitTheory.GenericsDeriveExamples
 import KitTheory.Classes
+import KitTheory.Derive.Common
+import KitTheory.Derive.Desc
+import KitTheory.Derive.To
+import KitTheory.Derive.From
+import KitTheory.Derive.ToFrom
+import KitTheory.Derive.FromTo
+import KitTheory.Derive.Iso
 
 -- Alternative formulation using the agda-stdlib approach.
 import KitTheory.KitAlt
