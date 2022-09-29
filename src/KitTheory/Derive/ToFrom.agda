@@ -69,7 +69,7 @@ deriveToFromClause modes-nm Term-nm desc-nm to∘from-nm con-nm con-i = do
   let e = foldr
             (λ { (x , arg i t) e → case unterm Term-nm t of λ where
               (just (µ , M)) → def (quote cong-×) [ argᵥ (def to∘from-nm [ argᵥ (var x []) ]) ; argᵥ e ]
-              nothing        → def (quote cong-×) [ argᵥ (con (quote refl) []) ; argᵥ e ]
+              nothing        → def (quote cong-Σ) [ argᵥ (con (quote refl) []) ; argᵥ e ]
             })
             (con (quote refl) [])
             c-tel'
