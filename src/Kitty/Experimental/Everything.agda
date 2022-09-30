@@ -43,6 +43,10 @@ import Kitty.Experimental.Examples.LambdaPi-Kits.EvalLemmas
 
 import Kitty.Experimental.Examples.LinearSTLC.Definitions
 
+import Kitty.Experimental.Examples.STLC.Definitions
+import Kitty.Experimental.Examples.STLC.Progress
+import Kitty.Experimental.Examples.STLC.SubjectReduction
+
 import Kitty.Experimental.Examples.STLCRef.Definitions
 -- import Kitty.Experimental.Examples.STLCRef.SubjectReduction
 
