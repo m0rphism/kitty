@@ -1,7 +1,7 @@
-open import KitTheory.Modes
-open import KitTheory.Kit using (KitTraversal)
+open import Kitty.Modes
+open import Kitty.Kit using (KitTraversal)
 
-module KitTheory.ComposeCat {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) where
+module Kitty.ComposeCat {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) where
 
 open import Data.List using (List; []; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
@@ -11,12 +11,12 @@ open ≡-Reasoning
 open import Data.List using (List; []; _∷_)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
-open import KitTheory.Prelude
+open import Kitty.Prelude
 
 open Modes 𝕄
 open Terms 𝕋
-open KitTheory.Kit 𝕋
-open KitTheory.Kit.KitTraversal T
+open Kitty.Kit 𝕋
+open Kitty.Kit.KitTraversal T
 
 open Kit {{...}} hiding (_–→_)
 

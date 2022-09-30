@@ -1,6 +1,6 @@
 {-# OPTIONS -vreflection-debug:10 #-}
 
-module KitTheory.Derive.To where
+module Kitty.Derive.From where
 
 open import ReflectionLib.Standard.Syntax
 open import ReflectionLib.Standard.VeryPretty
@@ -31,11 +31,11 @@ open import Data.Nat as Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
 open import Data.Fin as Fin using (Fin; zero; suc)
 open import Function using (_∘_; _$_; case_of_)
 
-open import KitTheory.Prelude using (_∋_)
-open import KitTheory.Modes
-open import KitTheory.Generics
-open import KitTheory.Iso
-open import KitTheory.Derive.Common
+open import Kitty.Prelude using (_∋_)
+open import Kitty.Modes
+open import Kitty.Generics
+open import Kitty.Iso
+open import Kitty.Derive.Common
 
 private variable
   ℓ ℓ₁ ℓ₂ ℓ₃ ℓ' : Level
@@ -43,10 +43,10 @@ private variable
   F : Functor' ℓ
   VM TM : Set
 
--- Derving To ------------------------------------------------------------------
+-- Deriving From ---------------------------------------------------------------
 
-deriveTo : Name → Name → Name → Name → TC ⊤
-deriveTo modes-nm Term-nm desc-nm to-nm = runFreshT $ do
+deriveFrom : Name → Name → Name → Name → TC ⊤
+deriveFrom modes-nm Term-nm desc-nm from-nm = runFreshT $ do
   ty ← getDefinition Term-nm
   var-c , term-cs ← split-term-ctors $ ctors ty
   modes  ← unquoteTC {A = Modes} (def modes-nm [])
@@ -57,8 +57,8 @@ deriveTo modes-nm Term-nm desc-nm to-nm = runFreshT $ do
         ; ("m" , argₕ unknown)
         ; ("x" , argᵥ (def (quote _∋_) [ argᵥ (var "µ" []) ; argᵥ (var "m" []) ]))
         ]
-        [ argᵥ (con var-c [ argₕ (var "µ") ; argₕ (var "m") ; argᵥ (var "x") ]) ]
-        (con (quote `var) [ argₕ unknown ; argₕ unknown ; argᵥ (var "x" []) ])
+        [ argᵥ (con (quote `var) [ argₕ (var "µ") ; argₕ (var "m") ; argᵥ (var "x") ]) ]
+        (con var-c [ argᵥ (var "x" []) ])
   term-clauses ← forM (enumerate term-cs) λ (i , c) → do
     c-ty ← getType' c
     let c-tel , c-ret = pi→tel c-ty
@@ -66,20 +66,28 @@ deriveTo modes-nm Term-nm desc-nm to-nm = runFreshT $ do
     `µ ← case List.head c-tel of λ where
       (just (x , _)) → pure x
       nothing        → liftTC $ failStr "No µ found."
-    let ps = tel→patterns c-tel'
-    let t = foldr
-          (λ { (x , arg i tx) t → case unterm Term-nm tx of λ where
-            (just (µ , M)) → con (quote _,_) [ argᵥ (def to-nm [ argᵥ (var x []) ]) ; argᵥ t ]
-            nothing        → con (quote _,_) [ argᵥ (var x []) ; argᵥ t ]
-          })
+    let ts = List.map (λ { (x , arg i tx) → case unterm Term-nm tx of λ where
+            (just (µ , M)) → argᵥ (def from-nm [ argᵥ (var x []) ])
+            nothing        → arg i (var x [])
+          }) c-tel
+    let p = foldr
+          (λ { (x , arg i tx) p → con (quote _,_) [ argᵥ (var x) ; argᵥ p ] })
           (con (quote refl) [])
           c-tel'
+    let c-tel'' = List.map
+          (λ { (x , arg i t) → case unterm Term-nm t of λ where
+            (just (µ , M)) → (x , arg i (def (quote Tm) [ argᵥ (def modes-nm []) ; argᵥ (def desc-nm []) ; argᵥ µ ; argᵥ M ]))
+            nothing        → (x , arg i t)
+          })
+          c-tel
     pure $ clause
-      c-tel
-      [ argᵥ (con c (argₕ (var `µ) ∷ ps)) ]
-      (con (quote `con) [ (argᵥ (con (quote _,_) [ argᵥ (fin-con' i) ; argᵥ t ])) ])
-  to-ty ← quoteTC' (∀ {µ} {M} → Term µ M → Tm modes d µ M)
-  defdecFun'
-    (argᵥ to-nm)
-    to-ty
-    (var-clause ∷ term-clauses)
+      c-tel''
+      [ argᵥ (con (quote `con)
+        [ argₕ (var `µ)
+        ; argᵥ (con (quote _,_) [ argᵥ (fin-pat' i) ; argᵥ p ])
+        ])
+      ]
+      (con c ts)
+  from-ty ← quoteTC' (∀ {µ} {M} → Tm modes d µ M → Term µ M)
+  defdecFun' (argᵥ from-nm) from-ty (var-clause ∷ term-clauses)
+

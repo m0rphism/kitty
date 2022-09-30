@@ -2,35 +2,35 @@ module Everything where
 
 -- Library ---------------------------------------------------------------------
 
-import KitTheory.Prelude
-import KitTheory.Modes
-import KitTheory.Kit
-import KitTheory.Compose
-import KitTheory.Types
-import KitTheory.OPE
-import KitTheory.Generics
-import KitTheory.GenericsDerive
-import KitTheory.Generics-Example -- TODO
-import KitTheory.GenericsDeriveExamples
-import KitTheory.Classes
-import KitTheory.Derive.Common
-import KitTheory.Derive.Desc
-import KitTheory.Derive.To
-import KitTheory.Derive.From
-import KitTheory.Derive.ToFrom
-import KitTheory.Derive.FromTo
-import KitTheory.Derive.Iso
+import Kitty.Prelude
+import Kitty.Modes
+import Kitty.Kit
+import Kitty.Compose
+import Kitty.Types
+import Kitty.OPE
+import Kitty.Generics
+import Kitty.GenericsDerive
+import Kitty.Generics-Example -- TODO
+import Kitty.GenericsDeriveExamples
+import Kitty.Classes
+import Kitty.Derive.Common
+import Kitty.Derive.Desc
+import Kitty.Derive.To
+import Kitty.Derive.From
+import Kitty.Derive.ToFrom
+import Kitty.Derive.FromTo
+import Kitty.Derive.Iso
 
 -- Alternative formulation using the agda-stdlib approach.
-import KitTheory.KitAlt
-import KitTheory.KitAltSimple
+import Kitty.KitAlt
+import Kitty.KitAltSimple
 
 -- Kits for deriving Substitution-Preserves-Typing for Typing
 -- Relations in standard form i.e. `Γ ⊢ e ∶ t`.
-import KitTheory.ITerms
--- import KitTheory.IKit
+import Kitty.ITerms
+-- import Kitty.IKit
 
--- import KitTheory.ComposeCat
+-- import Kitty.ComposeCat
 
 -- Examples --------------------------------------------------------------------
 

@@ -4,8 +4,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
-open import KitTheory.Prelude using (_∋_; _▷_; _▷▷_) public
-open import KitTheory.Modes using (Modes; Terms)
+open import Kitty.Prelude using (_∋_; _▷_; _▷▷_) public
+open import Kitty.Modes using (Modes; Terms)
 
 -- Fixities --------------------------------------------------------------------
 
@@ -75,8 +75,8 @@ variable
 
 -- Application of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Kit 𝕋
-open import KitTheory.KitAlt 𝕋
+open import Kitty.Kit 𝕋
+open import Kitty.KitAlt 𝕋
 open Kit {{...}} public
 
 kit-traversal-alt : KitTraversalAlt
@@ -218,7 +218,7 @@ open KitTraversalAlt kit-traversal-alt public
 
 -- -- Composition of Renamings and Substitutions ----------------------------------
 
--- open import KitTheory.Compose 𝕋 kit-traversal
+-- open import Kitty.Compose 𝕋 kit-traversal
 -- open ComposeKit {{...}} public
 
 -- kit-assoc : KitAssoc
@@ -274,7 +274,7 @@ open KitTraversalAlt kit-traversal-alt public
 
 -- -- Types and Contexts ----------------------------------------------------------
 
--- open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+-- open import Kitty.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
 
 -- -- Each variable mode corresponds to a term mode that represents its type.
 -- kit-type : KitType

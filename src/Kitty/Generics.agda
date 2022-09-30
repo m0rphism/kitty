@@ -1,6 +1,6 @@
-open import KitTheory.Modes
+open import Kitty.Modes
 
-module KitTheory.Generics (𝕄 : Modes) where
+module Kitty.Generics (𝕄 : Modes) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; cong-app; subst; module ≡-Reasoning)
@@ -11,8 +11,8 @@ open import Function using (id; _$_)
 
 open import Data.Product using (Σ; ∃-syntax; Σ-syntax; _×_; proj₁; proj₂; _,_)
 
-open import KitTheory.Prelude
-open import KitTheory.Iso
+open import Kitty.Prelude
+open import Kitty.Iso
 open Modes 𝕄
 
 private
@@ -41,7 +41,7 @@ data Tm (d : Desc) : Scoped where
 𝕋 : Desc → Terms 𝕄
 𝕋 d = record { _⊢_ = Tm d ; `_ = `var }
 
-open import KitTheory.Kit
+open import Kitty.Kit
 open Kit {{...}}
 
 private mutual
@@ -67,7 +67,7 @@ private
 KT : (d : Desc) → KitTraversal (𝕋 d)
 KT d = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
 
-open import KitTheory.Compose
+open import Kitty.Compose
 open ComposeKit {{...}}
 
 private mutual

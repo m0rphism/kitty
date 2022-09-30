@@ -5,8 +5,8 @@ open ≡-Reasoning
 open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import KitTheory.Prelude using (_∋_; _▷_) public
-open import KitTheory.Modes using (Modes; Terms)
+open import Kitty.Prelude using (_∋_; _▷_) public
+open import Kitty.Modes using (Modes; Terms)
 
 -- Fixities --------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ variable
 
 -- Application of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Kit 𝕋
+open import Kitty.Kit 𝕋
 open Kit {{...}} public
 
 kit-traversal : KitTraversal
@@ -110,7 +110,7 @@ instance 𝕂ₛ = kitₛ
 
 -- Composition of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Compose 𝕋 kit-traversal
+open import Kitty.Compose 𝕋 kit-traversal
 open ComposeKit {{...}} public
 
 kit-assoc : KitAssoc
@@ -166,7 +166,7 @@ open KitAssocLemmas kit-assoc-lemmas public
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import KitTheory.Types 𝕋
+open import Kitty.Types 𝕋
 
 -- Each variable mode corresponds to a term mode that represents its type.
 kit-type : KitType
@@ -174,7 +174,7 @@ kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 
 
 open KitType kit-type public
 
-open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
+open import Kitty.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ

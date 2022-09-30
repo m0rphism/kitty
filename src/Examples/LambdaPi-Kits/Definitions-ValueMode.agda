@@ -10,7 +10,7 @@ open import Level using (Level; _⊔_)
 open import Function using (id; _∘_; const)
 open import Data.String
 
-open import KitTheory.Prelude using (_∋_; _▷_) public
+open import Kitty.Prelude using (_∋_; _▷_) public
 
 infix   3  _⊢_∶_  _⊢*_∶_  _⇓_
 infixr  5  λ→_
@@ -65,7 +65,7 @@ variable
 
 -- Modes and Terms
 
-open import KitTheory.Modes
+open import Kitty.Modes
 
 𝕄 : Modes
 𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
@@ -75,7 +75,7 @@ open import KitTheory.Modes
 
 -- Kits and Traversals
 
-open import KitTheory.Kit 𝕋
+open import Kitty.Kit 𝕋
 open Kit {{...}} public
 
 kit-traversal : KitTraversal
@@ -105,7 +105,7 @@ instance 𝕂ₛ = kitₛ
 
 -- Traversal Composition
 
-open import KitTheory.Compose 𝕋 kit-traversal
+open import Kitty.Compose 𝕋 kit-traversal
 open ComposeKit {{...}} public
 
 kit-assoc : KitAssoc
@@ -149,7 +149,7 @@ open KitAssocLemmas kit-assoc-lemmas public
 
 -- Types and Contexts
 
-open import KitTheory.Types 𝕋
+open import Kitty.Types 𝕋
 
 -- Each variable mode corresponds to a term mode that represents its type.
 kit-type : KitType
@@ -157,7 +157,7 @@ kit-type = record { ↑ₜ = λ { _ → 𝕧 } }
 
 open KitType kit-type public
 
-open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
+open import Kitty.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ

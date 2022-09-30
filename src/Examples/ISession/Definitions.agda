@@ -4,8 +4,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open ≡-Reasoning
 open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
-open import KitTheory.Prelude using (_∋_; _▷_; _▷▷_) public
-open import KitTheory.Modes using (Modes; Terms)
+open import Kitty.Prelude using (_∋_; _▷_; _▷▷_) public
+open import Kitty.Modes using (Modes; Terms)
 
 -- Fixities --------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ mutual
 
   open Terms 𝕋 using (_⊢_) public
 
-  open import KitTheory.Types 𝕋 public
+  open import Kitty.Types 𝕋 public
 
   -- Each variable mode corresponds to a term mode that represents its type.
   kit-type : KitType

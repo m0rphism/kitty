@@ -1,13 +1,13 @@
-open import KitTheory.Modes
+open import Kitty.Modes
 
-module KitTheory.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; [])
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
-open import KitTheory.Prelude
+open import Kitty.Prelude
 
 open Modes 𝕄
 open Terms 𝕋

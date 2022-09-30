@@ -5,13 +5,13 @@ open ≡-Reasoning
 open import Data.List using (List; []; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import KitTheory.Prelude using (_∋_; _▷_) public
-open import KitTheory.Modes using (Modes; Terms)
+open import Kitty.Prelude using (_∋_; _▷_) public
+open import Kitty.Modes using (Modes; Terms)
 open import Examples.ISession.Definitions
 
 -- Application of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Kit 𝕋
+open import Kitty.Kit 𝕋
 open Kit {{...}} public hiding (_∥_)
 
 mutual
@@ -108,7 +108,7 @@ instance 𝕂ₛ = kitₛ
 
 -- Composition of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Compose 𝕋 kit-traversal
+open import Kitty.Compose 𝕋 kit-traversal
 open ComposeKit {{...}} public
 
 cong₃ : ∀ {A B C D : Set} (f : A → B → C → D) {a₁ a₂ b₁ b₂ c₁ c₂} → a₁ ≡ a₂ → b₁ ≡ b₂ → c₁ ≡ c₂ → f a₁ b₁ c₁ ≡ f a₂ b₂ c₂
@@ -306,4 +306,4 @@ open KitAssocLemmas kit-assoc-lemmas public
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
+open import Kitty.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public

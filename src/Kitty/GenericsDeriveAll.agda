@@ -1,21 +1,21 @@
-module KitTheory.GenericsDeriveExamples where
+module Kitty.GenericsDeriveExamples where
 
-open import KitTheory.Prelude
-open import KitTheory.Modes
-open import KitTheory.Generics hiding (⟦_⟧)
-open import KitTheory.GenericsDerive
+open import Kitty.Prelude
+open import Kitty.Modes
+open import Kitty.Generics hiding (⟦_⟧)
+open import Kitty.GenericsDerive
 
 open import Data.List using (List; []; _∷_)
 
-open import KitTheory.Iso
--- open import KitTheory.Kit using (Kit; KitTraversal)
--- open import KitTheory.Compose using (ComposeKit; KitAssoc)
+open import Kitty.Iso
+-- open import Kitty.Kit using (Kit; KitTraversal)
+-- open import Kitty.Compose using (ComposeKit; KitAssoc)
 -- open KitAssoc using (KitAssocLemmas)
 
 module Modules {𝕄 : Modes} {_⊢_ : Scoped 𝕄} {d : Desc 𝕄} (iso : ∀ {µ} {e} → (µ ⊢ e) ≃ Tm 𝕄 d µ e) where
   private module I = FromIso 𝕄 iso
-  open import KitTheory.Kit I.terms using (Kit; KitTraversal) public
-  open import KitTheory.Compose I.terms I.kit-traversal using (ComposeKit; KitAssoc) public
+  open import Kitty.Kit I.terms using (Kit; KitTraversal) public
+  open import Kitty.Compose I.terms I.kit-traversal using (ComposeKit; KitAssoc) public
   open KitAssoc I.kit-assoc using (WkDistKit; KitAssocLemmas) public
 
 open import Relation.Binary.PropositionalEquality using (_≡_)

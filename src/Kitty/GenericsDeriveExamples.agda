@@ -1,11 +1,11 @@
 {-# OPTIONS -vreflection-debug:10 #-}
 
-module KitTheory.GenericsDeriveExamples where
+module Kitty.GenericsDeriveExamples where
 
-open import KitTheory.Prelude
-open import KitTheory.Modes
-open import KitTheory.Generics
-open import KitTheory.GenericsDerive
+open import Kitty.Prelude
+open import Kitty.Modes
+open import Kitty.Generics
+open import Kitty.GenericsDerive
 
 open import Data.List using (List; []; _∷_)
 

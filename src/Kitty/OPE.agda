@@ -1,10 +1,10 @@
-open import KitTheory.Modes
-open import KitTheory.Kit using (KitTraversal)
-open import KitTheory.Compose using (KitAssoc)
-open import KitTheory.Types using (KitType)
+open import Kitty.Modes
+open import Kitty.Kit using (KitTraversal)
+open import Kitty.Compose using (KitAssoc)
+open import Kitty.Types using (KitType)
 open KitAssoc using (KitAssocLemmas)
 
-module KitTheory.OPE {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (A : KitAssoc 𝕋 T) (AL : KitAssocLemmas A) (KT : KitType 𝕋) where
+module Kitty.OPE {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (A : KitAssoc 𝕋 T) (AL : KitAssocLemmas A) (KT : KitType 𝕋) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -14,16 +14,16 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
-open import KitTheory.Prelude
+open import Kitty.Prelude
 
 open Modes 𝕄
 open Terms 𝕋
-open KitTheory.Kit 𝕋
-open KitTheory.Kit.KitTraversal T
-open KitTheory.Compose 𝕋 T
-open KitTheory.Compose.KitAssoc A
-open KitTheory.Compose.KitAssoc.KitAssocLemmas AL
-open KitTheory.Types.KitType KT
+open Kitty.Kit 𝕋
+open Kitty.Kit.KitTraversal T
+open Kitty.Compose 𝕋 T
+open Kitty.Compose.KitAssoc A
+open Kitty.Compose.KitAssoc.KitAssocLemmas AL
+open Kitty.Types.KitType KT
 
 open Kit {{...}}
 open ComposeKit {{...}}

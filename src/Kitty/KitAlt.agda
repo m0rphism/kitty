@@ -1,9 +1,9 @@
-open import KitTheory.Modes
+open import Kitty.Modes
 
 -- Alternative to KitTraversal, KitAssoc, and KitAssocLemmas using the
 -- approach from the agda-stdlib.
 
-module KitTheory.KitAlt {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.KitAlt {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Properties using (++-assoc)
@@ -11,7 +11,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subs
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
-open import KitTheory.Prelude
+open import Kitty.Prelude
 open import Level using (_⊔_)
 
 open Modes 𝕄
@@ -46,7 +46,7 @@ fold-star' f ta (rab ∷ rbc) = f _ _ _ (fold-star' f ta rbc) rab
 
 -- Alternative KitTraversal ----------------------------------------------------
 
-open import KitTheory.Kit 𝕋
+open import Kitty.Kit 𝕋
 
 open Kit {{...}}
 
@@ -132,7 +132,7 @@ module Derive (KT : KitTraversalAlt) where
   kit-traversal : KitTraversal
   kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
 
-  open import KitTheory.Compose 𝕋 kit-traversal
+  open import Kitty.Compose 𝕋 kit-traversal
 
   open ComposeKit {{...}}
 

@@ -5,8 +5,8 @@ open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import KitTheory.Prelude using (_∋_; _▷_) public
-open import KitTheory.Modes using (Modes; Terms)
+open import Kitty.Prelude using (_∋_; _▷_) public
+open import Kitty.Modes using (Modes; Terms)
 open import Data.Product using (_×_; ∃-syntax)
 
 -- Fixities --------------------------------------------------------------------
@@ -67,7 +67,7 @@ variable
 
 -- Application of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Kit 𝕋
+open import Kitty.Kit 𝕋
 open Kit {{...}} public
 
 infixl  5  _⋯_
@@ -91,7 +91,7 @@ instance 𝕂ₛ = kitₛ
 
 -- Composition of Renamings and Substitutions ----------------------------------
 
-open import KitTheory.Compose 𝕋 kit-traversal
+open import Kitty.Compose 𝕋 kit-traversal
 open ComposeKit {{...}} public
 
 kit-assoc : KitAssoc

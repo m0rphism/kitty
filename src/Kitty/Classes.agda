@@ -1,23 +1,23 @@
-module KitTheory.Classes where
+module Kitty.Classes where
 
-open import KitTheory.Modes public
+open import Kitty.Modes public
 open Terms {{...}} public
 
 -- module _ {𝕄 : Modes} {{𝕋 : Terms 𝕄}} where
---   import KitTheory.Kit 𝕋 as MKit
+--   import Kitty.Kit 𝕋 as MKit
 --   open MKit public
 --   open Kit {{...}} public
 --   open KitTraversal {{...}} public
 
 --   module _ {{T : KitTraversal}} where
---     import KitTheory.Compose 𝕋 T as MCompose
+--     import Kitty.Compose 𝕋 T as MCompose
 --     open MCompose public
 --     open ComposeKit {{...}} public
 --     open KitAssoc {{...}} public
 --     open KitAssocLemmas {{...}} public
 
 --     module _ {{A : KitAssoc}} {{AL : KitAssocLemmas}} where
---       import KitTheory.Types 𝕋 T A AL as MTypes
+--       import Kitty.Types 𝕋 T A AL as MTypes
 --       open MTypes public
 --       open KitType {{...}} public
 
@@ -29,10 +29,10 @@ open Terms {{...}} public
 -- instance 𝕂ₛₛ = kitₛₛ
 
 
-import KitTheory.Kit     as MKit
-import KitTheory.Compose as MCompose
-import KitTheory.Types   as MTypes
-import KitTheory.OPE     as MOPE
+import Kitty.Kit     as MKit
+import Kitty.Compose as MCompose
+import Kitty.Types   as MTypes
+import Kitty.OPE     as MOPE
 
 record Subst : Set₁ where
   field

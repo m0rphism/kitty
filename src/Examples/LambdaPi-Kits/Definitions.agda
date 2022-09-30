@@ -10,7 +10,7 @@ open import Level using (Level; _⊔_)
 open import Function using (id; _∘_; const)
 open import Data.String
 
-open import KitTheory.Prelude using (_∋_; _▷_) public
+open import Kitty.Prelude using (_∋_; _▷_) public
 
 infix   3  _⊢_∶_  _⊢*_∶_  _⇓_
 infixr  5  λ→_
@@ -47,7 +47,7 @@ module TermSubst where
 
   -- Modes and Terms
 
-  open import KitTheory.Modes
+  open import Kitty.Modes
 
   𝕄 : Modes
   𝕄 = record { VarMode = Mode ; TermMode = Mode ; m→M = id }
@@ -57,7 +57,7 @@ module TermSubst where
 
   -- Kits and Traversals
 
-  open import KitTheory.Kit 𝕋
+  open import Kitty.Kit 𝕋
   open Kit {{...}} public
 
   infixl  5  _⋯_
@@ -82,7 +82,7 @@ module TermSubst where
 
   -- Traversal Composition
 
-  open import KitTheory.Compose 𝕋 kit-traversal
+  open import Kitty.Compose 𝕋 kit-traversal
   open ComposeKit {{...}} public
 
   kit-assoc : KitAssoc
@@ -124,7 +124,7 @@ module TermSubst where
 
   -- Types and Contexts
 
-  -- open import KitTheory.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
+  -- open import Kitty.Types 𝕋 kit-traversal kit-assoc kit-assoc-lemmas
 
   -- -- Each variable mode corresponds to a term mode that represents its type.
   -- kit-type : KitType
@@ -159,7 +159,7 @@ module ValueSubst where
   ``_ : m ∈ µ → Value µ (m→M m)
   ``_ {m = 𝕥} x = ` x
 
-  open import KitTheory.Modes
+  open import Kitty.Modes
 
   𝕄 : Modes
   𝕄 = record { VarMode = Mode ; TermMode = ValMode ; m→M = m→M }
@@ -169,7 +169,7 @@ module ValueSubst where
 
   -- Kits and Traversals
 
-  open import KitTheory.Kit 𝕋
+  open import Kitty.Kit 𝕋
   open Kit {{...}} public
 
   infixl  5  _⋯_
@@ -194,7 +194,7 @@ module ValueSubst where
 
   -- Traversal Composition
 
-  open import KitTheory.Compose 𝕋 kit-traversal
+  open import Kitty.Compose 𝕋 kit-traversal
   open ComposeKit {{...}} public
 
   kit-assoc : KitAssoc
@@ -238,12 +238,12 @@ module ValueSubst where
 
   -- Types and Contexts
 
-  open import KitTheory.Types 𝕋
+  open import Kitty.Types 𝕋
 
   kit-type : KitType
   kit-type = record { ↑ₜ = λ { M → 𝕧 } }
 
-  open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
+  open import Kitty.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
 
   open KitType kit-type public
 

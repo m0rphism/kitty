@@ -1,7 +1,7 @@
-module KitTheory.Modes where
+module Kitty.Modes where
 
 open import Data.List using (List)
-open import KitTheory.Prelude
+open import Kitty.Prelude
 
 record Modes : Set₁ where
   field

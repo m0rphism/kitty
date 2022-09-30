@@ -1,6 +1,6 @@
-open import KitTheory.Modes
+open import Kitty.Modes
 
-module KitTheory.SubstRepr {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.SubstRepr {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; []; _∷_)
 import Data.List.Properties as ListP
@@ -8,8 +8,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst)
 open import Relation.Nullary using (Dec; yes; no)
 open import Agda.Primitive using (Level; _⊔_)
 
-open import KitTheory.Prelude
-import KitTheory.Kit 𝕋 as FKit
+open import Kitty.Prelude
+import Kitty.Kit 𝕋 as FKit
 
 open Modes 𝕄
 
@@ -128,7 +128,7 @@ module DKitSem where
   pattern _↓_ ϕ µ  = wk ∥ (kw {µ' = µ} ∘ ϕ)
 
   open FKit
-  open import KitTheory.Compose 𝕋
+  open import Kitty.Compose 𝕋
   module _ (KT : KitTraversal) (KA : KitAssoc KT) (KAL : KitAssoc.KitAssocLemmas KT KA) where
     open KitTraversal KT
     open KitAssoc KT KA
@@ -190,8 +190,8 @@ module DKitSem where
     simp (ϕ₁ ∥ ϕ₂) = {!!}
     simp ϕ         = ϕ
 
-open import KitTheory.Kit 𝕋
-open import KitTheory.Compose 𝕋
+open import Kitty.Kit 𝕋
+open import Kitty.Compose 𝕋
 module _ (KT : KitTraversal) (KA : KitAssoc KT) (KAL : KitAssoc.KitAssocLemmas KT KA) where
   open KitTraversal KT
   open KitAssoc KT KA

@@ -1,13 +1,13 @@
-module KitTheory.Generics-Example where
+module Kitty.Generics-Example where
 
 open import Data.List using (List; [])
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Product
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂)
 
-open import KitTheory.Modes
-open import KitTheory.Prelude
-open import KitTheory.Iso
+open import Kitty.Modes
+open import Kitty.Prelude
+open import Kitty.Iso
 
 data Mode : Set where
   𝕖 : Mode
@@ -16,7 +16,7 @@ data Mode : Set where
 𝕄 = record { VarMode = Mode ; TermMode = Mode ; m→M = λ m → m }
 open Modes 𝕄
 
-open import KitTheory.Generics 𝕄
+open import Kitty.Generics 𝕄
 
 data STLCCon : Set where
   con-λ con-· : STLCCon
@@ -34,8 +34,8 @@ variable
   e e₁ e₂ e₃ e' e₁' e₂' e₃' : Tm STLC µ 𝕖
 
 module With-Patterns where
-  open import KitTheory.Kit (𝕋 STLC)
-  open import KitTheory.Compose (𝕋 STLC) (KT STLC)
+  open import Kitty.Kit (𝕋 STLC)
+  open import Kitty.Compose (𝕋 STLC) (KT STLC)
 
   open KitTraversal (KT STLC)
   open KitAssoc (KA STLC)
@@ -103,8 +103,8 @@ module With-Iso where
     }
 
   open FromIso Iso
-  open import KitTheory.Kit terms
-  open import KitTheory.Compose terms kit-traversal
+  open import Kitty.Kit terms
+  open import Kitty.Compose terms kit-traversal
 
   open Kit {{...}}
   open ComposeKit {{...}}
@@ -154,7 +154,7 @@ module With-Iso where
 
 -- -- Types and Contexts ----------------------------------------------------------
 
--- open import KitTheory.Types 𝕋
+-- open import Kitty.Types 𝕋
 
 -- -- Each variable mode corresponds to a term mode that represents its type.
 -- kit-type : KitType
@@ -162,7 +162,7 @@ module With-Iso where
 
 -- open KitType kit-type public
 
--- open import KitTheory.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
+-- open import Kitty.OPE 𝕋 kit-traversal kit-assoc kit-assoc-lemmas kit-type public
 
 -- variable
 --   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
