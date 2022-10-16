@@ -21,9 +21,6 @@ private
     M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
     µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
-Scoped : Set₁
-Scoped = List VarMode → TermMode → Set
-
 data Desc : Set₁ where
   `σ : (A : Set) → (A → Desc) → Desc
   `X : List VarMode → TermMode → Desc → Desc
@@ -115,85 +112,97 @@ KAL : (d : Desc) → KitAssoc.KitAssocLemmas (KA d)
 KAL d = record { ⋯-id = ⋯-id }
 
 module FromIso {_⊢_ : Scoped} {d : Desc} (iso : ∀ {µ} {e} → (µ ⊢ e) ≃ Tm d µ e) where 
-  open _≃_ 
+  module _ where
+    open _≃_ 
 
-  open KitTraversal (KT d) hiding (_⋯_)
+    open KitTraversal (KT d) hiding (_⋯_)
 
-  terms : Terms 𝕄
-  terms = record
-    { _⊢_ = _⊢_
-    ; `_ = λ x → from iso (`var x)
-    }
+    terms : Terms 𝕄
+    terms = record
+      { _⊢_ = _⊢_
+      ; `_ = λ x → from iso (`var x)
+      }
 
-  Kit→Kit : Kit terms → Kit (𝕋 d)
-  Kit→Kit k = record
-    { VarMode/TermMode = Kit.VarMode/TermMode k
-    ; _∋/⊢_            = Kit._∋/⊢_ k
-    ; id/m→M           = Kit.id/m→M k
-    ; m→M/id           = Kit.m→M/id k
-    ; id/m→M/id        = Kit.id/m→M/id k
-    ; id/`             = Kit.id/` k
-    ; `/id             = λ m x → to iso (Kit.`/id k m x)
-    ; id/`/id          = λ x → trans (cong (to iso) (Kit.id/`/id k x)) (to∘from iso (`var x))
-    ; wk               = Kit.wk k
-    ; wk-id/`          = Kit.wk-id/` k
-    }
+    Kit→Kit : Kit terms → Kit (𝕋 d)
+    Kit→Kit k = record
+      { VarMode/TermMode = Kit.VarMode/TermMode k
+      ; _∋/⊢_            = Kit._∋/⊢_ k
+      ; id/m→M           = Kit.id/m→M k
+      ; m→M/id           = Kit.m→M/id k
+      ; id/m→M/id        = Kit.id/m→M/id k
+      ; id/`             = Kit.id/` k
+      ; `/id             = λ m x → to iso (Kit.`/id k m x)
+      ; id/`/id          = λ x → trans (cong (to iso) (Kit.id/`/id k x)) (to∘from iso (`var x))
+      ; wk               = Kit.wk k
+      ; wk-id/`          = Kit.wk-id/` k
+      }
 
-  kit-traversal : KitTraversal terms
-  kit-traversal = record
-    { _⋯_ = λ {{𝕂}} e ϕ →
-              let instance _ = Kit→Kit 𝕂 in
-              from iso (to iso e ⋯ ϕ)
-    ; ⋯-var = λ {{𝕂}} x ϕ →
-              let instance _ = Kit→Kit 𝕂 in
-              trans (cong (λ ■ → from iso (■ ⋯ ϕ)) (to∘from iso _)) (from∘to iso _)
-    }
+    kit-traversal : KitTraversal terms
+    kit-traversal = record
+      { _⋯_ = λ {{𝕂}} e ϕ →
+                let instance _ = Kit→Kit 𝕂 in
+                from iso (to iso e ⋯ ϕ)
+      ; ⋯-var = λ {{𝕂}} x ϕ →
+                let instance _ = Kit→Kit 𝕂 in
+                trans (cong (λ ■ → from iso (■ ⋯ ϕ)) (to∘from iso _)) (from∘to iso _)
+      }
 
-  ↑→↑ : ∀ {{𝕂}} {µ₁} {µ₂} (ϕ : _–[_]→_ (𝕋 d) µ₁ (Kit→Kit 𝕂) µ₂) m →
-    Kit._↑_ (Kit→Kit 𝕂) ϕ m ≡ Kit._↑_ 𝕂 ϕ m
-  ↑→↑ ϕ m = fun-ext terms λ m → fun-ext terms λ { (here px) → refl ; (there x) → refl }
+    ↑→↑ : ∀ {{𝕂}} {µ₁} {µ₂} (ϕ : _–[_]→_ (𝕋 d) µ₁ (Kit→Kit 𝕂) µ₂) m →
+      Kit._↑_ (Kit→Kit 𝕂) ϕ m ≡ Kit._↑_ 𝕂 ϕ m
+    ↑→↑ ϕ m = fun-ext terms λ m → fun-ext terms λ { (here px) → refl ; (there x) → refl }
 
-  CKit→CKit : ∀ {{𝕂₁}} {{𝕂₂}} {{𝕂}}
-    → ComposeKit terms kit-traversal {{𝕂₁}} {{𝕂₂}} {{𝕂}}
-    → ComposeKit (𝕋 d) (KT d) {{Kit→Kit 𝕂₁}} {{Kit→Kit 𝕂₂}} {{Kit→Kit 𝕂}}
-  CKit→CKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} k = record
-    { _∘ₖ_     = ComposeKit._∘ₖ_ k
-    ; tm-⋯-∘   = λ ϕ₁ ϕ₂ x → trans (sym (to∘from iso _)) (cong (to iso) (ComposeKit.tm-⋯-∘ k ϕ₁ ϕ₂ x))
-    ; dist-↑-∘ = dist-↑-∘' {{𝕂₁}} {{𝕂₂}} {{𝕂}} {{k}} 
-    } where
-      dist-↑-∘' :  ∀ {{𝕂₁}} {{𝕂₂}} {{𝕂}}
-          {{k : ComposeKit terms kit-traversal {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
-          {µ₁ µ₂ µ₃ : List VarMode} (m : VarMode)
-          (ϕ₁ : _–[_]→_ (𝕋 d) µ₂ (Kit→Kit 𝕂₁) µ₃)
-          (ϕ₂ : _–[_]→_ (𝕋 d) µ₁ (Kit→Kit 𝕂₂) µ₂) →
-          -- (ϕ₁ ∘ₖ ϕ₂) ↑ m ≡ (ϕ₁ ↑ m) ∘ₖ (ϕ₂ ↑ m)
-          Kit._↑_ (Kit→Kit 𝕂) (ComposeKit._∘ₖ_ k ϕ₁ ϕ₂) m ≡
-          ComposeKit._∘ₖ_ k (Kit._↑_ (Kit→Kit 𝕂₁) ϕ₁ m) (Kit._↑_ (Kit→Kit 𝕂₂) ϕ₂ m)
-      dist-↑-∘' {{𝕂₁}} {{𝕂₂}} {{𝕂}} {{k = k}} m ϕ₁ ϕ₂
-        rewrite ↑→↑ ϕ₁ m
-              | ↑→↑ ϕ₂ m
-              | ↑→↑ (ComposeKit._∘ₖ_ k ϕ₁ ϕ₂) m
-              = ComposeKit.dist-↑-∘ k m ϕ₁ ϕ₂
+    CKit→CKit : ∀ {{𝕂₁}} {{𝕂₂}} {{𝕂}}
+      → ComposeKit terms kit-traversal {{𝕂₁}} {{𝕂₂}} {{𝕂}}
+      → ComposeKit (𝕋 d) (KT d) {{Kit→Kit 𝕂₁}} {{Kit→Kit 𝕂₂}} {{Kit→Kit 𝕂}}
+    CKit→CKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} k = record
+      { _∘ₖ_     = ComposeKit._∘ₖ_ k
+      ; tm-⋯-∘   = λ ϕ₁ ϕ₂ x → trans (sym (to∘from iso _)) (cong (to iso) (ComposeKit.tm-⋯-∘ k ϕ₁ ϕ₂ x))
+      ; dist-↑-∘ = dist-↑-∘' {{𝕂₁}} {{𝕂₂}} {{𝕂}} {{k}} 
+      } where
+        dist-↑-∘' :  ∀ {{𝕂₁}} {{𝕂₂}} {{𝕂}}
+            {{k : ComposeKit terms kit-traversal {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
+            {µ₁ µ₂ µ₃ : List VarMode} (m : VarMode)
+            (ϕ₁ : _–[_]→_ (𝕋 d) µ₂ (Kit→Kit 𝕂₁) µ₃)
+            (ϕ₂ : _–[_]→_ (𝕋 d) µ₁ (Kit→Kit 𝕂₂) µ₂) →
+            -- (ϕ₁ ∘ₖ ϕ₂) ↑ m ≡ (ϕ₁ ↑ m) ∘ₖ (ϕ₂ ↑ m)
+            Kit._↑_ (Kit→Kit 𝕂) (ComposeKit._∘ₖ_ k ϕ₁ ϕ₂) m ≡
+            ComposeKit._∘ₖ_ k (Kit._↑_ (Kit→Kit 𝕂₁) ϕ₁ m) (Kit._↑_ (Kit→Kit 𝕂₂) ϕ₂ m)
+        dist-↑-∘' {{𝕂₁}} {{𝕂₂}} {{𝕂}} {{k = k}} m ϕ₁ ϕ₂
+          rewrite ↑→↑ ϕ₁ m
+                | ↑→↑ ϕ₂ m
+                | ↑→↑ (ComposeKit._∘ₖ_ k ϕ₁ ϕ₂) m
+                = ComposeKit.dist-↑-∘ k m ϕ₁ ϕ₂
 
-  kit-assoc : KitAssoc terms kit-traversal
-  kit-assoc = record
-    { ⋯-assoc = λ {{𝕂₁}} {{𝕂₂}} {{𝕂}} {{ℂ}} e ϕ₁ ϕ₂ →
-        let instance _ = Kit→Kit 𝕂₁ in
-        let instance _ = Kit→Kit 𝕂₂ in
-        let instance _ = Kit→Kit 𝕂 in
-        let instance _ = CKit→CKit ℂ in
-        trans (cong (λ ■ → from iso (■ ⋯ ϕ₂)) (to∘from iso _)) (cong (from iso) (⋯-assoc (to iso e) ϕ₁ ϕ₂))
-    }
+    kit-assoc : KitAssoc terms kit-traversal
+    kit-assoc = record
+      { ⋯-assoc = λ {{𝕂₁}} {{𝕂₂}} {{𝕂}} {{ℂ}} e ϕ₁ ϕ₂ →
+          let instance _ = Kit→Kit 𝕂₁ in
+          let instance _ = Kit→Kit 𝕂₂ in
+          let instance _ = Kit→Kit 𝕂 in
+          let instance _ = CKit→CKit ℂ in
+          trans (cong (λ ■ → from iso (■ ⋯ ϕ₂)) (to∘from iso _)) (cong (from iso) (⋯-assoc (to iso e) ϕ₁ ϕ₂))
+      }
+
+    open KitAssoc kit-assoc
+
+    kit-assoc-lemmas : KitAssocLemmas
+    kit-assoc-lemmas = record
+      { ⋯-id = λ {{𝕂}} v →
+          let instance _ = Kit→Kit 𝕂 in
+          trans (cong (from iso) (⋯-id (to iso v))) (from∘to iso v)
+      }
 
   open KitAssoc kit-assoc public
-
-  kit-assoc-lemmas : KitAssocLemmas
-  kit-assoc-lemmas = record
-    { ⋯-id = λ {{𝕂}} v →
-        let instance _ = Kit→Kit 𝕂 in
-        trans (cong (from iso) (⋯-id (to iso v))) (from∘to iso v)
-    }
-
   open KitTraversal kit-traversal public
   open KitAssocLemmas kit-assoc-lemmas public
+
+  open Kit ⦃ ... ⦄ public
+  open ComposeKit ⦃ ... ⦄ public
+
+  instance kitᵣ-inst  = kitᵣ
+  instance kitₛ-inst  = kitₛ
+  instance kitᵣᵣ-inst = kitᵣᵣ
+  instance kitᵣₛ-inst = kitᵣₛ
+  instance kitₛᵣ-inst = kitₛᵣ
+  instance kitₛₛ-inst = kitₛₛ
 

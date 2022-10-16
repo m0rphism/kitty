@@ -5,9 +5,12 @@ open import Kitty.Prelude
 
 record Modes : Set₁ where
   field
-    VarMode  : Set
-    TermMode : Set
-    m→M      : VarMode → TermMode
+    {VarMode}  : Set
+    {TermMode} : Set
+    m→M        : VarMode → TermMode
+
+  Scoped : Set₁
+  Scoped = List VarMode → TermMode → Set
 
 record Terms (𝕄 : Modes) : Set₁ where
   open Modes 𝕄
@@ -40,4 +43,15 @@ record Terms (𝕄 : Modes) : Set₁ where
     #_ n {n∈µ}  =  ` count (toWitness n∈µ)
 
   open DeBruijn-Notation public using (#_)
+
+mkModes : {VarMode TermMode : Set} → (VarMode → TermMode) → Modes
+mkModes m→M = record { m→M = m→M }
+
+module _ {𝕄 : Modes} where
+  open Modes 𝕄
+  mkTerms :
+    ∀ (_⊢_ : List VarMode → TermMode → Set)
+      (`_  : ∀ {µ m} → µ ∋ m → µ ⊢ m→M m)
+    → Terms 𝕄
+  mkTerms _⊢_ `_ = record { _⊢_ = _⊢_ ; `_ = `_ }
 

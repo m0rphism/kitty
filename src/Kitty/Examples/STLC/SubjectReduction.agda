@@ -1,3 +1,5 @@
+{-# OPTIONS --rewriting #-}
+
 module Kitty.Examples.STLC.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -13,9 +15,9 @@ ope-pres-⊢ : ∀ {e : µ₁ ⊢ 𝕖} {t : µ₁ ∶⊢ 𝕖} {ρ : µ₁ →�
   OPE ρ Γ₁ Γ₂ →
   Γ₁ ⊢ e     ∶ t →
   Γ₂ ⊢ e ⋯ ρ ∶ t ⋯ ρ
-ope-pres-⊢               {ρ = ρ} ope (τ-` refl)                 = τ-` (ope-pres-telescope _ ope)
-ope-pres-⊢ {t = t₁ ⇒ t₂} {ρ = ρ} ope (τ-λ ⊢e)                   = τ-λ (subst (_ ⊢ _ ∶_) (dist-↑-ren t₂ ρ) (ope-pres-⊢ (ope-keep ope) ⊢e))
-ope-pres-⊢                       ope (τ-· ⊢e₁ ⊢e₂)              = τ-· (ope-pres-⊢ ope ⊢e₁) (ope-pres-⊢ ope ⊢e₂)
+ope-pres-⊢               {ρ = ρ} ope (τ-` refl)    = τ-` (ope-pres-telescope _ ope)
+ope-pres-⊢ {t = t₁ ⇒ t₂} {ρ = ρ} ope (τ-λ ⊢e)      = τ-λ (subst (_ ⊢ _ ∶_) (dist-↑-ren t₂ ρ) (ope-pres-⊢ (ope-keep ope) ⊢e))
+ope-pres-⊢                       ope (τ-· ⊢e₁ ⊢e₂) = τ-· (ope-pres-⊢ ope ⊢e₁) (ope-pres-⊢ ope ⊢e₂)
 
 wk-pres-⊢ : ∀ {e : µ ⊢ 𝕖} {t : µ ∶⊢ 𝕖} (t' : µ ∶⊢ 𝕖) →
   Γ₂         ⊢ e      ∶ t →
@@ -37,7 +39,8 @@ sub-pres-⊢ : ∀ {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {e : µ₁ ⊢ 𝕖} 
   Γ₂ ⊢* σ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
 sub-pres-⊢                     (τ-` {x = x} refl) ⊢σ = ⊢σ x
-sub-pres-⊢ {σ = σ}             (τ-λ {t₂ = t₂} ⊢e) ⊢σ = τ-λ (subst (_ ⊢ _ ∶_) (dist-↑-sub t₂ σ) (sub-pres-⊢ ⊢e (lift-⊢* _ ⊢σ)) )
+sub-pres-⊢ {Γ₂ = Γ₂} {σ = σ}   (τ-λ {t₂ = t₂} ⊢e) ⊢σ = τ-λ {!(subst ((Γ₂ ▶ (_ ⋯ σ)) ⊢ _ ∶_) (dist-↑-sub t₂ σ) (sub-pres-⊢ ⊢e (lift-⊢* _ ⊢σ)) )!}
+-- sub-pres-⊢ {σ = σ}             (τ-λ {t₂ = t₂} ⊢e) ⊢σ = τ-λ (subst (_ ⊢ _ ∶_) (dist-↑-sub t₂ σ) (sub-pres-⊢ ⊢e (lift-⊢* _ ⊢σ)) )
 sub-pres-⊢                     (τ-· ⊢e₁ ⊢e₂)      ⊢σ = τ-· (sub-pres-⊢ ⊢e₁ ⊢σ) (sub-pres-⊢ ⊢e₂ ⊢σ)
 
 _,*_ : ∀ {σ : µ₁ →ₛ µ₂} {t : µ₁ ∶⊢ 𝕖} →
@@ -63,10 +66,3 @@ subject-reduction :
 subject-reduction (τ-· {t₂ = t₂} (τ-λ ⊢e₁) ⊢e₂) (β-λ e₂-val)         = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ₛ t₂ _) (sub₁-pres-⊢ ⊢e₁ ⊢e₂)
 subject-reduction (τ-· ⊢e₁ ⊢e₂)                 (ξ-·₁ e₁↪e₁')        = τ-· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (τ-· ⊢e₁ ⊢e₂)                 (ξ-·₂ e₁-val e₂↪e₂') = τ-· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
-
-subject-reduction* :
-  Γ ⊢ e ∶ t →
-  e ↪* e' →
-  Γ ⊢ e' ∶ t
-subject-reduction* ⊢e ↪*-refl = ⊢e
-subject-reduction* ⊢e (↪*-step e₁↪e₂ e₂↪*e₃) = subject-reduction* (subject-reduction ⊢e e₁↪e₂) e₂↪*e₃

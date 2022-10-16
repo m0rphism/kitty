@@ -28,7 +28,7 @@ module STLC where
     `λ_ : ∀ {µ} → (µ ▷ 𝕖) ⊢ 𝕖 → µ ⊢ 𝕖
     _·_ : ∀ {µ} → µ ⊢ 𝕖 → µ ⊢ 𝕖 → µ ⊢ 𝕖
 
-  unquoteDecl Iso = deriveIso' 𝕄 _⊢_ Iso
+  unquoteDecl Iso = deriveIso 𝕄 _⊢_ Iso
 
   open FromIso 𝕄 Iso
 

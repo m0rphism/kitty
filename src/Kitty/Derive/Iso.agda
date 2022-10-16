@@ -50,8 +50,8 @@ private variable
 
 -- Deriving the Isomorphism ----------------------------------------------------
 
-deriveIso : Name → Name → Name → TC ⊤
-deriveIso modes-nm Term-nm Iso-nm = do
+deriveIso' : Name → Name → Name → TC ⊤
+deriveIso' modes-nm Term-nm Iso-nm = do
   printAST "–– deriveIso –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––"
   desc-nm    ← freshName "d"
   to-nm      ← freshName "to"
@@ -83,11 +83,11 @@ deriveIso modes-nm Term-nm Iso-nm = do
       ])
     ]
 
-deriveIso' : (𝕄 : Modes)
+deriveIso : (𝕄 : Modes)
            → Scoped 𝕄
            → Name
            → TC ⊤
-deriveIso' modes Term Iso-nm = do
+deriveIso modes Term Iso-nm = do
   modes-nm    ← type→name =<< runFreshT (quoteTC' modes)
   Term-nm     ← type→name =<< runFreshT (quoteTC' Term)
-  deriveIso modes-nm Term-nm Iso-nm
+  deriveIso' modes-nm Term-nm Iso-nm

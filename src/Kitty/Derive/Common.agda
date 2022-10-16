@@ -57,10 +57,6 @@ split-term-ctors : List Name → FreshTC (Name × List Name)
 split-term-ctors []       = liftTC $ failStr "No variable constructor found"
 split-term-ctors (c ∷ cs) = return (c , cs)
 
-type→name : Type' → TC Name
-type→name (def nm args) = return nm
-type→name t = failStr "Type is not a Name."
-
 _isTCon_ : Type' → Name → Bool
 def nm args isTCon nm' = primQNameEquality nm nm' 
 _           isTCon _   = false 

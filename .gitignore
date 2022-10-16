@@ -4,3 +4,4 @@ paper/**/auto/
 *.pdf
 *.swp
 *.swo
+.#*
