@@ -50,7 +50,7 @@ deriveTo modes-nm Term-nm desc-nm to-nm = runFreshT $ do
   ty ← getDefinition Term-nm
   var-c , term-cs ← split-term-ctors $ ctors ty
   modes  ← unquoteTC {A = Modes} (def modes-nm [])
-  Term ← unquoteTC' {A = Scoped modes} (def Term-nm [])
+  Term ← unquoteTC' {A = Modes.Scoped modes} (def Term-nm [])
   d ← unquoteTC' (def desc-nm [])
   let var-clause = clause
         [ ("µ" , argₕ unknown)

@@ -4,7 +4,7 @@ module Kitty.Derive.ToFrom where
 
 open import ReflectionLib.Standard.Syntax
 open import ReflectionLib.Standard.VeryPretty
-open import ReflectionLib.Standard.ActionsClass hiding (⟦_⟧)
+open import ReflectionLib.Standard.ActionsClass hiding (⟦_⟧; term→name)
 open import ReflectionLib.Classes.Pretty
 open import ReflectionLib.Named.Syntax
 open import ReflectionLib.Named.Actions
@@ -74,7 +74,7 @@ deriveToFromClause modes-nm Term-nm desc-nm to∘from-nm con-nm con-i = do
             (con (quote refl) [])
             c-tel'
 
-  ret-nm ← liftTC $ type→name c-ret
+  ret-nm ← liftTC $ term→name c-ret
   let tel-rec , tel-non-rec = splitRec c-tel ret-nm
   let rec-ids = map proj₁ tel-rec
   let non-rec-ids = map proj₁ tel-non-rec
@@ -100,7 +100,7 @@ deriveToFrom modes-nm Term-nm desc-nm to-nm from-nm to∘from-nm = runFreshT $ d
   let cs = ctors ty
   var-c , term-cs ← split-term-ctors cs
   modes ← unquoteTC {A = Modes} (def modes-nm [])
-  Term  ← unquoteTC {A = Scoped modes} (def Term-nm [])
+  Term  ← unquoteTC {A = Modes.Scoped modes} (def Term-nm [])
   d     ← unquoteTC {A = Desc modes} (def desc-nm [])
   from  ← unquoteTC {A = ∀ {µ M} → Tm modes d µ M → Term µ M} (def from-nm [])
   to    ← unquoteTC {A = ∀ {µ M} → Term µ M → Tm modes d µ M} (def to-nm [])

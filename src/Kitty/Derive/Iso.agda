@@ -4,7 +4,7 @@ module Kitty.Derive.Iso where
 
 open import ReflectionLib.Standard.Syntax
 open import ReflectionLib.Standard.VeryPretty
-open import ReflectionLib.Standard.ActionsClass hiding (⟦_⟧)
+open import ReflectionLib.Standard.ActionsClass hiding (⟦_⟧; term→name)
 open import ReflectionLib.Classes.Pretty
 open import ReflectionLib.Named.Syntax
 open import ReflectionLib.Named.Actions
@@ -69,7 +69,7 @@ deriveIso' modes-nm Term-nm Iso-nm = do
   printAST "–– deriveToFrom"
   deriveToFrom modes-nm Term-nm desc-nm to-nm from-nm to∘from-nm
   modes    ← unquoteTC {A = Modes} (def modes-nm [])
-  Term     ← unquoteTC {A = Scoped modes} (def Term-nm [])
+  Term     ← unquoteTC {A = Modes.Scoped modes} (def Term-nm [])
   d        ← unquoteTC {A = Desc modes} (def desc-nm [])
   iso-ty   ← quoteTC (∀ {µ} {M} → (Term µ M) ≃ Tm modes d µ M)
   defdecFun
@@ -84,10 +84,10 @@ deriveIso' modes-nm Term-nm Iso-nm = do
     ]
 
 deriveIso : (𝕄 : Modes)
-           → Scoped 𝕄
+           → Modes.Scoped 𝕄
            → Name
            → TC ⊤
 deriveIso modes Term Iso-nm = do
-  modes-nm    ← type→name =<< runFreshT (quoteTC' modes)
-  Term-nm     ← type→name =<< runFreshT (quoteTC' Term)
+  modes-nm    ← term→name =<< runFreshT (quoteTC' modes)
+  Term-nm     ← term→name =<< runFreshT (quoteTC' Term)
   deriveIso' modes-nm Term-nm Iso-nm

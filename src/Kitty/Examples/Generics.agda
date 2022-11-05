@@ -132,23 +132,23 @@ module With-Iso where
   fap : ([] ▷ 𝕖 ▷ 𝕖) ⊢ 𝕖
   fap = (` here refl) · (` there (here refl))
 
-  fap' : [] ⊢ 𝕖
-  fap' = fap ⋯ₛ ⦅ id ⋯ wk ⦆ₛ ⋯ₛ ⦅ id ⦆ₛ
+  -- fap' : [] ⊢ 𝕖
+  -- fap' = fap ⋯ₛ ⦅ id ⋯ wk ⦆ₛ ⋯ₛ ⦅ id ⦆ₛ
 
-  fap'' : [] ⊢ 𝕖
-  fap'' = fap ⋯ₛ (⦅ id ⦆ₛ ∘ₖ ⦅ id ⋯ wk ⦆ₛ)
+  -- fap'' : [] ⊢ 𝕖
+  -- fap'' = fap ⋯ₛ (⦅ id ⦆ₛ ∘ₖ ⦅ id ⋯ wk ⦆ₛ)
 
-  fap''' : [] ⊢ 𝕖
-  fap''' = fap ⋯ₛ (⦅ id ⦆ₛ ∥ ⦅ id ⦆ₛ)
+  -- fap''' : [] ⊢ 𝕖
+  -- fap''' = fap ⋯ₛ (⦅ id ⦆ₛ ∥ ⦅ id ⦆ₛ)
 
-  test' : fap' ≡ id · id
-  test' = refl
+  -- test' : fap' ≡ id · id
+  -- test' = refl
 
-  test'' : fap'' ≡ id · id
-  test'' = refl
+  -- test'' : fap'' ≡ id · id
+  -- test'' = refl
 
-  test''' : fap''' ≡ id · id
-  test''' = refl
+  -- test''' : fap''' ≡ id · id
+  -- test''' = refl
 
 
 

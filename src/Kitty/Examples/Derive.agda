@@ -60,7 +60,7 @@ module SystemF where
     _`⇒_ : ∀ {µ} → µ ⊢ 𝕥 → µ ⊢ 𝕥 → µ ⊢ 𝕥
     `∀_ : ∀ {µ} → (µ ▷ 𝕥) ⊢ 𝕥 → µ ⊢ 𝕥
 
-  unquoteDecl Iso = deriveIso' 𝕄 _⊢_ Iso
+  unquoteDecl Iso = deriveIso 𝕄 _⊢_ Iso
 
   open FromIso 𝕄 Iso
 
@@ -100,7 +100,7 @@ module Patterns where
     _`∷_   : ∀ {µ} → µ ⊢ 𝕔 → µ ⊢ 𝕔𝕤 → µ ⊢ 𝕔𝕤
     _`⇒_   : ∀ {µ µ'} → Pat µ' → (µ ▷▷ µ') ⊢ 𝕖 → µ ⊢ 𝕔
 
-  unquoteDecl Iso = deriveIso' 𝕄 _⊢_ Iso
+  unquoteDecl Iso = deriveIso 𝕄 _⊢_ Iso
 
   open FromIso 𝕄 Iso
 
@@ -121,7 +121,7 @@ module STLC-Intrinsic where
     `λ_ : ∀ {Γ t₁ t₂} → (Γ ▷ t₁) ⊢ t₂ → Γ ⊢ (t₁ `⇒ t₂)
     _·_ : ∀ {Γ t₁ t₂} → Γ ⊢ (t₁ `⇒ t₂) → Γ ⊢ t₁ → Γ ⊢ t₂
 
-  unquoteDecl Iso = deriveIso' 𝕄 _⊢_ Iso
+  unquoteDecl Iso = deriveIso 𝕄 _⊢_ Iso
 
   open FromIso 𝕄 Iso
 
