@@ -132,3 +132,28 @@ module Derive (KT : KitTraversalAlt) where
   kitassoc-lemmas : KitAssocLemmas
   kitassoc-lemmas = record { ⋯-id = ⋯-id' }
 
+  _~_ :
+    ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
+    → (f g : (a : A) → (b : B a) → C a b)
+    → Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
+  f ~ g = ∀ a b → f a b ≡ g a b
+
+  ⋯-cong :
+    ∀ {{𝕂 : Kit}} (v : µ₁ ⊢ M) {f g : µ₁ –[ 𝕂 ]→ µ₂}
+    → f ~ g
+    → v ⋯ f ≡ v ⋯ g
+  ⋯-cong v {f} {g} f~g =
+    ⋯-↑ (f ∷ [])
+        (g ∷ [])
+        (λ m x →
+          begin
+            (` x) ⋯ f
+          ≡⟨ ⋯-var x f ⟩
+            `/id _ (f _ x)
+          ≡⟨ cong (`/id _) (f~g _ x) ⟩
+            `/id _ (g _ x)
+          ≡⟨ sym (⋯-var x g) ⟩
+            (` x) ⋯ g
+          ∎)
+        v
+
