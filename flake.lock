@@ -15,9 +15,40 @@
         "type": "indirect"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1667653703,
+        "narHash": "sha256-Xow4vx52/g5zkhlgZnMEm/TEXsj+13jTPCc2jIhW1xU=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "f09ad462c5a121d0239fde645aacb2221553a217",
+        "type": "github"
+      },
+      "original": {
+        "id": "nixpkgs",
+        "ref": "nixos-22.05",
+        "type": "indirect"
+      }
+    },
+    "reflection-lib": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1667727750,
+        "narHash": "sha256-IkNgAhDuciKinrO9lCwBfsPZFAZ0D8s6v2LpLQi8Xxk=",
+        "path": "/home/m0rphism/Development/projects/agda/reflection-lib/",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/m0rphism/Development/projects/agda/reflection-lib/",
+        "type": "path"
+      }
+    },
     "root": {
       "inputs": {
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "reflection-lib": "reflection-lib"
       }
     }
   },
