@@ -4,7 +4,7 @@ module Kitty.Derive.Traversal where
 
 open import ReflectionLib.Standard.Syntax
 open import ReflectionLib.Standard.VeryPretty
-open import ReflectionLib.Standard.ActionsClass hiding (⟦_⟧)
+open import ReflectionLib.Standard.ActionsClass hiding (term→name; ⟦_⟧)
 open import ReflectionLib.Classes.Pretty
 open import ReflectionLib.Named.Syntax
 open import ReflectionLib.Named.Actions
@@ -92,13 +92,13 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
   ⊢-nm ← quoteNameTC _⊢_
   ⊢-def ← getDefinition ⊢-nm
   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
-  𝕋` ← quoteNormTC' 𝕋
-  let VarMode` = def (quote Kitty.Modes.Modes.VarMode) [ argᵥ (def 𝕄-nm []) ]
-  let VarModes` = def (quote List) [ argᵥ VarMode` ]
-  let Kit` = def (quote Kitty.Kit.Kit) [ argᵥ 𝕋` ]
-  -- VarMode` ← quoteNormTC' VarMode
-  -- VarModes` ← quoteNormTC' (List VarMode)
-  -- Kit` ← quoteTC' Kit
+  𝕋-nm ← term→name =<< quoteTC' 𝕋
+  -- let VarMode` = def (quote Kitty.Modes.Modes.VarMode) [ argᵥ (def 𝕄-nm []) ]
+  -- let VarModes` = def (quote List) [ argᵥ VarMode` ]
+  -- let Kit` = def (quote Kitty.Kit.Kit) [ argᵥ (def 𝕋-nm []) ]
+  VarMode` ← quoteNormTC' VarMode
+  VarModes` ← quoteNormTC' (List VarMode)
+  Kit` ← quoteTC' Kit
   -- let VarMode` = def (quote VarMode) []
   -- let VarModes` = def (quote List) [ argᵥ (def (quote VarMode) []) ]
   -- let Kit` = def (quote Kitty.Kit.Kit) [ argᵥ 𝕋` ]
@@ -124,30 +124,32 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
   let var-clause = clause [ "𝕂" , argᵢ Kit`
                           ; "µ₁" , argₕ VarModes`
                           ; "µ₂" , argₕ VarModes`
-                          ; "m" , argₕ VarMode`
                           ; "x" , argᵥ (def (quote _∋_) [ argᵥ (var "µ₁" [])
-                                                        ; argᵥ (var "m" [])
+                                                        ; argᵥ unknown
                                                         ])
-                          ; "f" , argᵥ (def (quote _–[_]→_) [ argᵥ (var "µ₁" [])
-                                                            ; argᵥ (var "𝕂" [])
-                                                            ; argᵥ (var "µ₂" [])
-                                                            ])
+                          ; "f" , argᵥ (def (quote Kitty.Kit._–[_]→_) [ argᵥ (def 𝕋-nm [])
+                                                                      ; argᵥ (var "µ₁" [])
+                                                                      ; argᵥ (var "𝕂" [])
+                                                                      ; argᵥ (var "µ₂" [])
+                                                                      ])
                           ]
                           [ argᵢ (var "𝕂")
                           ; argₕ (var "µ₁")
                           ; argₕ (var "µ₂")
-                          ; argᵥ (con `-nm [ argₕ (dot (var "µ₁" [])) ; argₕ (var "m") ; argᵥ (var "x") ])
+                          ; argᵥ (con `-nm [ argᵥ (var "x") ])
                           ; argᵥ (var "f" )
                           ]
-                          (def (quote Kit.`/id) [ argᵥ (var "𝕂" [])
-                                                ; argᵥ (var "m" [])
-                                                ; argᵥ (var "f" [ argᵥ (var "m" [])
-                                                                ; argᵥ (var "x" [])
-                                                                ])
-                                                ])
+                          (def (quote Kit.`/id)
+                            [ argᵥ (var "𝕂" [])
+                            ; argᵥ unknown
+                            ; argᵥ (var "f" [ argᵥ unknown
+                                            ; argᵥ (var "x" [])
+                                            ])
+                            ])
   let clauses = var-clause ∷ clauses
   liftTC $ printAST var-clause
-  ⋯-ty ← quoteTC' (∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
+  ⋯-ty ← quoteTC' (∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
+  liftTC $ printAST ⋯-ty
   defdecFun'
     (argᵥ ⋯-nm)
     ⋯-ty

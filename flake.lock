@@ -35,11 +35,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1667752973,
-        "narHash": "sha256-WaV0MRwFC8ioMki9qO5e9SG1VZv6fwiqduTwYhc5ifs=",
+        "lastModified": 1667757926,
+        "narHash": "sha256-LyDh5eL2Q1JGe6qCZet8i/CE8cAKJoh0jJFExf1nCBc=",
         "ref": "master",
-        "rev": "79dc7b76ac2ce2e000dc448f1932271ed98e9320",
-        "revCount": 54,
+        "rev": "9a66974a029a8ab52256a3987a59f457f71c44cb",
+        "revCount": 56,
         "type": "git",
         "url": "ssh://git@github.com/m0rphism/reflection-lib"
       },
