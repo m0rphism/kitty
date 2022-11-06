@@ -17,6 +17,7 @@ open import ReflectionLib.Algorithms.Fin
 open import ReflectionLib.Algorithms.Nat
 open import ReflectionLib.Categorical
 
+
 open import Data.String as String using (String)
 open import Data.Unit using (⊤; tt)
 open import Data.Bool using (Bool; true; false; if_then_else_)
@@ -82,6 +83,8 @@ record DeriveContext : Set₁ where
   open Terms 𝕋 public
   open Kitty.Kit 𝕋 public
 
+postulate TODO : ∀ {ℓ} {A : Set ℓ} → A
+
 deriveTraversal : {𝕄 : Modes} → Terms 𝕄 → Name → TC ⊤
 deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
   liftTC $ printAST "FUCK YOU FUCK YOU FUCK YOU"
@@ -93,52 +96,81 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
   ⊢-def ← getDefinition ⊢-nm
   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
   𝕋-nm ← term→name =<< quoteTC' 𝕋
-  -- let VarMode` = def (quote Kitty.Modes.Modes.VarMode) [ argᵥ (def 𝕄-nm []) ]
-  -- let VarModes` = def (quote List) [ argᵥ VarMode` ]
-  -- let Kit` = def (quote Kitty.Kit.Kit) [ argᵥ (def 𝕋-nm []) ]
   VarMode` ← quoteNormTC' VarMode
   VarModes` ← quoteNormTC' (List VarMode)
   Kit` ← quoteTC' Kit
-  -- let VarMode` = def (quote VarMode) []
-  -- let VarModes` = def (quote List) [ argᵥ (def (quote VarMode) []) ]
-  -- let Kit` = def (quote Kitty.Kit.Kit) [ argᵥ 𝕋` ]
-  -- clauses ← forM (enumerate con-nms) λ (i , c) → do
-  --   c-ty ← getType' c
-  --   -- c-ty ← liftTC $ µ→[] c-ty
-  --   -- let (c-tel , c-ret) = pi→tel c-ty
-  --   -- end-ty ← case c-ret of λ where
-  --   --   (def f [ µ ; M ]) → pure (Term' by con (quote `■) [ M ])
-  --   --   _                 → liftTC $ failStr "Unexpected constructor type"
-  --   -- let desc = foldr' c-tel end-ty λ where
-  --   --       (x , arg i arg-ty) desc → case unterm Term-nm arg-ty of λ where
-  --   --         (just (µ , M)) →
-  --   --           con (quote `X) [ argᵥ µ ; argᵥ M ; argᵥ desc ]
-  --   --         nothing →
-  --   --           con (quote `σ)
-  --   --             [ argᵥ arg-ty
-  --   --             ; argᵥ (lam visible (abs x desc))
-  --   --             ]
-  --   -- pure $ clause [] [ argᵥ (fin-pat' i) ] desc
-  --   pure {!!}
-  let clauses = []
-  let var-clause = clause [ "𝕂" , argᵢ Kit`
-                          ; "µ₁" , argₕ VarModes`
-                          ; "µ₂" , argₕ VarModes`
-                          ; "x" , argᵥ (def (quote _∋_) [ argᵥ (var "µ₁" [])
-                                                        ; argᵥ unknown
-                                                        ])
-                          ; "f" , argᵥ (def (quote Kitty.Kit._–[_]→_) [ argᵥ (def 𝕋-nm [])
-                                                                      ; argᵥ (var "µ₁" [])
-                                                                      ; argᵥ (var "𝕂" [])
-                                                                      ; argᵥ (var "µ₂" [])
-                                                                      ])
-                          ]
-                          [ argᵢ (var "𝕂")
-                          ; argₕ (var "µ₁")
-                          ; argₕ (var "µ₂")
-                          ; argᵥ (con `-nm [ argᵥ (var "x") ])
-                          ; argᵥ (var "f" )
-                          ]
+
+  let mk-tel c-tel =
+        [ "𝕂" , argᵢ Kit`
+        ; "µ₁" , argₕ VarModes`
+        ; "µ₂" , argₕ VarModes`
+        ] ++ c-tel ++
+        [ "f" , argᵥ (def (quote Kitty.Kit._–[_]→_)
+            [ argᵥ (def 𝕋-nm [])
+            ; argᵥ (var "µ₁" [])
+            ; argᵥ (var "𝕂" [])
+            ; argᵥ (var "µ₂" [])
+            ])
+        ]
+  let mk-pats c-pat = 
+        [ argᵢ (var "𝕂")
+        ; argₕ (var "µ₁")
+        ; argₕ (var "µ₂")
+        ] ++ c-pat ∷
+        [ argᵥ (var "f" ) ]
+
+  clauses ← forM (enumerate con-nms) λ (i , c) → do
+    liftTC $ printAST c
+    c-ty ← getType' c
+    let (c-tel , c-ret) = pi→tel c-ty
+    liftTC $ printAST c-tel
+    c-µ ← case unterm ⊢-nm c-ret of λ where
+      (just (var µ [] , M)) → pure µ
+      (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
+      nothing → liftTC $ failStr "impossible"
+    let c-tel = List.boolFilter
+          (λ { (x , _) → case x String.≟ c-µ of λ { (yes _) → false; (no _) → true } })
+          c-tel
+    let c-tel = List.map (λ { (x , b) → (x , b [ c-µ ↦ var "µ₁" [] ]) }) c-tel
+    liftTC $ printAST c-tel
+    let c-pats = List.map (λ { (x , arg i _) →  arg i (var x) }) c-tel
+    let c-pat = argᵥ (con c c-pats)
+    let body = con c $ foldr' c-tel [] λ where
+          (s , arg i t) c-args → _∷ c-args $ case unterm ⊢-nm t of λ where
+            (just (µ , M)) → arg i (def ⋯-nm [ argᵥ (var s [])
+                                             ; argᵥ (def (quote Kitty.Kit.Kit._↑*_)
+                                                 [ argᵥ (var "𝕂" [])
+                                                 ; argᵥ (var "f" [])
+                                                 ; argᵥ unknown
+                                                 ])
+                                             ]) 
+            nothing        → arg i (var s [])
+    pure $ clause (mk-tel c-tel) (mk-pats c-pat) body
+ 
+  let mk-tel c-tel =
+        [ "𝕂" , argᵢ Kit`
+        ; "µ₁" , argₕ VarModes`
+        ; "µ₂" , argₕ VarModes`
+        ; "f" , argᵥ (def (quote Kitty.Kit._–[_]→_)
+            [ argᵥ (def 𝕋-nm [])
+            ; argᵥ (var "µ₁" [])
+            ; argᵥ (var "𝕂" [])
+            ; argᵥ (var "µ₂" [])
+            ])
+        ] ++ c-tel
+  let mk-pats c-pat = 
+        [ argᵢ (var "𝕂")
+        ; argₕ (var "µ₁")
+        ; argₕ (var "µ₂")
+        ] ++ c-pat ∷
+        [ argᵥ (var "f" ) ]
+  let var-tel = [ "x" , argᵥ (def (quote _∋_) [ argᵥ (var "µ₁" [])
+                                              ; argᵥ unknown
+                                              ])
+                ]
+  let var-pat = argᵥ (con `-nm [ argᵥ (var "x") ])
+  let var-clause = clause (mk-tel var-tel)
+                          (mk-pats var-pat)
                           (def (quote Kit.`/id)
                             [ argᵥ (var "𝕂" [])
                             ; argᵥ unknown
@@ -146,14 +178,13 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
                                             ; argᵥ (var "x" [])
                                             ])
                             ])
-  let clauses = var-clause ∷ clauses
-  liftTC $ printAST var-clause
+
   ⋯-ty ← quoteTC' (∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
-  liftTC $ printAST ⋯-ty
+
   defdecFun'
     (argᵥ ⋯-nm)
     ⋯-ty
-    clauses
+    (var-clause ∷ clauses)
 
 -- _⋯_ : ∀ {µ₁} {µ₂} {M} {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
 -- (` x)     ⋯ f = `/id _ (f _ x)
@@ -177,21 +208,21 @@ module Example where
     `_    : ∀ {µ m}  →  µ ∋ m  →  µ ⊢ m→M m
     λx_   : ∀ {µ}  →  (µ ▷ 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
     _·_   : ∀ {µ}  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
-    foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
+    -- foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
 
   unquoteDecl terms = deriveTerms 𝕄 _⊢_ terms
 
   open Kitty.Kit terms
   open Kit ⦃ ... ⦄
 
-  module Custom where
-    _⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-    -- _⋯_ ⦃ 𝕂 ⦄ {µ₁} {µ₂} (`_ {.(µ₁)} {m} x) f = `/id m (f m x)
-    (` x)     ⋯ f = `/id _ (f _ x)
-    (λx t)    ⋯ f = λx (t ⋯ (f ↑* _))
-    (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
-    (foo t)   ⋯ f = foo (t ⋯ (f ↑* _))
+  -- module Custom where
+  --   _⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+  --   -- _⋯_ ⦃ 𝕂 ⦄ {µ₁} {µ₂} (`_ {.(µ₁)} {m} x) f = `/id m (f m x)
+  --   (` x)     ⋯ f = `/id _ (f _ x)
+  --   (λx t)    ⋯ f = λx (t ⋯ (f ↑* _))
+  --   (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
+  --   (foo t)   ⋯ f = foo (t ⋯ (f ↑* _))
 
   unquoteDecl _⋯_ = deriveTraversal terms _⋯_
 
-  -- xx = {!terms!}
+  -- xx = {!_⋯_!}
