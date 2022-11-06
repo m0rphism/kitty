@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-22.05";
-    reflection-lib.url = "path:/home/m0rphism/Development/projects/agda/reflection-lib/";
+    reflection-lib.url = "git+ssh://git@github.com/m0rphism/reflection-lib";
   };
 
   outputs = { self, nixpkgs, reflection-lib, ... }: 
@@ -39,6 +39,11 @@
       #   patchShebangs find-deps.sh
       #   make
       # '';
+
+      # Required to allow debug output, e.g. from agda reflection, to contain unicode chars.
+      # Otherwise the build crashes...
+      LC_ALL="en_US.UTF-8";
+      LOCALE_ARCHIVE = "${pkgs.glibcLocales}/lib/locale/locale-archive";
 
       meta = {
         description = ".";

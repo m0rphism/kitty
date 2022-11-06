@@ -35,14 +35,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1667727750,
-        "narHash": "sha256-IkNgAhDuciKinrO9lCwBfsPZFAZ0D8s6v2LpLQi8Xxk=",
-        "path": "/home/m0rphism/Development/projects/agda/reflection-lib/",
-        "type": "path"
+        "lastModified": 1667752973,
+        "narHash": "sha256-WaV0MRwFC8ioMki9qO5e9SG1VZv6fwiqduTwYhc5ifs=",
+        "ref": "master",
+        "rev": "79dc7b76ac2ce2e000dc448f1932271ed98e9320",
+        "revCount": 54,
+        "type": "git",
+        "url": "ssh://git@github.com/m0rphism/reflection-lib"
       },
       "original": {
-        "path": "/home/m0rphism/Development/projects/agda/reflection-lib/",
-        "type": "path"
+        "type": "git",
+        "url": "ssh://git@github.com/m0rphism/reflection-lib"
       }
     },
     "root": {
