@@ -24,6 +24,7 @@ open import Data.Bool using (Bool; true; false; if_then_else_)
 open import Data.List as List using (List; []; _∷_; _++_; length; drop; zip; reverse)
 open import Data.Maybe using (Maybe; just; nothing)
 open import Data.List.Membership.Propositional using (_∈_)
+open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Product using (_×_; _,_; Σ; Σ-syntax; ∃-syntax; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst)
 open import Relation.Nullary using (Dec; yes; no)
@@ -87,7 +88,6 @@ postulate TODO : ∀ {ℓ} {A : Set ℓ} → A
 
 deriveTraversal : {𝕄 : Modes} → Terms 𝕄 → Name → TC ⊤
 deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
-  liftTC $ printAST "FUCK YOU FUCK YOU FUCK YOU"
   let open Modes 𝕄
   let open Terms 𝕋
   let open Kitty.Kit 𝕋
@@ -120,10 +120,8 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
         [ argᵥ (var "f" ) ]
 
   clauses ← forM (enumerate con-nms) λ (i , c) → do
-    liftTC $ printAST c
     c-ty ← getType' c
     let (c-tel , c-ret) = pi→tel c-ty
-    liftTC $ printAST c-tel
     c-µ ← case unterm ⊢-nm c-ret of λ where
       (just (var µ [] , M)) → pure µ
       (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
@@ -139,7 +137,6 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
                                             (no _)  → (x , b [ c-µ ↦ var "µ₂" [] ])
                                             (yes _) → ("µ₂" , b)
                               }) c-tel
-    liftTC $ printAST c-tel'
     let c-pats = List.map (λ { (x , arg i _) → case x String.≟ c-µ of λ where
                                                  (no _)  → arg i (var x)
                                                  (yes _) → arg i (dot (var "µ₁" []))
@@ -175,7 +172,6 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
                             ])
 
   ⋯-ty ← quoteTC' (∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
-  liftTC $ printAST ⋯-ty
 
   defdecFun'
     (argᵥ ⋯-nm)
@@ -206,21 +202,21 @@ module Example where
     _·_   : ∀ {µ}  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
     foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
 
-  unquoteDecl terms = deriveTerms 𝕄 _⊢_ terms
+  module Custom where
+    terms : Terms 𝕄
+    terms = record { _⊢_ = _⊢_ ; `_ = `_ }
 
-  open Kitty.Kit terms
-  open Kit ⦃ ... ⦄
+    open Kitty.Kit terms
+    open Kit ⦃ ... ⦄
 
-  -- module Custom where
-  --   _⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-  --   -- _⋯_ ⦃ 𝕂 ⦄ {µ₁} {µ₂} (`_ {.(µ₁)} {m} x) f = `/id m (f m x)
-  --   (` x)     ⋯ f = `/id _ (f _ x)
-  --   (λx t)    ⋯ f = λx (t ⋯ (f ↑* _))
-  --   (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
-  --   (foo t)   ⋯ f = foo (t ⋯ (f ↑* _))
+    _⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    -- _⋯_ ⦃ 𝕂 ⦄ {µ₁} {µ₂} (`_ {.(µ₁)} {m} x) f = `/id m (f m x)
+    (` x)     ⋯ f = `/id _ (f _ x)
+    (λx t)    ⋯ f = λx (t ⋯ (f ↑* _))
+    (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
+    (foo t)   ⋯ f = foo (t ⋯ (f ↑* _))
 
-  open Terms terms
-  unquoteDecl _⋯_ = deriveTraversal terms _⋯_
+  module Derived where
+    unquoteDecl terms = deriveTerms 𝕄 _⊢_ terms
+    unquoteDecl _⋯_ = deriveTraversal terms _⋯_
 
-
-  -- xx = {!_⋯_!}
