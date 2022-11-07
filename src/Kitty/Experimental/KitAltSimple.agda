@@ -72,7 +72,7 @@ module Derive (KT : KitTraversalAlt) where
     kit-traversal : KitTraversal
     kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
 
-  open KitTraversal kit-traversal hiding (_⋯_; ⋯-var) public
+  open KitTraversal kit-traversal hiding (_⋯_; ⋯-var; kitᵣ; kitₛ) public
 
   open import Kitty.Compose 𝕋 kit-traversal
 
@@ -101,7 +101,7 @@ module Derive (KT : KitTraversalAlt) where
     kit-assoc : KitAssoc
     kit-assoc = record { ⋯-assoc = ⋯-assoc }
 
-  open KitAssoc kit-assoc public
+  open KitAssoc kit-assoc public hiding (kitᵣᵣ; kitᵣₛ; kitₛᵣ; kitₛₛ; wk-kitᵣ; wk-kitₛ)
 
   private
     ⋯-id' : ∀ {{𝕂 : Kit}} {µ M} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
@@ -146,17 +146,17 @@ module Derive (KT : KitTraversalAlt) where
           ∎)
         v
 
+  instance
+    kitᵣ  = KitTraversal.kitᵣ kit-traversal
+    kitₛ  = KitTraversal.kitₛ kit-traversal
+    kitᵣᵣ = KitAssoc.kitᵣᵣ kit-assoc
+    kitₛᵣ = KitAssoc.kitₛᵣ kit-assoc
+    kitᵣₛ = KitAssoc.kitᵣₛ kit-assoc
+    kitₛₛ = KitAssoc.kitₛₛ kit-assoc
+    wk-kitᵣ = KitAssoc.wk-kitᵣ kit-assoc
+    wk-kitₛ = KitAssoc.wk-kitₛ kit-assoc
+
   open Kit {{...}} public
   open import Kitty.Kit 𝕋 public
 
-  instance
-    _ = kitᵣ
-    _ = kitₛ
-    _ = kitᵣᵣ
-    _ = kitₛᵣ
-    _ = kitᵣₛ
-    _ = kitₛₛ
-    _ = kitₛₛ
-    _ = wk-kitᵣ
-    _ = wk-kitₛ
 

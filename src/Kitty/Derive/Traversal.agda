@@ -284,6 +284,10 @@ module Example where
   𝕄 : Modes
   𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
 
+  infix  30 `_
+  infixl 20 _·_
+  infixr 10 λx_
+
   data _⊢_ : List Modeᵥ → Modeₜ → Set where
     `_    : ∀ {µ m}  →  µ ∋ m  →  µ ⊢ m→M m
     λx_   : ∀ {µ}  →  (µ ▷ 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
@@ -317,13 +321,17 @@ module Example where
 
     open Kitty.Experimental.KitAltSimple.Derive _ traversal
 
-    -- open KitTraversalAlt traversal
-    -- open import Kitty.Compose _ kit-traversal
+    `id : [] ⊢ 𝕖
+    `id = λx ` here refl
 
-    -- open KitAssoc kit-assoc
+    `f : [ 𝕖 ] ⊢ 𝕖
+    `f = λx (` here refl) · (` there (here refl))
 
-    -- open import Kitty.Kit.Kit  ⦃ ... ⦄
-    -- open ComposeKit ⦃ ... ⦄
+    `f' : [] ⊢ 𝕖
+    `f' = `f ⋯ ⦅ `id ⦆ₛ
+
+    test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    test-`f' = refl
 
 
 
