@@ -166,7 +166,7 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
   let var-pat = argᵥ (con `-nm [ argᵥ (var "x") ])
   let var-clause = clause (mk-tel var-tel)
                           (mk-pats var-pat)
-                          (def (quote Kit.`/id)
+                          (def (quote Kitty.Kit.Kit.`/id)
                             [ argᵥ (var "𝕂" [])
                             ; argᵥ unknown
                             ; argᵥ (var "f" [ argᵥ unknown
@@ -174,7 +174,8 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
                                             ])
                             ])
 
-  ⋯-ty ← quoteTC' (∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
+  ⋯-ty ← quoteTC' (∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
+  liftTC $ printAST ⋯-ty
 
   defdecFun'
     (argᵥ ⋯-nm)
