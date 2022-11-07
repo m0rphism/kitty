@@ -66,53 +66,60 @@ record KitTraversalAlt : Set₁ where
 -- Deriving KitTraversal, KitAssoc, and KitAssocLemmas -------------------------
 
 module Derive (KT : KitTraversalAlt) where
-  open KitTraversalAlt KT
+  open KitTraversalAlt KT public
 
-  kit-traversal : KitTraversal
-  kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
+  private
+    kit-traversal : KitTraversal
+    kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
+
+  open KitTraversal kit-traversal hiding (_⋯_; ⋯-var) public
 
   open import Kitty.Compose 𝕋 kit-traversal
 
-  open ComposeKit {{...}}
+  open ComposeKit {{...}} public
 
-  ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
-              (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
-    v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
-  ⋯-assoc {{𝕂₁}} {{𝕂₂}} {{𝕂}} v f g =
-    v ⋯ f ⋯ g                            ≡⟨ refl ⟩
-    v ⋯* (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
-      ≡⟨ ⋯-↑ (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
-             ((g ∘ₖ f) ∷[ 𝕂 ] [])
-             (λ m₁ x →
-               ` x ⋯ f ⋯ g               ≡⟨ cong (_⋯ g) (⋯-var x f) ⟩
-               (`/id _ (f _ x)) ⋯ g      ≡⟨ tm-⋯-∘ f g x ⟩
-               `/id _ ((g ∘ₖ f) _ x)     ≡⟨ cong (λ h → `/id _ (h _ x)) (sym (dist-↑*-∘ [] g f)) ⟩
-               `/id _ ((g ∘ₖ f) _ x)     ≡⟨ sym (⋯-var x (g ∘ₖ f)) ⟩
-               ` x ⋯ (g ∘ₖ f)            ∎)
-             v
-      ⟩
-    v ⋯* (_∷_ {b = 𝕂} (g ∘ₖ f) [])       ≡⟨ refl ⟩
-    v ⋯ (g ∘ₖ f)       ∎
+  private
+    ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
+                (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
+      v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
+    ⋯-assoc {{𝕂₁}} {{𝕂₂}} {{𝕂}} v f g =
+      v ⋯ f ⋯ g                            ≡⟨ refl ⟩
+      v ⋯* (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
+        ≡⟨ ⋯-↑ (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
+              ((g ∘ₖ f) ∷[ 𝕂 ] [])
+              (λ m₁ x →
+                ` x ⋯ f ⋯ g               ≡⟨ cong (_⋯ g) (⋯-var x f) ⟩
+                (`/id _ (f _ x)) ⋯ g      ≡⟨ tm-⋯-∘ f g x ⟩
+                `/id _ ((g ∘ₖ f) _ x)     ≡⟨ cong (λ h → `/id _ (h _ x)) (sym (dist-↑*-∘ [] g f)) ⟩
+                `/id _ ((g ∘ₖ f) _ x)     ≡⟨ sym (⋯-var x (g ∘ₖ f)) ⟩
+                ` x ⋯ (g ∘ₖ f)            ∎)
+              v
+        ⟩
+      v ⋯* (_∷_ {b = 𝕂} (g ∘ₖ f) [])       ≡⟨ refl ⟩
+      v ⋯ (g ∘ₖ f)       ∎
 
-  kit-assoc : KitAssoc
-  kit-assoc = record { ⋯-assoc = ⋯-assoc }
+    kit-assoc : KitAssoc
+    kit-assoc = record { ⋯-assoc = ⋯-assoc }
 
-  open KitAssoc kit-assoc
+  open KitAssoc kit-assoc public
 
-  ⋯-id' : ∀ {{𝕂 : Kit}} {µ M} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
-  ⋯-id' {{𝕂}} {µ} {M} v =
-    ⋯-↑ (idₖ ∷[ 𝕂 ] [])
-        []
-        (λ m x →
-          ` x ⋯ idₖ {{𝕂}}           ≡⟨ ⋯-var x idₖ ⟩
-          `/id _ ((idₖ {{𝕂}}) _ x)  ≡⟨ cong (λ h → `/id _ (h _ x)) (id↑*≡id [] _) ⟩
-          `/id _ (idₖ {{𝕂}} _ x)    ≡⟨⟩
-          `/id _ (id/` _ x)         ≡⟨ id/`/id x ⟩
-          ` x                       ∎)
-        v
+  private
+    ⋯-id' : ∀ {{𝕂 : Kit}} {µ M} (v : µ ⊢ M) → v ⋯ idₖ {{𝕂}} ≡ v
+    ⋯-id' {{𝕂}} {µ} {M} v =
+      ⋯-↑ (idₖ ∷[ 𝕂 ] [])
+          []
+          (λ m x →
+            ` x ⋯ idₖ {{𝕂}}           ≡⟨ ⋯-var x idₖ ⟩
+            `/id _ ((idₖ {{𝕂}}) _ x)  ≡⟨ cong (λ h → `/id _ (h _ x)) (id↑*≡id [] _) ⟩
+            `/id _ (idₖ {{𝕂}} _ x)    ≡⟨⟩
+            `/id _ (id/` _ x)         ≡⟨ id/`/id x ⟩
+            ` x                       ∎)
+          v
 
-  kitassoc-lemmas : KitAssocLemmas
-  kitassoc-lemmas = record { ⋯-id = ⋯-id' }
+    kitassoc-lemmas : KitAssocLemmas
+    kitassoc-lemmas = record { ⋯-id = ⋯-id' }
+
+  open KitAssocLemmas kitassoc-lemmas public
 
   _~_ :
     ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
@@ -138,4 +145,18 @@ module Derive (KT : KitTraversalAlt) where
             (` x) ⋯ g
           ∎)
         v
+
+  open Kit {{...}} public
+  open import Kitty.Kit 𝕋 public
+
+  instance
+    _ = kitᵣ
+    _ = kitₛ
+    _ = kitᵣᵣ
+    _ = kitₛᵣ
+    _ = kitᵣₛ
+    _ = kitₛₛ
+    _ = kitₛₛ
+    _ = wk-kitᵣ
+    _ = wk-kitₛ
 
