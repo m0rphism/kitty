@@ -128,42 +128,37 @@ deriveTraversal {𝕄} 𝕋 ⋯-nm = runFreshT do
       (just (var µ [] , M)) → pure µ
       (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
       nothing → liftTC $ failStr "impossible"
-    let c-tel = List.boolFilter
-          (λ { (x , _) → case x String.≟ c-µ of λ { (yes _) → false; (no _) → true } })
-          c-tel
-    let c-tel = List.map (λ { (x , b) → (x , b [ c-µ ↦ var "µ₁" [] ]) }) c-tel
-    liftTC $ printAST c-tel
-    let c-pats = List.map (λ { (x , arg i _) →  arg i (var x) }) c-tel
+    let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
+                                           (no _)  → (x , b [ c-µ ↦ var "µ₁" [] ])
+                                           (yes _) → ("µ₁" , b)
+                             }) c-tel
+    let c-tel'x = List.boolFilter
+          (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
+          c-tel'
+    let c-tel'' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
+                                            (no _)  → (x , b [ c-µ ↦ var "µ₂" [] ])
+                                            (yes _) → ("µ₂" , b)
+                              }) c-tel
+    liftTC $ printAST c-tel'
+    let c-pats = List.map (λ { (x , arg i _) → case x String.≟ c-µ of λ where
+                                                 (no _)  → arg i (var x)
+                                                 (yes _) → arg i (dot (var "µ₁" []))
+                             }) c-tel'
     let c-pat = argᵥ (con c c-pats)
-    let body = con c $ foldr' c-tel [] λ where
+    let body = con c $ foldr' c-tel'' [] λ where
           (s , arg i t) c-args → _∷ c-args $ case unterm ⊢-nm t of λ where
-            (just (µ , M)) → arg i (def ⋯-nm [ argᵥ (var s [])
-                                             ; argᵥ (def (quote Kitty.Kit.Kit._↑*_)
-                                                 [ argᵥ (var "𝕂" [])
-                                                 ; argᵥ (var "f" [])
-                                                 ; argᵥ unknown
-                                                 ])
-                                             ]) 
-            nothing        → arg i (var s [])
-    pure $ clause (mk-tel c-tel) (mk-pats c-pat) body
- 
-  let mk-tel c-tel =
-        [ "𝕂" , argᵢ Kit`
-        ; "µ₁" , argₕ VarModes`
-        ; "µ₂" , argₕ VarModes`
-        ; "f" , argᵥ (def (quote Kitty.Kit._–[_]→_)
-            [ argᵥ (def 𝕋-nm [])
-            ; argᵥ (var "µ₁" [])
-            ; argᵥ (var "𝕂" [])
-            ; argᵥ (var "µ₂" [])
-            ])
-        ] ++ c-tel
-  let mk-pats c-pat = 
-        [ argᵢ (var "𝕂")
-        ; argₕ (var "µ₁")
-        ; argₕ (var "µ₂")
-        ] ++ c-pat ∷
-        [ argᵥ (var "f" ) ]
+            (just _) → arg i (def ⋯-nm [ argᵥ (var s [])
+                                       ; argᵥ (def (quote Kitty.Kit.Kit._↑*_)
+                                           [ argᵥ (var "𝕂" [])
+                                           ; argᵥ (var "f" [])
+                                           ; argᵥ unknown
+                                           ])
+                                       ]) 
+            nothing  → case s String.≟ c-µ of λ where
+                          (no _)  → arg i (var s [])
+                          (yes _) → arg i (var "µ₂" [])
+    pure $ clause (mk-tel c-tel'x) (mk-pats c-pat) body
+
   let var-tel = [ "x" , argᵥ (def (quote _∋_) [ argᵥ (var "µ₁" [])
                                               ; argᵥ unknown
                                               ])
@@ -208,7 +203,7 @@ module Example where
     `_    : ∀ {µ m}  →  µ ∋ m  →  µ ⊢ m→M m
     λx_   : ∀ {µ}  →  (µ ▷ 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
     _·_   : ∀ {µ}  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
-    -- foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
+    foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
 
   unquoteDecl terms = deriveTerms 𝕄 _⊢_ terms
 
@@ -223,6 +218,8 @@ module Example where
   --   (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
   --   (foo t)   ⋯ f = foo (t ⋯ (f ↑* _))
 
+  open Terms terms
   unquoteDecl _⋯_ = deriveTraversal terms _⋯_
+
 
   -- xx = {!_⋯_!}
