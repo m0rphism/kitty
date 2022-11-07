@@ -200,10 +200,9 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
 
   let todo = def (quote TODO) []
-  todo-ty ← quoteTC' (∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
-                      → (` x) ⋯ f ≡ Kit.`/id 𝕂 _ (f _ x))
   let body = todo
-  let ⋯-var-ty = todo-ty
+  ⋯-var-ty ← quoteTC' (∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
+                       → (` x) ⋯ f ≡ Kit.`/id 𝕂 _ (f _ x))
   defdecFun'
     (argᵥ ⋯-var-nm)
     ⋯-var-ty
@@ -229,13 +228,12 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
         (λ t fs → fold-star' (λ 𝕂 _ _ t f → _⋯_ {{𝕂}} t f) t fs)
 
   let todo = def (quote TODO) []
-  todo-ty ← quoteTC' (
+  let body = todo
+  ⋯-↑-ty ← quoteTC' (
       ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂ M} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
       → (∀ m (x : µ₁ ∋ m) → ((` x) ⋯* f) ≡ ((` x) ⋯* g))
       → (t : µ₁ ⊢ M) → t ⋯* f ≡ t ⋯* g
     )
-  let body = todo
-  let ⋯-↑-ty = todo-ty
   defdecFun'
     (argᵥ ⋯-↑-nm)
     ⋯-↑-ty
@@ -302,7 +300,6 @@ module Example where
     open Kit ⦃ ... ⦄
 
     _⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-    -- _⋯_ ⦃ 𝕂 ⦄ {µ₁} {µ₂} (`_ {.(µ₁)} {m} x) f = `/id m (f m x)
     (` x)     ⋯ f = `/id _ (f _ x)
     (λx t)    ⋯ f = λx (t ⋯ (f ↑* _))
     (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
