@@ -199,14 +199,19 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
 
   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
 
-  let todo = def (quote TODO) []
-  let body = todo
+  let body = lam visible (abs "x" (
+             lam visible (abs "f" (
+             con (quote refl) []))))
   ⋯-var-ty ← quoteTC' (∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
                        → (` x) ⋯ f ≡ Kit.`/id 𝕂 _ (f _ x))
   defdecFun'
     (argᵥ ⋯-var-nm)
     ⋯-var-ty
     [ clause [] [] body ]
+
+-- ⋯-var : ∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+--         (` x) ⋯ f ≡ `/id _ (f _ x)
+-- ⋯-var x f = refl
 
 derive-⋯-↑ : {𝕄 : Modes} → Terms 𝕄 → Name → Name → TC ⊤
 derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
