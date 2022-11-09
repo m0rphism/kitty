@@ -1,0 +1,55 @@
+\begin{code}[hide]
+module Presentation.Section3-Kits where
+
+open import Paper.Section2-Intrinsic
+open import Data.List using (List; []; _∷_)
+
+infix  4  _–[_]→_
+\end{code}
+
+\newpage
+\section{Kits}
+
+McBride proposed the kit technique for intrinsically typed formalizations.
+
+\begin{code}
+record Kit : Set₁ where
+  infix 4 _◆_
+  field
+    _◆_  : List Type → Type → Set
+    vr   : ∀ t → (Γ ∋ t) → (Γ ◆ t)
+    tm   : ∀ t → (Γ ◆ t) → (Γ ⊢ t)
+    wk   : ∀ {t'} t → (Γ ◆ t) → (t' ∷ Γ ◆ t)
+
+_–[_]→_ : List Type → Kit → List Type → Set
+Γ₁ –[ K ]→ Γ₂ = ∀ t → (Γ₁ ∋ t) → (Γ₂ ◆ t) where open Kit K
+
+lift : (K : Kit) → (Γ₁ –[ K ]→ Γ₂) → (t ∷ Γ₁ –[ K ]→ t ∷ Γ₂)
+lift K f _ zero     = vr _ zero     where open Kit K
+lift K f _ (suc x)  = wk _ (f _ x)  where open Kit K
+
+kitᵣ : Kit
+kitᵣ = record {  _◆_  =  _∋_
+              ;  vr   = λ t x → x
+              ;  tm   = λ t x → ` x
+              ;  wk   = λ t x → suc x
+              }
+
+traverse : ∀ (K : Kit) → (Γ₁ –[ K ]→ Γ₂) → (Γ₁ ⊢ t) → (Γ₂ ⊢ t)
+traverse K f (` x)      = Kit.tm K _ (f _ x)
+traverse K f (λx e)     = λx (traverse K (lift K f) e)
+traverse K f (e₁ · e₂)  = traverse K f e₁ · traverse K f e₂
+
+kitₛ : Kit
+kitₛ = record {  _◆_  = _⊢_
+              ;  vr   = λ t x → ` x
+              ;  tm   = λ t x → x
+              ;  wk   = λ t x → traverse kitᵣ (Kit.wk kitᵣ) x
+              }
+
+rename : (Γ₁ –[ kitᵣ ]→ Γ₂) → (Γ₁ ⊢ t) → (Γ₂ ⊢ t)
+rename ρ e = traverse kitᵣ ρ e
+
+subst : (Γ₁ –[ kitₛ ]→ Γ₂) → (Γ₁ ⊢ t) → (Γ₂ ⊢ t)
+subst σ e = traverse kitₛ σ e
+\end{code}

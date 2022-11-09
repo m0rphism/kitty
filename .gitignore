@@ -1,7 +1,10 @@
 *.agdai
 paper/_build
 paper/**/auto/
+presentation/_build
+presentation/**/auto/
 *.pdf
 *.swp
 *.swo
 .#*
+*.log
