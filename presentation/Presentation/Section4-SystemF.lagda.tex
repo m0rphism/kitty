@@ -4,10 +4,11 @@ module Presentation.Section4-SystemF where
 open import Data.List using (List; []; _∷_)
 \end{code}
 
-\newpage
 \section{System F}
 
+\begin{frame}
 The usual formalization of extrinsic STLC:
+
 \begin{code}[hide]
 module STLCFin where
   open import Data.Nat
@@ -20,7 +21,9 @@ module STLCFin where
     λx_  : Expr (suc n) → Expr n
     _·_  : Expr n → Expr n → Expr n
 \end{code}
+\end{frame}
 
+\begin{frame}
 An isomorphic formalization of extrinsic STLC:
 \begin{code}[hide]
 module STLCUnit where
@@ -45,7 +48,9 @@ module STLCUnit where
     λx_  : (★ ∷ Γ ⊢ ★) → (Γ ⊢ ★)
     _·_  : (Γ ⊢ ★) → (Γ ⊢ ★) → (Γ ⊢ ★)
 \end{code}
+\end{frame}
 
+\begin{frame}
 System F:
 
 \begin{code}
@@ -62,6 +67,8 @@ data Modeₜ : Set where
 
 variable µ : List Modeᵥ
 \end{code}
+\end{frame}
+
 \begin{code}[hide]
 variable m m' : Modeᵥ
 infix  4  _∋_  _⊢_
@@ -69,6 +76,8 @@ data _∋_ : List Modeᵥ → Modeᵥ → Set where
   zero  : (m ∷ µ ∋ m)
   suc   : (µ ∋ m) → (m' ∷ µ ∋ m)
 \end{code}
+
+\begin{frame}
 \begin{code}
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
   `ˣ_   : (µ ∋ 𝕖) → (µ ⊢ 𝕖)
@@ -81,3 +90,4 @@ data _⊢_ : List Modeᵥ → Modeₜ → Set where
   _⇒_   : (µ ⊢ 𝕥) → (µ ⊢ 𝕥) → (µ ⊢ 𝕥)
   ★     : (µ ⊢ 𝕜)
 \end{code}
+\end{frame}

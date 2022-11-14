@@ -13,18 +13,18 @@ TGTS_INPUT=$(patsubst $(LAGDA_DIR)/%.lagda.tex,$(LAGDA_DIR)/%,$(SRCS))
 all: presentation
 
 presentation: $(TGTS)
-	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex									;\
-	cp -f $(EXTRA_FILES) $(CACHE_DIR)/				                        ;\
-	cd $(CACHE_DIR)												            ;\
+	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex                                    ;\
+	cp -r images $(CACHE_DIR)/images                                        ;\
+	cp -f $(EXTRA_FILES) $(CACHE_DIR)/                                      ;\
+	cd $(CACHE_DIR)                                                         ;\
 	for t in $(TGTS_INPUT); do                                               \
-	  sed -i "s|.*SED MARKER.*|  \\\\input{$$t}\\nSED MARKER|g" main.tex	;\
-	done																	;\
-	sed -i "/.*SED MARKER.*/d" main.tex										;\
-	pdflatex main.tex											            ;\
-	bibtex main														        ;\
-	pdflatex main.tex											            ;\
+	  sed -i "s|.*SED MARKER.*|  \\\\input{$$t}\\nSED MARKER|g" main.tex    ;\
+	done                                                                    ;\
+	sed -i "/.*SED MARKER.*/d" main.tex                                     ;\
+	pdflatex main.tex                                                       ;\
+	bibtex main                                                             ;\
+	pdflatex main.tex                                                       ;\
 	pdflatex main.tex
-
 	cp $(CACHE_DIR)/main.pdf $(MAIN_PDF)
 
 $(CACHE_DIR)/$(LAGDA_DIR)/%.tex: $(LAGDA_DIR)/%.lagda.tex

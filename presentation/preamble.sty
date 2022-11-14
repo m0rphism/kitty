@@ -1,0 +1,141 @@
+\ProvidesPackage{preamble}
+
+%% Packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{relsize}
+\usepackage{amsmath, amssymb, amsfonts, amsthm}
+\usepackage{stmaryrd} % For double braces etc
+\usepackage{hyperref} % Link references, should be last because it redefines commands
+% \hypersetup{colorlinks=true} % Color text instead of using colored boxes
+\usepackage{booktabs} % toprule, midrule, bottomrule for tabulars
+\usepackage{mathpartir}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{upgreek} % Non-italic greek letters. \upalpha and \Upalpha for lower and upper case.
+
+%% Colors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{lightgray}{rgb}{0.9,0.9,0.95}
+\definecolor{gray}{rgb}{0.3,0.3,0.3}
+\definecolor{string}{rgb}{0.3,0.5,0.95}
+\definecolor{keyword}{rgb}{0.6,0.3,0.65}
+\definecolor{bluee}{rgb}{0.15,0.4,0.85}
+\newcommand\Ca{bluee}
+\newcommand\Cb{keyword}
+\newcommand\Cc{greeen}
+\newcommand<>\colorA{\color#1{\Ca}}
+\newcommand<>\colorB{\color#1{\Cb}}
+\newcommand<>\colorC{\color#1{\Cc}}
+
+%% Beamer Style %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% uncover everything in a step-wise fashion:
+% \beamerdefaultoverlayspecification{<+->}
+
+\pgfdeclareimage[height=1.5cm]{university-logo}{images/logo}
+% \logo{\pgfuseimage{university-logo}}
+\titlegraphic{\pgfuseimage{university-logo}}
+
+\def\labelitemi{--}
+
+\definecolor{mythemecolor}{rgb}{0.15,0.4,0.85}
+\mode<presentation> {
+  \setbeamerfont{title}{family=\sffamily}
+  \usecolortheme[rgb={0.15, 0.4, 0.85}]{structure}
+  \useoutertheme{infolines}
+}
+
+% Fix overlapping text in footline on every frame.
+\makeatletter
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.233333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor\expandafter\beamer@ifempty\expandafter{\beamer@shortinstitute}{}{~~(\insertshortinstitute)}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.433333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+\makeatother
+
+% % Spacing above and below equations.
+% \setlength{\abovedisplayskip}{7pt}
+% \setlength{\belowdisplayskip}{7pt}
+
+\setbeamertemplate{navigation symbols}{}  % No stupid navigation bar.
+
+% \newcommand\bulletnormal{\scriptsize$\blacktriangleright$}
+% \newcommand\bullethl{\normalsize$\blacktriangleright$}
+
+% \newenvironment{hlbulletenv}{\only{\setbeamercolor{item}{fg=red}}}{}
+% \newenvironment{nohlbulletenv}{\only{\setbeamercolor{item}{fg=mythemecolor}}}{}
+% % \newenvironment{hlbulletenv}{\only{\setbeamertemplate{itemize items}{\bullethl}}}{}
+% % \newenvironment{nohlbulletenv}{\only{\setbeamertemplate{itemize items}{\bulletnormal}}}{}
+
+%% Listings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \usepackage{DejaVuSansMono}
+\usepackage{roboto-mono}[light,scaled=0.85]
+
+\lstdefinelanguage{SessionLang}{
+  morekeywords={send, receive, let, in, on},
+  sensitive=false
+}
+\lstset{
+  language=SessionLang,
+  showstringspaces=false,
+  % basicstyle=\sffamily,
+  basicstyle=\ttfamily\footnotesize,
+  % keywordstyle=\color{keyword},
+  % keywordstyle=\bf,
+  % xleftmargin=.35in,
+  % xrightmargin=.35in,
+  literate=
+    {->}{$\to$\lst@whitespacefalse}1
+    {→}{$\to$\lst@whitespacefalse}1
+    {α}{$\alpha$}1
+    {A}{$\alpha$}1
+  %   {=>}{$\Rightarrow$\lst@whitespacefalse}1
+    {/r}{\color{red}}1
+    {/b}{\color{black}}1
+  ,
+  escapeinside={(*@}{@*)},
+  % escapechar=@,
+  breaklines=true,
+  comment=[l]{//},
+  commentstyle=\color{gray},
+  numbers=none, %=left
+  % columns=flexible,
+  %
+  % Highlighting inside of lstlistings:
+  moredelim={**[is][{\colorA}]{@A}{@}},
+  moredelim={**[is][{\colorB}]{@B}{@}},
+  moredelim={**[is][{\colorC}]{@C}{@}},
+  moredelim={**[is][{\colorA<1>}]{@A1}{@}},
+  moredelim={**[is][{\colorB<1>}]{@B1}{@}},
+  moredelim={**[is][{\colorC<1>}]{@C1}{@}},
+  moredelim={**[is][{\colorA<2>}]{@A2}{@}},
+  moredelim={**[is][{\colorB<2>}]{@B2}{@}},
+  moredelim={**[is][{\colorC<2>}]{@C2}{@}},
+  moredelim={**[is][{\colorA<3>}]{@A3}{@}},
+  moredelim={**[is][{\colorB<3>}]{@B3}{@}},
+  moredelim={**[is][{\colorC<3>}]{@C3}{@}},
+  moredelim={**[is][{\colorA<4>}]{@A4}{@}},
+  moredelim={**[is][{\colorB<4>}]{@B4}{@}},
+  moredelim={**[is][{\colorC<4>}]{@C4}{@}},
+  moredelim={**[is][{\colorA<5>}]{@A5}{@}},
+  moredelim={**[is][{\colorB<5>}]{@B5}{@}},
+  moredelim={**[is][{\colorC<5>}]{@C5}{@}},
+  mathescape=true
+}
