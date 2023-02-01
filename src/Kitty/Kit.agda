@@ -73,7 +73,7 @@ module ~-Reasoning where
 
   _~⟨⟩_ :
     ∀ (f {g} : (a : A) → (b : B a) → C a b)
-    → f ≡ g → f ≡ g
+    → f ~ g → f ~ g
   _ ~⟨⟩ x~y = x~y
 
   step-~ :
@@ -132,22 +132,36 @@ record Kit : Set₁ where
   (ϕ ↑ m) _ (here p)  = id/` _ (here p)
   (ϕ ↑ m) _ (there x) = wk _ (ϕ _ x)
 
+  ~-cong-↑ : {ϕ ϕ' : µ₁ –→ µ₂} →
+    ϕ ~ ϕ' →
+    ϕ ↑ m ~ ϕ' ↑ m
+  ~-cong-↑ ϕ~ϕ' _ (here px) = refl
+  ~-cong-↑ ϕ~ϕ' _ (there x) = cong (wk _) (ϕ~ϕ' _ x)
+
   _↑*_ : µ₁ –→ µ₂ → ∀ µ' → (µ₁ ▷▷ µ') –→ (µ₂ ▷▷ µ')
   ϕ ↑* []       = ϕ
   ϕ ↑* (µ' ▷ m) = (ϕ ↑* µ') ↑ m
+
+  ~-cong-↑* : {ϕ ϕ' : µ₁ –→ µ₂} →
+    ϕ ~ ϕ' →
+    ϕ ↑* µ ~ ϕ' ↑* µ
+  ~-cong-↑* {µ = []}    ϕ~ϕ' = ϕ~ϕ'
+  ~-cong-↑* {µ = µ ▷ m} {ϕ = ϕ} {ϕ' = ϕ'} ϕ~ϕ' = ~-cong-↑ (~-cong-↑* ϕ~ϕ')
 
   id↑~id : ∀ m µ → idₖ {µ = µ} ↑ m ~ idₖ {µ = µ ▷ m}
   id↑~id m µ _ (here _)  = refl
   id↑~id m µ _ (there x) = wk-id/` m x
 
   id↑*~id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ~ idₖ {µ = µ ▷▷ µ'}
-  id↑*~id []       µ _ x = refl
-  id↑*~id (µ' ▷ m) µ _ (here px) = refl
-  id↑*~id (µ' ▷ m) µ _ (there x) =
-    ((idₖ ↑* µ') ↑ m) _ (there x) ≡⟨ refl ⟩
-    wk _ ((idₖ ↑* µ') _ x)        ≡⟨ cong (wk _) (id↑*~id µ' µ _ x) ⟩
-    wk _ (id/` _ x)               ≡⟨ wk-id/` _ x ⟩
-    idₖ _ (there x)               ∎
+  id↑*~id []       µ = ~-refl
+  id↑*~id (µ' ▷ m) µ =
+    begin~
+      idₖ ↑* µ' ↑ m
+    ~⟨ ~-cong-↑ (id↑*~id µ' µ) ⟩
+      idₖ ↑ m
+    ~⟨ id↑~id _ _ ⟩
+      idₖ
+    ~∎
 
   -- Extending a renaming/substitution
   _,ₖ_ : µ₁ –→ µ₂ → µ₂ ∋/⊢ id/m→M m → (µ₁ ▷ m) –→ µ₂
