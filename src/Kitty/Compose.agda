@@ -10,9 +10,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans
 open ≡-Reasoning
 open import Data.List using (List; []; _∷_)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Axiom.Extensionality.Propositional using (Extensionality)
 open import Function using (id)
+
 open import Kitty.Prelude
+open import Kitty.Homotopy
+open ~-Reasoning
 
 open Modes 𝕄
 open Terms 𝕋
@@ -21,7 +23,6 @@ open Kitty.Kit.KitTraversal T
 open Kitty.Kit.KitHomotopy H
 
 open Kit {{...}}
-open ~-Reasoning
 
 private
   variable

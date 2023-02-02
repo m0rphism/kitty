@@ -7,7 +7,6 @@ open import Level using (Level; _⊔_; 0ℓ)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Axiom.Extensionality.Propositional using (Extensionality)
 open import Kitty.Prelude
 
 open Modes 𝕄
@@ -19,81 +18,7 @@ private
     M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
     µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
--- postulate fun-ext : ∀ {ℓ₁ ℓ₂} → Extensionality ℓ₁ ℓ₂
-
--- fun-ext₂ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A₁ : Set ℓ₁} {A₂ : A₁ → Set ℓ₂} {B : (x : A₁) → A₂ x → Set ℓ₃}
---              {f g : (x : A₁) → (y : A₂ x) → B x y} →
---     (∀ (x : A₁) (y : A₂ x) → f x y ≡ g x y) →
---     f ≡ g
--- fun-ext₂ h = fun-ext λ x → fun-ext λ y → h x y
-
-infix 4 _~_
-_~_ :
-  ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-  → (f g : (a : A) → (b : B a) → C a b)
-  → Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
-f ~ g = ∀ a b → f a b ≡ g a b
-
-~-refl :
-  ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-  → {f : (a : A) → (b : B a) → C a b}
-  → f ~ f
-~-refl a b = refl
-
-~-sym :
-  ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-  → {f g : (a : A) → (b : B a) → C a b}
-  → f ~ g
-  → g ~ f
-~-sym f~g a b = sym (f~g a b)
-
-~-trans :
-  ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-  → {f g h : (a : A) → (b : B a) → C a b}
-  → f ~ g
-  → g ~ h
-  → f ~ h
-~-trans f~g g~h a b = trans (f~g a b) (g~h a b)
-
-module ~-Reasoning where
-
-  infix  3 _~∎
-  infixr 2 _~⟨⟩_ step-~ step-~˘
-  infix  1 begin~_
-
-  private variable
-    ℓ₁ ℓ₂ ℓ₃ : Level
-    A : Set ℓ₁
-    B : A → Set ℓ₂
-    C : (a : A) → B a → Set ℓ₃
-    f g h : (a : A) → (b : B a) → C a b
-
-  begin~_ : f ~ g → f ~ g
-  begin~_ x≡y = x≡y
-
-  _~⟨⟩_ :
-    ∀ (f {g} : (a : A) → (b : B a) → C a b)
-    → f ~ g → f ~ g
-  _ ~⟨⟩ x~y = x~y
-
-  step-~ :
-    ∀ (f {g h} : (a : A) → (b : B a) → C a b)
-    → g ~ h → f ~ g → f ~ h
-  step-~ _ g~h f~g = ~-trans f~g g~h
-
-  step-~˘ :
-    ∀ (f {g h} : (a : A) → (b : B a) → C a b)
-    → g ~ h → g ~ f → f ~ h
-  step-~˘ _ g~h g~f = ~-trans (~-sym g~f) g~h
-
-  _~∎ :
-    ∀ (f : (a : A) → (b : B a) → C a b)
-    → f ~ f
-  _~∎ _ = ~-refl
-
-  syntax step-~  f g~h f~g = f ~⟨  f~g ⟩ g~h
-  syntax step-~˘ f g~h g~f = f ~˘⟨ g~f ⟩ g~h
-
+open import Kitty.Homotopy
 open ~-Reasoning
 
 record Kit : Set₁ where
@@ -324,6 +249,8 @@ record KitHomotopy (T : KitTraversal) : Set₁ where
       ∀ ⦃ 𝕂 : Kit ⦄ {f g : µ₁ –[ 𝕂 ]→ µ₂} {t : µ₁ ⊢ M}
       → f ~ g
       → t ⋯ f ≡ t ⋯ g
+
+open import Axiom.Extensionality.Propositional using (Extensionality)
 
 Extensionality→KitHomotopy : ∀ {T} → Extensionality 0ℓ 0ℓ → KitHomotopy T
 Extensionality→KitHomotopy {T} fun-ext =
