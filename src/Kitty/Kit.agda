@@ -25,7 +25,7 @@ record Kit : Set₁ where
   infix   4  _∋/⊢_
   infixl  5  _,ₖ_
   infixl  6  _↑_  _↑*_
-  infixl  5  _∥_
+  infixl  8  _∥_
 
   field
     VarMode/TermMode : Set
@@ -143,6 +143,7 @@ _–[_]→_ : List VarMode → Kit → List VarMode → Set
 
 record KitTraversal : Set₁ where
   infixl  5  _⋯_  _⋯ᵣ_  _⋯ₛ_
+  infixl  8  _∥ᵣ_  _∥ₛ_
   infixr  9  _∘ᵣ_  _∘ₛ_  _ᵣ∘ᵣ_  _ₛ∘ᵣ_  _ᵣ∘ₛ_  _ₛ∘ₛ_
   infixl  9  _ᵣ·_  _ₛ·_  _ᵣ·ᵣ_  _ᵣ·ₛ_  _ₛ·ᵣ_  _ₛ·ₛ_
 
@@ -188,10 +189,14 @@ record KitTraversal : Set₁ where
   module R = Kit kitᵣ
   module S = Kit kitₛ
 
+  -- Specialized application
+
   _⋯ₛ_ : µ₁ ⊢ M → µ₁ →ₛ µ₂ → µ₂ ⊢ M
   _⋯ᵣ_ : µ₁ ⊢ M → µ₁ →ᵣ µ₂ → µ₂ ⊢ M
   _⋯ₛ_ = _⋯_
   _⋯ᵣ_ = _⋯_
+
+  -- Composition
 
   _∘ᵣ_ : {{K : Kit}} → µ₂ –[ K ]→ µ₃ → µ₁ →ᵣ µ₂ → µ₁ –[ K ]→ µ₃
   _∘ₛ_ : {{K : Kit}} → µ₂ –[ K ]→ µ₃ → µ₁ →ₛ µ₂ → µ₁ →ₛ µ₃
@@ -207,10 +212,12 @@ record KitTraversal : Set₁ where
   _ᵣ∘ₛ_ = _∘ₛ_
   _ₛ∘ₛ_ = _∘ₛ_
 
+  -- Reverse composition
+
   _ᵣ·_ : {{K : Kit}} → µ₁ →ᵣ µ₂ → µ₂ –[ K ]→ µ₃ → µ₁ –[ K ]→ µ₃
   _ₛ·_ : {{K : Kit}} → µ₁ →ₛ µ₂ → µ₂ –[ K ]→ µ₃ → µ₁ →ₛ µ₃
-  ρ ᵣ· ϕ = ϕ ∘ᵣ ρ
-  σ ₛ· ϕ = ϕ ∘ₛ σ
+  ϕ₁ ᵣ·  ϕ₂ = ϕ₂ ∘ᵣ ϕ₁
+  ϕ₁ ₛ·  ϕ₂ = ϕ₂ ∘ₛ ϕ₁
 
   _ᵣ·ᵣ_ : µ₁ →ᵣ µ₂ → µ₂ →ᵣ µ₃ → µ₁ →ᵣ µ₃
   _ᵣ·ₛ_ : µ₁ →ᵣ µ₂ → µ₂ →ₛ µ₃ → µ₁ →ₛ µ₃
@@ -221,10 +228,14 @@ record KitTraversal : Set₁ where
   ϕ₁ ₛ·ᵣ ϕ₂ = ϕ₂ ∘ₛ ϕ₁
   ϕ₁ ₛ·ₛ ϕ₂ = ϕ₂ ∘ₛ ϕ₁
 
+  -- Parallel composition
+
   _∥ᵣ_ : ∀ {µ₁ µ₂ µ} → (µ₁ →ᵣ µ) → (µ₂ →ᵣ µ) → ((µ₁ ▷▷ µ₂) →ᵣ µ)
   _∥ₛ_ : ∀ {µ₁ µ₂ µ} → (µ₁ →ₛ µ) → (µ₂ →ₛ µ) → ((µ₁ ▷▷ µ₂) →ₛ µ)
   _∥ᵣ_ = _∥_
   _∥ₛ_ = _∥_
+
+  -- Embedding renamings as substitutions
 
   toₛ : {{K : Kit}} → µ₁ –[ K ]→ µ₂ → µ₁ →ₛ µ₂
   toₛ ϕ = λ m x → `/id m (ϕ m x)
