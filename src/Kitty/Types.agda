@@ -54,11 +54,14 @@ record KitType : Set₁ where
     variable
       Γ Γ₁ Γ₂    : Ctx µ
 
-  infixl  5  _▶_
+  infixl  5  _▶_  _▶[_]_
 
   _▶_ : Ctx µ → µ ∶⊢ m→M m → Ctx (µ ▷ m)
   (Γ ▶ t) (here refl) = t
   (Γ ▶ t) (there x) = Γ x
+
+  _▶[_]_ : Ctx µ → ∀ m → µ ∶⊢ m→M m → Ctx (µ ▷ m)
+  (Γ ▶[ _ ] t) = Γ ▶ t
 
   -- ∈-++ : ∀ {ℓ} {A : Set ℓ} {xs ys : List A} {x : A} → (xs ++ ys) ∋ x → (xs ∋ x) ⊎ (ys ∋ x)
   -- ∈-++ {xs = []} x∈ys = inj₂ x∈ys
