@@ -281,7 +281,7 @@ record KitHomotopy (T : KitTraversal) : Set₁ where
   open KitTraversal T
   field
     ~-cong-⋯ :
-      ∀ ⦃ 𝕂 : Kit ⦄ {f g : µ₁ –[ 𝕂 ]→ µ₂} {t : µ₁ ⊢ M}
+      ∀ ⦃ 𝕂 : Kit ⦄ {f g : µ₁ –[ 𝕂 ]→ µ₂} (t : µ₁ ⊢ M)
       → f ~ g
       → t ⋯ f ≡ t ⋯ g
 
@@ -290,4 +290,4 @@ open import Axiom.Extensionality.Propositional using (Extensionality)
 Extensionality→KitHomotopy : ∀ {T} → Extensionality 0ℓ 0ℓ → KitHomotopy T
 Extensionality→KitHomotopy {T} fun-ext =
   let open KitTraversal T in record
-  { ~-cong-⋯ = λ f~g → cong (_ ⋯_) (fun-ext (λ m → fun-ext (λ x → f~g m x))) }
+  { ~-cong-⋯ = λ t f~g → cong (t ⋯_) (fun-ext (λ m → fun-ext (λ x → f~g m x))) }
