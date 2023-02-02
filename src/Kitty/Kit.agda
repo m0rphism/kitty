@@ -42,20 +42,34 @@ record Kit : Set₁ where
     wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
     wk-id/`          : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
 
-  wk* : ∀ SM → µ ∋/⊢ SM → (µ ▷▷ µ') ∋/⊢ SM
-  wk* {µ' = []}     m/M x = x
-  wk* {µ' = µ' ▷ m} m/M x = wk m/M (wk* m/M x)
+  -- Renaming/Substitution
 
   _–→_ : List VarMode → List VarMode → Set
   _–→_ µ₁ µ₂ = ∀ m → µ₁ ∋ m → µ₂ ∋/⊢ id/m→M m
 
-  idₖ : µ –→ µ
-  idₖ = id/`
+  -- Weakening
 
-  -- TODO: Can we express this as weakened f + ,ₖ ?
+  wk* : ∀ SM → µ ∋/⊢ SM → (µ ▷▷ µ') ∋/⊢ SM
+  wk* {µ' = []}     m/M x = x
+  wk* {µ' = µ' ▷ m} m/M x = wk m/M (wk* m/M x)
+
+  wk' : µ –→ (µ ▷ m)
+  wk' _ x = wk _ (id/` _ x)
+
+  wk'* : µ –→ (µ ▷▷ µ')
+  wk'* _ x = wk* _ (id/` _ x)
+
+  -- Lifting
+
   _↑_ : µ₁ –→ µ₂ → ∀ m → (µ₁ ▷ m) –→ (µ₂ ▷ m)
   (ϕ ↑ m) _ (here p)  = id/` _ (here p)
   (ϕ ↑ m) _ (there x) = wk _ (ϕ _ x)
+
+  _↑*_ : µ₁ –→ µ₂ → ∀ µ' → (µ₁ ▷▷ µ') –→ (µ₂ ▷▷ µ')
+  ϕ ↑* []       = ϕ
+  ϕ ↑* (µ' ▷ m) = (ϕ ↑* µ') ↑ m
+
+  -- Lifting preserves Homotopy
 
   ~-cong-↑ : {ϕ ϕ' : µ₁ –→ µ₂} →
     ϕ ~ ϕ' →
@@ -63,58 +77,16 @@ record Kit : Set₁ where
   ~-cong-↑ ϕ~ϕ' _ (here px) = refl
   ~-cong-↑ ϕ~ϕ' _ (there x) = cong (wk _) (ϕ~ϕ' _ x)
 
-  _↑*_ : µ₁ –→ µ₂ → ∀ µ' → (µ₁ ▷▷ µ') –→ (µ₂ ▷▷ µ')
-  ϕ ↑* []       = ϕ
-  ϕ ↑* (µ' ▷ m) = (ϕ ↑* µ') ↑ m
-
   ~-cong-↑* : {ϕ ϕ' : µ₁ –→ µ₂} →
     ϕ ~ ϕ' →
     ϕ ↑* µ ~ ϕ' ↑* µ
   ~-cong-↑* {µ = []}    ϕ~ϕ' = ϕ~ϕ'
   ~-cong-↑* {µ = µ ▷ m} {ϕ = ϕ} {ϕ' = ϕ'} ϕ~ϕ' = ~-cong-↑ (~-cong-↑* ϕ~ϕ')
 
-  id↑~id : ∀ m µ → idₖ {µ = µ} ↑ m ~ idₖ {µ = µ ▷ m}
-  id↑~id m µ _ (here _)  = refl
-  id↑~id m µ _ (there x) = wk-id/` m x
+  -- Identity
 
-  id↑*~id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ~ idₖ {µ = µ ▷▷ µ'}
-  id↑*~id []       µ = ~-refl
-  id↑*~id (µ' ▷ m) µ =
-    idₖ ↑* µ' ↑ m  ~⟨ ~-cong-↑ (id↑*~id µ' µ) ⟩
-    idₖ ↑ m        ~⟨ id↑~id _ _ ⟩
-    idₖ            ~∎
-
-  -- Extending a renaming/substitution
-  _,ₖ_ : µ₁ –→ µ₂ → µ₂ ∋/⊢ id/m→M m → (µ₁ ▷ m) –→ µ₂
-  (ϕ ,ₖ t) _ (here refl) = t
-  (ϕ ,ₖ t) _ (there x)   = ϕ _ x
-
-  -- Singleton renaming/substitution
-  ⦅_⦆ : µ ∋/⊢ id/m→M m → (µ ▷ m) –→ µ
-  ⦅ v ⦆ = idₖ ,ₖ v
-
-  -- Empty renaming/substitution
-  emptyₖ : [] –→ µ
-  emptyₖ _ ()
-
-  -- Singleton renaming/substitution for terms with 1 free variable.
-  -- Allows the term to be substituted to have arbitrary free variables.
-  -- This is useful for things like pattern matching in combination with `_∥_`,
-  -- where a matching substitution needs to be built up piece by piece.
-  ⦅_⦆₀ : µ ∋/⊢ id/m→M m → ([] ▷ m) –→ µ
-  ⦅ v ⦆₀ = emptyₖ ,ₖ v
-
-  _∥_ : ∀ {µ₁ µ₂ µ} → (µ₁ –→ µ) → (µ₂ –→ µ) → ((µ₁ ▷▷ µ₂) –→ µ)
-  _∥_ {µ₂ = []}     σ₁ σ₂ _ x = σ₁ _ x
-  _∥_ {µ₂ = µ₂ ▷ _} σ₁ σ₂ _ (here px) = σ₂ _ (here px)
-  _∥_ {µ₂ = µ₂ ▷ _} σ₁ σ₂ _ (there x) = (σ₁ ∥ (λ m y → σ₂ m (there y))) _ x
-
-  -- A weakening renaming/substitution
-  wk' : µ –→ (µ ▷ m)
-  wk' _ x = wk _ (id/` _ x)
-
-  wk'* : µ –→ (µ ▷▷ µ')
-  wk'* _ x = wk* _ (id/` _ x)
+  idₖ : µ –→ µ
+  idₖ = id/`
 
   idₖ' : µ –→ (µ' ▷▷ µ )
   idₖ' _ x = id/` _ (∈-▷▷ₗ x)  where
@@ -127,6 +99,49 @@ record Kit : Set₁ where
     ∈-▷▷ₗ :  ∀ {µ} {µ'} → µ ∋ m → (µ' ▷▷ µ) ∋ m
     ∈-▷▷ₗ (here px) = here px
     ∈-▷▷ₗ (there x) = there (∈-▷▷ₗ x)
+
+  -- Lifted identity is identity
+
+  id↑~id : ∀ m µ → idₖ {µ = µ} ↑ m ~ idₖ {µ = µ ▷ m}
+  id↑~id m µ _ (here _)  = refl
+  id↑~id m µ _ (there x) = wk-id/` m x
+
+  id↑*~id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ~ idₖ {µ = µ ▷▷ µ'}
+  id↑*~id []       µ = ~-refl
+  id↑*~id (µ' ▷ m) µ =
+    idₖ ↑* µ' ↑ m  ~⟨ ~-cong-↑ (id↑*~id µ' µ) ⟩
+    idₖ ↑ m        ~⟨ id↑~id _ _ ⟩
+    idₖ            ~∎
+
+  -- Extending a renaming/substitution with a variable/term
+
+  _,ₖ_ : µ₁ –→ µ₂ → µ₂ ∋/⊢ id/m→M m → (µ₁ ▷ m) –→ µ₂
+  (ϕ ,ₖ t) _ (here refl) = t
+  (ϕ ,ₖ t) _ (there x)   = ϕ _ x
+
+  -- Empty renaming/substitution
+
+  emptyₖ : [] –→ µ
+  emptyₖ _ ()
+
+  -- Parallel Composition
+
+  _∥_ : ∀ {µ₁ µ₂ µ} → (µ₁ –→ µ) → (µ₂ –→ µ) → ((µ₁ ▷▷ µ₂) –→ µ)
+  _∥_ {µ₂ = []}     σ₁ σ₂ _ x = σ₁ _ x
+  _∥_ {µ₂ = µ₂ ▷ _} σ₁ σ₂ _ (here px) = σ₂ _ (here px)
+  _∥_ {µ₂ = µ₂ ▷ _} σ₁ σ₂ _ (there x) = (σ₁ ∥ (λ m y → σ₂ m (there y))) _ x
+
+  -- Singleton renaming/substitution
+
+  ⦅_⦆ : µ ∋/⊢ id/m→M m → (µ ▷ m) –→ µ
+  ⦅ v ⦆ = idₖ ,ₖ v
+
+  -- Singleton renaming/substitution for terms with 1 free variable.
+  -- Allows the term to be substituted to have arbitrary free variables.
+  -- This is useful for things like pattern matching in combination with `_∥_`,
+  -- where a matching substitution needs to be built up piece by piece.
+  ⦅_⦆₀ : µ ∋/⊢ id/m→M m → ([] ▷ m) –→ µ
+  ⦅ v ⦆₀ = emptyₖ ,ₖ v
 
   -- ⦅_⦆' : (µ ▷▷ µ') ∋/⊢ m→[m/M] m → (µ ▷ m ▷▷ µ') –→ (µ ▷▷ µ')
   -- ⦅ v ⦆' = idₖ'' ∥ ⦅ v ⦆₀ ∥ idₖ''
