@@ -311,9 +311,6 @@ record KitTraversal : Set₁ where
   toₛ∘fromᵣ : {{K : Kit}} → (ϕ : µ₁ →ᵣ µ₂) → toₛ ⦃ K ⦄ (fromᵣ ⦃ K ⦄ ϕ) ~ ₛfromᵣ ϕ
   toₛ∘fromᵣ ϕ m x = id/`/id (ϕ m x)
 
-  -- toₛ∘fromᵣ : {{K : Kit}} → (ϕ : µ₁ →ᵣ µ₂) → toₛ ⦃ K ⦄ (fromᵣ ⦃ K ⦄ ϕ) ≡ ₛfromᵣ ϕ
-  -- toₛ∘fromᵣ ϕ = fun-ext₂ λ m x → id/`/id (ϕ m x)
-
   ₛfromᵣ≡ᵣtoₛ : (λ {µ₁} {µ₂} → ₛfromᵣ {µ₁} {µ₂}) ≡ (λ {µ₁} {µ₂} → ᵣtoₛ {µ₁} {µ₂})
   ₛfromᵣ≡ᵣtoₛ = refl
 
