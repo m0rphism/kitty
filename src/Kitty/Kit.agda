@@ -80,13 +80,9 @@ record Kit : Set₁ where
   id↑*~id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ~ idₖ {µ = µ ▷▷ µ'}
   id↑*~id []       µ = ~-refl
   id↑*~id (µ' ▷ m) µ =
-    begin~
-      idₖ ↑* µ' ↑ m
-    ~⟨ ~-cong-↑ (id↑*~id µ' µ) ⟩
-      idₖ ↑ m
-    ~⟨ id↑~id _ _ ⟩
-      idₖ
-    ~∎
+    idₖ ↑* µ' ↑ m  ~⟨ ~-cong-↑ (id↑*~id µ' µ) ⟩
+    idₖ ↑ m        ~⟨ id↑~id _ _ ⟩
+    idₖ            ~∎
 
   -- Extending a renaming/substitution
   _,ₖ_ : µ₁ –→ µ₂ → µ₂ ∋/⊢ id/m→M m → (µ₁ ▷ m) –→ µ₂
