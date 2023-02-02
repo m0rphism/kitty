@@ -37,6 +37,7 @@ record Kit : Set₁ where
 
     id/`             : ∀ m → µ ∋ m → µ ∋/⊢ id/m→M m
     `/id             : ∀ m → µ ∋/⊢ id/m→M m → µ ⊢ m→M m
+    `/id'            : ∀ m → µ ∋/⊢ m → µ ⊢ m→M/id m -- For IKit Experiment
     id/`/id          : ∀ x → `/id {µ = µ} m (id/` _ x) ≡ ` x
 
     wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
@@ -177,6 +178,7 @@ record KitTraversal : Set₁ where
   Kit.id/m→M/id        kitᵣ = λ m → refl
   Kit.id/`             kitᵣ = λ m x → x
   Kit.`/id             kitᵣ = λ m x → ` x
+  Kit.`/id'            kitᵣ = λ m x → ` x
   Kit.id/`/id          kitᵣ = λ x → refl
   Kit.wk               kitᵣ = λ m x → there x
   Kit.wk-id/`          kitᵣ = λ m x → refl
@@ -191,6 +193,7 @@ record KitTraversal : Set₁ where
   Kit.id/m→M/id        kitₛ = λ m → refl
   Kit.id/`             kitₛ = λ m x → ` x
   Kit.`/id             kitₛ = λ M t → t
+  Kit.`/id'            kitₛ = λ M t → t
   Kit.id/`/id          kitₛ = λ x → refl
   Kit.wk               kitₛ = λ M t → t ⋯ wk
   Kit.wk-id/`          kitₛ = λ m x → ⋯-var x wk
