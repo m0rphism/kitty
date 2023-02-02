@@ -90,3 +90,52 @@ ope-pres-telescope x           (ope-drop {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ�
   wk-drop-∈ (ρ _ x) (Γ₂ (ρ _ x)) ⋯ wk ≡⟨ cong (_⋯ wk) (ope-pres-telescope x ope) ⟩
   wk-drop-∈ x (Γ₁ x) ⋯ ρ         ⋯ wk ≡⟨ ⋯-assoc (wk-drop-∈ x (Γ₁ x)) ρ wk ⟩
   wk-drop-∈ x (Γ₁ x) ⋯ wk ∘ᵣ ρ        ∎
+
+-- _∋*_∶_ : Ctx µ₂ → µ₁ →ᵣ µ₂ → Ctx µ₁ → Set
+-- _∋*_∶_ {µ₁ = µ₁} Γ₂ ρ Γ₁ = ∀ {m} (x : µ₁ ∋ m) → wk-telescope Γ₂ (ρ _ x) ≡ wk-telescope Γ₁ x ⋯ ρ
+
+-- ope-pres-telescope : ∀ {ρ : µ₁ →ᵣ µ₂} →
+--   OPE ρ Γ₁ Γ₂ →
+--   Γ₂ ∋* ρ ∶ Γ₁
+-- ope-pres-telescope ope-id                                     x           = sym (⋯-id _)
+-- ope-pres-telescope (ope-keep {ρ = ρ} {T = T} ope)             (here refl) = sym (dist-↑-ren T ρ)
+-- ope-pres-telescope (ope-keep {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ₂} ope) (there x)   =
+--   wk _ (wk-drop-∈ (ρ _ x) (Γ₂ (ρ _ x))) ≡⟨ cong (wk _) (ope-pres-telescope ope x) ⟩
+--   wk _ (wk-drop-∈ x (Γ₁ x) ⋯ ρ)         ≡⟨ sym (dist-↑-ren (wk-drop-∈ x (Γ₁ x)) ρ) ⟩
+--   wk _ (wk-drop-∈ x (Γ₁ x)) ⋯ ρ ↑ _     ∎
+-- ope-pres-telescope (ope-drop {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ₂} ope) x           =
+--   wk-drop-∈ (ρ _ x) (Γ₂ (ρ _ x)) ⋯ wk ≡⟨ cong (_⋯ wk) (ope-pres-telescope ope x) ⟩
+--   wk-drop-∈ x (Γ₁ x) ⋯ ρ         ⋯ wk ≡⟨ ⋯-assoc (wk-drop-∈ x (Γ₁ x)) ρ wk ⟩
+--   wk-drop-∈ x (Γ₁ x) ⋯ wk ∘ᵣ ρ        ∎
+
+-- ∋*-id : ∀ {Γ : Ctx µ} →
+--   Γ ∋* idᵣ ∶ Γ
+-- ∋*-id {Γ = Γ} x =
+--   wk-telescope Γ (idᵣ _ x) ≡⟨⟩
+--   wk-telescope Γ x         ≡⟨ sym (⋯-id _) ⟩
+--   wk-telescope Γ x ⋯ idᵣ   ∎
+
+-- ∋*-keep : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : µ₁ ∶⊢ m→M m} →
+--    Γ₂            ∋*  ρ      ∶  Γ₁ →
+--   (Γ₂ ▶ (T ⋯ ρ)) ∋* (ρ ↑ m) ∶ (Γ₁ ▶ T)
+-- ∋*-keep {ρ = ρ} {Γ₁} {Γ₂} {T} ∋* (here refl) =
+--   wk-telescope (Γ₂ ▶ (T ⋯ ρ)) ((ρ ↑ _) _ (here refl)) ≡⟨⟩
+--   T ⋯ ρ ⋯ wk                                          ≡⟨ sym (dist-↑-ren T ρ) ⟩
+--   T ⋯ wk ⋯ (ρ ↑ _)                                    ≡⟨⟩
+--   wk-telescope (Γ₁ ▶ T) (here refl) ⋯ ρ ↑ _           ∎
+-- ∋*-keep {ρ = ρ} {Γ₁} {Γ₂} {T} ∋* (there x) =
+--   wk-telescope (Γ₂ ▶ (T ⋯ ρ)) ((ρ ↑ _) _ (there x)) ≡⟨⟩
+--   wk-telescope Γ₂ (ρ _ x) ⋯ wk                      ≡⟨ cong (_⋯ wk) (∋* x) ⟩
+--   wk-telescope Γ₁ x ⋯ ρ ⋯ wk                        ≡⟨ sym (dist-↑-ren (wk-drop-∈ x (Γ₁ x)) ρ) ⟩
+--   wk-telescope Γ₁ x ⋯ wk ⋯ ρ ↑ _                    ≡⟨⟩
+--   wk-telescope (Γ₁ ▶ T) (there x) ⋯ ρ ↑ _           ∎
+
+-- ∋*-drop : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : µ₂ ∶⊢ m→M m} →
+--    Γ₂      ∋*  ρ        ∶ Γ₁ →
+--   (Γ₂ ▶ T) ∋* (wk ∘ᵣ ρ) ∶ Γ₁
+-- ∋*-drop {ρ = ρ} {Γ₁} {Γ₂} {T} ∋* x =
+--   wk-telescope (Γ₂ ▶ T) ((wk ∘ᵣ ρ) _ x)       ≡⟨⟩
+--   wk-telescope (Γ₂ ▶ T) (((ρ ↑ _) ∘ᵣ wk) _ x) ≡⟨⟩
+--   wk-telescope Γ₂ (ρ _ x) ⋯ wk                ≡⟨ cong (_⋯ wk) (∋* x) ⟩
+--   wk-telescope Γ₁ x ⋯ ρ ⋯ wk                  ≡⟨ ⋯-assoc (wk-telescope Γ₁ x) ρ wk ⟩
+--   wk-telescope Γ₁ x ⋯ wk ∘ᵣ ρ                 ∎
