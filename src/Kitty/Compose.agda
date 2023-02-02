@@ -79,7 +79,7 @@ record KitAssoc : Set₁ where
     t ⋯ ϕ₁ ⋯ ϕ₂ ≡ t ⋯ ϕ₁' ⋯ ϕ₂'
   ∘~∘→⋯≡⋯ {ϕ₁ = ϕ₁} {ϕ₂ = ϕ₂} {ϕ₁' = ϕ₁'} {ϕ₂' = ϕ₂'} eq t =
     t ⋯ ϕ₁ ⋯ ϕ₂    ≡⟨ ⋯-assoc t ϕ₁ ϕ₂ ⟩
-    t ⋯ ϕ₂ ∘ₖ ϕ₁   ≡⟨ ⋯-~ eq ⟩
+    t ⋯ ϕ₂ ∘ₖ ϕ₁   ≡⟨ ~-cong-⋯ eq ⟩
     t ⋯ ϕ₂' ∘ₖ ϕ₁' ≡⟨ sym (⋯-assoc t ϕ₁' ϕ₂') ⟩
     t ⋯ ϕ₁' ⋯ ϕ₂'  ∎
 
@@ -147,7 +147,7 @@ record KitAssoc : Set₁ where
     ϕ₁ ᵣ∘ₛ ϕ₂ ~ ϕ₁' ᵣ∘ₛ ϕ₂
   ~-cong-ᵣ∘ₛ₁ {ϕ₁ = ϕ₁} {ϕ₁'} ϕ₂ ϕ₁~ϕ₁' _ x  =
     (ϕ₁  ᵣ∘ₛ ϕ₂) _ x ≡⟨⟩
-    ϕ₂ _ x ⋯ᵣ ϕ₁     ≡⟨ ⋯-~ ϕ₁~ϕ₁' ⟩
+    ϕ₂ _ x ⋯ᵣ ϕ₁     ≡⟨ ~-cong-⋯ ϕ₁~ϕ₁' ⟩
     ϕ₂ _ x ⋯ᵣ ϕ₁'    ≡⟨⟩
     (ϕ₁' ᵣ∘ₛ ϕ₂) _ x ∎
 
@@ -186,7 +186,7 @@ record KitAssoc : Set₁ where
     ϕ₁ ₛ∘ₛ ϕ₂ ~ ϕ₁' ₛ∘ₛ ϕ₂
   ~-cong-ₛ∘ₛ₁ {ϕ₁ = ϕ₁} {ϕ₁'} ϕ₂ ϕ₁~ϕ₁' _ x  =
     (ϕ₁  ₛ∘ₛ ϕ₂) _ x ≡⟨⟩
-    ϕ₂ _ x ⋯ₛ ϕ₁     ≡⟨ ⋯-~ ϕ₁~ϕ₁' ⟩
+    ϕ₂ _ x ⋯ₛ ϕ₁     ≡⟨ ~-cong-⋯ ϕ₁~ϕ₁' ⟩
     ϕ₂ _ x ⋯ₛ ϕ₁'    ≡⟨⟩
     (ϕ₁' ₛ∘ₛ ϕ₂) _ x ∎
 
@@ -235,7 +235,7 @@ record KitAssoc : Set₁ where
       v ⋯ᵣ wkᵣ ⋯ (ϕ ↑ m) ≡ v ⋯ ϕ ⋯ᵣ wkᵣ
     dist-↑-f v ϕ =
       v ⋯ wkᵣ ⋯ (ϕ ↑ _)  ≡⟨ ⋯-assoc v wk (ϕ ↑ _)  ⟩
-      v ⋯ (ϕ ↑ _) ∘ₖ wkᵣ ≡⟨ ⋯-~ (comm-↑-wk ϕ) ⟩
+      v ⋯ (ϕ ↑ _) ∘ₖ wkᵣ ≡⟨ ~-cong-⋯ (comm-↑-wk ϕ) ⟩
       v ⋯ wkᵣ ∘ₖ ϕ       ≡⟨ sym (⋯-assoc v ϕ wk) ⟩
       v ⋯ ϕ ⋯ wkᵣ        ∎
 
@@ -243,7 +243,7 @@ record KitAssoc : Set₁ where
       v ⋯ᵣ wkᵣ ⋯ (ϕ ,ₖ v') ≡ v ⋯ ϕ
     wk-cancels-,ₖ v ϕ v' =
       v ⋯ᵣ wkᵣ ⋯ (ϕ ,ₖ v')   ≡⟨ ⋯-assoc v wkᵣ (ϕ ,ₖ v') ⟩
-      v ⋯ ((ϕ ,ₖ v') ∘ₖ wkᵣ) ≡⟨ ⋯-~ (wk-cancels-,ₖ-∘ ϕ v') ⟩
+      v ⋯ ((ϕ ,ₖ v') ∘ₖ wkᵣ) ≡⟨ ~-cong-⋯ (wk-cancels-,ₖ-∘ ϕ v') ⟩
       v ⋯ ϕ                  ∎
 
   wk-kitᵣ : WkDistKit {{kitᵣ}} {{kitᵣᵣ}} {{kitᵣᵣ}}
@@ -316,7 +316,7 @@ record KitAssoc : Set₁ where
       t' ⋯ (σ ↑ m) ⋯ ⦅ t ⦆ₛ ≡ t' ⋯ (σ ,ₛ t)
     ⋯↑⋯⦅⦆-is-⋯,ₛ {m = m} t' t σ =
       t' ⋯ₛ (σ ↑ m) ⋯ₛ ⦅ t ⦆ₛ    ≡⟨ ⋯-assoc t' (σ ↑ m) ⦅ t ⦆ₛ ⟩
-      t' ⋯ₛ (⦅ t ⦆ₛ ₛ∘ₛ (σ ↑ m)) ≡⟨ ⋯-~ (↑∘⦅⦆-is-,ₛ t σ) ⟩
+      t' ⋯ₛ (⦅ t ⦆ₛ ₛ∘ₛ (σ ↑ m)) ≡⟨ ~-cong-⋯ (↑∘⦅⦆-is-,ₛ t σ) ⟩
       t' ⋯ₛ (σ ,ₛ t)             ∎
 
     dist-ᵣ∘ᵣ-⦅⦆ : ∀ {µ₁ µ₂ m} (x : µ₁ ∋ m) (ρ : µ₁ →ᵣ µ₂) →
