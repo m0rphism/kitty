@@ -129,12 +129,16 @@ private instance _ = wk-kitᵣ
 private instance _ = wk-kitₛ
 
 record IKitTraversal : Set₁ where
-  -- infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
-  infixl  5  _⊢⋯_
+  infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
   field
-    _⊢⋯_   : ∀ {{𝕂 : Kit}} {{𝔸₁}} {{𝔸₂}} {{WK : WkDistKit {{𝕂}} {{𝔸₁}} {{𝔸₂}} }} {{IK : IKit 𝕂 WK}} {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {f : µ₁ –[ 𝕂 ]→ µ₂} →
-            Γ₁ ⊢ e ∶ t → Γ₂ ∋*/⊢*[ IK ] f ∶ Γ₁ → Γ₂ ⊢ e ⋯ f ∶ t ⋯ f
+    -- Substitution/Renaming preserves typing
+    _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄ ⦃ WK : WkDistKit ⦃ 𝕂 ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄ ⦄ ⦃ IK : IKit 𝕂 WK ⦄
+             {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
+           Γ₁ ⊢ e ∶ t →
+           Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
+           Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+
     -- ⋯-var : ∀ {{𝕂 : Kit}} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
     --         (` x) ⋯ f ≡ subst (µ₂ ⊢_) (m→SM→M m) (tm _ (f _ x))
 
@@ -156,5 +160,22 @@ record IKitTraversal : Set₁ where
 
   private instance _ = ikitₛ
 
-  open IKit ikitᵣ public using () renaming (_∋*/⊢*_∶_ to _∋*_∶_; ∋wk/⊢wk to ⊢wk)
-  open IKit ikitₛ public using () renaming (_∋*/⊢*_∶_ to _⊢*_∶_; ∋wk/⊢wk to ∋wk)
+  open IKit ikitᵣ public using () renaming (_∋*/⊢*_∶_ to _∋*_∶_; ∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_)
+  open IKit ikitₛ public using () renaming (_∋*/⊢*_∶_ to _⊢*_∶_; ∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_)
+
+  -- Renaming preserves typing
+
+  _⊢⋯ᵣ_ : ∀ {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ρ : µ₁ →ᵣ µ₂} →
+          Γ₁ ⊢ e ∶ t →
+          Γ₂ ∋* ρ ∶ Γ₁ →
+          Γ₂ ⊢ e ⋯ ρ ∶ t ⋯ ρ
+  _⊢⋯ᵣ_ = _⊢⋯_
+
+  -- Substitution preserves typing
+
+  _⊢⋯ₛ_ : ∀ {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {σ : µ₁ →ₛ µ₂} →
+          Γ₁ ⊢ e ∶ t →
+          Γ₂ ⊢* σ ∶ Γ₁ →
+          Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
+  _⊢⋯ₛ_ = _⊢⋯_
+
