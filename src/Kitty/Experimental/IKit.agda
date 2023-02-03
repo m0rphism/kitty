@@ -28,6 +28,14 @@ open import Kitty.OPE AL KT
 open Kitty.Experimental.ITerms 𝕋 T H A AL KT
 open Kitty.Experimental.ITerms.ITerms IT
 
+dist-subst :
+  ∀ {ℓ ℓ₁ ℓ₂} {A : Set ℓ} {a₁ a₂ : A}
+    {F : A → Set ℓ₁} {G : A → Set ℓ₂}
+    (x : F a₁) (f : ∀ {a} → F a → G a)
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → f {a₂} (subst F a₁≡a₂ x) ≡ subst G a₁≡a₂ (f {a₁} x)
+dist-subst _ _ refl = refl
+
 private
   variable
     m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
@@ -65,16 +73,20 @@ record IKit
     _∋/⊢_∶_  : ∀ {SM} → Ctx µ → µ ∋/⊢ SM → µ ∶⊢ m→M/id SM → Set
 
     -- Conditional Applications of Variable-Typing-Rule
-    id/⊢`    : ∀ {x : µ ∋ m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ} →
-               Γ ∋ x ∶ t →  Γ ∋/⊢ id/` _ x ∶ subst (µ ∶⊢_) (sym (id/m→M/id m)) t
-    ⊢`/id    : ∀ {e : µ ∋/⊢ id/m→M m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ} →
-               Γ ∋/⊢ e ∶ subst (_ ∶⊢_) (sym (id/m→M/id m)) t → Γ ⊢ `/id _ e ∶ t
-    ⊢`/id'   : ∀ {SM} {e : µ ∋/⊢ SM} {t : µ ∶⊢ m→M/id SM} {Γ : Ctx µ} →
-               Γ ∋/⊢ e ∶ t →  Γ ⊢ `/id' _ e ∶ t
+    id/⊢`    : ∀ {x : µ ∋ m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ}
+               → Γ ∋ x ∶ t
+               →  Γ ∋/⊢ id/` _ x ∶ subst (µ ∶⊢_) (sym (id/m→M/id m)) t
+    ⊢`/id    : ∀ {e : µ ∋/⊢ id/m→M m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ}
+               → Γ ∋/⊢ e ∶ subst (_ ∶⊢_) (sym (id/m→M/id m)) t
+               → Γ ⊢ `/id _ e ∶ t
+    ⊢`/id'   : ∀ {SM} {e : µ ∋/⊢ SM} {t : µ ∶⊢ m→M/id SM} {Γ : Ctx µ}
+               → Γ ∋/⊢ e ∶ t
+               → Γ ⊢ `/id' _ e ∶ t
 
     -- Weakening preserveres variable/term typings.
-    ∋wk/⊢wk  : ∀ {SM} (Γ : Ctx µ) (t' : µ ∶⊢ m→M m) (e : µ ∋/⊢ SM) (t : µ ∶⊢ m→M/id SM) →
-               Γ ∋/⊢ e ∶ t → (Γ ▶ t') ∋/⊢ wk _ e ∶ Kit.wk kitₛ _ t
+    ∋wk/⊢wk  : ∀ {SM} (Γ : Ctx µ) (t' : µ ∶⊢ m→M m) (e : µ ∋/⊢ SM) (t : µ ∶⊢ m→M/id SM)
+               → Γ ∋/⊢ e ∶ t
+               → (Γ ▶ t') ∋/⊢ wk _ e ∶ Kit.wk kitₛ _ t
     -- ⊢wk-vr : ∀ {x : µ ∋ m} {t : µ ∶⊢ M} (⊢x : Γ ∋ x ∶ t) →
     --          ⊢wk (⊢vr ⊢x) ≡ ⊢vr (there x)
     -- wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
@@ -106,9 +118,29 @@ record IKit
       by {!⊢f !}
       -- by {!◆wk _ _ _ _ (⊢f _ (t ⋯ f) _)!}
 
-  -- _↑_ : µ₁ –→ µ₂ → ∀ m → (m ∷ µ₁) –→ (m ∷ µ₂)
-  -- (f ↑ m) _ (here p)  = vr _ (here p)
-  -- (f ↑ m) _ (there x) = wk _ (f _ x)
+  _,*_ : ∀ {m} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} {e : µ₂ ∋/⊢ id/m→M m} {t : µ₁ ∶⊢ m→M m} →
+    Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →
+    Γ₂ ∋/⊢   e ∶ subst (_ ∶⊢_) (sym (id/m→M/id m)) t ⋯ ϕ →
+    Γ₂ ∋*/⊢* ϕ ,ₖ e ∶ Γ₁ ▶ t
+  _,*_ {µ₁ = µ₁} {µ₂ = µ₂} {Γ₁ = Γ₁} {Γ₂ = Γ₂} {ϕ = ϕ} {e = e} {t = t} ⊢σ ⊢e (here refl) _ refl =
+    subst (Γ₂ ∋/⊢ e ∶_) (
+      begin
+        subst (µ₁ ∶⊢_) (sym (id/m→M/id _)) t ⋯ ϕ
+      ≡⟨ sym (wk-cancels-,ₖ (subst (_ ∶⊢_) (sym (id/m→M/id _)) t) ϕ e) ⟩
+        (subst (µ₁ ∶⊢_) (sym (id/m→M/id _)) t) ⋯ᵣ wkᵣ ⋯ (ϕ ,ₖ e)
+      ≡⟨ dist-subst t (λ ■ → ■ ⋯ᵣ wkᵣ ⋯ (ϕ ,ₖ e)) (sym (id/m→M/id _)) ⟩
+        subst (µ₂ ∶⊢_) (sym (id/m→M/id _)) (t ⋯ᵣ wkᵣ ⋯ (ϕ ,ₖ e))
+      ≡⟨⟩
+        subst (µ₂ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (here refl) ⋯ (ϕ ,ₖ e))
+      ∎
+    ) ⊢e
+  _,*_ {µ₁ = µ₁} {µ₂ = µ₂} {Γ₁ = Γ₁} {Γ₂ = Γ₂} {ϕ = ϕ} {e = e} {t = t} ⊢σ ⊢e (there x) _ eq@refl =
+    Γ₂ ∋/⊢ (ϕ ,ₖ e) _ (there x) ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (there x) ⋯ (ϕ ,ₖ e)) by (
+    Γ₂ ∋/⊢ ϕ _ x ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (wk-telescope Γ₁ x ⋯ᵣ wkᵣ ⋯ (ϕ ,ₖ e)) by
+    subst (λ ■ → Γ₂ ∋/⊢ ϕ _ x ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) ■)
+      (wk-telescope Γ₁ x ⋯ ϕ               ≡⟨ sym (wk-cancels-,ₖ (wk-telescope Γ₁ x) ϕ e) ⟩
+       wk-telescope Γ₁ x ⋯ᵣ wkᵣ ⋯ (ϕ ,ₖ e) ∎)
+    (Γ₂ ∋/⊢ ϕ _ x ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (wk-telescope Γ₁ x ⋯ ϕ) by ⊢σ x _ refl ))
 
 open IKit {{...}}
 
