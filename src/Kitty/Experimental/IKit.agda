@@ -61,13 +61,18 @@ record IKit
   open WkDistKit WK
 
   field
+    -- Variable/Term Typing
     _∋/⊢_∶_  : ∀ {SM} → Ctx µ → µ ∋/⊢ SM → µ ∶⊢ m→M/id SM → Set
+
+    -- Conditional Applications of Variable-Typing-Rule
     id/⊢`    : ∀ {x : µ ∋ m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ} →
                Γ ∋ x ∶ t →  Γ ∋/⊢ id/` _ x ∶ subst (µ ∶⊢_) (sym (id/m→M/id m)) t
     ⊢`/id    : ∀ {e : µ ∋/⊢ id/m→M m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ} →
                Γ ∋/⊢ e ∶ subst (_ ∶⊢_) (sym (id/m→M/id m)) t → Γ ⊢ `/id _ e ∶ t
     ⊢`/id'   : ∀ {SM} {e : µ ∋/⊢ SM} {t : µ ∶⊢ m→M/id SM} {Γ : Ctx µ} →
                Γ ∋/⊢ e ∶ t →  Γ ⊢ `/id' _ e ∶ t
+
+    -- Weakening preserveres variable/term typings.
     ∋wk/⊢wk  : ∀ {SM} (Γ : Ctx µ) (t' : µ ∶⊢ m→M m) (e : µ ∋/⊢ SM) (t : µ ∶⊢ m→M/id SM) →
                Γ ∋/⊢ e ∶ t → (Γ ▶ t') ∋/⊢ wk _ e ∶ Kit.wk kitₛ _ t
     -- ⊢wk-vr : ∀ {x : µ ∋ m} {t : µ ∶⊢ M} (⊢x : Γ ∋ x ∶ t) →
