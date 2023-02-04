@@ -33,7 +33,6 @@ open import Function using (_∘_; _$_; case_of_)
 
 open import Kitty.Prelude using (_∋_; _▷▷_)
 open import Kitty.Modes
-open import Kitty.Generics
 open import Kitty.Iso
 
 private variable
