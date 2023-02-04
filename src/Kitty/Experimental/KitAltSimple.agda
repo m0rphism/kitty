@@ -27,6 +27,7 @@ private
 -- Alternative KitTraversal ----------------------------------------------------
 
 open import Kitty.Kit 𝕋
+open import Kitty.Homotopy
 
 open Kit {{...}}
 
@@ -74,7 +75,30 @@ module Derive (KT : KitTraversalAlt) where
 
   open KitTraversal kit-traversal hiding (_⋯_; ⋯-var; kitᵣ; kitₛ) public
 
-  open import Kitty.Compose 𝕋 kit-traversal
+  ~-cong-⋯ :
+    ∀ {{𝕂 : Kit}} {f g : µ₁ –[ 𝕂 ]→ µ₂}  (v : µ₁ ⊢ M)
+    → f ~ g
+    → v ⋯ f ≡ v ⋯ g
+  ~-cong-⋯ {f = f} {g} v f~g =
+    ⋯-↑ (f ∷ [])
+        (g ∷ [])
+        (λ m x →
+          begin
+            (` x) ⋯ f
+          ≡⟨ ⋯-var x f ⟩
+            `/id _ (f _ x)
+          ≡⟨ cong (`/id _) (f~g _ x) ⟩
+            `/id _ (g _ x)
+          ≡⟨ sym (⋯-var x g) ⟩
+            (` x) ⋯ g
+          ∎)
+        v
+
+  private
+    kit-homotopy : KitHomotopy kit-traversal
+    kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
+
+  open import Kitty.Compose 𝕋 kit-traversal kit-homotopy
 
   open ComposeKit {{...}} public
 
@@ -90,7 +114,7 @@ module Derive (KT : KitTraversalAlt) where
               (λ m₁ x →
                 ` x ⋯ f ⋯ g               ≡⟨ cong (_⋯ g) (⋯-var x f) ⟩
                 (`/id _ (f _ x)) ⋯ g      ≡⟨ tm-⋯-∘ f g x ⟩
-                `/id _ ((g ∘ₖ f) _ x)     ≡⟨ cong (λ h → `/id _ (h _ x)) (sym (dist-↑*-∘ [] g f)) ⟩
+                `/id _ ((g ∘ₖ f) _ x)     ≡⟨ cong (λ h → `/id _ h) (sym (dist-↑*-∘ [] g f _ x)) ⟩
                 `/id _ ((g ∘ₖ f) _ x)     ≡⟨ sym (⋯-var x (g ∘ₖ f)) ⟩
                 ` x ⋯ (g ∘ₖ f)            ∎)
               v
@@ -110,7 +134,7 @@ module Derive (KT : KitTraversalAlt) where
           []
           (λ m x →
             ` x ⋯ idₖ {{𝕂}}           ≡⟨ ⋯-var x idₖ ⟩
-            `/id _ ((idₖ {{𝕂}}) _ x)  ≡⟨ cong (λ h → `/id _ (h _ x)) (id↑*≡id [] _) ⟩
+            `/id _ ((idₖ {{𝕂}}) _ x)  ≡⟨ cong (λ h → `/id _ h) (id↑*~id [] _ _ x) ⟩
             `/id _ (idₖ {{𝕂}} _ x)    ≡⟨⟩
             `/id _ (id/` _ x)         ≡⟨ id/`/id x ⟩
             ` x                       ∎)
@@ -120,31 +144,6 @@ module Derive (KT : KitTraversalAlt) where
     kitassoc-lemmas = record { ⋯-id = ⋯-id' }
 
   open KitAssocLemmas kitassoc-lemmas public
-
-  _~_ :
-    ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-    → (f g : (a : A) → (b : B a) → C a b)
-    → Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
-  f ~ g = ∀ a b → f a b ≡ g a b
-
-  ⋯-cong :
-    ∀ {{𝕂 : Kit}} (v : µ₁ ⊢ M) {f g : µ₁ –[ 𝕂 ]→ µ₂}
-    → f ~ g
-    → v ⋯ f ≡ v ⋯ g
-  ⋯-cong v {f} {g} f~g =
-    ⋯-↑ (f ∷ [])
-        (g ∷ [])
-        (λ m x →
-          begin
-            (` x) ⋯ f
-          ≡⟨ ⋯-var x f ⟩
-            `/id _ (f _ x)
-          ≡⟨ cong (`/id _) (f~g _ x) ⟩
-            `/id _ (g _ x)
-          ≡⟨ sym (⋯-var x g) ⟩
-            (` x) ⋯ g
-          ∎)
-        v
 
   instance
     kitᵣ  = KitTraversal.kitᵣ kit-traversal
