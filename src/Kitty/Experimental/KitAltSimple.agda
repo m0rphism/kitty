@@ -6,7 +6,7 @@ module Kitty.Experimental.KitAltSimple {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Properties using (++-assoc)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; subst; subst₂; sym; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; subst₂; sym; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
@@ -34,9 +34,104 @@ open Kit {{...}}
 _–[_]→*_ : List VarMode → (_ : List Kit) → List VarMode → Set _
 µ₁ –[ 𝕂s ]→* µ₂ = Star (λ 𝕂 x y → y –[ 𝕂 ]→ x) 𝕂s µ₂ µ₁
 
+infixl  6  _↑**_
 _↑**_ : {𝕂s : List Kit} → µ₁ –[ 𝕂s ]→* µ₂ → ∀ µ' → (µ' ++ µ₁) –[ 𝕂s ]→* (µ' ++ µ₂)
 [] ↑** µ' = []
 (_∷_ {b = 𝕂} f fs) ↑** µ' = (Kit._↑*_ 𝕂 f µ') ∷ (fs ↑** µ')
+
+↑**-neutral :
+  ∀ {𝕂s : List Kit}
+  → (fs : µ₁ –[ 𝕂s ]→* µ₂)
+  → fs ↑** [] ≡ fs
+↑**-neutral []       = refl
+↑**-neutral (f ∷ fs) = cong (f ∷_) (↑**-neutral fs)
+
+subst-[] :
+  ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (R : B → A → A → Set) {a₁ a₁'}
+  → (eq₁ : a₁ ≡ a₁')
+  → [] ≡ subst₂ (Star R []) eq₁ eq₁ []
+subst-[] R refl = refl
+
+subst-[]-flip :
+  ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (R : B → A → A → Set) {a₁ a₁'}
+  → (eq₁ : a₁ ≡ a₁')
+  → [] ≡ subst₂ (λ x y → Star R [] y x) eq₁ eq₁ []
+subst-[]-flip R refl = refl
+
+subst-∷ :
+  ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (R : B → A → A → Set) {a₁ a₁' a₂ a₂' a₃ a₃' : A}
+    {b} {bs} {r : R b a₁ a₂} {rs : Star R bs a₂ a₃}
+  → (eq₁ : a₁ ≡ a₁')
+  → (eq₂ : a₂ ≡ a₂')
+  → (eq₃ : a₃ ≡ a₃')
+  → let sub = subst₂ (Star R (b ∷ bs)) eq₁ eq₃ in
+    let sub₁ = subst₂ (R b) eq₁ eq₂ in
+    let sub₂ = subst₂ (Star R bs) eq₂ eq₃ in
+    sub (r ∷ rs) ≡ sub₁ r ∷ sub₂ rs
+subst-∷ R refl refl refl = refl
+
+subst-∷-flipped :
+  ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : Set ℓ₂} (R : B → A → A → Set) {a₁ a₁' a₂ a₂' a₃ a₃' : A}
+    {b} {bs} {r : R b a₁ a₂} {rs : Star R bs a₂ a₃}
+  → (eq₁ : a₁ ≡ a₁')
+  → (eq₂ : a₂ ≡ a₂')
+  → (eq₃ : a₃ ≡ a₃')
+  → let sub = subst₂ (λ x y → Star R (b ∷ bs) y x) eq₃ eq₁ in
+    let sub₁ = subst₂ (λ x y → R b y x) eq₂ eq₁ in
+    let sub₂ = subst₂ (λ x y → Star R bs y x) eq₃ eq₂ in
+    sub (r ∷ rs) ≡ sub₁ r ∷ sub₂ rs
+subst-∷-flipped R refl refl refl = refl
+
+open import Kitty.SubstProperties
+
+dist-↑*-▷▷ :
+  ∀ {{𝕂 : Kit}} µ' µ''
+  → (f : µ₁ –[ 𝕂 ]→ µ₂)
+  → let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc µ'' µ' µ₁) (++-assoc µ'' µ' µ₂) in
+    f ↑* µ' ↑* µ'' ≡ sub (f ↑* (µ' ▷▷ µ''))
+dist-↑*-▷▷ {µ₁} {µ₂} µ' []        f = refl
+dist-↑*-▷▷ {µ₁} {µ₂} {{𝕂}} µ' (µ'' ▷ m) f =
+  let sub = subst₂ (_–[ 𝕂 ]→_) (cong (_∷_ m) (++-assoc µ'' µ' µ₁))
+                               (cong (_∷_ m) (++-assoc µ'' µ' µ₂)) in
+  let sub'' = subst₂ (λ x y → (x ▷ m) –[ 𝕂 ]→ (y ▷ m)) (++-assoc µ'' µ' µ₁)
+                                                       (++-assoc µ'' µ' µ₂) in
+  let sub' = subst₂ (_–[ 𝕂 ]→_) (++-assoc µ'' µ' µ₁)
+                                (++-assoc µ'' µ' µ₂) in
+  f ↑* µ' ↑* (µ'' ▷ m)         ≡⟨⟩
+  f ↑* µ' ↑* µ'' ↑ m           ≡⟨ cong (_↑ m) (dist-↑*-▷▷ µ' µ'' f) ⟩
+  sub' (f ↑* (µ' ▷▷ µ'')) ↑ m  ≡⟨ dist-subst₂ (λ ■ → _↑_ ⦃ 𝕂 ⦄ ■ m) (++-assoc µ'' µ' µ₁) (++-assoc µ'' µ' µ₂) (f ↑* (µ' ▷▷ µ'')) ⟩
+  sub'' (f ↑* (µ' ▷▷ µ'') ↑ m) ≡⟨ comm-subst₂ (_▷ m) (_▷ m) (++-assoc µ'' µ' µ₁) (++-assoc µ'' µ' µ₂) (f ↑* (µ' ▷▷ µ'') ↑ m) ⟩
+  sub (f ↑* (µ' ▷▷ µ'') ↑ m)   ≡⟨⟩
+  sub (f ↑* (µ' ▷▷ (µ'' ▷ m))) ∎
+
+dist-↑**-▷▷ :
+  ∀ {𝕂s : List Kit} µ' µ''
+  → (f : µ₁ –[ 𝕂s ]→* µ₂)
+  → let sub = subst₂ (_–[ 𝕂s ]→*_) (++-assoc µ'' µ' µ₁) (++-assoc µ'' µ' µ₂) in
+    f ↑** µ' ↑** µ'' ≡ sub (f ↑** (µ' ▷▷ µ''))
+dist-↑**-▷▷ {µ₁} {µ₂} {𝕂s = 𝕂s} µ' []        f =
+  f ↑** µ' ↑** []  ≡⟨ ↑**-neutral (f ↑** µ') ⟩
+  f ↑** µ'         ≡⟨⟩
+  f ↑** (µ' ▷▷ []) ∎
+dist-↑**-▷▷ {µ₁} {.µ₁} µ' (µ'' ▷ m) []       = subst-[]-flip (λ 𝕂s µ₂ µ₁ → µ₁ –[ 𝕂s ]→ µ₂) (cong (_∷_ m) (++-assoc µ'' µ' µ₁))
+dist-↑**-▷▷ {µ₁} {µ₂} {𝕂 ∷ 𝕂s}  µ' (µ'' ▷ m) (_∷_ {x = .µ₂} {y = y} f fs) =
+  let sub = subst₂ (_–[ 𝕂 ∷ 𝕂s ]→*_) (++-assoc (µ'' ▷ m) µ' µ₁)
+                                     (++-assoc (µ'' ▷ m) µ' µ₂) in
+  let sub₁ = subst₂ (_–[ 𝕂 ]→_) (cong (_∷_ m) (++-assoc µ'' µ' y))
+                                (cong (_∷_ m) (++-assoc µ'' µ' µ₂)) in
+  let sub₂ = subst₂ (_–[ 𝕂s ]→*_) (cong (_∷_ m) (++-assoc µ'' µ' µ₁))
+                                  (cong (_∷_ m) (++-assoc µ'' µ' y)) in
+  let instance _ = 𝕂 in
+  (f ∷ fs) ↑** µ' ↑** (µ'' ▷ m)                                       ≡⟨⟩
+  (f ↑* µ' ↑* µ'' ↑ m) ∷ (fs ↑** µ' ↑** (µ'' ▷ m))                    ≡⟨ cong₂ _∷_ (dist-↑*-▷▷ µ' (µ'' ▷ m) f)
+                                                                                   (dist-↑**-▷▷ µ' (µ'' ▷ m) fs) ⟩
+  (sub₁ (f ↑* (µ' ▷▷ (µ'' ▷ m)))) ∷ (sub₂ (fs ↑** (µ' ▷▷ (µ'' ▷ m)))) ≡⟨ sym (subst-∷-flipped
+                                                                           (λ 𝕂s µ₂ µ₁ → µ₁ –[ 𝕂s ]→ µ₂)
+                                                                           (++-assoc (µ'' ▷ m) µ' µ₂)
+                                                                           (++-assoc (µ'' ▷ m) µ' y)
+                                                                           (++-assoc (µ'' ▷ m) µ' µ₁)) ⟩
+  sub ((f ↑* (µ' ▷▷ (µ'' ▷ m))) ∷ (fs ↑** (µ' ▷▷ (µ'' ▷ m))))         ≡⟨⟩
+  sub ((f ∷ fs) ↑** (µ' ▷▷ (µ'' ▷ m)))                                ∎
 
 instance
   kit-[] : List Kit

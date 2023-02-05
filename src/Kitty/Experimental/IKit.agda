@@ -15,6 +15,7 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using (id; _∘_) renaming (_∋_ to _by_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Kitty.Prelude
+open import Kitty.SubstProperties
 
 open Modes 𝕄
 open Terms 𝕋
@@ -27,23 +28,6 @@ open Kitty.Types.KitType KT
 open import Kitty.OPE AL KT
 open Kitty.Experimental.ITerms 𝕋 T H A AL KT
 open Kitty.Experimental.ITerms.ITerms IT
-
-dist-subst :
-  ∀ {ℓ ℓ₁ ℓ₂} {A : Set ℓ} {a₁ a₂ : A}
-    {F : A → Set ℓ₁} {G : A → Set ℓ₂}
-  → (f : ∀ {a} → F a → G a)
-  → (a₁≡a₂ : a₁ ≡ a₂)
-  → (x : F a₁) 
-  → f {a₂} (subst F a₁≡a₂ x) ≡ subst G a₁≡a₂ (f {a₁} x)
-dist-subst _ refl _ = refl
-
-cancel-subst :
-  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ : A}
-  → (F : A → Set ℓ₁)
-  → (a₁≡a₂ : a₁ ≡ a₂)
-  → (x : F a₁)
-  → subst F (sym a₁≡a₂) (subst F a₁≡a₂ x) ≡ x
-cancel-subst _ refl _ = refl
 
 private
   variable
