@@ -215,67 +215,75 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
 --         (` x) ⋯ f ≡ `/id _ (f _ x)
 -- ⋯-var x f = refl
 
--- derive-⋯-↑ : {𝕄 : Modes} → Terms 𝕄 → Name → Name → TC ⊤
--- derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
---   let open Modes 𝕄
---   let open Terms 𝕋
---   let open Kitty.Kit 𝕋
---   let open Kitty.Experimental.KitAltSimple 𝕋
---   𝕄-nm ← quoteNameTC 𝕄
---   ⊢-nm ← quoteNameTC _⊢_
---   ⊢-def ← getDefinition ⊢-nm
---   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
---   𝕋-nm ← term→name =<< quoteTC' 𝕋
+derive-⋯-↑ : {𝕄 : Modes} → Terms 𝕄 → Name → Name → TC ⊤
+derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
+  let open Modes 𝕄
+  let open Terms 𝕋
+  let open Kitty.Kit 𝕋
+  let open Kitty.Prelude using (_▷▷_)
+  let open Kitty.Experimental.KitAltSimple 𝕋
+  𝕄-nm ← quoteNameTC 𝕄
+  ⊢-nm ← quoteNameTC _⊢_
+  ⊢-def ← getDefinition ⊢-nm
+  `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+  𝕋-nm ← term→name =<< quoteTC' 𝕋
 
---   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
---   let _⋯*_ =
---         (∀ {𝕂s : List Kit} {µ₁ µ₂ M} →
---           µ₁ ⊢ M → µ₁ –[ 𝕂s ]→* µ₂ → µ₂ ⊢ M)
---         by
---         (λ t fs → fold-star' (λ 𝕂 _ _ t f → _⋯_ {{𝕂}} t f) t fs)
+  _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
 
---   let todo = def (quote TODO) []
---   let body = todo
---   ⋯-↑-ty ← quoteTC' (
---       ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂ M} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
---       → (∀ m (x : µ₁ ∋ m) → ((` x) ⋯* f) ≡ ((` x) ⋯* g))
---       → (t : µ₁ ⊢ M) → t ⋯* f ≡ t ⋯* g
---     )
---   defdecFun'
---     (argᵥ ⋯-↑-nm)
---     ⋯-↑-ty
---     [ clause [] [] body ]
+  let _⋯*_ =
+        (∀ {𝕂s : List Kit} {µ₁ µ₂ M} →
+          µ₁ ⊢ M → µ₁ –[ 𝕂s ]→* µ₂ → µ₂ ⊢ M)
+        by
+        (λ t fs → fold-star' (λ 𝕂 _ _ t f → _⋯_ {{𝕂}} t f) t fs)
 
--- derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
--- derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
---   𝕋-nm ← term→name =<< quoteTC' 𝕋
---   let body =
---         con (quote Kitty.Experimental.KitAltSimple.mkKitTraversalAlt)
---           [ argᵥ (def ⋯-nm [])
---           ; argᵥ (def ⋯-var-nm [])
---           ; argᵥ (def ⋯-↑-nm [])
---           ]
---   defdecFun'
---     (argᵥ kit-traversal-nm)
---     (def (quote Kitty.Experimental.KitAltSimple.KitTraversalAlt) [ argᵥ (def 𝕋-nm []) ])
---     [ clause [] [] body ]
+  let _≈ₓ_ = (∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} → (f : µ₁ –[ 𝕂s₁ ]→* µ₂) → (g : µ₁ –[ 𝕂s₂ ]→* µ₂) → Set)
+        by
+        (λ {𝕂s₁} {𝕂s₂} {µ₁} f g → ∀ {µ₁'} {m} (x : (µ₁ ▷▷ µ₁') ∋ m) → (` x) ⋯* (f ↑** µ₁') ≡ (` x) ⋯* (g ↑** µ₁'))
 
--- derive-traversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name  → TC ⊤
--- derive-traversal 𝕄 _⊢_ traversal-nm = do
---   terms-nm ← freshName "terms"
---   derive-Terms 𝕄 _⊢_ terms-nm
---   terms ← unquoteTC {A = Terms 𝕄} (def terms-nm [])
+  let _≈ₜ_ = (∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} → (f : µ₁ –[ 𝕂s₁ ]→* µ₂) → (g : µ₁ –[ 𝕂s₂ ]→* µ₂) → Set)
+        by
+        (λ {𝕂s₁} {𝕂s₂} {µ₁} f g → ∀ {µ₁'} {M} (t : (µ₁ ▷▷ µ₁') ⊢ M) → t ⋯* (f ↑** µ₁') ≡ t ⋯* (g ↑** µ₁'))
+  let todo = def (quote TODO) []
+  let body = todo
+  ⋯-↑-ty ← quoteTC' (
+      ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
+        f ≈ₓ g → f ≈ₜ g
+    )
+  defdecFun'
+    (argᵥ ⋯-↑-nm)
+    ⋯-↑-ty
+    [ clause [] [] body ]
 
---   ⋯-nm ← freshName "⋯"
---   derive-⋯ terms ⋯-nm
+derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
+derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
+  𝕋-nm ← term→name =<< quoteTC' 𝕋
+  let body =
+        con (quote Kitty.Experimental.KitAltSimple.mkKitTraversalAlt)
+          [ argᵥ (def ⋯-nm [])
+          ; argᵥ (def ⋯-var-nm [])
+          ; argᵥ (def ⋯-↑-nm [])
+          ]
+  defdecFun'
+    (argᵥ kit-traversal-nm)
+    (def (quote Kitty.Experimental.KitAltSimple.KitTraversalAlt) [ argᵥ (def 𝕋-nm []) ])
+    [ clause [] [] body ]
 
---   ⋯-var-nm ← freshName "⋯-var"
---   derive-⋯-var terms ⋯-nm ⋯-var-nm
+derive-traversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name  → TC ⊤
+derive-traversal 𝕄 _⊢_ traversal-nm = do
+  terms-nm ← freshName "terms"
+  derive-Terms 𝕄 _⊢_ terms-nm
+  terms ← unquoteTC {A = Terms 𝕄} (def terms-nm [])
 
---   ⋯-↑-nm ← freshName "⋯-↑"
---   derive-⋯-↑ terms ⋯-nm ⋯-↑-nm
+  ⋯-nm ← freshName "⋯"
+  derive-⋯ terms ⋯-nm
 
---   derive-KitTraversalAlt terms ⋯-nm ⋯-var-nm ⋯-↑-nm traversal-nm
+  ⋯-var-nm ← freshName "⋯-var"
+  derive-⋯-var terms ⋯-nm ⋯-var-nm
+
+  ⋯-↑-nm ← freshName "⋯-↑"
+  derive-⋯-↑ terms ⋯-nm ⋯-↑-nm
+
+  derive-KitTraversalAlt terms ⋯-nm ⋯-var-nm ⋯-↑-nm traversal-nm
 
 module Example where
   open Kitty.Prelude
@@ -364,15 +372,17 @@ module Example where
 
     open Kitty.Experimental.KitAltSimple.Derive _ kit-traversal-alt
 
-  module Derived where
+  module Half-Derived where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
     unquoteDecl _⋯_ = derive-⋯ terms _⋯_
     unquoteDecl ⋯-var = derive-⋯-var terms (quote _⋯_) ⋯-var
+    unquoteDecl ⋯-↑ = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
 
     -- Tests
     open import Kitty.Experimental.KitAltSimple terms
     open Kitty.Kit terms
     open Kit ⦃ … ⦄
+    open TraversalOps _⋯_
 
     _⋯'_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
     _⋯'_ = _⋯_
@@ -381,22 +391,43 @@ module Example where
             (` x) ⋯ f ≡ `/id _ (f _ x)
     ⋯-var' = ⋯-var
 
-  --   unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
-  --   open import Kitty.Experimental.KitAltSimple
+    ⋯-↑' : ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂ } (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
+           → f ≈ₓ g → f ≈ₜ g
+    ⋯-↑' = ⋯-↑
 
-  --   open Kitty.Experimental.KitAltSimple.Derive _ traversal
+    kit-traversal-alt : KitTraversalAlt
+    kit-traversal-alt = Kitty.Experimental.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
 
-  --   `id : [] ⊢ 𝕖
-  --   `id = λx ` here refl
+    open Kitty.Experimental.KitAltSimple.Derive _ kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
 
-  --   `f : [ 𝕖 ] ⊢ 𝕖
-  --   `f = λx (` here refl) · (` there (here refl))
+    `id : [] ⊢ 𝕖
+    `id = λx ` here refl
 
-  --   `f' : [] ⊢ 𝕖
-  --   `f' = `f ⋯ ⦅ `id ⦆ₛ
+    `f : [ 𝕖 ] ⊢ 𝕖
+    `f = λx (` here refl) · (` there (here refl))
 
-  --   test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
-  --   test-`f' = refl
+    `f' : [] ⊢ 𝕖
+    `f' = `f ⋯ ⦅ `id ⦆ₛ
+
+    test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    test-`f' = refl
+
+  module Derived where
+    unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
+    open import Kitty.Experimental.KitAltSimple
+    open Kitty.Experimental.KitAltSimple.Derive _ traversal
+
+    `id : [] ⊢ 𝕖
+    `id = λx ` here refl
+
+    `f : [ 𝕖 ] ⊢ 𝕖
+    `f = λx (` here refl) · (` there (here refl))
+
+    `f' : [] ⊢ 𝕖
+    `f' = `f ⋯ ⦅ `id ⦆ₛ
+
+    test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    test-`f' = refl
 
 
 
