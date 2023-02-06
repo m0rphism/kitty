@@ -193,6 +193,7 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
   let open Modes 𝕄
   let open Terms 𝕋
   let open Kitty.Kit 𝕋
+
   𝕄-nm ← quoteNameTC 𝕄
   ⊢-nm ← quoteNameTC _⊢_
   ⊢-def ← getDefinition ⊢-nm
@@ -222,6 +223,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   let open Kitty.Kit 𝕋
   let open Kitty.Prelude using (_▷▷_)
   let open Kitty.Experimental.KitAltSimple 𝕋
+
   𝕄-nm ← quoteNameTC 𝕄
   ⊢-nm ← quoteNameTC _⊢_
   ⊢-def ← getDefinition ⊢-nm
@@ -243,12 +245,15 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   let _≈ₜ_ = (∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} → (f : µ₁ –[ 𝕂s₁ ]→* µ₂) → (g : µ₁ –[ 𝕂s₂ ]→* µ₂) → Set)
         by
         (λ {𝕂s₁} {𝕂s₂} {µ₁} f g → ∀ {µ₁'} {M} (t : (µ₁ ▷▷ µ₁') ⊢ M) → t ⋯* (f ↑** µ₁') ≡ t ⋯* (g ↑** µ₁'))
+
   let todo = def (quote TODO) []
   let body = todo
+
   ⋯-↑-ty ← quoteTC' (
       ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
         f ≈ₓ g → f ≈ₜ g
     )
+
   defdecFun'
     (argᵥ ⋯-↑-nm)
     ⋯-↑-ty
@@ -374,9 +379,9 @@ module Example where
 
   module Half-Derived where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
-    unquoteDecl _⋯_ = derive-⋯ terms _⋯_
+    unquoteDecl _⋯_   = derive-⋯ terms _⋯_
     unquoteDecl ⋯-var = derive-⋯-var terms (quote _⋯_) ⋯-var
-    unquoteDecl ⋯-↑ = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
+    unquoteDecl ⋯-↑   = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
 
     -- Tests
     open import Kitty.Experimental.KitAltSimple terms
@@ -414,7 +419,6 @@ module Example where
 
   module Derived where
     unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
-    open import Kitty.Experimental.KitAltSimple
     open Kitty.Experimental.KitAltSimple.Derive _ traversal
 
     `id : [] ⊢ 𝕖
