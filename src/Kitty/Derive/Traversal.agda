@@ -2,6 +2,24 @@
 
 module Kitty.Derive.Traversal where
 
+open import Agda.Primitive using (Level; _⊔_) renaming (lzero to 0ℓ)
+open import Data.Bool using (Bool; true; false; if_then_else_)
+open import Data.Fin as Fin using (Fin; zero; suc)
+open import Data.List as List using (List; []; _∷_; _++_; length; drop; zip; reverse)
+open import Data.List.Membership.Propositional using (_∈_)
+open import Data.List.Properties using (++-assoc)
+open import Data.List.Relation.Unary.Any using (here; there)
+open import Data.Maybe using (Maybe; just; nothing)
+open import Data.Nat as Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
+open import Data.Product using (_×_; _,_; Σ; Σ-syntax; ∃-syntax; proj₁; proj₂)
+open import Data.String as String using (String)
+open import Data.Unit using (⊤; tt)
+open import Function using (_∘_; _$_; case_of_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; trans; sym; subst₂; module ≡-Reasoning)
+open import Relation.Nullary using (Dec; yes; no)
+open ≡-Reasoning
+import Agda.Builtin.List
+
 open import ReflectionLib.Standard.Syntax
 open import ReflectionLib.Standard.VeryPretty
 open import ReflectionLib.Standard.ActionsClass hiding (term→name; ⟦_⟧)
@@ -17,32 +35,12 @@ open import ReflectionLib.Algorithms.Fin
 open import ReflectionLib.Algorithms.Nat
 open import ReflectionLib.Categorical
 
-
-open import Data.String as String using (String)
-open import Data.Unit using (⊤; tt)
-open import Data.Bool using (Bool; true; false; if_then_else_)
-open import Data.List as List using (List; []; _∷_; _++_; length; drop; zip; reverse)
-open import Data.List.Properties using (++-assoc)
-open import Data.Maybe using (Maybe; just; nothing)
-open import Data.List.Membership.Propositional using (_∈_)
-open import Data.List.Relation.Unary.Any using (here; there)
-open import Data.Product using (_×_; _,_; Σ; Σ-syntax; ∃-syntax; proj₁; proj₂)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; trans; sym; subst₂; module ≡-Reasoning)
-open import Relation.Nullary using (Dec; yes; no)
-open import Agda.Primitive using (Level; _⊔_) renaming (lzero to 0ℓ)
-open import Data.Nat as Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
-open import Data.Fin as Fin using (Fin; zero; suc)
-open import Function using (_∘_; _$_; case_of_)
-open ≡-Reasoning
-import Agda.Builtin.List
-
 open import Kitty.Prelude using (_∋_)
 open import Kitty.Modes
--- open import Kitty.Experimental.KitAltSimple
+import Kitty.Kit
 import Kitty.Experimental.KitAltSimple
 open import Kitty.Experimental.Star
 open import Kitty.Derive.Common
-import Kitty.Kit
 
 private variable
   ℓ ℓ₁ ℓ₂ ℓ₃ ℓ' : Level
@@ -243,16 +241,9 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
   𝕋-nm ← term→name =<< quoteTC' 𝕋
 
-  -- _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
   _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M}
                     (lam visible (abs "_" (def ⋯-nm [])))
   let open Kitty.Experimental.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
-
-  -- let _⋯*_ =
-  --       (∀ {𝕂s : List Kit} {µ₁ µ₂ M} →
-  --         µ₁ ⊢ M → µ₁ –[ 𝕂s ]→* µ₂ → µ₂ ⊢ M)
-  --       by
-  --       (λ t fs → fold-star' (λ 𝕂 _ _ t f → _⋯_ {{𝕂}} t f) t fs)
 
   -- Get constructor telescope
   c-ty ← getType' con-nm
@@ -300,7 +291,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                 ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
                 ; argᵥ con-term
                 ; argᵥ (def (quote Kitty.Experimental.KitAltSimple._↑**_)
-                       [ argᵥ (def 𝕋-nm []) ; argᵥ (var "fs" []) ; argᵥ (var "µ₁'" []) ])
+                            [ argᵥ (def 𝕋-nm []) ; argᵥ (var "fs" []) ; argᵥ (var "µ₁'" []) ])
                 ]
   let ⋯-↑-con-ty = tel→pi
         ( [ ("𝕂s"  , argₕ Kits`)
@@ -387,20 +378,9 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   𝕋-nm ← term→name =<< quoteTC' 𝕋
 
   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
+  _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
 
-  let _⋯*_ =
-        (∀ {𝕂s : List Kit} {µ₁ µ₂ M} →
-          µ₁ ⊢ M → µ₁ –[ 𝕂s ]→* µ₂ → µ₂ ⊢ M)
-        by
-        (λ t fs → fold-star' (λ 𝕂 _ _ t f → _⋯_ {{𝕂}} t f) t fs)
-
-  let _≈ₓ_ = (∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} → (f : µ₁ –[ 𝕂s₁ ]→* µ₂) → (g : µ₁ –[ 𝕂s₂ ]→* µ₂) → Set)
-        by
-        (λ {𝕂s₁} {𝕂s₂} {µ₁} f g → ∀ {µ₁'} {m} (x : (µ₁ ▷▷ µ₁') ∋ m) → (` x) ⋯* (f ↑** µ₁') ≡ (` x) ⋯* (g ↑** µ₁'))
-
-  let _≈ₜ_ = (∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} → (f : µ₁ –[ 𝕂s₁ ]→* µ₂) → (g : µ₁ –[ 𝕂s₂ ]→* µ₂) → Set)
-        by
-        (λ {𝕂s₁} {𝕂s₂} {µ₁} f g → ∀ {µ₁'} {M} (t : (µ₁ ▷▷ µ₁') ⊢ M) → t ⋯* (f ↑** µ₁') ≡ t ⋯* (g ↑** µ₁'))
+  let open Kitty.Experimental.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
 
   clauses ← forM (enumerate con-nms) λ (i , c) → do
     ⋯-↑-con-nm ← freshName "⋯-↑-con"
@@ -418,6 +398,14 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
     (argᵥ ⋯-↑-nm)
     ⋯-↑-ty
     [ clause [] [] body ]
+
+  --   ⋯-↑ f g f≈g (` x) = f≈g x
+
+  --   ⋯-↑ {𝕂s₁} {𝕂s₂} {µ₁ = µ₁} {µ₂ = µ₂} f g f≈g {µ₁' = µ₁'} (foo {µ' = µ} t) =
+  --     foo t ⋯* (f ↑** µ₁')                  ≡⟨ ⋯-↑-foo f t ⟩
+  --     foo {µ' = µ} (t ⋯* (f ↑** µ₁' ↑** µ)) ≡⟨ cong foo (⋯-↑ (f ↑** µ₁') (g ↑** µ₁') (≈↑** f g f≈g) t) ⟩
+  --     foo {µ' = µ} (t ⋯* (g ↑** µ₁' ↑** µ)) ≡⟨ sym (⋯-↑-foo g t) ⟩
+  --     foo t ⋯* (g ↑** µ₁')                  ∎
 
 -- derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
 -- derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
