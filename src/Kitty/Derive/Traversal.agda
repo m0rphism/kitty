@@ -299,7 +299,7 @@ module Example where
     _·_   : ∀ {µ}  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
     foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
 
-  module Custom where
+  module Manual where
     terms : Terms 𝕄
     terms = record { _⊢_ = _⊢_ ; `_ = `_ }
 
@@ -358,6 +358,11 @@ module Example where
       foo {µ' = µ} (t ⋯* (f ↑** µ₁' ↑** µ)) ≡⟨ cong foo (⋯-↑ (f ↑** µ₁') (g ↑** µ₁') (≈↑** f g f≈g) t) ⟩
       foo {µ' = µ} (t ⋯* (g ↑** µ₁' ↑** µ)) ≡⟨ sym (⋯-↑-foo g t) ⟩
       foo t ⋯* (g ↑** µ₁')                  ∎
+
+    kit-traversal-alt : KitTraversalAlt
+    kit-traversal-alt = Kitty.Experimental.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
+
+    open Kitty.Experimental.KitAltSimple.Derive _ kit-traversal-alt
 
   -- module Derived where
   --   -- unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
