@@ -194,6 +194,10 @@ module TraversalOps (_⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ�
     sub₂ ((` sub₁ x) ⋯* (g ↑** (µ₁' ▷▷ µ₁''))) ≡⟨ sym (lemy g _ x)  ⟩
     ((` x) ⋯* ((g ↑** µ₁') ↑** µ₁'')) ∎
 
+open import Data.Unit using (⊤; tt)
+module TraversalOps' (_⋯_ : ⊤ → ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M) where
+  open TraversalOps (_⋯_ tt) public
+
 instance
   kit-[] : List Kit
   kit-[] = []
