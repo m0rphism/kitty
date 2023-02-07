@@ -486,8 +486,6 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
         ] ++ c-pat ∷ []
 
   non-var-clauses ← forM (enumerate con-nms) λ (i , c) → do
-    liftTC $ printStr "=========================================="
-    liftTC $ printAST c
     ⋯-↑-con-nm ← freshName "⋯-↑-con"
     liftTC (derive-⋯-↑-con 𝕋 ⋯-nm c ⋯-↑-con-nm)
 
@@ -579,16 +577,6 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
     let body = trans` (⋯-↑-con` 𝕂s₁` fs`) (
                trans` eqq
                       (sym` (⋯-↑-con` 𝕂s₂` gs`)))
-
-  --   ⋯-↑ {𝕂s₁} {𝕂s₂} {µ₁ = µ₁} {µ₂ = µ₂} f g f≈g {µ₁' = µ₁'} (foo {µ' = µ} t) =
-  --     foo t ⋯* (f ↑** µ₁')                  ≡⟨ ⋯-↑-foo f t ⟩
-  --     foo {µ' = µ} (t ⋯* (f ↑** µ₁' ↑** µ)) ≡⟨ cong foo (⋯-↑ (f ↑** µ₁') (g ↑** µ₁') (≈↑** f g f≈g) t) ⟩
-  --     foo {µ' = µ} (t ⋯* (g ↑** µ₁' ↑** µ)) ≡⟨ sym (⋯-↑-foo g t) ⟩
-  --     foo t ⋯* (g ↑** µ₁')                  ∎
-
-
-    liftTC $ printAST (mk-tel c-tel'x)
-    liftTC $ printAST (mk-pats c-pat)
 
     pure $ clause
       (mk-tel c-tel'x)
