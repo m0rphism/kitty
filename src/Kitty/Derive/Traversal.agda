@@ -223,6 +223,51 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
 --         (` x) ⋯ f ≡ `/id _ (f _ x)
 -- ⋯-var x f = refl
 
+-- Deriving n-ary cong ---------------------------------------------------------
+
+-- cong₂ : ∀ {a : Level} {A : Set a}
+--           {b : Level} {B : Set b}
+--           {c : Level} {C : Set c}
+--           (f : A → B → C)
+--           {x y : A}
+--           {u v : B}
+--         → x ≡ y
+--         → u ≡ v
+--         → f x u ≡ f y v
+-- cong₂ f refl refl = refl
+
+cong-n : ℕ → Name → FreshT TC ⊤
+cong-n n nm = do
+  levels    ← fresh-ids n "ℓ"
+  sets      ← fresh-ids n "A"
+  out-level ← fresh-id "ℓ"
+  out-set   ← fresh-id "A"
+  let all-levels = levels ++ [ out-level ]
+  let all-sets   = sets ++ [ out-set ]
+  let level-tel  = map (λ ℓ → (ℓ , argₕ (def (quote Level) []))) all-levels
+  let set-tel    = map (λ (ℓ , A) → (A , argₕ (agda-sort (set (var ℓ []))))) (zip all-levels all-sets)
+  f ← fresh-id "f"
+  let f-ty  = tel→pi (map (λ A → ("_" , argᵥ (var A []))) sets) (var out-set [])
+  let f-tel = [ f , argᵥ f-ty ]
+  args-x ← fresh-ids (length sets) "x"
+  args-y ← fresh-ids (length sets) "y"
+  let args-x-tel = map (λ (x , A) → (x , argₕ (var A []))) (zip args-x sets)
+  let args-y-tel = map (λ (x , A) → (x , argₕ (var A []))) (zip args-y sets)
+  let eq-tel = map
+        (λ (x , y) → ("_", argᵥ (def (quote _≡_) [ argᵥ (var x []) ; argᵥ (var y []) ])))
+        (zip args-x args-y)
+  let eq-res = def (quote _≡_) [ argᵥ (var f (map (λ x → argᵥ (var x [])) args-x))
+                               ; argᵥ (var f (map (λ y → argᵥ (var y [])) args-y)) ]
+  let tel = level-tel ++ set-tel ++ f-tel ++ args-x-tel ++ args-y-tel ++ eq-tel
+  let cong-ty = tel→pi tel eq-res
+  let cong-clause = clause
+        (level-tel ++ set-tel ++ f-tel)
+        (List.map (λ x → argₕ (var x)) all-levels ++
+        List.map (λ x → argₕ (var x)) all-sets ++
+        argᵥ (var f) ∷ List.map (λ _ → argᵥ (con (quote refl) [])) eq-tel)
+        (con (quote refl) [])
+  defdecFun' (argᵥ nm) cong-ty [ cong-clause ]
+
 tel→args : Telescope' → List (Arg Term')
 tel→args [] = []
 tel→args ((x , arg i t) ∷ tel) = arg i (var x []) ∷ tel→args tel
@@ -493,6 +538,30 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
     let 𝕂s₂` = Term' by (var "𝕂s₂" [])
     let fs` = Term' by (var "fs" [])
     let gs` = Term' by (var "gs" [])
+    let µ₁'` = Term' by (var "µ₁'" [])
+    let fs≈gs` = Term' by (var "fs≈gs" [])
+    let cong` = (Term' → Term' → Term') by λ f eq → def (quote cong) [ argᵥ f ; argᵥ eq ]
+    let _⋯*`_ = (Term' → Term' → Term') by
+                  λ t fs → def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._⋯*_)
+                          [ argᵥ (def 𝕋-nm [])
+                          ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                          ; argᵥ t
+                          ; argᵥ fs
+                          ]
+    let _↑**`_ = (Term' → Term' → Term') by
+                  λ fs µ → def (quote Kitty.Experimental.KitAltSimple._↑**_)
+                              [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
+    let ⋯-↑` = (Term' → Term' → Term' → Term' → Term') by λ fs gs fs≈gs t →
+               def ⋯-↑-nm [ argᵥ fs ; argᵥ gs ; argᵥ fs≈gs ; argᵥ t ]
+    let ≈↑**` = (Term' → Term' → Term' → Term') by λ fs gs fs≈gs →
+               def (quote Kitty.Experimental.KitAltSimple.TraversalOps'.≈↑**)
+                   [ argᵥ (def 𝕋-nm [])
+                   ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                   ; argᵥ fs ; argᵥ gs ; argᵥ fs≈gs
+                   ]
+
+    let rec = (Term' → Term') by λ t →
+          ⋯-↑` (fs` ↑**` µ₁'`) (gs` ↑**` µ₁'`) (≈↑**` fs` gs` fs≈gs`) t
 
     let todo = def (quote TODO) []
     let body = trans` (⋯-↑-con` 𝕂s₁` fs`) (
