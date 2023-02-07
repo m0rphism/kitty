@@ -397,35 +397,143 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
   𝕋-nm ← term→name =<< quoteTC' 𝕋
 
+  Kit` ← quoteTC' (Kitty.Kit.Kit 𝕋)
+  Kits` ← quoteTC' (List (Kitty.Kit.Kit 𝕋))
+  VarModes` ← quoteTC' (List VarMode)
+
   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
   _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
 
   let open Kitty.Experimental.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
 
-  clauses ← forM (enumerate con-nms) λ (i , c) → do
+  let mk-tel c-tel =
+        [ "𝕂s₁" , argₕ Kits`
+        ; "𝕂s₂" , argₕ Kits`
+        ; "µ₁" , argₕ VarModes`
+        ; "µ₂" , argₕ VarModes`
+        ; "fs" , argᵥ (def (quote Kitty.Experimental.KitAltSimple._–[_]→*_)
+            [ argᵥ (def 𝕋-nm [])
+            ; argᵥ (var "µ₁" [])
+            ; argᵥ (var "𝕂s₁" [])
+            ; argᵥ (var "µ₂" [])
+            ])
+        ; "gs" , argᵥ (def (quote Kitty.Experimental.KitAltSimple._–[_]→*_)
+            [ argᵥ (def 𝕋-nm [])
+            ; argᵥ (var "µ₁" [])
+            ; argᵥ (var "𝕂s₂" [])
+            ; argᵥ (var "µ₂" [])
+            ])
+        ; "f≈g" , argᵥ (def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._≈ₓ_)
+            [ argᵥ (def 𝕋-nm [])
+            ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+            ; argᵥ (var "fs" [])
+            ; argᵥ (var "gs" [])
+            ])
+        ; "µ₁'" , argₕ VarModes`
+        ] ++ c-tel
+  let mk-pats c-pat = 
+        [ argₕ (var "𝕂s₁")
+        ; argₕ (var "𝕂s₂")
+        ; argₕ (var "µ₁")
+        ; argₕ (var "µ₂")
+        ; argᵥ (var "fs" )
+        ; argᵥ (var "gs" )
+        ; argᵥ (var "f≈g" )
+        ; argₕ (var "µ₁'")
+        ] ++ c-pat ∷ []
+
+  non-var-clauses ← forM (enumerate con-nms) λ (i , c) → do
+    liftTC $ printStr "=========================================="
+    liftTC $ printAST c
     ⋯-↑-con-nm ← freshName "⋯-↑-con"
     liftTC (derive-⋯-↑-con 𝕋 ⋯-nm c ⋯-↑-con-nm)
 
-  let todo = def (quote TODO) []
-  let body = todo
+    -- Get constructor telescope
+    c-ty ← getType' c
+    let (c-tel , c-ret) = pi→tel c-ty
 
-  ⋯-↑-ty ← quoteTC' (
-      ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
-        f ≈ₓ g → f ≈ₜ g
-    )
+    -- Retrieve variable name used for `µ`
+    c-µ ← case unterm ⊢-nm c-ret of λ where
+      (just (var µ [] , M)) → pure µ
+      (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
+      nothing → liftTC $ failStr "impossible"
 
-  defdecFun'
-    (argᵥ ⋯-↑-nm)
-    ⋯-↑-ty
-    [ clause [] [] body ]
+    -- Rename `µ` to `µ₁` and replace `µ` occurences with `µ₁ ▷▷ µ₁'`
+    let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
+                                            (no _)  → (x , b [ c-µ ↦ def (quote _▷▷_) [ argᵥ (var "µ₁" []) ; argᵥ (var "µ₁'" []) ] ])
+                                            (yes _) → ("µ₁" , b)
+                              }) c-tel
 
-  --   ⋯-↑ f g f≈g (` x) = f≈g x
+    -- Remove `µ₁` binding, since it's already bound on the outside
+    let c-tel'x = List.boolFilter
+          (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
+          c-tel'
+
+    -- Convert tel bindings (x , t) to var patterns, but replace `µ₁` with `µ₁ ▷▷ µ₁'`
+    let c-pats = List.map (λ { (x , arg i _) → case x String.≟ c-µ of λ where
+                                                 (no _)  → arg i (var x)
+                                                 (yes _) → arg i (dot (def (quote _▷▷_)
+                                                    [ argᵥ (var "µ₁" [])
+                                                    ; argᵥ (var "µ₁'" []) ]))
+                             }) c-tel
+    let c-pat = argᵥ (con c c-pats)
+
+    
+    let ⋯-↑-con` = (Term' → Term' → Term') by λ 𝕂s fs →
+          def ⋯-↑-con-nm
+            ([ argₕ 𝕂s
+             ; argₕ (var "µ₁" [])
+             ; argₕ (var "µ₂" [])
+             ; argₕ (var "µ₁'" [])
+             ; argᵥ fs
+             ] ++ List.map (λ { (x , arg i t) → arg i (var x []) }) c-tel'x)
+    let sym` = (Term' → Term') by λ eq → def (quote sym) [ argᵥ eq ]
+    let trans` = (Term' → Term' → Term') by λ eq₁ eq₂ → def (quote trans) [ argᵥ eq₁ ; argᵥ eq₂ ]
+    let 𝕂s₁` = Term' by (var "𝕂s₁" [])
+    let 𝕂s₂` = Term' by (var "𝕂s₂" [])
+    let fs` = Term' by (var "fs" [])
+    let gs` = Term' by (var "gs" [])
+
+    let todo = def (quote TODO) []
+    let body = trans` (⋯-↑-con` 𝕂s₁` fs`) (
+               trans` todo
+                      (sym` (⋯-↑-con` 𝕂s₂` gs`)))
 
   --   ⋯-↑ {𝕂s₁} {𝕂s₂} {µ₁ = µ₁} {µ₂ = µ₂} f g f≈g {µ₁' = µ₁'} (foo {µ' = µ} t) =
   --     foo t ⋯* (f ↑** µ₁')                  ≡⟨ ⋯-↑-foo f t ⟩
   --     foo {µ' = µ} (t ⋯* (f ↑** µ₁' ↑** µ)) ≡⟨ cong foo (⋯-↑ (f ↑** µ₁') (g ↑** µ₁') (≈↑** f g f≈g) t) ⟩
   --     foo {µ' = µ} (t ⋯* (g ↑** µ₁' ↑** µ)) ≡⟨ sym (⋯-↑-foo g t) ⟩
   --     foo t ⋯* (g ↑** µ₁')                  ∎
+
+
+    liftTC $ printAST (mk-tel c-tel'x)
+    liftTC $ printAST (mk-pats c-pat)
+
+    pure $ clause
+      (mk-tel c-tel'x)
+      (mk-pats c-pat)
+      body
+
+  ⋯-↑-ty ← quoteTC' (
+      ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
+        f ≈ₓ g → f ≈ₜ g
+    )
+
+  let var-clause = clause
+        (mk-tel [ "x" , argᵥ (def (quote _∋_) [ argᵥ (def (quote List._++_)
+                                                       [ argᵥ (var "µ₁'" [])
+                                                       ; argᵥ (var "µ₁" [])
+                                                       ])
+                                              ; argᵥ unknown
+                                              ])
+                ])
+        (mk-pats (argᵥ (con `-nm [ argᵥ (var "x") ])))
+        (var "f≈g" [ argᵥ (var "x" []) ])
+
+  defdecFun'
+    (argᵥ ⋯-↑-nm)
+    ⋯-↑-ty
+    (var-clause ∷ non-var-clauses)
 
 -- derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
 -- derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
