@@ -468,7 +468,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
             ; argᵥ (var "𝕂s₂" [])
             ; argᵥ (var "µ₂" [])
             ])
-        ; "f≈g" , argᵥ (def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._≈ₓ_)
+        ; "fs≈gs" , argᵥ (def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._≈ₓ_)
             [ argᵥ (def 𝕋-nm [])
             ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
             ; argᵥ (var "fs" [])
@@ -483,7 +483,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
         ; argₕ (var "µ₂")
         ; argᵥ (var "fs" )
         ; argᵥ (var "gs" )
-        ; argᵥ (var "f≈g" )
+        ; argᵥ (var "fs≈gs" )
         ; argₕ (var "µ₁'")
         ] ++ c-pat ∷ []
 
@@ -563,9 +563,23 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
     let rec = (Term' → Term') by λ t →
           ⋯-↑` (fs` ↑**` µ₁'`) (gs` ↑**` µ₁'`) (≈↑**` fs` gs` fs≈gs`) t
 
-    let todo = def (quote TODO) []
+    let tel-rec , tel-non-rec = splitRec c-tel ⊢-nm
+    let rec-ids = map proj₁ tel-rec
+    let non-rec-ids = map proj₁ tel-non-rec
+    cong-name ← freshName "cong-n"
+    cong-n (length rec-ids) cong-name
+    let cong-fun = tel→lam tel-rec $ con c $
+                    List.map (λ{ (x , arg i t) → case x String.≟ c-µ of λ where
+                                    (no _)  → arg i (var x [])
+                                    (yes _) → arg i (def (quote _▷▷_)
+                                                      [ argᵥ (var "µ₂" [])
+                                                      ; argᵥ (var "µ₁'" []) ])
+                               }) c-tel
+
+    let eqq = def cong-name (argᵥ cong-fun ∷ List.map (λ x → argᵥ (rec (var x []))) rec-ids)
+                         
     let body = trans` (⋯-↑-con` 𝕂s₁` fs`) (
-               trans` todo
+               trans` eqq
                       (sym` (⋯-↑-con` 𝕂s₂` gs`)))
 
   --   ⋯-↑ {𝕂s₁} {𝕂s₂} {µ₁ = µ₁} {µ₂ = µ₂} f g f≈g {µ₁' = µ₁'} (foo {µ' = µ} t) =
@@ -597,7 +611,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
                                               ])
                 ])
         (mk-pats (argᵥ (con `-nm [ argᵥ (var "x") ])))
-        (var "f≈g" [ argᵥ (var "x" []) ])
+        (var "fs≈gs" [ argᵥ (var "x" []) ])
 
   defdecFun'
     (argᵥ ⋯-↑-nm)
