@@ -227,6 +227,17 @@ tel→args : Telescope' → List (Arg Term')
 tel→args [] = []
 tel→args ((x , arg i t) ∷ tel) = arg i (var x []) ∷ tel→args tel
 
+µ→[]' : String → Term' → Term'
+µ→[]' `µ t₂ =
+  let t₂ = rw (λ { ⦃ `Term ⦄ t → case un-++ t of λ where
+                     (just (xs , var ys [])) → case `µ String.≟ ys of λ where
+                                                 (yes _) → just xs
+                                                 (no  _) → nothing
+                     _                        → nothing
+                 ; ⦃ T     ⦄ t → nothing
+                 }) t₂
+  in t₂ [ `µ ↦ con (quote List.List.[]) [] ]
+
 derive-⋯-↑-con : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → TC ⊤
 derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
   let open Modes 𝕄
@@ -279,20 +290,29 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                               (no _) → arg i (var x [])
                    )
                    c-tel'
-  let rhs = def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._⋯*_)
-                [ argᵥ (def 𝕋-nm [])
-                ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
-                ; argᵥ con-term
-                ; argᵥ (def (quote Kitty.Experimental.KitAltSimple._↑**_)
-                            [ argᵥ (def 𝕋-nm []) ; argᵥ (var "fs" []) ; argᵥ (var "µ₁'" []) ])
-                ]
-  let lhs = def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._⋯*_)
-                [ argᵥ (def 𝕋-nm [])
-                ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
-                ; argᵥ con-term
-                ; argᵥ (def (quote Kitty.Experimental.KitAltSimple._↑**_)
-                            [ argᵥ (def 𝕋-nm []) ; argᵥ (var "fs" []) ; argᵥ (var "µ₁'" []) ])
-                ]
+  -- ((λx t) ⋯* (f ↑** µ₁')) ≡ λx (t ⋯* (f ↑** µ₁' ↑** [ 𝕖 ]))
+  let _⋯*`_ = (Term' → Term' → Term') by
+                λ t fs → def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._⋯*_)
+                        [ argᵥ (def 𝕋-nm [])
+                        ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                        ; argᵥ t
+                        ; argᵥ fs
+                        ]
+  let _↑**`_ = (Term' → Term' → Term') by
+                λ fs µ → def (quote Kitty.Experimental.KitAltSimple._↑**_)
+                             [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
+  let lhs = con-term ⋯*` (var "fs" [] ↑**` var "µ₁'" [])
+  let rhs = con con-nm $ List.map
+                   (λ where (x , arg i t) → case x String.≟ c-µ of λ where
+                              (yes _) → arg i (def (quote _▷▷_)
+                                                   [ argᵥ (var "µ₂" [])
+                                                   ; argᵥ (var "µ₁'" []) ])
+                              (no _) → case unterm ⊢-nm t of λ where
+                                         (just (µ , _)) → let µ' = µ→[]' c-µ µ in
+                                                          arg i (var x [] ⋯*` ((var "fs" [] ↑**` var "µ₁'" []) ↑**` µ'))
+                                         nothing        → arg i (var x [])
+                   )
+                   c-tel
   let ⋯-↑-con-ty = tel→pi
         ( [ ("𝕂s"  , argₕ Kits`)
           ; ("µ₁"  , argₕ VarModes`) 
