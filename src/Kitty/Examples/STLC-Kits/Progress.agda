@@ -1,9 +1,9 @@
-module Kitty.Examples.STLC.Progress where
+module Kitty.Examples.STLC-Kits.Progress where
 
 open import Data.Product using (∃-syntax; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 
-open import Kitty.Examples.STLC.Definitions
+open import Kitty.Examples.STLC-Kits.Definitions
 
 progress : ∀ {Γ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} →
   Γ ⊢ e ∶ t →

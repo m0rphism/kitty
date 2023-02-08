@@ -1,4 +1,4 @@
-module Kitty.Examples.STLC.Definitions where
+module Kitty.Examples.STLC-Kits.Definitions where
 
 open import Data.List using (List; [])
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong₂; module ≡-Reasoning)

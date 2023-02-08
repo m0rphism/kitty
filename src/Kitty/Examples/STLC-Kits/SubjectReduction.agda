@@ -1,10 +1,10 @@
-module Kitty.Examples.STLC.SubjectReduction where
+module Kitty.Examples.STLC-Kits.SubjectReduction where
 
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
 
-open import Kitty.Examples.STLC.Definitions
+open import Kitty.Examples.STLC-Kits.Definitions
 
 open import Kitty.Typing.ITerms terms kit-traversal kit-homotopy kit-assoc kit-assoc-lemmas kit-type
 
