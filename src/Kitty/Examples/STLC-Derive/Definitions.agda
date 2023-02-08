@@ -60,9 +60,8 @@ variable
 
 open import Kitty.Derive.Traversal
 
-import Kitty.Term.KitAltSimple
 unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
-open Kitty.Term.KitAltSimple.Derive _ traversal
+open Kitty.Derive.Traversal.Derived traversal public
 
 -- Types and Contexts ----------------------------------------------------------
 

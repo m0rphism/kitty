@@ -280,8 +280,8 @@ module Derive (KT : KitTraversalAlt) where
       v ⋯* (_∷_ {b = 𝕂} (g ∘ₖ f) [])       ≡⟨ refl ⟩
       v ⋯ (g ∘ₖ f)       ∎
 
-    kit-assoc : KitAssoc
-    kit-assoc = record { ⋯-assoc = ⋯-assoc }
+  kit-assoc : KitAssoc
+  kit-assoc = record { ⋯-assoc = ⋯-assoc }
 
   open KitAssoc kit-assoc public hiding (kitᵣᵣ; kitᵣₛ; kitₛᵣ; kitₛₛ; wk-kitᵣ; wk-kitₛ)
 

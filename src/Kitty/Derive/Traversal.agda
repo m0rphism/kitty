@@ -635,6 +635,11 @@ derive-traversal 𝕄 _⊢_ traversal-nm = do
 
   derive-KitTraversalAlt terms ⋯-nm ⋯-var-nm ⋯-↑-nm traversal-nm
 
+
+module Derived {𝕄 : Modes} {𝕋 : Terms 𝕄} (T : Kitty.Term.KitAltSimple.KitTraversalAlt 𝕋) where
+  import Kitty.Term.KitAltSimple
+  open Kitty.Term.KitAltSimple.Derive _ T public
+
 module Example where
   open Kitty.Term.Prelude
 
@@ -720,7 +725,7 @@ module Example where
     kit-traversal-alt : KitTraversalAlt
     kit-traversal-alt = Kitty.Term.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
 
-    open Kitty.Term.KitAltSimple.Derive _ kit-traversal-alt
+    open Derived kit-traversal-alt
 
   module Half-Derived where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
@@ -748,7 +753,7 @@ module Example where
     kit-traversal-alt : KitTraversalAlt
     kit-traversal-alt = Kitty.Term.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
 
-    open Kitty.Term.KitAltSimple.Derive _ kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
+    open Derived kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
 
     `id : [] ⊢ 𝕖
     `id = λx ` here refl
@@ -762,9 +767,9 @@ module Example where
     test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
     test-`f' = refl
 
-  module Derived where
+  module Derived' where
     unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
-    open Kitty.Term.KitAltSimple.Derive _ traversal
+    open Derived traversal
 
     `id : [] ⊢ 𝕖
     `id = λx ` here refl
