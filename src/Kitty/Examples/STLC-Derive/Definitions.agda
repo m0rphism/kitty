@@ -64,16 +64,6 @@ import Kitty.Term.KitAltSimple
 unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
 open Kitty.Term.KitAltSimple.Derive _ traversal
 
--- Instances
-
-instance
-  kitᵣ'  = kitᵣ
-  kitₛ'  = kitₛ
-  kitᵣᵣ' = kitᵣᵣ
-  kitᵣₛ' = kitᵣₛ
-  kitₛᵣ' = kitₛᵣ
-  kitₛₛ' = kitₛₛ
-
 -- Types and Contexts ----------------------------------------------------------
 
 open import Kitty.Typing.Types terms
