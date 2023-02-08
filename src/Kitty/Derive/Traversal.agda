@@ -48,6 +48,45 @@ private variable
 
 open Modes using (Scoped)
 
+record VarCon (𝕄 : Modes) (_⊢_ : Scoped 𝕄) : Set where
+  open Modes 𝕄
+  field
+    nm    : Name
+    ctor` : Term' → Term'
+    pat`  : Pattern' → Pattern'
+    ctor  : ∀ {µ m} → µ ∋ m → µ ⊢ m→M m
+
+open VarCon
+
+get-var-con : (𝕄 : Modes) (_⊢_ : Scoped 𝕄) → Name → TC (VarCon 𝕄 _⊢_)
+get-var-con 𝕄 _⊢_ `-nm = do
+  let open Modes 𝕄
+  catchTC
+    (do
+      `_ ← unquoteTC' {A = ∀ {µ m} → µ ∋ m → µ ⊢ m→M m} (con `-nm [])
+      pure record
+        { nm = `-nm
+        ; ctor` = λ x → con `-nm [ argᵥ x ]
+        ; pat` = λ x → con `-nm [ argᵥ x ]
+        ; ctor = λ {µ} → `_ {µ}
+        }
+    )
+    (do
+      `_ ← (unquoteTC' {A = ∀ {µ m} → µ ∋ m → µ ⊢ m→M m}
+                       (lam hidden (abs "µ"
+                       (lam hidden (abs "m"
+                       (con `-nm [ argₕ (var "µ" [])
+                                 ; argₕ (var "m" [])
+                                 ; argᵥ (con (quote refl) [])
+                                 ]))))))
+      pure record
+        { nm = `-nm
+        ; ctor` = λ x → con `-nm [ argᵥ (con (quote refl) []) ; argᵥ x ]
+        ; pat` = λ x → con `-nm [ argᵥ (con (quote refl) []) ; argᵥ x ]
+        ; ctor = λ {µ} → `_ {µ}
+        }
+    )
+
 derive-Terms : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
 derive-Terms 𝕄 _⊢_ terms-nm = runFreshT do
   let open Modes 𝕄
@@ -55,9 +94,9 @@ derive-Terms 𝕄 _⊢_ terms-nm = runFreshT do
   ⊢-nm ← quoteNameTC _⊢_
   ⊢-def ← getDefinition ⊢-nm
   `-nm , _ ← split-term-ctors (ctors ⊢-def)
-  `_ ← unquoteTC' {A = ∀ {µ m} → µ ∋ m → µ ⊢ m→M m} (con `-nm [])
+  var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
   terms-ty ← quoteTC' (Terms 𝕄)
-  terms-body ← quoteTC' (mkTerms _⊢_ (λ {µ} → `_ {µ}))
+  terms-body ← quoteTC' (mkTerms _⊢_ (ctor var-con))
   -- let terms-ty = def (quote Terms) [ argᵥ (def 𝕄-nm []) ]
   -- let terms-body = def (quote mkTerms) [ argᵥ (def ⊢-nm []) ; argᵥ (con `-nm []) ] 
   defdecFun'
@@ -96,6 +135,7 @@ derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
   ⊢-nm ← quoteNameTC _⊢_
   ⊢-def ← getDefinition ⊢-nm
   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+  var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
   𝕋-nm ← term→name =<< quoteTC' 𝕋
   VarMode` ← quoteNormTC' VarMode
   VarModes` ← quoteNormTC' (List VarMode)
@@ -169,7 +209,7 @@ derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
                                               ; argᵥ unknown
                                               ])
                 ]
-  let var-pat = argᵥ (con `-nm [ argᵥ (var "x") ])
+  let var-pat = argᵥ (pat` var-con (var "x"))
   let var-clause = clause (mk-tel var-tel)
                           (mk-pats var-pat)
                           (def (quote Kitty.Term.Kit.Kit.`/id)
@@ -203,6 +243,7 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
   ⊢-nm ← quoteNameTC _⊢_
   ⊢-def ← getDefinition ⊢-nm
   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+  var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
   𝕋-nm ← term→name =<< quoteTC' 𝕋
 
   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
@@ -211,7 +252,7 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
              lam visible (abs "f" (
              con (quote refl) []))))
   ⋯-var-ty ← quoteTC' (∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
-                       → (` x) ⋯ f ≡ Kit.`/id 𝕂 _ (f _ x))
+                       → (ctor var-con x) ⋯ f ≡ Kit.`/id 𝕂 _ (f _ x))
   defdecFun'
     (argᵥ ⋯-var-nm)
     ⋯-var-ty
@@ -438,6 +479,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   ⊢-nm ← quoteNameTC _⊢_
   ⊢-def ← getDefinition ⊢-nm
   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+  var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
   𝕋-nm ← term→name =<< quoteTC' 𝕋
 
   Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
@@ -596,7 +638,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
                                               ; argᵥ unknown
                                               ])
                 ])
-        (mk-pats (argᵥ (con `-nm [ argᵥ (var "x") ])))
+        (mk-pats (argᵥ (pat` var-con (var "x"))))
         (var "fs≈gs" [ argᵥ (var "x" []) ])
 
   defdecFun'
@@ -783,5 +825,29 @@ module Example where
     test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
     test-`f' = refl
 
+module ExampleVarEq where
+  open Kitty.Term.Prelude
 
+  data Modeᵥ : Set where 𝕖 : Modeᵥ
+  data Modeₜ : Set where 𝕖 : Modeₜ
+
+  m→M : Modeᵥ → Modeₜ
+  m→M 𝕖 = 𝕖
+
+  𝕄 : Modes
+  𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
+
+  infix  30 `[_]_
+  infixl 20 _·_
+  infixr 10 λx_
+
+  data _⊢_ : List Modeᵥ → Modeₜ → Set where
+    `[_]_ : ∀ {µ m M}  →  m→M m ≡ M  →  µ ∋ m  →  µ ⊢ M
+    λx_   : ∀ {µ}  →  (µ ▷ 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
+    _·_   : ∀ {µ}  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
+    foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
+
+  module Derived' where
+    unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
+    open Derived traversal
 
