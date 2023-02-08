@@ -1,10 +1,10 @@
-module Kitty.Examples.STLC.SubjectReduction where
+module Kitty.Examples.STLC-NoIKit.SubjectReduction where
 
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
 
-open import Kitty.Examples.STLC.Definitions
+open import Kitty.Examples.STLC-NoIKit.Definitions
 
 ope-pres-⊢ : ∀ {e : µ₁ ⊢ 𝕖} {t : µ₁ ∶⊢ 𝕖} {ρ : µ₁ →ᵣ µ₂} →
   OPE ρ Γ₁ Γ₂ →

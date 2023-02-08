@@ -5,10 +5,10 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 
 open import Kitty.Examples.STLC.Definitions
 
-progress :
+progress : ∀ {Γ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} →
   Γ ⊢ e ∶ t →
   Value e ⊎ ∃[ e' ] (e ↪ e')
-progress (τ-` x) = inj₁ (neutral (` _))
+progress (τ-` {m = 𝕖} x) = inj₁ (neutral (` _))
 progress (τ-λ ⊢e) = inj₁ (λx _)
 progress (τ-· {e₁ = e₁} {e₂ = e₂} ⊢e₁ ⊢e₂) with progress ⊢e₁ | progress ⊢e₂
 ... | inj₁ (neutral n)      | inj₁ v₂             = inj₁ (neutral (n · v₂))

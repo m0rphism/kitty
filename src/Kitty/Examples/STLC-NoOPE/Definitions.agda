@@ -1,11 +1,11 @@
-module Kitty.Examples.STLC.Definitions where
+module Kitty.Examples.STLC-NoOPE.Definitions where
 
 open import Data.List using (List; [])
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong₂; module ≡-Reasoning)
 
-open import Kitty.Prelude using (_∋_; _▷_) public
-open import Kitty.Homotopy using (_~_; ~-sym)
-open import Kitty.Modes using (Modes; Terms)
+open import Kitty.Term.Prelude using (_∋_; _▷_) public
+open import Kitty.Term.Modes using (Modes; Terms)
+open import Kitty.Util.Homotopy using (_~_; ~-sym)
 
 open ≡-Reasoning
 
@@ -63,7 +63,7 @@ terms = record { _⊢_ = _⊢_ ; `_ = `_ }
 
 -- Kitty KitTraversal
 
-open import Kitty.Kit terms public
+open import Kitty.Term.Kit terms public
 open Kit ⦃ … ⦄ public
 
 infixl  5  _⋯_
@@ -101,7 +101,7 @@ kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
 -- Kitty KitCompose
 
-open import Kitty.Compose terms kit-traversal kit-homotopy
+open import Kitty.Term.Compose terms kit-traversal kit-homotopy
 open ComposeKit ⦃ … ⦄ public
 
 ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
@@ -152,7 +152,7 @@ instance
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import Kitty.Types terms
+open import Kitty.Typing.Types terms
 
 -- Each variable mode corresponds to a term mode that represents its type.
 kit-type : KitType
@@ -160,7 +160,7 @@ kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕥 } }
 
 open KitType kit-type public
 
-open import Kitty.OPE kit-assoc-lemmas kit-type public
+open import Kitty.Typing.OPE kit-assoc-lemmas kit-type public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ

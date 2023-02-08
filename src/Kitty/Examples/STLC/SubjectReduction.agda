@@ -6,12 +6,12 @@ open ≡-Reasoning
 
 open import Kitty.Examples.STLC.Definitions
 
-open import Kitty.Experimental.ITerms terms kit-traversal kit-homotopy kit-assoc kit-assoc-lemmas kit-type
+open import Kitty.Typing.ITerms terms kit-traversal kit-homotopy kit-assoc kit-assoc-lemmas kit-type
 
 iterms : ITerms
 iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = τ-` }
 
-open import Kitty.Experimental.IKit terms kit-traversal kit-homotopy kit-assoc kit-assoc-lemmas kit-type iterms
+open import Kitty.Typing.IKit terms kit-traversal kit-homotopy kit-assoc kit-assoc-lemmas kit-type iterms
 
 open IKit ⦃ … ⦄
 
