@@ -1,9 +1,8 @@
 module Kitty.Examples.SystemF-Derive.Definitions where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-open import Kitty.Term.Prelude using (_∋_; _▷_; List; []) public
-open import Kitty.Term.Modes using (Modes; Terms)
-open import Kitty.Util.Homotopy using (_~_; ~-sym)
+open import Kitty.Term.Prelude using (_∋_; List; []; _▷_) public
+open import Kitty.Term.Modes using (Modes)
 
 -- Fixities --------------------------------------------------------------------
 
@@ -85,25 +84,25 @@ variable
 -- Type System -----------------------------------------------------------------
 
 data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
-  τ-` : ∀ {x : µ ∋ m} →
+  ⊢` : ∀ {x : µ ∋ m} →
     Γ ∋ x ∶ T →
     Γ ⊢ ` x ∶ T
-  τ-λ :
+  ⊢λ :
     Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wkᵣ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
-  τ-Λ :
+  ⊢Λ :
     Γ ▶ k ⊢ e ∶ t₂ →
     Γ ⊢ Λα e ∶ ∀[α∶ k ] t₂
-  τ-· :
+  ⊢· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →
     Γ ⊢ e₂ ∶ t₁ →
     Γ ⊢ e₁ · e₂ ∶ t₂
-  τ-∙ : {Γ : Ctx µ} →
+  ⊢∙ : {Γ : Ctx µ} →
     Γ ▶ k₂ ⊢ t₁ ∶ k₁ →
     Γ ⊢ t₂ ∶ k₂ →
     Γ ⊢ e₁ ∶ ∀[α∶ k₂ ] t₁ →
     Γ ⊢ e₁ ∙ t₂ ∶ t₁ ⋯ ⦅ t₂ ⦆
-  τ-τ :
+  ⊢τ :
     Γ ⊢ t ∶ ★
 
 -- Semantics -------------------------------------------------------------------
