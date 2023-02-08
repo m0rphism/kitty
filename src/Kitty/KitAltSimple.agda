@@ -2,7 +2,7 @@ open import Kitty.Modes
 
 -- Version of KitAlt with a simpler KitTraversal.⋯-↑ field.
 
-module Kitty.Experimental.KitAltSimple {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.KitAltSimple {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Properties using (++-assoc)
@@ -13,7 +13,7 @@ open import Axiom.Extensionality.Propositional using (Extensionality)
 open import Kitty.Prelude
 open import Level using (_⊔_)
 
-open import Kitty.Experimental.Star
+open import Kitty.Star
 
 open Modes 𝕄
 open Terms 𝕋

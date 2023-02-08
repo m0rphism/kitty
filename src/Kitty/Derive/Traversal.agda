@@ -38,8 +38,8 @@ open import ReflectionLib.Categorical
 open import Kitty.Prelude using (_∋_)
 open import Kitty.Modes
 import Kitty.Kit
-import Kitty.Experimental.KitAltSimple
-open import Kitty.Experimental.Star
+import Kitty.KitAltSimple
+open import Kitty.Star
 open import Kitty.Derive.Common
 
 private variable
@@ -287,7 +287,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
   let open Terms 𝕋
   let open Kitty.Kit 𝕋
   let open Kitty.Prelude using (_▷▷_)
-  let open Kitty.Experimental.KitAltSimple 𝕋
+  let open Kitty.KitAltSimple 𝕋
 
   𝕄-nm ← quoteNameTC 𝕄
   ⊢-nm ← quoteNameTC _⊢_
@@ -297,7 +297,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
 
   _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M}
                     (lam visible (abs "_" (def ⋯-nm [])))
-  let open Kitty.Experimental.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
+  let open Kitty.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
 
   -- Get constructor telescope
   c-ty ← getType' con-nm
@@ -335,14 +335,14 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                    c-tel'
   -- ((λx t) ⋯* (f ↑** µ₁')) ≡ λx (t ⋯* (f ↑** µ₁' ↑** [ 𝕖 ]))
   let _⋯*`_ = (Term' → Term' → Term') by
-                λ t fs → def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._⋯*_)
+                λ t fs → def (quote Kitty.KitAltSimple.TraversalOps'._⋯*_)
                         [ argᵥ (def 𝕋-nm [])
                         ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
                         ; argᵥ t
                         ; argᵥ fs
                         ]
   let _↑**`_ = (Term' → Term' → Term') by
-                λ fs µ → def (quote Kitty.Experimental.KitAltSimple._↑**_)
+                λ fs µ → def (quote Kitty.KitAltSimple._↑**_)
                              [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
   let lhs = con-term ⋯*` (var "fs" [] ↑**` var "µ₁'" [])
   let rhs = con con-nm $ List.map
@@ -361,7 +361,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
           ; ("µ₁"  , argₕ VarModes`) 
           ; ("µ₂"  , argₕ VarModes`) 
           ; ("µ₁'" , argₕ VarModes`)
-          ; ("fs"  , argᵥ (def (quote Kitty.Experimental.KitAltSimple._–[_]→*_)
+          ; ("fs"  , argᵥ (def (quote Kitty.KitAltSimple._–[_]→*_)
                           [ argᵥ (def 𝕋-nm []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µ₂" []) ]))
           ] ++ c-tel'x)
         (def (quote _≡_) [ argᵥ lhs ; argᵥ rhs ])
@@ -391,7 +391,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
   let clause₁ = clause
         (mk-tel [] [])
         (mk-pats [ argₕ (con (quote Agda.Builtin.List.List.[]) []) ]
-                 [ argᵥ (con (quote Kitty.Experimental.Star.[]) []) ])
+                 [ argᵥ (con (quote Kitty.Star.[]) []) ])
         (con (quote refl) [])
 
   -- ⋯-↑-λ {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-λ fs t) refl
@@ -405,15 +405,15 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                 ; ("f" , argᵥ (def (quote Kitty.Kit._–[_]→_)
                       [ argᵥ (def 𝕋-nm [])
                       ; argᵥ (var "µₓ" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ]))
-                ; ("fs" , argᵥ (def (quote Kitty.Experimental.KitAltSimple._–[_]→*_)
+                ; ("fs" , argᵥ (def (quote Kitty.KitAltSimple._–[_]→*_)
                       [ argᵥ (def 𝕋-nm [])
                       ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µₓ" []) ]))
                 ])
         (mk-pats [ argₕ (con (quote Agda.Builtin.List.List._∷_) [ argᵥ (var "𝕂") ; argᵥ (var "𝕂s") ]) ]
-                 [ argᵥ (con (quote Kitty.Experimental.Star._∷_) [ argₕ (dot (var "µ₂" []))
-                                                                 ; argₕ (var "µₓ")
-                                                                 ; argₕ (dot (var "µ₁" []))
-                                                                 ; argᵥ (var "f") ; argᵥ (var "fs") ])
+                 [ argᵥ (con (quote Kitty.Star._∷_) [ argₕ (dot (var "µ₂" []))
+                                                    ; argₕ (var "µₓ")
+                                                    ; argₕ (dot (var "µ₁" []))
+                                                    ; argᵥ (var "f") ; argᵥ (var "fs") ])
                  ])
         (def (quote cong₂)
           [ argᵥ (def ⋯-nm [ argᵢ (var "𝕂" []) ])
@@ -432,7 +432,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   let open Terms 𝕋
   let open Kitty.Kit 𝕋
   let open Kitty.Prelude using (_▷▷_)
-  let open Kitty.Experimental.KitAltSimple 𝕋
+  let open Kitty.KitAltSimple 𝕋
 
   𝕄-nm ← quoteNameTC 𝕄
   ⊢-nm ← quoteNameTC _⊢_
@@ -447,26 +447,26 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
   _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕂 : Kitty.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
 
-  let open Kitty.Experimental.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
+  let open Kitty.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
 
   let mk-tel c-tel =
         [ "𝕂s₁" , argₕ Kits`
         ; "𝕂s₂" , argₕ Kits`
         ; "µ₁" , argₕ VarModes`
         ; "µ₂" , argₕ VarModes`
-        ; "fs" , argᵥ (def (quote Kitty.Experimental.KitAltSimple._–[_]→*_)
+        ; "fs" , argᵥ (def (quote Kitty.KitAltSimple._–[_]→*_)
             [ argᵥ (def 𝕋-nm [])
             ; argᵥ (var "µ₁" [])
             ; argᵥ (var "𝕂s₁" [])
             ; argᵥ (var "µ₂" [])
             ])
-        ; "gs" , argᵥ (def (quote Kitty.Experimental.KitAltSimple._–[_]→*_)
+        ; "gs" , argᵥ (def (quote Kitty.KitAltSimple._–[_]→*_)
             [ argᵥ (def 𝕋-nm [])
             ; argᵥ (var "µ₁" [])
             ; argᵥ (var "𝕂s₂" [])
             ; argᵥ (var "µ₂" [])
             ])
-        ; "fs≈gs" , argᵥ (def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._≈ₓ_)
+        ; "fs≈gs" , argᵥ (def (quote Kitty.KitAltSimple.TraversalOps'._≈ₓ_)
             [ argᵥ (def 𝕋-nm [])
             ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
             ; argᵥ (var "fs" [])
@@ -538,19 +538,19 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
     let fs≈gs` = Term' by (var "fs≈gs" [])
     let cong` = (Term' → Term' → Term') by λ f eq → def (quote cong) [ argᵥ f ; argᵥ eq ]
     let _⋯*`_ = (Term' → Term' → Term') by
-                  λ t fs → def (quote Kitty.Experimental.KitAltSimple.TraversalOps'._⋯*_)
+                  λ t fs → def (quote Kitty.KitAltSimple.TraversalOps'._⋯*_)
                           [ argᵥ (def 𝕋-nm [])
                           ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
                           ; argᵥ t
                           ; argᵥ fs
                           ]
     let _↑**`_ = (Term' → Term' → Term') by
-                  λ fs µ → def (quote Kitty.Experimental.KitAltSimple._↑**_)
+                  λ fs µ → def (quote Kitty.KitAltSimple._↑**_)
                               [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
     let ⋯-↑` = (Term' → Term' → Term' → Term' → Term') by λ fs gs fs≈gs t →
                def ⋯-↑-nm [ argᵥ fs ; argᵥ gs ; argᵥ fs≈gs ; argᵥ t ]
     let ≈↑**` = (Term' → Term' → Term' → Term') by λ fs gs fs≈gs →
-               def (quote Kitty.Experimental.KitAltSimple.TraversalOps'.≈↑**)
+               def (quote Kitty.KitAltSimple.TraversalOps'.≈↑**)
                    [ argᵥ (def 𝕋-nm [])
                    ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
                    ; argᵥ fs ; argᵥ gs ; argᵥ fs≈gs
@@ -608,14 +608,14 @@ derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Nam
 derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
   𝕋-nm ← term→name =<< quoteTC' 𝕋
   let body =
-        con (quote Kitty.Experimental.KitAltSimple.mkKitTraversalAlt)
+        con (quote Kitty.KitAltSimple.mkKitTraversalAlt)
           [ argᵥ (def ⋯-nm [])
           ; argᵥ (def ⋯-var-nm [])
           ; argᵥ (def ⋯-↑-nm [])
           ]
   defdecFun'
     (argᵥ kit-traversal-nm)
-    (def (quote Kitty.Experimental.KitAltSimple.KitTraversalAlt) [ argᵥ (def 𝕋-nm []) ])
+    (def (quote Kitty.KitAltSimple.KitTraversalAlt) [ argᵥ (def 𝕋-nm []) ])
     [ clause [] [] body ]
 
 derive-traversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name  → TC ⊤
@@ -661,7 +661,7 @@ module Example where
     terms : Terms 𝕄
     terms = record { _⊢_ = _⊢_ ; `_ = `_ }
 
-    open import Kitty.Experimental.KitAltSimple terms
+    open import Kitty.KitAltSimple terms
     open Kitty.Kit terms
     open Kit ⦃ ... ⦄
 
@@ -718,9 +718,9 @@ module Example where
       foo t ⋯* (g ↑** µ₁')                  ∎
 
     kit-traversal-alt : KitTraversalAlt
-    kit-traversal-alt = Kitty.Experimental.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
+    kit-traversal-alt = Kitty.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
 
-    open Kitty.Experimental.KitAltSimple.Derive _ kit-traversal-alt
+    open Kitty.KitAltSimple.Derive _ kit-traversal-alt
 
   module Half-Derived where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
@@ -729,7 +729,7 @@ module Example where
     unquoteDecl ⋯-↑   = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
 
     -- Tests
-    open import Kitty.Experimental.KitAltSimple terms
+    open import Kitty.KitAltSimple terms
     open Kitty.Kit terms
     open Kit ⦃ … ⦄
     open TraversalOps _⋯_
@@ -746,9 +746,9 @@ module Example where
     ⋯-↑' = ⋯-↑
 
     kit-traversal-alt : KitTraversalAlt
-    kit-traversal-alt = Kitty.Experimental.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
+    kit-traversal-alt = Kitty.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
 
-    open Kitty.Experimental.KitAltSimple.Derive _ kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
+    open Kitty.KitAltSimple.Derive _ kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
 
     `id : [] ⊢ 𝕖
     `id = λx ` here refl
@@ -764,7 +764,7 @@ module Example where
 
   module Derived where
     unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
-    open Kitty.Experimental.KitAltSimple.Derive _ traversal
+    open Kitty.KitAltSimple.Derive _ traversal
 
     `id : [] ⊢ 𝕖
     `id = λx ` here refl

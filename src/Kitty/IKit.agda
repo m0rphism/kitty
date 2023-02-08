@@ -2,10 +2,10 @@ open import Kitty.Modes
 open import Kitty.Kit using (KitTraversal; KitHomotopy)
 open import Kitty.Compose using (KitAssoc)
 open import Kitty.Types using (KitType)
-open import Kitty.Experimental.ITerms using (ITerms)
+open import Kitty.ITerms using (ITerms)
 open KitAssoc using (KitAssocLemmas)
 
-module Kitty.Experimental.IKit {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (H : KitHomotopy 𝕋 T) (A : KitAssoc 𝕋 T H) (AL : KitAssocLemmas A) (KT : KitType 𝕋) (IT : ITerms 𝕋 T H A AL KT) where
+module Kitty.IKit {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (H : KitHomotopy 𝕋 T) (A : KitAssoc 𝕋 T H) (AL : KitAssocLemmas A) (KT : KitType 𝕋) (IT : ITerms 𝕋 T H A AL KT) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -26,8 +26,8 @@ open Kitty.Compose.KitAssoc A
 open Kitty.Compose.KitAssoc.KitAssocLemmas AL
 open Kitty.Types.KitType KT
 open import Kitty.OPE AL KT
-open Kitty.Experimental.ITerms 𝕋 T H A AL KT
-open Kitty.Experimental.ITerms.ITerms IT
+open Kitty.ITerms 𝕋 T H A AL KT
+open Kitty.ITerms.ITerms IT
 
 private
   variable
