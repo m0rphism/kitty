@@ -224,16 +224,18 @@ record KitTraversalAlt : Set₁ where
 -- Deriving KitTraversal, KitAssoc, and KitAssocLemmas -------------------------
 
 module Derive (KT : KitTraversalAlt) where
+  terms : Terms 𝕄
+  terms = 𝕋
+
   open KitTraversalAlt KT public
 
-  private
-    kit-traversal : KitTraversal
-    kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
+  kit-traversal : KitTraversal
+  kit-traversal = record { _⋯_ = _⋯_ ; ⋯-var = ⋯-var }
 
   open KitTraversal kit-traversal hiding (_⋯_; ⋯-var; kitᵣ; kitₛ) public
 
   ~-cong-⋯ :
-    ∀ {{𝕂 : Kit}} {f g : µ₁ –[ 𝕂 ]→ µ₂}  (v : µ₁ ⊢ M)
+    ∀ {{𝕂 : Kit}} {f g : µ₁ –[ 𝕂 ]→ µ₂} (v : µ₁ ⊢ M)
     → f ~ g
     → v ⋯ f ≡ v ⋯ g
   ~-cong-⋯ {f = f} {g} v f~g =
@@ -251,9 +253,8 @@ module Derive (KT : KitTraversalAlt) where
           ∎)
         v
 
-  private
-    kit-homotopy : KitHomotopy kit-traversal
-    kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
+  kit-homotopy : KitHomotopy kit-traversal
+  kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
   open import Kitty.Term.Compose 𝕋 kit-traversal kit-homotopy
 
@@ -296,10 +297,10 @@ module Derive (KT : KitTraversalAlt) where
             ` x                            ∎)
           v
 
-    kitassoc-lemmas : KitAssocLemmas
-    kitassoc-lemmas = record { ⋯-id = ⋯-id' }
+  kit-assoc-lemmas : KitAssocLemmas
+  kit-assoc-lemmas = record { ⋯-id = ⋯-id' }
 
-  open KitAssocLemmas kitassoc-lemmas public
+  open KitAssocLemmas kit-assoc-lemmas public
 
   instance
     kitᵣ  = KitTraversal.kitᵣ kit-traversal

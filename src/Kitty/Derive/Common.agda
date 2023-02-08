@@ -31,9 +31,9 @@ open import Data.Nat as Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
 open import Data.Fin as Fin using (Fin; zero; suc)
 open import Function using (_∘_; _$_; case_of_)
 
-open import Kitty.Prelude using (_∋_; _▷▷_)
-open import Kitty.Modes
-open import Kitty.Iso
+open import Kitty.Term.Prelude using (_∋_; _▷▷_)
+open import Kitty.Term.Modes
+open import Kitty.Util.Iso
 
 private variable
   ℓ ℓ₁ ℓ₂ ℓ₃ ℓ' : Level
