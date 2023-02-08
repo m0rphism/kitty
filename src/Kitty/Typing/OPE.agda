@@ -61,6 +61,10 @@ wk-drop-∈ (there x) t = wk _ (wk-drop-∈ x t)
 wk-telescope : Ctx µ → µ ∋ m → µ ∶⊢ m→M m
 wk-telescope Γ x = wk-drop-∈ x (Γ x)
 
+infix   4  _∋_∶_
+_∋_∶_ : Ctx µ → µ ∋ m → µ ∶⊢ m→M m → Set
+Γ ∋ x ∶ t = wk-telescope Γ x ≡ t
+
 -- Order Preserving Embeddings for Contexts. Required by wk-⊢', where we can't
 -- just say Γ₂ ≡ Γ₁ ⋯* ρ because weakenings in ρ require us to fill the gaps
 -- between the weakened Γ₁ types with new Γ₂ types (the `T` in the `ope-drop`

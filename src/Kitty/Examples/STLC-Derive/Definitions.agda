@@ -1,13 +1,8 @@
 module Kitty.Examples.STLC-Derive.Definitions where
 
-open import Data.List using (List; [])
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong₂; module ≡-Reasoning)
-
-open import Kitty.Term.Prelude using (_∋_; _▷_) public
+open import Kitty.Term.Prelude using (_∋_; _▷_; List; []) public
 open import Kitty.Term.Modes using (Modes; Terms)
 open import Kitty.Util.Homotopy using (_~_; ~-sym)
-
-open ≡-Reasoning
 
 -- Fixities --------------------------------------------------------------------
 
@@ -56,8 +51,7 @@ variable
   t t₁ t₂ t₃ t' t₁' t₂' : µ ⊢ 𝕥
   E E₁ E₂ E₃ E' E₁' E₂' : µ ⊢ M
 
--- Kitty Derive
-
+-- Deriving Renaming/Substitution and related lemmas.
 open import Kitty.Derive.Traversal using (derive-traversal; module Derived)
 unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
 open Derived traversal public
@@ -82,7 +76,7 @@ variable
 
 data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
   τ-` : ∀ {µ} {m} {Γ : Ctx µ} {T : µ ∶⊢ m→M m} {x : µ ∋ m} →
-    wk-telescope Γ x ≡ T →
+    Γ ∋ x ∶ T →
     Γ ⊢ ` x ∶ T
   τ-λ : {Γ : Ctx µ} →
     Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wkᵣ →

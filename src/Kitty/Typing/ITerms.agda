@@ -29,11 +29,6 @@ private
     Γ Γ₁ Γ₂ : Ctx µ
     x y z : µ ∋ m
 
-infix   4  _∋_∶_
-
-_∋_∶_ : Ctx µ → µ ∋ m → µ ∶⊢ m→M m → Set
-Γ ∋ x ∶ t = wk-telescope Γ x ≡ t
-
 record ITerms : Set₁ where
   infix   4  _⊢_∶_
   field
