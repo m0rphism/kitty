@@ -1,6 +1,6 @@
 {-# OPTIONS -vreflection-debug:10 #-}
 
-module Kitty.Derive.Iso where
+module Kitty.Derive.Experimental.Generics.Iso where
 
 open import ReflectionLib.Standard.Syntax
 open import ReflectionLib.Standard.VeryPretty
@@ -31,16 +31,16 @@ open import Data.Nat as Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
 open import Data.Fin as Fin using (Fin; zero; suc)
 open import Function using (_∘_; _$_; case_of_)
 
-open import Kitty.Prelude using (_∋_)
-open import Kitty.Modes
-open import Kitty.Generics
-open import Kitty.Iso
+open import Kitty.Term.Prelude using (_∋_)
+open import Kitty.Term.Modes
+open import Kitty.Experimental.Generics.Generics
+open import Kitty.Util.Iso
 open import Kitty.Derive.Common
-open import Kitty.Derive.Desc
-open import Kitty.Derive.To
-open import Kitty.Derive.From
-open import Kitty.Derive.ToFrom
-open import Kitty.Derive.FromTo
+open import Kitty.Experimental.Generics.Derive.Desc
+open import Kitty.Experimental.Generics.Derive.To
+open import Kitty.Experimental.Generics.Derive.From
+open import Kitty.Experimental.Generics.Derive.ToFrom
+open import Kitty.Experimental.Generics.Derive.FromTo
 
 private variable
   ℓ ℓ₁ ℓ₂ ℓ₃ ℓ' : Level

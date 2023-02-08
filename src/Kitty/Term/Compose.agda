@@ -1,7 +1,7 @@
-open import Kitty.Modes
-open import Kitty.Kit using (KitTraversal; KitHomotopy)
+open import Kitty.Term.Modes
+open import Kitty.Term.Kit using (KitTraversal; KitHomotopy)
 
-module Kitty.Compose {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (H : KitHomotopy 𝕋 T) where
+module Kitty.Term.Compose {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (H : KitHomotopy 𝕋 T) where
 
 open import Data.List using (List; [])
 open import Data.List.Membership.Propositional using (_∈_)
@@ -12,15 +12,15 @@ open import Data.List using (List; []; _∷_)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using (id)
 
-open import Kitty.Prelude
-open import Kitty.Homotopy
+open import Kitty.Term.Prelude
+open import Kitty.Util.Homotopy
 open ~-Reasoning
 
 open Modes 𝕄
 open Terms 𝕋
-open Kitty.Kit 𝕋
-open Kitty.Kit.KitTraversal T
-open Kitty.Kit.KitHomotopy H
+open Kitty.Term.Kit 𝕋
+open Kitty.Term.Kit.KitTraversal T
+open Kitty.Term.Kit.KitHomotopy H
 
 open Kit {{...}}
 

@@ -1,4 +1,4 @@
-module Kitty.Homotopy where
+module Kitty.Util.Homotopy where
 
 open import Level using (Level; _⊔_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym)

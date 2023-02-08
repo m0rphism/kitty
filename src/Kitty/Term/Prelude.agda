@@ -1,4 +1,4 @@
-module Kitty.Prelude where
+module Kitty.Term.Prelude where
 
 open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Membership.Propositional public using (_∈_)

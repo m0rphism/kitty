@@ -1,4 +1,4 @@
-module Kitty.Star where
+module Kitty.Util.Star where
 
 open import Data.List using (List; []; _∷_; _++_)
 open import Level using (_⊔_)

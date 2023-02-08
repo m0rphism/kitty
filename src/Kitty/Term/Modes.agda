@@ -1,7 +1,7 @@
-module Kitty.Modes where
+module Kitty.Term.Modes where
 
 open import Data.List using (List)
-open import Kitty.Prelude
+open import Kitty.Term.Prelude
 
 record Modes : Set₁ where
   field

@@ -1,13 +1,13 @@
-open import Kitty.Modes
+open import Kitty.Term.Modes
 
-module Kitty.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.Term.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; [])
 open import Level using (Level; _⊔_; 0ℓ)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Kitty.Prelude
+open import Kitty.Term.Prelude
 
 open Modes 𝕄
 open Terms 𝕋
@@ -18,7 +18,7 @@ private
     M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
     µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
-open import Kitty.Homotopy
+open import Kitty.Util.Homotopy
 open ~-Reasoning
 
 record Kit : Set₁ where

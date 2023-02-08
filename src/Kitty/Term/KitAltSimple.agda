@@ -1,8 +1,8 @@
-open import Kitty.Modes
+open import Kitty.Term.Modes
 
 -- Version of KitAlt with a simpler KitTraversal.⋯-↑ field.
 
-module Kitty.KitAltSimple {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.Term.KitAltSimple {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Properties using (++-assoc)
@@ -10,10 +10,10 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Axiom.Extensionality.Propositional using (Extensionality)
-open import Kitty.Prelude
+open import Kitty.Term.Prelude
 open import Level using (_⊔_)
 
-open import Kitty.Star
+open import Kitty.Util.Star
 
 open Modes 𝕄
 open Terms 𝕋
@@ -26,8 +26,8 @@ private
 
 -- Alternative KitTraversal ----------------------------------------------------
 
-open import Kitty.Kit 𝕋
-open import Kitty.Homotopy
+open import Kitty.Term.Kit 𝕋
+open import Kitty.Util.Homotopy
 
 open Kit {{...}}
 
@@ -82,7 +82,7 @@ subst-∷-flipped :
     sub (r ∷ rs) ≡ sub₁ r ∷ sub₂ rs
 subst-∷-flipped R refl refl refl = refl
 
-open import Kitty.SubstProperties
+open import Kitty.Util.SubstProperties
 
 dist-↑*-▷▷ :
   ∀ {{𝕂 : Kit}} µ' µ''
@@ -255,7 +255,7 @@ module Derive (KT : KitTraversalAlt) where
     kit-homotopy : KitHomotopy kit-traversal
     kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
-  open import Kitty.Compose 𝕋 kit-traversal kit-homotopy
+  open import Kitty.Term.Compose 𝕋 kit-traversal kit-homotopy
 
   open ComposeKit {{...}} public
 
@@ -312,6 +312,6 @@ module Derive (KT : KitTraversalAlt) where
     wk-kitₛ = KitAssoc.wk-kitₛ kit-assoc
 
   open Kit {{...}} public
-  open import Kitty.Kit 𝕋 public
+  open import Kitty.Term.Kit 𝕋 public
 
 
