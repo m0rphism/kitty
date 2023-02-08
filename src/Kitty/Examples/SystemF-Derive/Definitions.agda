@@ -1,5 +1,6 @@
 module Kitty.Examples.SystemF-Derive.Definitions where
 
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Kitty.Term.Prelude using (_∋_; _▷_; List; []) public
 open import Kitty.Term.Modes using (Modes; Terms)
 open import Kitty.Util.Homotopy using (_~_; ~-sym)
@@ -43,7 +44,7 @@ variable
 
 -- Expressions, Types, and Kinds
 data _⊢_ : List Modeᵥ → Modeₜ → Set where
-  `_        : ∀ {m}  →  µ ∋ m  →  µ ⊢ m→M m
+  `[_]_     : ∀ {m M}  →  m→M m ≡ M  →  µ ∋ m  →  µ ⊢ M
   λx_       : µ ▷ 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
   Λα_       : µ ▷ 𝕥 ⊢ 𝕖  →  µ ⊢ 𝕖
   ∀[α∶_]_   : µ ⊢ 𝕜  →  µ ▷ 𝕥 ⊢ 𝕥  →  µ ⊢ 𝕥
@@ -62,6 +63,8 @@ variable
 open import Kitty.Derive.Traversal using (derive-traversal; module Derived)
 unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
 open Derived traversal public
+
+pattern `_ x = `[ refl ] x  
 
 -- Types and Contexts ----------------------------------------------------------
 
@@ -107,9 +110,9 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
 
 mutual
   data Neutral : µ ⊢ M → Set where
-    `_  : ∀ (x : µ ∋ m) → Neutral (` x)
-    _·_ : Neutral e₁ → Value e₂ → Neutral (e₁ · e₂)
-    _∙_ : Neutral e₁ → Value t₂ → Neutral (e₁ ∙ t₂)
+    `[_]_  : ∀ (eq : m→M m ≡ M) (x : µ ∋ m) → Neutral (`[ eq ] x)
+    _·_    : Neutral e₁ → Value e₂ → Neutral (e₁ · e₂)
+    _∙_    : Neutral e₁ → Value t₂ → Neutral (e₁ ∙ t₂)
 
   data Value : µ ⊢ M → Set where
     λx_     : ∀ (e : (µ ▷ 𝕖) ⊢ 𝕖) → Value (λx e)

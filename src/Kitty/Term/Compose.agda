@@ -54,6 +54,8 @@ record ComposeKit {{𝕂₁ : Kit}} {{𝕂₂ : Kit}} {{𝕂 : Kit}} : Set₁ wh
       ϕ₂ ~ ϕ₂' →
       ϕ₁ ∘ₖ ϕ₂ ~ ϕ₁ ∘ₖ ϕ₂'
 
+    _⋯'_ : ∀ (t : µ₁ ∋/⊢[ 𝕂₁ ] (id/m→M m)) (ϕ : µ₁ –[ 𝕂₂ ]→ µ₂) → µ₂ ∋/⊢[ 𝕂 ] (id/m→M m)
+
   _·ₖ_ : µ₁ –[ 𝕂₂ ]→ µ₂ → µ₂ –[ 𝕂₁ ]→ µ₃ → µ₁ –[ 𝕂 ]→ µ₃
   ϕ₁ ·ₖ ϕ₂ = ϕ₂ ∘ₖ ϕ₁
 
@@ -123,6 +125,7 @@ record KitAssoc : Set₁ where
                                                   _ (there x) → refl
   ComposeKit.~-cong-∘₁ kitᵣᵣ = ~-cong-ᵣ∘ᵣ₁
   ComposeKit.~-cong-∘₂ kitᵣᵣ = ~-cong-ᵣ∘ᵣ₂
+  ComposeKit._⋯'_      kitᵣᵣ = λ x ρ → ρ _ x
 
 
   ~-cong-ₛ∘ᵣ₁ : {ϕ₁ ϕ₁' : µ₂ →ₛ µ₃} (ϕ₂ : µ₁ →ᵣ µ₂)  →
@@ -143,6 +146,7 @@ record KitAssoc : Set₁ where
                                                   _ (there x) → refl
   ComposeKit.~-cong-∘₁ kitₛᵣ = ~-cong-ₛ∘ᵣ₁
   ComposeKit.~-cong-∘₂ kitₛᵣ = ~-cong-ₛ∘ᵣ₂
+  ComposeKit._⋯'_      kitₛᵣ = λ t ρ → t ⋯ ρ
 
   private instance _ = kitᵣᵣ
   private instance _ = kitₛᵣ
@@ -184,6 +188,7 @@ record KitAssoc : Set₁ where
           (σ₂ m x ⋯ wk) ⋯ (ρ₁ ↑ m₁)   ∎
   ComposeKit.~-cong-∘₁ kitᵣₛ = ~-cong-ᵣ∘ₛ₁
   ComposeKit.~-cong-∘₂ kitᵣₛ = ~-cong-ᵣ∘ₛ₂
+  ComposeKit._⋯'_      kitᵣₛ = λ x σ → σ _ x
 
   private instance _ = kitᵣₛ
 
@@ -220,6 +225,7 @@ record KitAssoc : Set₁ where
           (σ₂ m x ⋯ wk) ⋯ (σ₁ ↑ m₁)   ∎
   ComposeKit.~-cong-∘₁ kitₛₛ = ~-cong-ₛ∘ₛ₁
   ComposeKit.~-cong-∘₂ kitₛₛ = ~-cong-ₛ∘ₛ₂
+  ComposeKit._⋯'_      kitₛₛ = λ t σ → t ⋯ σ
 
   private instance _ = kitₛₛ
 
@@ -370,6 +376,18 @@ record KitAssoc : Set₁ where
     dist-⦅⦆ₛ-⋯ₛ : ∀ {µ₁ µ₂ m M} (t : (m ∷ µ₁) ⊢ M) (t' : µ₁ ⊢ m→M m) (σ : µ₁ →ₛ µ₂) →
       t ⋯ ⦅ t' ⦆ ⋯ σ ≡ t ⋯ (σ ↑ m) ⋯ ⦅ t' ⋯ σ ⦆
     dist-⦅⦆ₛ-⋯ₛ t₂ t σ = ∘~∘→⋯≡⋯ (dist-ₛ∘ₛ-⦅⦆ t σ) t₂
+
+    postulate TODO : ∀ {A : Set} → A
+
+    dist-⦅⦆-⋯ : ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 : Kit ⦄ ⦃ C : ComposeKit ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂 ⦄ ⦄ {µ₁ µ₂ m M}
+                  (t : (m ∷ µ₁) ⊢ M) (t' : Kit._∋/⊢_ 𝕂₁ µ₁ (id/m→M m)) (ϕ : µ₁ –[ 𝕂₂ ]→ µ₂) →
+      t ⋯ ⦅ t' ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ m) ⋯ ⦅ ComposeKit._⋯'_ C t' ϕ ⦆
+    dist-⦅⦆-⋯ t t' ϕ = TODO
+
+    dist-⦅⦆-⋯ₛ : ∀ ⦃ 𝕂 : Kit ⦄
+                  (t : (m ∷ µ₁) ⊢ M) (t' : µ₁ ⊢ m→M m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂) →
+      t ⋯ ⦅ t' ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ m) ⋯ ⦅ t' ⋯ ϕ ⦆
+    dist-⦅⦆-⋯ₛ t t' ϕ = TODO
 
   -- record KitTraversalLemmas : Set₁ where
   --   open AssocAssumptions {{...}}
