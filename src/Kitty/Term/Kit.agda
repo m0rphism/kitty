@@ -21,6 +21,10 @@ private
 open import Kitty.Util.Homotopy
 open ~-Reasoning
 
+-- Required for proving that `kitᵣ ≢ kitₛ`
+data KitTag : Set where
+  Ren Sub : KitTag
+
 record Kit : Set₁ where
   infix   4  _∋/⊢_
   infixl  12  _,ₖ_
@@ -42,6 +46,7 @@ record Kit : Set₁ where
 
     wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
     wk-id/`          : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
+    kit-tag          : KitTag
 
   -- Renaming/Substitution
 
@@ -182,6 +187,7 @@ record KitTraversal : Set₁ where
   Kit.id/`/id          kitᵣ = λ x → refl
   Kit.wk               kitᵣ = λ m x → there x
   Kit.wk-id/`          kitᵣ = λ m x → refl
+  Kit.kit-tag          kitᵣ = Ren
 
   private instance _ = kitᵣ
 
@@ -197,6 +203,7 @@ record KitTraversal : Set₁ where
   Kit.id/`/id          kitₛ = λ x → refl
   Kit.wk               kitₛ = λ M t → t ⋯ wk
   Kit.wk-id/`          kitₛ = λ m x → ⋯-var x wk
+  Kit.kit-tag          kitₛ = Sub
 
   private instance _ = kitₛ
 
