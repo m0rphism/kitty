@@ -3,6 +3,7 @@ open import Kitty.Term.Modes
 module Kitty.Term.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; [])
+open import Data.List.Properties using (++-assoc)
 open import Level using (Level; _⊔_; 0ℓ)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
@@ -23,7 +24,7 @@ open ~-Reasoning
 
 -- Required for proving that `kitᵣ ≢ kitₛ`
 data KitTag : Set where
-  Ren Sub : KitTag
+  instance Ren Sub : KitTag
 
 record Kit : Set₁ where
   infix   4  _∋/⊢_
@@ -43,6 +44,8 @@ record Kit : Set₁ where
     `/id             : ∀ m → µ ∋/⊢ id/m→M m → µ ⊢ m→M m
     `/id'            : ∀ m → µ ∋/⊢ m → µ ⊢ m→M/id m -- For IKit Experiment
     id/`/id          : ∀ x → `/id {µ = µ} m (id/` _ x) ≡ ` x
+    id/`/id'         : ∀ x → let sub = subst (µ ⊢_) (sym (id/m→M/id m)) in
+                             `/id' {µ = µ} (id/m→M m) (id/` _ x) ≡ sub (` x) -- For Compose Experiment
 
     wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
     wk-id/`          : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
@@ -132,10 +135,17 @@ record Kit : Set₁ where
 
   -- Parallel Composition
 
+  _↓ : ∀ {µ₁ µ₂ m} → ((µ₁ ▷ m) –→ µ₂) → (µ₁ –→ µ₂)
+  (ϕ ↓) _ x = ϕ _ (there x)
+
   _∥_ : ∀ {µ₁ µ₂ µ} → (µ₁ –→ µ) → (µ₂ –→ µ) → ((µ₁ ▷▷ µ₂) –→ µ)
   _∥_ {µ₂ = []}     σ₁ σ₂ _ x = σ₁ _ x
   _∥_ {µ₂ = µ₂ ▷ _} σ₁ σ₂ _ (here px) = σ₂ _ (here px)
-  _∥_ {µ₂ = µ₂ ▷ _} σ₁ σ₂ _ (there x) = (σ₁ ∥ (λ m y → σ₂ m (there y))) _ x
+  _∥_ {µ₂ = µ₂ ▷ _} σ₁ σ₂ _ (there x) = (σ₁ ∥ (σ₂ ↓)) _ x
+
+  -- _∥'_ : ∀ {µ₁ µ₂ µ} → (µ₁ –→ µ) → (µ₂ –→ µ) → ((µ₁ ▷▷ µ₂) –→ µ)
+  -- _∥'_ {µ₂ = []}         σ₁ σ₂ = σ₁
+  -- _∥'_ {µ₁} {µ₂ ▷ m} {µ} σ₁ σ₂ = subst (_–→ µ) (sym (++-assoc ([] ▷ m) µ₂ µ₁)) ((σ₁ ∥ (σ₂ ↓)) ,ₖ σ₂ _ (here refl))
 
   -- Singleton renaming/substitution
 
@@ -173,6 +183,9 @@ record KitTraversal : Set₁ where
             → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
     ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –→ µ₂)
             → (` x) ⋯ ϕ ≡ `/id _ (ϕ _ x)
+    -- ⋯-var' : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –→ µ₂)
+    --         → let sub = subst (µ₂ ⊢_) (id/m→M/id m) in
+    --           (` x) ⋯ ϕ ≡ sub (`/id' _ (ϕ _ x))
 
   -- TODO: This could also be defined outside of KitTraversal.
   kitᵣ : Kit
@@ -185,6 +198,7 @@ record KitTraversal : Set₁ where
   Kit.`/id             kitᵣ = λ m x → ` x
   Kit.`/id'            kitᵣ = λ m x → ` x
   Kit.id/`/id          kitᵣ = λ x → refl
+  Kit.id/`/id'         kitᵣ = λ x → refl
   Kit.wk               kitᵣ = λ m x → there x
   Kit.wk-id/`          kitᵣ = λ m x → refl
   Kit.kit-tag          kitᵣ = Ren
@@ -201,6 +215,7 @@ record KitTraversal : Set₁ where
   Kit.`/id             kitₛ = λ M t → t
   Kit.`/id'            kitₛ = λ M t → t
   Kit.id/`/id          kitₛ = λ x → refl
+  Kit.id/`/id'         kitₛ = λ x → refl
   Kit.wk               kitₛ = λ M t → t ⋯ wk
   Kit.wk-id/`          kitₛ = λ m x → ⋯-var x wk
   Kit.kit-tag          kitₛ = Sub
