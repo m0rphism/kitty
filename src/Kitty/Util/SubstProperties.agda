@@ -24,6 +24,17 @@ dist-subst₂ :
   → f {a₂} {b₂} (subst₂ F a₁≡a₂ b₁≡b₂ x) ≡ subst₂ G a₁≡a₂ b₁≡b₂ (f {a₁} {b₁} x)
 dist-subst₂ _ refl refl  _ = refl
 
+dist-subst' :
+  ∀ {ℓ ℓ' ℓ₁ ℓ₂} {A : Set ℓ} {B : Set ℓ'} {a₁ a₂ : A}
+    {F : A → Set ℓ₁} {G : B → Set ℓ₂}
+  → (a→b : A → B)
+  → (f : ∀ {a} → F a → G (a→b a))
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (b₁≡b₂ : a→b a₁ ≡ a→b a₂)
+  → (x : F a₁) 
+  → f {a₂} (subst F a₁≡a₂ x) ≡ subst G b₁≡b₂ (f {a₁} x)
+dist-subst' _ _ refl refl _ = refl
+
 comm-subst₂ :
   ∀ {ℓ₁ ℓ₂ ℓ₁' ℓ₂' ℓ₃}
     {A : Set ℓ₁} {a₁ a₂ : A}
