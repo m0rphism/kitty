@@ -18,9 +18,13 @@ open Terms 𝕋
 
 open import Kitty.Term.Kit 𝕋 using (Kit; _∋/⊢[_]_)
 
-open Kit ⦃ … ⦄ hiding (_,ₖ_; _↑_; _↑*_; _–→_; ~-cong-↑; ~-cong-↑*; _∥_; ⦅_⦆; _↓)
+open Kit ⦃ … ⦄
 
 record Sub : Set₁ where
+  infixl  12  _,ₖ_
+  infixl  11  _↑_  _↑*_
+  infixl  9  _∥_
+
   field
     _–[_]→_ : List VarMode → Kit → List VarMode → Set
 
@@ -35,8 +39,16 @@ record Sub : Set₁ where
     _↓   : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} → (µ₁ ▷ m) –[ 𝕂 ]→ µ₂ → µ₁ –[ 𝕂 ]→ µ₂
     _∥_  : ∀ ⦃ 𝕂 ⦄ {µ₁ µ₂ µ} → (µ₁ –[ 𝕂 ]→ µ) → (µ₂ –[ 𝕂 ]→ µ) → ((µ₁ ▷▷ µ₂) –[ 𝕂 ]→ µ)
     ⦅_⦆  : ∀ ⦃ 𝕂 ⦄ {µ m} → µ ∋/⊢ id/m→M m → (µ ▷ m) –[ 𝕂 ]→ µ
+    -- Singleton renaming/substitution for terms with 1 free variable.
+    -- Allows the term to be substituted to have arbitrary free variables.
+    -- This is useful for things like pattern matching in combination with `_∥_`,
+    -- where a matching substitution needs to be built up piece by piece.
+    ⦅_⦆₀ : ∀ ⦃ 𝕂 ⦄ {µ m} → µ ∋/⊢ id/m→M m → ([] ▷ m) –[ 𝕂 ]→ µ
 
     apₖ  : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} → µ₁ –[ 𝕂 ]→ µ₂ → (∀ m → µ₁ ∋ m → µ₂ ∋/⊢ id/m→M m)
+
+    pre : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₂ –[ 𝕂 ]→ µ₃ → (∀ m → µ₁ ∋ m → µ₂ ∋ m) → µ₁ –[ 𝕂 ]→ µ₃
+    post : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₁ –[ 𝕂 ]→ µ₂ → (∀ m → µ₂ ∋/⊢[ 𝕂 ] id/m→M m → µ₃ ∋/⊢[ 𝕂 ] id/m→M m) → µ₁ –[ 𝕂 ]→ µ₃
 
   -- Renaming/Substitution
 
@@ -173,6 +185,9 @@ record Sub : Set₁ where
   -- invert-ϕ'→ϕ' {µ₁} {µ₂} {ϕ} (ϕ~[]* µ₁≡[] ϕ~) = {!subst₂ (λ ■ ■' → Invert-ϕ {µ₁ = ■} ■') ? ? {!ϕ~[]* ϕ~!}!}
   -- invert-ϕ'→ϕ' (ϕ~,ₖ refl ϕ' x/t ϕ~) = ϕ~,ₖ ϕ' x/t ϕ~
 
+_–[_;_]→_ : List VarMode → Kit → Sub → List VarMode → Set
+_–[_;_]→_ µ₁ 𝕂 𝕊 µ₂ = Sub._–[_]→_ 𝕊 µ₁ 𝕂 µ₂
+
 record SubWithLaws : Set₁ where
   open Sub ⦃ … ⦄
   field
@@ -227,9 +242,28 @@ record SubWithLaws : Set₁ where
     ⦅⦆-,ₖ : ∀ ⦃ 𝕂 : Kit ⦄ {µ m} (x/t : µ ∋/⊢ id/m→M m) →
       ⦅ x/t ⦆ ~ (id ,ₖ x/t)
 
+    ⦅⦆₀-,ₖ : ∀ ⦃ 𝕂 : Kit ⦄ {µ m} (x/t : µ ∋/⊢ id/m→M m) →
+      ⦅ x/t ⦆₀ ~ ([]* ,ₖ x/t)
+
     invert' : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) → Invert-ϕ' ϕ
 
   open ~-Reasoning
+
+  apₖ-id : ∀ ⦃ 𝕂 : Kit ⦄ {µ} {m} (x : µ ∋ m)
+           → apₖ (id {µ}) _ x ≡ id/` _ x
+  apₖ-id ⦃ 𝕂 ⦄ {µ ▷ m'} {m} x@(here refl) =
+    apₖ (id {µ ▷ m'}) _ x                ≡⟨ id-▷ m' x ⟩
+    apₖ (id {µ} ↑ m') _ x                ≡⟨ ↑-,ₖ id m' _ x ⟩
+    apₖ (wkₖ _ (id {µ}) ,ₖ id/` _ x) _ x ≡⟨ apₖ-,ₖ-here (wkₖ _ (id {µ})) (id/` _ x) ⟩
+    id/` _ x                             ∎
+  apₖ-id ⦃ 𝕂 ⦄ {µ ▷ m'} {m} (there x) =
+    apₖ (id {µ ▷ m'}) _ (there x)                          ≡⟨ id-▷ _ (there x) ⟩
+    apₖ (id {µ} ↑ m') _ (there x)                          ≡⟨ ↑-,ₖ id m' _ (there x) ⟩
+    apₖ (wkₖ _ (id {µ}) ,ₖ id/` _ (here refl)) _ (there x) ≡⟨ apₖ-,ₖ-there (wkₖ _ (id {µ})) (id/` _ (here refl)) x ⟩
+    apₖ (wkₖ _ (id {µ})) _ x                               ≡⟨ apₖ-wkₖ-wk id x ⟩
+    wk _ (apₖ (id {µ}) _ x)                                ≡⟨ cong (wk _) (apₖ-id x) ⟩
+    wk _ (id/` _ x)                                        ≡⟨ wk-id/` m' x ⟩
+    id/` _ (there x)                                       ∎
 
   -- id-▷▷ : ∀ ⦃ 𝕂 : Kit ⦄ {µ µ'}
   --   → id {µ ▷▷ µ'} ~ (id {µ} ↑* µ')
@@ -506,3 +540,4 @@ record SubWithLaws : Set₁ where
   -- -- ⦅ v ⦆' = idₖ'' ∥ ⦅ v ⦆₀ ∥ idₖ''
   -- -- ⦅ v ⦆' = {!!} ∥ ⦅ v ⦆₀ ∥ {!!}
   -- -- -- ⦅ v ⦆' = (idₖ ∥ ⦅ v ⦆₀) ↑* _
+
