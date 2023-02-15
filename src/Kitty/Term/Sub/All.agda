@@ -126,6 +126,8 @@ instance
     ; apₖ-,ₖ-there = λ ϕ x/t x → refl
     ; apₖ-wkₖ-wk   = apₖ-wkₖ-wk
     ; apₖ-↓        = λ { (x/t ∷ ϕ) x → refl }
+    ; apₖ-pre      = λ ϕ f x → {!!}
+    ; apₖ-post     = λ ϕ f x → {!!}
     ; wkₖ*-[]      = wkₖ*-[]
     ; wkₖ*-▷       = wkₖ*-▷
     ; ↑-,ₖ         = λ ϕ m mx x → refl

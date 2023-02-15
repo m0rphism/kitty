@@ -2,32 +2,26 @@ open import Kitty.Term.Modes
 
 module Kitty.Term.Traversal {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
-open import Data.List using (List; [])
-open import Data.List.Properties using (++-assoc)
-open import Level using (Level; _⊔_; 0ℓ)
+open import Data.List.Relation.Unary.Any using (here; there)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List.Relation.Unary.Any using (here; there)
-open import Kitty.Term.Prelude
 
+open import Kitty.Term.Prelude
+open import Kitty.Util.SubstProperties
+open import Kitty.Term.Kit 𝕋
+open import Kitty.Term.KitOrder 𝕋
+open import Kitty.Term.Sub 𝕋
 open Modes 𝕄
 open Terms 𝕋
-
-open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.Sub 𝕋
-
-private
-  variable
-    m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
-    M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
-    µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
-
--- open import Kitty.Util.Homotopy
--- open ~-Reasoning
-
 open Kit ⦃ … ⦄
 open Sub ⦃ … ⦄
 open SubWithLaws ⦃ … ⦄
+open _⊑ₖ_ ⦃ … ⦄
+
+private variable
+  m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
+  M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
+  µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
 record Traversal : Set₁ where
   infixl   8  _⋯_
@@ -37,9 +31,6 @@ record Traversal : Set₁ where
             → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
     ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂)
             → (` x) ⋯ ϕ ≡ `/id _ (apₖ ϕ _ x)
-    -- ⋯-var' : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –→ µ₂)
-    --         → let sub = subst (µ₂ ⊢_) (id/m→M/id m) in
-    --           (` x) ⋯ ϕ ≡ sub (`/id' _ (ϕ _ x))
 
   -- TODO: This could also be defined outside of Traversal.
   kitᵣ : Kit
@@ -81,8 +72,65 @@ record Traversal : Set₁ where
 
   private instance _ = kitₛ
 
+  ⊑-ᵣₛ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ → kitᵣ ⊑ₖ kitₛ
+  ⊑-ᵣₛ = record
+    { ι-Mode   = m→M
+    ; ι-id/m→M = λ m → refl
+    ; ι-m→M/id = λ m/M → refl
+    ; ι-∋/⊢    = `_
+    ; ι-id/`   = λ x → refl
+    ; ι-`/id   = λ x/t → refl
+    ; ι-`/id'  = λ x/t → refl
+    ; ι-wk     = λ {m'} {m} {µ} {m} x →
+        let instance _ = kitᵣ in
+        ` Kit.wk kitᵣ m x         ≡⟨⟩
+        ` there x                 ≡⟨ cong (λ ■ → ` there ■) (sym (apₖ-id x)) ⟩
+        ` there (apₖ id _ x)      ≡⟨ cong `_ (sym (apₖ-wkₖ-wk id x)) ⟩
+        ` apₖ (wkₖ _ id) _ x      ≡⟨ sym (⋯-var ⦃ kitᵣ ⦄ x (wkₖ _ id)) ⟩
+        (` x) ⋯ wkₖ _ id          ≡⟨⟩
+        Kit.wk kitₛ (m→M m) (` x) ∎
+    }
+
+  ⊑ₖ-⊥ : ∀ ⦃ 𝕂 : Kit ⦄ → kitᵣ ⊑ₖ 𝕂
+  ⊑ₖ-⊥ ⦃ 𝕂 ⦄ = record
+    { ι-Mode   = Kit.id/m→M 𝕂
+    ; ι-id/m→M = λ m → refl
+    ; ι-m→M/id = λ m → sym (Kit.id/m→M/id 𝕂 m)
+    ; ι-∋/⊢    = Kit.id/` 𝕂 _
+    ; ι-id/`   = λ x → refl
+    ; ι-`/id   = λ x → sym (Kit.id/`/id 𝕂 x)
+    ; ι-`/id'  = λ {µ} {m/M} x →
+        let sub = subst (_⊢_ µ) (sym (sym (Kit.id/m→M/id 𝕂 m/M))) in
+        let sub' = subst (_⊢_ µ) (Kit.id/m→M/id 𝕂 m/M) in
+        Kit.`/id' kitᵣ m/M x                                      ≡⟨⟩
+        ` x                                                       ≡⟨ sym (subst-sym (Kit.id/m→M/id 𝕂 m/M) _ (` x)
+                                                                                    (Kit.id/`/id' 𝕂 x)) ⟩
+        sub' (Kit.`/id' 𝕂 (Kit.id/m→M 𝕂 m/M) (Kit.id/` 𝕂 m/M x)) ≡⟨ subst-irrelevant (Kit.id/m→M/id 𝕂 m/M) _ _ ⟩
+        sub (Kit.`/id' 𝕂 (Kit.id/m→M 𝕂 m/M) (Kit.id/` 𝕂 m/M x))  ∎
+    ; ι-wk     = λ x → sym (wk-id/` _ x)
+    }
+
+  -- -- TODO: Requires extending Traversal with a lemma that for any kit
+  -- --   `/id _ (wk _ x/t) ≡ `/id _ x/t ⋯ᵣ wkₖ _ id
+  -- ⊑ₖ-⊤ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ kitₛ
+  -- ⊑ₖ-⊤ ⦃ 𝕊 ⦄ ⦃ 𝕂 ⦄ = record
+  --   { ι-Mode   = m→M/id
+  --   ; ι-id/m→M = id/m→M/id
+  --   ; ι-m→M/id = λ m/M → refl
+  --   ; ι-∋/⊢    = `/id' _
+  --   ; ι-id/`   = id/`/id'
+  --   ; ι-`/id   = λ x/t → {!!}
+  --   ; ι-`/id'  = λ x/t → refl
+  --   ; ι-wk     = λ {m'} {m} {µ} {m/M} x/t →
+  --       let instance _ = kitᵣ in
+  --       `/id' m/M (wk _ x/t)                 ≡⟨ sym {!⋯-var!} ⟩
+  --       `/id' m/M x/t ⋯ᵣ wkₖ _ id            ≡⟨⟩
+  --       Kit.wk kitₛ _ (Kit.`/id' 𝕂 m/M x/t) ∎
+  --   }
+
+  -- TODO: differentiate between things needing SubWithLaws, Sub, or nothing at all...
   module Specialized ⦃ 𝕊 : SubWithLaws ⦄ where
-    infixl   8   _⋯ᵣ_  _⋯ₛ_
+    infixl   8   _⋯ᵣ_  _⋯ₛ_ _⋯[_]_
     infixl   9  _∥ᵣ_  _∥ₛ_
 
     open Kit kitᵣ using () renaming (wk to wkᵣ) public
@@ -179,6 +227,9 @@ record Traversal : Set₁ where
     _⋯ₛ_ = _⋯_
     _⋯ᵣ_ = _⋯_
 
+    _⋯[_]_ : µ₁ ⊢ M → (𝕂 : Kit) → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    t ⋯[ 𝕂 ] ϕ = t ⋯ ϕ where instance _ = 𝕂
+
   open Specialized public
 
   -- -- Alternative without duplication and `R.id` instead of `idᵣ`:
@@ -253,13 +304,13 @@ record Traversal : Set₁ where
   -- ₛfromᵣ'≡ᵣtoₛ : (λ {µ₁} {µ₂} → ₛfromᵣ' {µ₁} {µ₂}) ≡ (λ {µ₁} {µ₂} → ᵣtoₛ {µ₁} {µ₂})
   -- ₛfromᵣ'≡ᵣtoₛ = refl
   
--- record KitHomotopy (T : Traversal) : Set₁ where
---   open Traversal T
---   field
---     ~-cong-⋯ :
---       ∀ ⦃ 𝕂 : Kit ⦄ {f g : µ₁ –[ 𝕂 ]→ µ₂} (t : µ₁ ⊢ M)
---       → f ~ g
---       → t ⋯ f ≡ t ⋯ g
+record KitHomotopy (T : Traversal) : Set₁ where
+  open Traversal T
+  field
+    ~-cong-⋯ :
+      ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ {f g : µ₁ –[ 𝕂 ]→ µ₂} (t : µ₁ ⊢ M)
+      → f ~ g
+      → t ⋯ f ≡ t ⋯ g
 
 -- open import Axiom.Extensionality.Propositional using (Extensionality)
 

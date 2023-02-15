@@ -3,6 +3,24 @@ module Kitty.Util.SubstProperties where
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂; module ≡-Reasoning)
 open ≡-Reasoning
 
+subst-irrelevant : 
+  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ : A}
+    {F : A → Set ℓ₁}
+    (eq eq' : a₁ ≡ a₂)
+    (x : F a₁) 
+  → subst F eq x ≡ subst F eq' x
+subst-irrelevant refl refl x = refl
+
+subst-sym : 
+  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ : A}
+    {F : A → Set ℓ₁}
+    (eq : a₁ ≡ a₂)
+    (x : F a₁) 
+    (y : F a₂) 
+  → x ≡ subst F (sym eq) y
+  → subst F eq x ≡ y
+subst-sym refl x y eq = eq
+
 dist-subst :
   ∀ {ℓ ℓ₁ ℓ₂} {A : Set ℓ} {a₁ a₂ : A}
     {F : A → Set ℓ₁} {G : A → Set ℓ₂}

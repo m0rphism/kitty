@@ -2,23 +2,19 @@ open import Kitty.Term.Modes
 
 module Kitty.Term.Sub {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
-open import Data.List using (List; [])
 open import Data.List.Properties using (++-assoc; ++-identityʳ)
-open import Level using (Level; _⊔_; 0ℓ)
+open import Data.List.Relation.Unary.Any using (here; there)
+open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
 open ≡-Reasoning
-open import Data.List.Relation.Unary.Any using (here; there)
-open import Kitty.Term.Prelude
-open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
-open import Data.Sum using (inj₁; inj₂; _⊎_)
-open import Function using (_$_)
 
+open import Kitty.Term.Prelude
+open import Kitty.Term.Kit 𝕋 using (Kit; _∋/⊢[_]_)
+open import Kitty.Term.KitOrder 𝕋
 open Modes 𝕄
 open Terms 𝕋
-
-open import Kitty.Term.Kit 𝕋 using (Kit; _∋/⊢[_]_)
-
 open Kit ⦃ … ⦄
+open _⊑ₖ_ ⦃ … ⦄
 
 record Sub : Set₁ where
   infixl  12  _,ₖ_
@@ -47,7 +43,7 @@ record Sub : Set₁ where
 
     apₖ  : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} → µ₁ –[ 𝕂 ]→ µ₂ → (∀ m → µ₁ ∋ m → µ₂ ∋/⊢ id/m→M m)
 
-    pre : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₂ –[ 𝕂 ]→ µ₃ → (∀ m → µ₁ ∋ m → µ₂ ∋ m) → µ₁ –[ 𝕂 ]→ µ₃
+    pre  : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₂ –[ 𝕂 ]→ µ₃ → (∀ m → µ₁ ∋ m → µ₂ ∋ m) → µ₁ –[ 𝕂 ]→ µ₃
     post : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₁ –[ 𝕂 ]→ µ₂ → (∀ m → µ₂ ∋/⊢[ 𝕂 ] id/m→M m → µ₃ ∋/⊢[ 𝕂 ] id/m→M m) → µ₁ –[ 𝕂 ]→ µ₃
 
   -- Renaming/Substitution
@@ -204,6 +200,23 @@ record SubWithLaws : Set₁ where
     apₖ-↓ : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} {m'} (ϕ : (µ₁ ▷ m) –[ 𝕂 ]→ µ₂) (x : µ₁ ∋ m')
       → apₖ (ϕ ↓) _ x ≡ apₖ ϕ _ (there x)
 
+    -- pre : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₂ –[ 𝕂 ]→ µ₃ → (∀ m → µ₁ ∋ m → µ₂ ∋ m) → µ₁ –[ 𝕂 ]→ µ₃
+    -- post : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₁ –[ 𝕂 ]→ µ₂ → (∀ m → µ₂ ∋/⊢[ 𝕂 ] id/m→M m → µ₃ ∋/⊢[ 𝕂 ] id/m→M m) → µ₁ –[ 𝕂 ]→ µ₃
+
+    apₖ-pre :
+      ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} {m}
+        (ϕ : µ₂ –[ 𝕂 ]→ µ₃)
+        (f : ∀ m → µ₁ ∋ m → µ₂ ∋ m)
+        (x : µ₁ ∋ m)
+      → apₖ (pre ϕ f) _ x ≡ apₖ ϕ _ (f _ x)
+
+    apₖ-post :
+      ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} {m}
+        (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
+        (f : ∀ m → µ₂ ∋/⊢[ 𝕂 ] id/m→M m → µ₃ ∋/⊢[ 𝕂 ] id/m→M m)
+        (x : µ₁ ∋ m)
+      → apₖ (post ϕ f) _ x ≡ f _ (apₖ ϕ _ x)
+
     wkₖ*-[] : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
       → wkₖ* [] ϕ ~ ϕ
     wkₖ*-▷ : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} µ m (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
@@ -269,6 +282,23 @@ record SubWithLaws : Set₁ where
   --   → id {µ ▷▷ µ'} ~ (id {µ} ↑* µ')
   -- id-▷▷ {µ' = []} = ~-sym (↑*-[] id)
   -- id-▷▷ {µ' = µ' ▷ m} = ~-trans {!id-▷▷!} (~-trans {!id-▷!} (~-sym (↑*-▷ µ' m id)))
+
+  apₖ-↑-here :
+    ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
+    → apₖ (ϕ ↑ m) m (here refl) ≡ id/` _ (here refl)
+  apₖ-↑-here ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} ϕ =
+    apₖ (ϕ ↑ m) m (here refl)                         ≡⟨ ↑-,ₖ ϕ m m (here refl) ⟩
+    apₖ (wkₖ m ϕ ,ₖ id/` _ (here refl)) m (here refl) ≡⟨ apₖ-,ₖ-here (wkₖ m ϕ) _ ⟩
+    id/` _ (here refl)                                ∎
+
+  apₖ-↑-there :
+    ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} {m'} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) (x : µ₁ ∋ m')
+    → apₖ (ϕ ↑ m) _ (there x) ≡ wk _ (apₖ ϕ _ x)
+  apₖ-↑-there ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} {m'} ϕ x =
+    apₖ (ϕ ↑ m) m' (there x)                         ≡⟨ ↑-,ₖ ϕ m m' (there x) ⟩
+    apₖ (wkₖ m ϕ ,ₖ id/` _ (here refl)) m' (there x) ≡⟨ apₖ-,ₖ-there (wkₖ m ϕ) _ x ⟩
+    apₖ (wkₖ m ϕ) _ x                                ≡⟨ apₖ-wkₖ-wk ϕ x ⟩
+    wk _ (apₖ ϕ _ x)                                 ∎
 
   -- Weakening preserves Homotopy
 

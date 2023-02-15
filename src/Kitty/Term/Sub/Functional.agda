@@ -70,6 +70,8 @@ pre ϕ f = λ m x → ϕ _ (f m x)
 post : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} → µ₁ –[ 𝕂 ]→ µ₂ → (∀ m → µ₂ ∋/⊢[ 𝕂 ] id/m→M m → µ₃ ∋/⊢[ 𝕂 ] id/m→M m) → µ₁ –[ 𝕂 ]→ µ₃
 post ϕ f = λ m x → f _ (ϕ m x)
 
+open import Kitty.Term.KitOrder 𝕋
+
 instance
   Sub-→ : Sub
   Sub-→ = record
@@ -111,6 +113,8 @@ instance
     ; apₖ-,ₖ-there = λ ϕ x/t x → refl
     ; apₖ-wkₖ-wk   = λ ϕ x → refl
     ; apₖ-↓        = λ ϕ x → refl
+    ; apₖ-pre      = λ ϕ f x → refl
+    ; apₖ-post     = λ ϕ f x → refl
     ; wkₖ*-[]      = λ ϕ m x → refl
     ; wkₖ*-▷       = λ µ m ϕ mx x → refl
     ; ↑-,ₖ         = λ ϕ m mx x → refl
