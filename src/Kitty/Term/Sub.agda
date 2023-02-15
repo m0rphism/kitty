@@ -10,11 +10,9 @@ open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋 using (Kit; _∋/⊢[_]_)
-open import Kitty.Term.KitOrder 𝕋
 open Modes 𝕄
 open Terms 𝕋
 open Kit ⦃ … ⦄
-open _⊑ₖ_ ⦃ … ⦄
 
 record Sub : Set₁ where
   infixl  12  _,ₖ_

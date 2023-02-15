@@ -7,13 +7,16 @@ open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
+open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties
 
 open Modes 𝕄
 open Terms 𝕋
 open Kit ⦃ … ⦄
+open Sub ⦃ … ⦄
+open SubWithLaws ⦃ … ⦄
 
-record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set where 
+record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where 
   field
     ι-Mode : Kit.VarMode/TermMode 𝕂₁ → Kit.VarMode/TermMode 𝕂₂
     ι-id/m→M : ∀ m → ι-Mode (Kit.id/m→M 𝕂₁ m) ≡ Kit.id/m→M 𝕂₂ m
@@ -34,6 +37,12 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set where
              → let sub = subst (µ ∋/⊢[ 𝕂₂ ]_) (sym (ι-id/m→M m)) in
                ι-∋/⊢ (Kit.wk 𝕂₁ {m' = m'} m/M x/t) ≡ Kit.wk 𝕂₂ {m' = m'} (ι-Mode m/M) (ι-∋/⊢ x/t)
 
+    ι-→ : ∀ ⦃ 𝕊 : Sub ⦄ {µ₁} {µ₂} → µ₁ –[ 𝕂₁ ; 𝕊 ]→ µ₂ → µ₁ –[ 𝕂₂ ; 𝕊 ]→ µ₂
+    ι-ap-→ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂) (x : µ₁ ∋ m)
+             → let instance _ = 𝕂₁; _ = 𝕂₂ in
+               let sub = subst (µ₂ ∋/⊢_) (ι-id/m→M m ) in
+               apₖ (ι-→ ϕ) _ x ≡ sub (ι-∋/⊢ (apₖ ϕ _ x))
+
 ⊑ₖ-refl : ∀ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ 𝕂
 ⊑ₖ-refl ⦃ 𝕂 ⦄ = record
   { ι-Mode   = λ m/M → m/M
@@ -44,6 +53,8 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set where
   ; ι-`/id   = λ x/t → refl
   ; ι-`/id'  = λ x/t → refl
   ; ι-wk     = λ x/t → refl
+  ; ι-→      = λ ϕ → ϕ
+  ; ι-ap-→   = λ ϕ x → refl
   }
 
 -- -- Probably not needed

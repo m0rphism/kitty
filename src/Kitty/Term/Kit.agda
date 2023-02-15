@@ -40,6 +40,9 @@ record Kit : Set₁ where
     id/`/id          : ∀ x → `/id {µ = µ} m (id/` _ x) ≡ ` x
     id/`/id'         : ∀ x → let sub = subst (µ ⊢_) (sym (id/m→M/id m)) in
                              `/id' {µ = µ} (id/m→M m) (id/` _ x) ≡ sub (` x) -- For Compose Experiment
+    `/id≡`/id'       : ∀ {m} (x/t : µ ∋/⊢ id/m→M m)
+                       → let sub = subst (µ ⊢_) (id/m→M/id m) in
+                         `/id _ x/t ≡ sub (`/id' _ x/t)
 
     wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
     wk-id/`          : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
@@ -59,3 +62,20 @@ record Kit : Set₁ where
 
 _∋/⊢[_]_ : List VarMode → (𝕂 : Kit) → Kit.VarMode/TermMode 𝕂 → Set
 µ ∋/⊢[ 𝕂 ] sm = Kit._∋/⊢_ 𝕂 µ sm
+
+kitᵣ : Kit
+Kit.VarMode/TermMode kitᵣ = VarMode
+Kit._∋/⊢_            kitᵣ = _∋_
+Kit.id/m→M           kitᵣ = λ m → m
+Kit.m→M/id           kitᵣ = m→M
+Kit.id/m→M/id        kitᵣ = λ m → refl
+Kit.id/`             kitᵣ = λ m x → x
+Kit.`/id             kitᵣ = λ m x → ` x
+Kit.`/id'            kitᵣ = λ m x → ` x
+Kit.id/`/id          kitᵣ = λ x → refl
+Kit.id/`/id'         kitᵣ = λ x → refl
+Kit.`/id≡`/id'       kitᵣ = λ x → refl
+Kit.wk               kitᵣ = λ m x → there x
+Kit.wk-id/`          kitᵣ = λ m x → refl
+Kit.kit-tag          kitᵣ = K-Ren
+

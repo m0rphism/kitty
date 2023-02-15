@@ -23,6 +23,8 @@ private variable
   M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
   µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
+private instance _ = kitᵣ
+
 record Traversal : Set₁ where
   infixl   8  _⋯_
 
@@ -31,24 +33,11 @@ record Traversal : Set₁ where
             → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
     ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂)
             → (` x) ⋯ ϕ ≡ `/id _ (apₖ ϕ _ x)
-
-  -- TODO: This could also be defined outside of Traversal.
-  kitᵣ : Kit
-  Kit.VarMode/TermMode kitᵣ = VarMode
-  Kit._∋/⊢_            kitᵣ = _∋_
-  Kit.id/m→M           kitᵣ = λ m → m
-  Kit.m→M/id           kitᵣ = m→M
-  Kit.id/m→M/id        kitᵣ = λ m → refl
-  Kit.id/`             kitᵣ = λ m x → x
-  Kit.`/id             kitᵣ = λ m x → ` x
-  Kit.`/id'            kitᵣ = λ m x → ` x
-  Kit.id/`/id          kitᵣ = λ x → refl
-  Kit.id/`/id'         kitᵣ = λ x → refl
-  Kit.wk               kitᵣ = λ m x → there x
-  Kit.wk-id/`          kitᵣ = λ m x → refl
-  Kit.kit-tag          kitᵣ = K-Ren
-
-  private instance _ = kitᵣ
+    -- TODO: Can't we get rid of this weird special case? Required for ⊑ₖ-⊤, which is required for ComposeKit.𝕂₂⊑⊔
+    ⋯-x/t-wk : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M)
+               → (`/id' _ x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) ≡ `/id' _ (wk {m' = m'} m/M x/t)
+    -- ⋯-x/t    : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M) (ϕ : µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂)
+    --            → (`/id' _ x/t ⋯ ϕ) ≡ `/id' _ (apₖ/⋯ ϕ _ x/t)
 
   kitₛ : ⦃ 𝕊 : SubWithLaws ⦄ → Kit
   Kit.VarMode/TermMode kitₛ = TermMode
@@ -61,6 +50,7 @@ record Traversal : Set₁ where
   Kit.`/id'            kitₛ = λ M t → t
   Kit.id/`/id          kitₛ = λ x → refl
   Kit.id/`/id'         kitₛ = λ x → refl
+  Kit.`/id≡`/id'       kitₛ = λ t → refl
   Kit.wk               kitₛ = λ M t → t ⋯ wkₖ _ id
   Kit.wk-id/`          kitₛ = λ m x →
     (` x) ⋯ wkₖ m id            ≡⟨ ⋯-var x (wkₖ m id) ⟩
@@ -73,7 +63,7 @@ record Traversal : Set₁ where
   private instance _ = kitₛ
 
   ⊑-ᵣₛ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ → kitᵣ ⊑ₖ kitₛ
-  ⊑-ᵣₛ = record
+  ⊑-ᵣₛ ⦃ 𝕊 ⦄ = record
     { ι-Mode   = m→M
     ; ι-id/m→M = λ m → refl
     ; ι-m→M/id = λ m/M → refl
@@ -89,6 +79,13 @@ record Traversal : Set₁ where
         ` apₖ (wkₖ _ id) _ x      ≡⟨ sym (⋯-var ⦃ kitᵣ ⦄ x (wkₖ _ id)) ⟩
         (` x) ⋯ wkₖ _ id          ≡⟨⟩
         Kit.wk kitₛ (m→M m) (` x) ∎
+    ; ι-→      = λ ϕ → pre id (apₖ ϕ)
+    ; ι-ap-→   = λ ⦃ 𝕊' ⦄ ϕ x →
+      let instance _ = kitᵣ; _ = kitₛ ⦃ 𝕊 ⦄ in
+      let 𝕤' = SubWithLaws.SubWithLaws-Sub 𝕊' in
+      apₖ ⦃ 𝕤' ⦄ (pre id (apₖ ⦃ 𝕤' ⦄ ϕ)) _ x      ≡⟨ apₖ-pre ⦃ 𝕊' ⦄ id (apₖ ϕ) x ⟩
+      apₖ ⦃ 𝕤' ⦄ (id ⦃ 𝕤' ⦄) _ (apₖ ⦃ 𝕤' ⦄ ϕ _ x) ≡⟨ apₖ-id ⦃ 𝕊' ⦄ (apₖ ⦃ 𝕤' ⦄ ϕ _ x) ⟩
+      id/` ⦃ kitₛ ⦃ 𝕊 ⦄ ⦄ _ (apₖ ⦃ 𝕤' ⦄ ϕ _ x)    ∎
     }
 
   ⊑ₖ-⊥ : ∀ ⦃ 𝕂 : Kit ⦄ → kitᵣ ⊑ₖ 𝕂
@@ -108,25 +105,40 @@ record Traversal : Set₁ where
         sub' (Kit.`/id' 𝕂 (Kit.id/m→M 𝕂 m/M) (Kit.id/` 𝕂 m/M x)) ≡⟨ subst-irrelevant (Kit.id/m→M/id 𝕂 m/M) _ _ ⟩
         sub (Kit.`/id' 𝕂 (Kit.id/m→M 𝕂 m/M) (Kit.id/` 𝕂 m/M x))  ∎
     ; ι-wk     = λ x → sym (wk-id/` _ x)
+    ; ι-→      = λ ϕ → pre id (apₖ ϕ)
+    ; ι-ap-→   = λ ϕ x →
+      let instance _ = kitᵣ in
+      apₖ (pre id (apₖ ϕ)) _ x ≡⟨ apₖ-pre id (apₖ ϕ) x ⟩
+      apₖ id _ (apₖ ϕ _ x)     ≡⟨ apₖ-id (apₖ ϕ _ x) ⟩
+      id/` _ (apₖ ϕ _ x)       ∎
     }
 
-  -- -- TODO: Requires extending Traversal with a lemma that for any kit
-  -- --   `/id _ (wk _ x/t) ≡ `/id _ x/t ⋯ᵣ wkₖ _ id
-  -- ⊑ₖ-⊤ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ kitₛ
-  -- ⊑ₖ-⊤ ⦃ 𝕊 ⦄ ⦃ 𝕂 ⦄ = record
-  --   { ι-Mode   = m→M/id
-  --   ; ι-id/m→M = id/m→M/id
-  --   ; ι-m→M/id = λ m/M → refl
-  --   ; ι-∋/⊢    = `/id' _
-  --   ; ι-id/`   = id/`/id'
-  --   ; ι-`/id   = λ x/t → {!!}
-  --   ; ι-`/id'  = λ x/t → refl
-  --   ; ι-wk     = λ {m'} {m} {µ} {m/M} x/t →
-  --       let instance _ = kitᵣ in
-  --       `/id' m/M (wk _ x/t)                 ≡⟨ sym {!⋯-var!} ⟩
-  --       `/id' m/M x/t ⋯ᵣ wkₖ _ id            ≡⟨⟩
-  --       Kit.wk kitₛ _ (Kit.`/id' 𝕂 m/M x/t) ∎
-  --   }
+  ⊑ₖ-⊤ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ kitₛ
+  ⊑ₖ-⊤ ⦃ 𝕊 ⦄ ⦃ 𝕂 ⦄ = record
+    { ι-Mode   = m→M/id
+    ; ι-id/m→M = id/m→M/id
+    ; ι-m→M/id = λ m/M → refl
+    ; ι-∋/⊢    = `/id' _
+    ; ι-id/`   = id/`/id'
+    ; ι-`/id   = λ {µ} {m} x/t →
+        let sub = subst (µ ⊢_) (Kit.id/m→M/id 𝕂 m) in
+        `/id m x/t                       ≡⟨ `/id≡`/id' x/t ⟩
+        sub (`/id' _ x/t) ∎
+    ; ι-`/id'  = λ x/t → refl
+    ; ι-wk     = λ {m'} {m} {µ} {m/M} x/t →
+        `/id' m/M (wk _ x/t)                  ≡⟨ sym (⋯-x/t-wk x/t) ⟩
+        `/id' m/M x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨⟩
+        Kit.wk kitₛ _ (Kit.`/id' 𝕂 m/M x/t)   ∎
+    ; ι-→      = λ ϕ → post id λ _ t → t ⋯ ϕ
+    ; ι-ap-→   = λ ⦃ 𝕊' ⦄ {µ₁} {µ₂} {m} ϕ x →
+        let sub = subst (µ₂ ⊢_) (id/m→M/id m) in
+        let 𝕤' = SubWithLaws.SubWithLaws-Sub 𝕊' in
+        apₖ (post id λ _ t → t ⋯ ϕ) _ x            ≡⟨ apₖ-post ⦃ 𝕊' ⦄ id (λ _ t → t ⋯ ϕ) x ⟩
+        apₖ ⦃ 𝕤' ⦄ (id ⦃ 𝕂 = kitₛ ⦃ 𝕊 ⦄ ⦄) _ x ⋯ ϕ ≡⟨ cong (_⋯ ϕ) (apₖ-id x) ⟩
+        ` x ⋯ ϕ                                    ≡⟨ ⋯-var x ϕ ⟩
+        `/id _ (apₖ ϕ _ x)                         ≡⟨ `/id≡`/id' (apₖ ϕ _ x) ⟩
+        sub (`/id' _ (apₖ ϕ _ x))                  ∎
+    }
 
   -- TODO: differentiate between things needing SubWithLaws, Sub, or nothing at all...
   module Specialized ⦃ 𝕊 : SubWithLaws ⦄ where
