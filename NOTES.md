@@ -1,3 +1,12 @@
+- Should we make Context part of Term? `Ctx µ = µ ⊢ ℂ`
+  Pro: can be easily traversed.
+  Con: Ops and Laws need to be somehow derived + boilerplate.
+  Alternative: Make Traversal somehow aware of external context.
+  
+- Make Context structure independent like Sub.
+  This might also fix the previous point, as a Term-Context can be declared
+  an instance afterwards. This instance could also be derived via reflection.
+
 - Can we unify `_⋯_` and `_∘_` via yoneda lemma, i.e. by representing Terms as
   substitutions from a singleton context?
   - the `assoc` lemma will become real associativity - simply from the category
