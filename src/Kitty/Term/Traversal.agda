@@ -98,6 +98,7 @@ record Traversal : Set₁ where
       apₖ ⦃ 𝕤' ⦄ (pre id (apₖ ⦃ 𝕤' ⦄ ϕ)) _ x      ≡⟨ apₖ-pre ⦃ 𝕊' ⦄ id (apₖ ϕ) x ⟩
       apₖ ⦃ 𝕤' ⦄ (id ⦃ 𝕤' ⦄) _ (apₖ ⦃ 𝕤' ⦄ ϕ _ x) ≡⟨ apₖ-id ⦃ 𝕊' ⦄ (apₖ ⦃ 𝕤' ⦄ ϕ _ x) ⟩
       id/` ⦃ kitₛ ⦃ 𝕊 ⦄ ⦄ _ (apₖ ⦃ 𝕤' ⦄ ϕ _ x)    ∎
+    ; ι-∋/⊢-id = λ ()
     }
 
   ⊑ₖ-⊥ : ∀ ⦃ 𝕂 : Kit ⦄ → kitᵣ ⊑ₖ 𝕂
@@ -123,6 +124,7 @@ record Traversal : Set₁ where
       apₖ (pre id (apₖ ϕ)) _ x ≡⟨ apₖ-pre id (apₖ ϕ) x ⟩
       apₖ id _ (apₖ ϕ _ x)     ≡⟨ apₖ-id (apₖ ϕ _ x) ⟩
       id/` _ (apₖ ϕ _ x)       ∎
+    ; ι-∋/⊢-id = λ { refl x/t → refl }
     }
 
   ⊑ₖ-⊤ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ kitₛ
@@ -150,6 +152,7 @@ record Traversal : Set₁ where
         ` x ⋯ ϕ                                    ≡⟨ ⋯-var x ϕ ⟩
         `/id _ (apₖ ϕ _ x)                         ≡⟨ `/id≡`/id' (apₖ ϕ _ x) ⟩
         sub (`/id' _ (apₖ ϕ _ x))                  ∎
+    ; ι-∋/⊢-id = λ { refl x/t → refl }
     }
 
   -- TODO: differentiate between things needing SubWithLaws, Sub, or nothing at all...

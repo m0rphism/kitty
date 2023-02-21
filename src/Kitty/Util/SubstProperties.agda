@@ -76,6 +76,14 @@ cancel-subst :
   → subst F (sym a₁≡a₂) (subst F a₁≡a₂ x) ≡ x
 cancel-subst _ refl _ = refl
 
+cancel-subst' :
+  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ : A}
+  → (F : A → Set ℓ₁)
+  → (a₂≡a₁ : a₂ ≡ a₁)
+  → (x : F a₁)
+  → subst F a₂≡a₁ (subst F (sym a₂≡a₁) x) ≡ x
+cancel-subst' _ refl _ = refl
+
 cancel-subst₂ :
   ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ : A}
   → (F : A → Set ℓ₁)

@@ -17,6 +17,7 @@ open Sub ⦃ … ⦄
 open SubWithLaws ⦃ … ⦄
 
 record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where 
+  private instance _ = 𝕂₁; _ = 𝕂₂
   field
     ι-Mode : Kit.VarMode/TermMode 𝕂₁ → Kit.VarMode/TermMode 𝕂₂
     ι-id/m→M : ∀ m → ι-Mode (Kit.id/m→M 𝕂₁ m) ≡ Kit.id/m→M 𝕂₂ m
@@ -43,6 +44,11 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where
                let sub = subst (µ₂ ∋/⊢_) (ι-id/m→M m ) in
                apₖ (ι-→ ϕ) _ x ≡ sub (ι-∋/⊢ (apₖ ϕ _ x))
 
+    ι-∋/⊢-id : ∀ {µ} {m} (eq : 𝕂₁ ≡ 𝕂₂) (x/t : µ ∋/⊢[ 𝕂₁ ] (id/m→M m))
+               → let sub₁ = subst (µ ∋/⊢[ 𝕂₂ ]_) (sym (ι-id/m→M m)) in
+                 let sub₂ = subst (λ ■ → µ ∋/⊢[ ■ ] id/m→M ⦃ ■ ⦄ m) eq in
+                 ι-∋/⊢ x/t ≡ sub₁ (sub₂ x/t)
+
   private instance _ = 𝕂₁; _ = 𝕂₂
 
   _,ₖ'_ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {µ₁} {µ₂} {m}
@@ -65,6 +71,7 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where
   ; ι-wk     = λ x/t → refl
   ; ι-→      = λ ϕ → ϕ
   ; ι-ap-→   = λ ϕ x → refl
+  ; ι-∋/⊢-id = λ { refl x/t → refl }
   }
 
 -- -- Probably not needed
