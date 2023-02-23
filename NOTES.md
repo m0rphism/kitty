@@ -1,3 +1,20 @@
+- ap/⋯ may need to work for general m/M, because we ne need laws involving id for Typing.Kit cases for
+  type-preservation of terms like "clauses" which have no var-mode.
+  
+  Or at least this would allow us to use all properties for ap/⋯ and transfer them to ap AND ⋯.
+
+- We could make a single Sub/Rename type that includes composition as a constructor, i.e.
+
+        _·_ : ∀ ⦃ 𝕂₁ 𝕂₂ ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
+              → µ₁ –[ 𝕂₁ ]→ µ₂
+              → µ₂ –[ 𝕂₂ ]→ µ₃
+              → µ₁ –[ 𝕂  ]→ µ₃
+
+  Note that we could also do that generic over any kind of lattice instead of kits in particular for decoupling.
+  Caveat: Would be Lattice + X, since x/t depends on Kit
+
+- Alternatively maybe it would be good to define substitutions as `Star InnerSub` like to KitAltSimple.
+
 - Should we make Context part of Term? `Ctx µ = µ ⊢ ℂ`
   Pro: can be easily traversed.
   Con: Ops and Laws need to be somehow derived + boilerplate.

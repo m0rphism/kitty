@@ -1,6 +1,7 @@
 module Kitty.Term.Modes where
 
 open import Data.List using (List)
+open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Kitty.Term.Prelude
 
 record Modes : Set₁ where
@@ -15,8 +16,9 @@ record Modes : Set₁ where
 record Terms (𝕄 : Modes) : Set₁ where
   open Modes 𝕄
   field
-    _⊢_ : List VarMode → TermMode → Set
-    `_  : ∀ {µ m} → µ ∋ m → µ ⊢ m→M m
+    _⊢_         : List VarMode → TermMode → Set
+    `_          : ∀ {µ m} → µ ∋ m → µ ⊢ m→M m
+    `-injective : ∀ {µ m} {x₁ x₂ : µ ∋ m} → ` x₁ ≡ ` x₂ → x₁ ≡ x₂
 
   module DeBruijn-Notation where
     open import Relation.Binary.PropositionalEquality using (_≡_; refl)
@@ -50,8 +52,13 @@ mkModes m→M = record { m→M = m→M }
 module _ {𝕄 : Modes} where
   open Modes 𝕄
   mkTerms :
-    ∀ (_⊢_ : List VarMode → TermMode → Set)
-      (`_  : ∀ {µ m} → µ ∋ m → µ ⊢ m→M m)
+    ∀ (_⊢_         : List VarMode → TermMode → Set)
+      (`_          : ∀ {µ m} → µ ∋ m → µ ⊢ m→M m)
+      (`-injective : ∀ {µ m} {x₁ x₂ : µ ∋ m} → ` x₁ ≡ ` x₂ → x₁ ≡ x₂)
     → Terms 𝕄
-  mkTerms _⊢_ `_ = record { _⊢_ = _⊢_ ; `_ = `_ }
+  mkTerms _⊢_ `_ `-injective = record
+    { _⊢_         = _⊢_
+    ; `_          = `_
+    ; `-injective = `-injective
+    }
 

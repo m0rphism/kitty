@@ -44,6 +44,10 @@ record Kit : Set₁ where
                        → let sub = subst (µ ⊢_) (id/m→M/id m) in
                          `/id _ x/t ≡ sub (`/id' _ x/t)
 
+    id/`-injective  : ∀ {µ m} {x₁ x₂ : µ ∋ m} → id/` _ x₁ ≡ id/` _ x₂ → x₁ ≡ x₂
+    `/id-injective  : ∀ {µ m} {x/t₁ x/t₂ : µ ∋/⊢ id/m→M m} → `/id _ x/t₁ ≡ `/id _ x/t₂ → x/t₁ ≡ x/t₂
+    `/id'-injective : ∀ {µ m/M} {x/t₁ x/t₂ : µ ∋/⊢ m/M} → `/id' _ x/t₁ ≡ `/id' _ x/t₂ → x/t₁ ≡ x/t₂
+
     wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
     wk-id/`          : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
     kit-tag          : KitTag
@@ -78,4 +82,7 @@ Kit.`/id≡`/id'       kitᵣ = λ x → refl
 Kit.wk               kitᵣ = λ m x → there x
 Kit.wk-id/`          kitᵣ = λ m x → refl
 Kit.kit-tag          kitᵣ = K-Ren
+Kit.id/`-injective   kitᵣ = λ eq → eq
+Kit.`/id-injective   kitᵣ = λ eq → `-injective eq
+Kit.`/id'-injective  kitᵣ = λ eq → `-injective eq
 

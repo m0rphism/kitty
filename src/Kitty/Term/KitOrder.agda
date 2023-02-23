@@ -1,6 +1,7 @@
 open import Kitty.Term.Modes
+import Kitty.Term.Sub
 
-module Kitty.Term.KitOrder {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.Term.KitOrder {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; module ≡-Reasoning)
 open ≡-Reasoning
@@ -38,24 +39,24 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where
              → let sub = subst (µ ∋/⊢[ 𝕂₂ ]_) (sym (ι-id/m→M m)) in
                ι-∋/⊢ (Kit.wk 𝕂₁ {m' = m'} m/M x/t) ≡ Kit.wk 𝕂₂ {m' = m'} (ι-Mode m/M) (ι-∋/⊢ x/t)
 
-    ι-→ : ∀ ⦃ 𝕊 : Sub ⦄ {µ₁} {µ₂} → µ₁ –[ 𝕂₁ ; 𝕊 ]→ µ₂ → µ₁ –[ 𝕂₂ ; 𝕊 ]→ µ₂
-    ι-ap-→ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂) (x : µ₁ ∋ m)
-             → let instance _ = 𝕂₁; _ = 𝕂₂ in
-               let sub = subst (µ₂ ∋/⊢_) (ι-id/m→M m ) in
+    ι-→ : ∀ {µ₁} {µ₂} → µ₁ –[ 𝕂₁ ]→ µ₂ → µ₁ –[ 𝕂₂ ]→ µ₂
+    ι-ap-→ : ∀ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂) (x : µ₁ ∋ m)
+             → let sub = subst (µ₂ ∋/⊢_) (ι-id/m→M m ) in
                apₖ (ι-→ ϕ) _ x ≡ sub (ι-∋/⊢ (apₖ ϕ _ x))
+
+    ι-~-→ : ∀ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂)
+            → ι-→ ϕ ~ ϕ
 
     ι-∋/⊢-id : ∀ {µ} {m} (eq : 𝕂₁ ≡ 𝕂₂) (x/t : µ ∋/⊢[ 𝕂₁ ] (id/m→M m))
                → let sub₁ = subst (µ ∋/⊢[ 𝕂₂ ]_) (sym (ι-id/m→M m)) in
                  let sub₂ = subst (λ ■ → µ ∋/⊢[ ■ ] id/m→M ⦃ ■ ⦄ m) eq in
                  ι-∋/⊢ x/t ≡ sub₁ (sub₂ x/t)
 
-  private instance _ = 𝕂₁; _ = 𝕂₂
-
-  _,ₖ'_ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {µ₁} {µ₂} {m}
+  _,ₖ'_ : ∀ {µ₁} {µ₂} {m}
           → µ₁ –[ 𝕂₂ ]→ µ₂
           → µ₂ ∋/⊢[ 𝕂₁ ] id/m→M m
           → (µ₁ ▷ m) –[ 𝕂₂ ]→ µ₂
-  _,ₖ'_ ⦃ 𝕊 ⦄ {µ₁} {µ₂} {m} ϕ x/t =
+  _,ₖ'_ {µ₁} {µ₂} {m} ϕ x/t =
     let sub = subst (µ₂ ∋/⊢[ 𝕂₂ ]_) (ι-id/m→M m) in
     ϕ ,ₖ  sub (ι-∋/⊢ x/t)
 
@@ -71,6 +72,7 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where
   ; ι-wk     = λ x/t → refl
   ; ι-→      = λ ϕ → ϕ
   ; ι-ap-→   = λ ϕ x → refl
+  ; ι-~-→    = λ ϕ m x → refl
   ; ι-∋/⊢-id = λ { refl x/t → refl }
   }
 
