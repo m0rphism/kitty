@@ -11,8 +11,7 @@ open import Kitty.Util.SubstProperties
 open import Kitty.Term.Kit 𝕋
 -- open import Kitty.Term.KitOrder 𝕋
 import Kitty.Term.KitOrder
-module KO = Kitty.Term.KitOrder 𝕋
-open KO ⦃ … ⦄
+open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
 open Modes 𝕄
 open Terms 𝕋
@@ -148,23 +147,6 @@ record Traversal : Set₁ where
 
   open SubLemmas ⦃ … ⦄ public
 
-  pre-id-~ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ kitᵣ ]→ µ₂)
-    → pre (id ⦃ 𝕂 = 𝕂 ⦄) (apₖ ϕ) ~ ϕ
-  pre-id-~ ⦃ 𝕊 ⦄ ⦃ 𝕂 ⦄ {µ₁} {µ₂} ϕ m x =
-    `/id _ (apₖ (pre (id ⦃ 𝕂 = 𝕂 ⦄) (apₖ ϕ)) m x) ≡⟨ cong (`/id _) (apₖ-pre id (apₖ ϕ) x) ⟩
-    `/id _ (apₖ (id ⦃ 𝕂 = 𝕂 ⦄) _ (apₖ ϕ _ x))     ≡⟨ cong (`/id _) (apₖ-id (apₖ ϕ _ x)) ⟩
-    `/id _ (id/` ⦃ 𝕂 ⦄ _ (apₖ ϕ m x))             ≡⟨ id/`/id (apₖ ϕ m x) ⟩
-    ` apₖ ϕ m x                                   ≡⟨⟩
-    `/id _ (apₖ ϕ m x)                            ∎
-
-  post-id-~ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
-    → post (id ⦃ 𝕂 = kitₛ ⦄) (λ _ t → t ⋯ ϕ) ~ ϕ
-  post-id-~ ⦃ 𝕊 ⦄ ⦃ 𝕂 ⦄ {µ₁} {µ₂} ϕ m x =
-    `/id _ (apₖ (post (id ⦃ 𝕂 = kitₛ ⦄) (λ _ t → t ⋯ ϕ)) _ x) ≡⟨ cong (`/id _) (apₖ-post id (λ _ t → t ⋯ ϕ) x) ⟩
-    `/id _ (apₖ (id ⦃ 𝕂 = kitₛ ⦄) _ x ⋯ ϕ)                    ≡⟨ cong (λ ■ → `/id _ (■ ⋯ ϕ)) (apₖ-id x) ⟩
-    `/id _ (` x ⋯ ϕ)                                          ≡⟨ cong (`/id _) (⋯-var x ϕ) ⟩
-    `/id _ (apₖ ϕ _ x)                                        ∎
-
   ⊑-ᵣₛ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ → kitᵣ ⊑ₖ kitₛ
   ⊑-ᵣₛ ⦃ 𝕊 ⦄ = record
     { ι-Mode   = m→M
@@ -182,14 +164,9 @@ record Traversal : Set₁ where
         ` apₖ (wkₖ _ id) _ x      ≡⟨ sym (⋯-var ⦃ kitᵣ ⦄ x (wkₖ _ id)) ⟩
         (` x) ⋯ wkₖ _ id          ≡⟨⟩
         Kit.wk kitₛ (m→M m) (` x) ∎
-    ; ι-→      = λ ϕ → pre id (apₖ ϕ)
-    ; ι-ap-→   = λ ϕ x →
-      let instance _ = kitᵣ; _ = kitₛ in
-      apₖ (pre id (apₖ ϕ)) _ x      ≡⟨ apₖ-pre id (apₖ ϕ) x ⟩
-      apₖ id _ (apₖ ϕ _ x) ≡⟨ apₖ-id (apₖ ϕ _ x) ⟩
-      id/` ⦃ kitₛ ⦄ _ (apₖ ϕ _ x)    ∎
-    ; ι-~-→    = pre-id-~
     ; ι-∋/⊢-id = λ ()
+    ; ι-∋/⊢-~ₜ = λ x/t → refl
+    ; ι-∋/⊢-~ₜ[] = λ x/t → refl
     }
 
   ⊑ₖ-⊥ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ → ⦃ 𝕂 : Kit ⦄ → kitᵣ ⊑ₖ 𝕂
@@ -209,14 +186,14 @@ record Traversal : Set₁ where
         sub' (Kit.`/id' 𝕂 (Kit.id/m→M 𝕂 m/M) (Kit.id/` 𝕂 m/M x)) ≡⟨ subst-irrelevant (Kit.id/m→M/id 𝕂 m/M) _ _ ⟩
         sub (Kit.`/id' 𝕂 (Kit.id/m→M 𝕂 m/M) (Kit.id/` 𝕂 m/M x))  ∎
     ; ι-wk     = λ x → sym (wk-id/` _ x)
-    ; ι-→      = λ ϕ → pre id (apₖ ϕ)
-    ; ι-ap-→   = λ ϕ x →
-      let instance _ = kitᵣ in
-      apₖ (pre id (apₖ ϕ)) _ x ≡⟨ apₖ-pre id (apₖ ϕ) x ⟩
-      apₖ id _ (apₖ ϕ _ x)     ≡⟨ apₖ-id (apₖ ϕ _ x) ⟩
-      id/` _ (apₖ ϕ _ x)       ∎
-    ; ι-~-→    = pre-id-~
     ; ι-∋/⊢-id = λ { refl x/t → refl }
+    ; ι-∋/⊢-~ₜ = id/`/id
+    ; ι-∋/⊢-~ₜ[] = λ {µ} {m/M} x →
+        let sub = subst (_⊢_ µ) (sym (sym (id/m→M/id m/M))) in
+        let sub' = subst (_⊢_ µ) (id/m→M/id m/M) in
+        sub (`/id' ⦃ 𝕂 ⦄ _ (id/` _ x))  ≡⟨ subst-irrelevant (sym (sym (id/m→M/id m/M))) (id/m→M/id m/M) (`/id' ⦃ 𝕂 ⦄ _ (id/` _ x)) ⟩
+        sub' (`/id' ⦃ 𝕂 ⦄ _ (id/` _ x)) ≡⟨ subst-sym (id/m→M/id m/M) (`/id' ⦃ 𝕂 ⦄ _ (id/` _ x)) (` x) (id/`/id' x) ⟩
+        Kit.`/id' kitᵣ m/M x            ∎
     }
 
   ⊑ₖ-⊤ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ kitₛ
@@ -235,16 +212,12 @@ record Traversal : Set₁ where
         `/id' m/M (wk _ x/t)                  ≡⟨ sym (⋯-x/t-wk x/t) ⟩
         `/id' m/M x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨⟩
         Kit.wk kitₛ _ (Kit.`/id' 𝕂 m/M x/t)   ∎
-    ; ι-→      = λ ϕ → post id λ _ t → t ⋯ ϕ
-    ; ι-ap-→   = λ {µ₁} {µ₂} {m} ϕ x →
-        let sub = subst (µ₂ ⊢_) (id/m→M/id m) in
-        apₖ (post id λ _ t → t ⋯ ϕ) _ x            ≡⟨ apₖ-post id (λ _ t → t ⋯ ϕ) x ⟩
-        apₖ (id ⦃ 𝕂 = kitₛ ⦄) _ x ⋯ ϕ              ≡⟨ cong (_⋯ ϕ) (apₖ-id x) ⟩
-        ` x ⋯ ϕ                                    ≡⟨ ⋯-var x ϕ ⟩
-        `/id _ (apₖ ϕ _ x)                         ≡⟨ `/id≡`/id' (apₖ ϕ _ x) ⟩
-        sub (`/id' _ (apₖ ϕ _ x))                  ∎
-    ; ι-~-→    = post-id-~
     ; ι-∋/⊢-id = λ { refl x/t → refl }
+    ; ι-∋/⊢-~ₜ = λ {µ} {m} x/t →
+        let sub = subst (µ ⊢_) (id/m→M/id m) in
+        sub (`/id' ⦃ 𝕂 ⦄ _ x/t) ≡⟨ sym (`/id≡`/id' x/t) ⟩
+        `/id m x/t              ∎
+    ; ι-∋/⊢-~ₜ[] = λ x/t → refl
     }
 
   -- TODO: differentiate between things needing SubWithLaws, Sub, or nothing at all...

@@ -1,21 +1,17 @@
 open import Kitty.Term.Modes
-import Kitty.Term.Sub
 
-module Kitty.Term.KitOrder {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) where
+module Kitty.Term.KitOrder {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; module ≡-Reasoning)
 open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties
 
 open Modes 𝕄
 open Terms 𝕋
 open Kit ⦃ … ⦄
-open Sub ⦃ … ⦄
-open SubWithLaws ⦃ … ⦄
 
 record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where 
   private instance _ = 𝕂₁; _ = 𝕂₂
@@ -39,26 +35,26 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where
              → let sub = subst (µ ∋/⊢[ 𝕂₂ ]_) (sym (ι-id/m→M m)) in
                ι-∋/⊢ (Kit.wk 𝕂₁ {m' = m'} m/M x/t) ≡ Kit.wk 𝕂₂ {m' = m'} (ι-Mode m/M) (ι-∋/⊢ x/t)
 
-    ι-→ : ∀ {µ₁} {µ₂} → µ₁ –[ 𝕂₁ ]→ µ₂ → µ₁ –[ 𝕂₂ ]→ µ₂
-    ι-ap-→ : ∀ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂) (x : µ₁ ∋ m)
-             → let sub = subst (µ₂ ∋/⊢_) (ι-id/m→M m ) in
-               apₖ (ι-→ ϕ) _ x ≡ sub (ι-∋/⊢ (apₖ ϕ _ x))
-
-    ι-~-→ : ∀ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂)
-            → ι-→ ϕ ~ ϕ
-
     ι-∋/⊢-id : ∀ {µ} {m} (eq : 𝕂₁ ≡ 𝕂₂) (x/t : µ ∋/⊢[ 𝕂₁ ] (id/m→M m))
                → let sub₁ = subst (µ ∋/⊢[ 𝕂₂ ]_) (sym (ι-id/m→M m)) in
                  let sub₂ = subst (λ ■ → µ ∋/⊢[ ■ ] id/m→M ⦃ ■ ⦄ m) eq in
                  ι-∋/⊢ x/t ≡ sub₁ (sub₂ x/t)
 
-  _,ₖ'_ : ∀ {µ₁} {µ₂} {m}
-          → µ₁ –[ 𝕂₂ ]→ µ₂
-          → µ₂ ∋/⊢[ 𝕂₁ ] id/m→M m
-          → (µ₁ ▷ m) –[ 𝕂₂ ]→ µ₂
-  _,ₖ'_ {µ₁} {µ₂} {m} ϕ x/t =
-    let sub = subst (µ₂ ∋/⊢[ 𝕂₂ ]_) (ι-id/m→M m) in
-    ϕ ,ₖ  sub (ι-∋/⊢ x/t)
+    ι-∋/⊢-~ₜ : ∀ {µ} {m} (x/t : µ ∋/⊢[ 𝕂₁ ] (id/m→M m))
+             → let sub = subst (µ ∋/⊢[ 𝕂₂ ]_) (ι-id/m→M m) in
+               `/id _ (sub (ι-∋/⊢ x/t)) ≡ `/id _ x/t
+
+    ι-∋/⊢-~ₜ[] : ∀ {µ} {m/M} (x/t : µ ∋/⊢[ 𝕂₁ ] m/M)
+               → let sub = subst (µ ⊢_) (sym (ι-m→M/id m/M)) in
+                 sub (`/id' _ (ι-∋/⊢ x/t)) ≡ `/id' _ x/t
+
+  -- _,ₖ'_ : ∀ {µ₁} {µ₂} {m}
+  --         → µ₁ –[ 𝕂₂ ]→ µ₂
+  --         → µ₂ ∋/⊢[ 𝕂₁ ] id/m→M m
+  --         → (µ₁ ▷ m) –[ 𝕂₂ ]→ µ₂
+  -- _,ₖ'_ {µ₁} {µ₂} {m} ϕ x/t =
+  --   let sub = subst (µ₂ ∋/⊢[ 𝕂₂ ]_) (ι-id/m→M m) in
+  --   ϕ ,ₖ  sub (ι-∋/⊢ x/t)
 
 ⊑ₖ-refl : ∀ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ 𝕂
 ⊑ₖ-refl ⦃ 𝕂 ⦄ = record
@@ -70,10 +66,9 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where
   ; ι-`/id   = λ x/t → refl
   ; ι-`/id'  = λ x/t → refl
   ; ι-wk     = λ x/t → refl
-  ; ι-→      = λ ϕ → ϕ
-  ; ι-ap-→   = λ ϕ x → refl
-  ; ι-~-→    = λ ϕ m x → refl
   ; ι-∋/⊢-id = λ { refl x/t → refl }
+  ; ι-∋/⊢-~ₜ = λ x/t → refl
+  ; ι-∋/⊢-~ₜ[] = λ x/t → refl
   }
 
 -- -- Probably not needed
