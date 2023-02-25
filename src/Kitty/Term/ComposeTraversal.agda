@@ -1,8 +1,10 @@
 open import Kitty.Term.Modes
 open import Kitty.Term.Traversal using (Traversal; KitHomotopy)
 import Kitty.Term.Sub
+import Kitty.Term.SubCompose
 
-module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (H : KitHomotopy 𝕋 T) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) where
+module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (H : KitHomotopy 𝕋 T)
+                                   (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) (𝕊C : Kitty.Term.SubCompose.SubCompose 𝕋 T H 𝕊) where
 
 open import Data.List using (List; []; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
@@ -17,6 +19,7 @@ open import Kitty.Term.Kit 𝕋
 open import Kitty.Term.KitOrder 𝕋 𝕊
 open import Kitty.Term.Sub 𝕋
 open import Kitty.Term.ComposeKit 𝕋 T H 𝕊
+open import Kitty.Term.SubCompose 𝕋 T H 𝕊
 open import Kitty.Util.SubstProperties
 
 open Modes 𝕄
@@ -26,6 +29,7 @@ open KitHomotopy H
 open Kit ⦃ … ⦄
 open Sub ⦃ … ⦄
 open SubWithLaws ⦃ … ⦄
+open SubCompose ⦃ … ⦄
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
@@ -34,6 +38,7 @@ private instance
   _ = kitₛ
   _ = ckitᵣ
   _ = 𝕊
+  _ = 𝕊C
 
 private variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode

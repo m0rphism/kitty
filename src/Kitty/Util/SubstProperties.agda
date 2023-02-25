@@ -91,3 +91,12 @@ cancel-subst₂ :
   → (x : F a₂)
   → subst F a₁≡a₂ (subst F (sym a₁≡a₂) x) ≡ x
 cancel-subst₂ _ refl _ = refl
+
+subst-merge :
+  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ a₃ : A}
+  → (F : A → Set ℓ₁)
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (a₂≡a₃ : a₂ ≡ a₃)
+  → (x : F a₁)
+  → subst F a₂≡a₃ (subst F a₁≡a₂ x) ≡ subst F (trans a₁≡a₂ a₂≡a₃) x
+subst-merge F refl refl x = refl

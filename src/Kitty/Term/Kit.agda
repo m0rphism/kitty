@@ -34,35 +34,35 @@ record Kit : Set₁ where
     m→M/id           : VarMode/TermMode → TermMode
     id/m→M/id        : ∀ m → m→M/id (id/m→M m) ≡ m→M m
 
-    id/`             : ∀ m → µ ∋ m → µ ∋/⊢ id/m→M m
-    `/id             : ∀ m → µ ∋/⊢ id/m→M m → µ ⊢ m→M m
-    `/id'            : ∀ m → µ ∋/⊢ m → µ ⊢ m→M/id m -- For IKit Experiment
-    id/`/id          : ∀ x → `/id {µ = µ} m (id/` _ x) ≡ ` x
-    id/`/id'         : ∀ x → let sub = subst (µ ⊢_) (sym (id/m→M/id m)) in
-                             `/id' {µ = µ} (id/m→M m) (id/` _ x) ≡ sub (` x) -- For Compose Experiment
+    id/`             : ∀ {m} → µ ∋ m → µ ∋/⊢ id/m→M m
+    `/id             : ∀ {m} → µ ∋/⊢ id/m→M m → µ ⊢ m→M m
+    `/id'            : ∀ {m} → µ ∋/⊢ m → µ ⊢ m→M/id m -- For IKit Experiment
+    id/`/id          : ∀ (x : µ ∋ m) → `/id (id/` x) ≡ ` x
+    id/`/id'         : ∀ (x : µ ∋ m) → let sub = subst (µ ⊢_) (sym (id/m→M/id m)) in
+                             `/id' (id/` x) ≡ sub (` x) -- For Compose Experiment
     `/id≡`/id'       : ∀ {m} (x/t : µ ∋/⊢ id/m→M m)
                        → let sub = subst (µ ⊢_) (id/m→M/id m) in
-                         `/id _ x/t ≡ sub (`/id' _ x/t)
+                         `/id x/t ≡ sub (`/id' x/t)
 
-    id/`-injective  : ∀ {µ m} {x₁ x₂ : µ ∋ m} → id/` _ x₁ ≡ id/` _ x₂ → x₁ ≡ x₂
-    `/id-injective  : ∀ {µ m} {x/t₁ x/t₂ : µ ∋/⊢ id/m→M m} → `/id _ x/t₁ ≡ `/id _ x/t₂ → x/t₁ ≡ x/t₂
-    `/id'-injective : ∀ {µ m/M} {x/t₁ x/t₂ : µ ∋/⊢ m/M} → `/id' _ x/t₁ ≡ `/id' _ x/t₂ → x/t₁ ≡ x/t₂
+    id/`-injective  : ∀ {µ m} {x₁ x₂ : µ ∋ m} → id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
+    `/id-injective  : ∀ {µ m} {x/t₁ x/t₂ : µ ∋/⊢ id/m→M m} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
+    `/id'-injective : ∀ {µ m/M} {x/t₁ x/t₂ : µ ∋/⊢ m/M} → `/id' x/t₁ ≡ `/id' x/t₂ → x/t₁ ≡ x/t₂
 
-    wk               : ∀ m/M → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
-    wk-id/`          : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (id/` _ x) ≡ id/` _ (there x)
+    wk               : ∀ m' {m/M} → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
+    wk-id/`          : ∀ m' (x : µ ∋ m) → wk m' (id/` x) ≡ id/` (there x)
     kit-tag          : KitTag
 
   -- Weakening
 
-  wk* : ∀ SM → µ ∋/⊢ SM → (µ ▷▷ µ') ∋/⊢ SM
-  wk* {µ' = []}     m/M x = x
-  wk* {µ' = µ' ▷ m} m/M x = wk m/M (wk* m/M x)
+  wk* : ∀ {SM} µ' → µ ∋/⊢ SM → (µ ▷▷ µ') ∋/⊢ SM
+  wk* []       x = x
+  wk* (µ' ▷ m) x = wk m (wk* µ' x)
 
   -- wk' : µ –→ (µ ▷ m)
-  -- wk' _ x = wk _ (id/` _ x)
+  -- wk' _ x = wk _ (id/` x)
 
   -- wk'* : µ –→ (µ ▷▷ µ')
-  -- wk'* _ x = wk* _ (id/` _ x)
+  -- wk'* _ x = wk* _ (id/` x)
 
 _∋/⊢[_]_ : List VarMode → (𝕂 : Kit) → Kit.VarMode/TermMode 𝕂 → Set
 µ ∋/⊢[ 𝕂 ] sm = Kit._∋/⊢_ 𝕂 µ sm
@@ -73,14 +73,14 @@ Kit._∋/⊢_            kitᵣ = _∋_
 Kit.id/m→M           kitᵣ = λ m → m
 Kit.m→M/id           kitᵣ = m→M
 Kit.id/m→M/id        kitᵣ = λ m → refl
-Kit.id/`             kitᵣ = λ m x → x
-Kit.`/id             kitᵣ = λ m x → ` x
-Kit.`/id'            kitᵣ = λ m x → ` x
+Kit.id/`             kitᵣ = λ x → x
+Kit.`/id             kitᵣ = `_
+Kit.`/id'            kitᵣ = `_
 Kit.id/`/id          kitᵣ = λ x → refl
 Kit.id/`/id'         kitᵣ = λ x → refl
 Kit.`/id≡`/id'       kitᵣ = λ x → refl
-Kit.wk               kitᵣ = λ m x → there x
-Kit.wk-id/`          kitᵣ = λ m x → refl
+Kit.wk               kitᵣ = λ _ x → there x
+Kit.wk-id/`          kitᵣ = λ _ x → refl
 Kit.kit-tag          kitᵣ = K-Ren
 Kit.id/`-injective   kitᵣ = λ eq → eq
 Kit.`/id-injective   kitᵣ = λ eq → `-injective eq
