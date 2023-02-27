@@ -9,8 +9,6 @@ open ≡-Reasoning
 open import Kitty.Term.Prelude
 open import Kitty.Util.SubstProperties
 open import Kitty.Term.Kit 𝕋
--- open import Kitty.Term.KitOrder 𝕋
-import Kitty.Term.KitOrder
 open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
 open Modes 𝕄
@@ -19,6 +17,7 @@ open Kit ⦃ … ⦄
 open Sub ⦃ … ⦄
 open SubWithLaws ⦃ … ⦄
 open _⊑ₖ_ ⦃ … ⦄
+open import Kitty.Term.MultiSub 𝕋
 
 private variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
@@ -33,8 +32,14 @@ record Traversal : Set₁ where
   field
     _⋯_   : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄
             → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+
+  open TraversalOps _⋯_ public
+
+  field
     ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂)
             → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
+    ⋯-↑ : ∀ {𝕂s₁ 𝕂s₂ : List Kit} ⦃ 𝕊 : Sub ⦄ {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
+          f ≈ₓ g → f ≈ₜ g
     ⋯-id : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {µ} {M} (t : µ ⊢ M)
             → t ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ t
     -- TODO: Can't we get rid of this weird special case? Required for ⊑ₖ-⊤, which is required for ComposeKit.𝕂₂⊑⊔
