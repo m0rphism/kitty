@@ -682,18 +682,25 @@ record SubWithLaws : Set₁ where
 
   -- Lifted identity is identity
 
-  -- TODO: However now this holds definitionally...
+  id↑~id : ∀ ⦃ 𝕂 : Kit ⦄ m µ → id {µ = µ} ↑ m ~ id {µ = µ ▷ m}
+  id↑~id m µ _ x@(here refl)  =
+    `/id (x & id {µ = µ} ↑ m) ≡⟨ cong `/id (&-↑-here id) ⟩
+    `/id (id/` (here refl))   ≡⟨ cong `/id (sym (&-id x)) ⟩
+    `/id (x & id {µ = µ ▷ m}) ∎
+  id↑~id m µ _ x@(there y) = -- {!wk-id/` m y!}
+    `/id (x & id {µ = µ} ↑ m)    ≡⟨ cong `/id (&-↑-there id y) ⟩
+    `/id (wk _ (y & id {µ = µ})) ≡⟨ cong (λ ■ → `/id (wk _ ■)) (&-id y) ⟩
+    `/id (wk _ (id/` y))         ≡⟨ cong `/id (wk-id/` _ y) ⟩
+    `/id (id/` x)                ≡⟨ cong `/id (sym (&-id x)) ⟩
+    `/id (x & id {µ = µ ▷ m})    ∎
 
-  -- id↑~id : ∀ m µ → idₖ {µ = µ} ↑ m ~ idₖ {µ = µ ▷ m}
-  -- id↑~id m µ _ (here _)  = refl
-  -- id↑~id m µ _ (there x) = wk-id/` m x
-
-  -- id↑*~id : ∀ µ' µ → idₖ {µ = µ} ↑* µ' ~ idₖ {µ = µ ▷▷ µ'}
-  -- id↑*~id []       µ = ~-refl
-  -- id↑*~id (µ' ▷ m) µ =
-  --   idₖ ↑* µ' ↑ m  ~⟨ ~-cong-↑ (id↑*~id µ' µ) ⟩
-  --   idₖ ↑ m        ~⟨ id↑~id _ _ ⟩
-  --   idₖ            ~∎
+  id↑*~id : ∀ ⦃ 𝕂 : Kit ⦄ µ' µ → id {µ = µ} ↑* µ' ~ id {µ = µ ▷▷ µ'}
+  id↑*~id []       µ = ↑*-[] id
+  id↑*~id (µ' ▷ m) µ =
+    id ↑* (µ' ▷ m) ~⟨ ↑*-▷ µ' m id ⟩
+    id ↑* µ' ↑ m   ~⟨ ~-cong-↑' (id↑*~id µ' µ) ⟩
+    id ↑ m         ~⟨ id↑~id _ _ ⟩
+    id             ~∎
 
   -- Empty Substitution
 

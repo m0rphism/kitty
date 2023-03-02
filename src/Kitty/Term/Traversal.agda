@@ -40,18 +40,18 @@ record Traversal : Set₁ where
             → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
     ⋯-↑ : ∀ {𝕂s₁ 𝕂s₂ : List Kit} ⦃ 𝕊 : SubWithLaws ⦄ {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
           f ≈ₓ g → f ≈ₜ g
-    ⋯-id : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {µ} {M} (t : µ ⊢ M)
+    ⋯-id : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ {µ} {M} (t : µ ⊢ M)
             → t ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ t
     -- TODO: Can't we get rid of this weird special case? Required for ⊑ₖ-⊤, which is required for ComposeKit.𝕂₂⊑⊔
-    ⋯-x/t-wk : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M)
+    ⋯-x/t-wk : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M)
                → (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) ≡ `/id' (wk m' x/t)
     -- TODO: Not required with heterogeneous homotopies
-    ⋯-x/t-wk' : ∀ ⦃ 𝕂 𝕂' : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M)
+    ⋯-x/t-wk' : ∀ ⦃ 𝕂 𝕂' : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M)
                 → (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) ≡ `/id' (wk m' x/t)
     -- ⋯-x/t    : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M) (ϕ : µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂)
     --            → (`/id' _ x/t ⋯ ϕ) ≡ `/id' _ (&/⋯ ϕ _ x/t)
 
-  ⋯-x/t-wk'' : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m} (x/t : µ ∋/⊢[ 𝕂 ] id/m→M m)
+  ⋯-x/t-wk'' : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ {m'} {m} (x/t : µ ∋/⊢[ 𝕂 ] id/m→M m)
               → (`/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) ≡ `/id (wk m' x/t)
   ⋯-x/t-wk'' {µ} ⦃ 𝕂 ⦄ ⦃ 𝕊 ⦄ {m'} {m} x/t =
     let sub = subst (µ ⊢_) (id/m→M/id m) in
@@ -62,7 +62,7 @@ record Traversal : Set₁ where
     sub' (`/id' (wk m' x/t))                 ≡⟨ sym (`/id≡`/id' (wk m' x/t)) ⟩
     `/id (wk m' x/t)                         ∎
 
-  ⋯-x/t-wk''' : ∀ ⦃ 𝕂 𝕂' : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m} (x/t : µ ∋/⊢[ 𝕂 ] id/m→M m)
+  ⋯-x/t-wk''' : ∀ ⦃ 𝕂 𝕂' : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ {m'} {m} (x/t : µ ∋/⊢[ 𝕂 ] id/m→M m)
               → (`/id x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) ≡ `/id (wk m' x/t)
   ⋯-x/t-wk''' {µ} ⦃ 𝕂 ⦄ ⦃ 𝕂' ⦄ ⦃ 𝕊 ⦄ {m'} {m} x/t = -- {!!}
     let sub = subst (µ ⊢_) (id/m→M/id m) in
