@@ -62,6 +62,17 @@ record Traversal : Set₁ where
     sub' (`/id' (wk m' x/t))                 ≡⟨ sym (`/id≡`/id' (wk m' x/t)) ⟩
     `/id (wk m' x/t)                         ∎
 
+  ⋯-x/t-wk''' : ∀ ⦃ 𝕂 𝕂' : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {m'} {m} (x/t : µ ∋/⊢[ 𝕂 ] id/m→M m)
+              → (`/id x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) ≡ `/id (wk m' x/t)
+  ⋯-x/t-wk''' {µ} ⦃ 𝕂 ⦄ ⦃ 𝕂' ⦄ ⦃ 𝕊 ⦄ {m'} {m} x/t = -- {!!}
+    let sub = subst (µ ⊢_) (id/m→M/id m) in
+    let sub' = subst ((µ ▷ m') ⊢_) (id/m→M/id m) in
+    `/id x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id         ≡⟨ cong (_⋯ _) (`/id≡`/id' x/t) ⟩
+    sub (`/id' x/t) ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id  ≡⟨ dist-subst (_⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) (id/m→M/id m) (`/id' x/t) ⟩
+    sub' (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) ≡⟨ cong sub' (⋯-x/t-wk' x/t) ⟩
+    sub' (`/id' (wk m' x/t))               ≡⟨ sym (`/id≡`/id' (wk m' x/t)) ⟩
+    `/id (wk m' x/t)                       ∎
+
 
   ⋯-var' : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂)
            → let sub = subst (µ₂ ⊢_) (id/m→M/id m) in
