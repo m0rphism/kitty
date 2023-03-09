@@ -21,6 +21,16 @@ subst-sym :
   → subst F eq x ≡ y
 subst-sym refl x y eq = eq
 
+subst-sym' : 
+  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ : A}
+    {F : A → Set ℓ₁}
+    (eq : a₁ ≡ a₂)
+    (x : F a₂) 
+    (y : F a₁) 
+  → x ≡ subst F eq y
+  → subst F (sym eq) x ≡ y
+subst-sym' refl x y eq = eq
+
 dist-subst :
   ∀ {ℓ ℓ₁ ℓ₂} {A : Set ℓ} {a₁ a₂ : A}
     {F : A → Set ℓ₁} {G : A → Set ℓ₂}
