@@ -106,10 +106,10 @@ wkkitₛ = record { ⋯-x/t-wk' = ⋯-x/t-wk'ₛ }
     {m'} {µ} m (x/t₁ : µ ∋/⊢[ 𝕂₁ ] id/m→M m') (x/t₂ : µ ∋/⊢[ 𝕂₂ ] id/m→M m')
   → `/id x/t₁ ≡ `/id x/t₂
   → `/id (wk m x/t₁) ≡ `/id (wk m x/t₂)
-`/id-wk-cong ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ {m'} {µ} m x/t₁ x/t₂ eq =
-  `/id (wk m x/t₁)                ≡⟨ sym (⋯-x/t-wk ⦃ C₁ ⦄ x/t₁) ⟩
+`/id-wk-cong ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ {m'} {µ} m x/t₁ x/t₂ eq =
+  `/id (wk m x/t₁)                ≡⟨ sym (⋯-x/t-wk ⦃ W₁ ⦄ x/t₁) ⟩
   `/id x/t₁ ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id ≡⟨ cong (_⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id) eq ⟩
-  `/id x/t₂ ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id ≡⟨ ⋯-x/t-wk ⦃ C₂ ⦄ x/t₂ ⟩
+  `/id x/t₂ ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id ≡⟨ ⋯-x/t-wk ⦃ W₂ ⦄ x/t₂ ⟩
   `/id (wk m x/t₂)                ∎
 
 ~-cong-wk :
@@ -119,7 +119,7 @@ wkkitₛ = record { ⋯-x/t-wk' = ⋯-x/t-wk'ₛ }
     {µ₁} {µ₂} {m} {ϕ : µ₁ –[ 𝕂₁ ]→ µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→ µ₂} →
   ϕ ~ ϕ' →
   wkₖ m ϕ ~ wkₖ m ϕ'
-~-cong-wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ {µ₁} {µ₂} {m} {ϕ} {ϕ'} ϕ~ϕ' mx x =
+~-cong-wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ {µ₁} {µ₂} {m} {ϕ} {ϕ'} ϕ~ϕ' mx x =
   `/id ⦃ 𝕂₁ ⦄ (x & wkₖ _ ϕ)                     ≡⟨ cong `/id (&-wkₖ-wk ϕ x) ⟩
   `/id ⦃ 𝕂₁ ⦄ (wk _ (x & ϕ))                    ≡⟨ sym (⋯-x/t-wk (x & ϕ)) ⟩
   `/id ⦃ 𝕂₁ ⦄ (x & ϕ) ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id     ≡⟨ cong (_⋯ _) (ϕ~ϕ' mx x) ⟩
