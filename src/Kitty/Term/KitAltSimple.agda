@@ -117,20 +117,21 @@ module Derive (KT : KitTraversalAlt) where
             ` x                             ∎)
           v
 
+  -- This needs to be another Axiom or a corrolary of ⋯-assoc
   ⋯-x/t-wk' : ∀ ⦃ 𝕂 𝕂' : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ {m'} {m/M : VarMode/TermMode ⦃ 𝕂 ⦄} (x/t : µ₁ ∋/⊢ m/M)
               → (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) ≡ `/id' (wk m' x/t)
   ⋯-x/t-wk' {µ₁} ⦃ 𝕂 ⦄ ⦃ 𝕂' ⦄ ⦃ 𝕊 ⦄ {m'} {m/M} x/t =
-    (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) ≡⟨ ? ⟩
+    (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂' ⦄ _ id) ≡⟨ {!!} ⟩
     `/id' (wk m' x/t)                 ∎
 
   kit-traversal : Traversal
   kit-traversal = record
     { _⋯_   = _⋯_
     ; ⋯-var = ⋯-var
-    ; ⋯-↑   = ⋯-↑
+    -- ; ⋯-↑   = ⋯-↑
     ; ⋯-id  = ⋯-id'
-    ; ⋯-x/t-wk = λ x/t → ⋯-x/t-wk' ⦃ 𝕂' = kitᵣ ⦄ x/t
-    ; ⋯-x/t-wk' = ⋯-x/t-wk'
+    -- ; ⋯-x/t-wk = λ x/t → ⋯-x/t-wk' ⦃ 𝕂' = kitᵣ ⦄ x/t
+    -- ; ⋯-x/t-wk' = ⋯-x/t-wk'
     }
 
   -- open Traversal kit-traversal hiding (_⋯_; ⋯-var; kitᵣ; kitₛ) public
