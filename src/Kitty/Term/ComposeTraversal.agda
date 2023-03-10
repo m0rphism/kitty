@@ -32,6 +32,8 @@ open SubWithLaws ⦃ … ⦄
 open SubCompose ⦃ … ⦄
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
+open ComposeKit ⦃ … ⦄
+open WkKit ⦃ … ⦄
 
 private instance
   _ = kitᵣ
@@ -39,13 +41,13 @@ private instance
   _ = ckitᵣ
   _ = 𝕊
   _ = 𝕊C
+  _ = wkkitᵣ
+  _ = wkkitₛ
 
 private variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
   M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
   µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
-
-open ComposeKit ⦃ … ⦄
 
 -- dist-↑-⦅⦆-· :
 --   ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 ⦄
@@ -211,7 +213,7 @@ record ComposeTraversal : Set₁ where
   --   ; ~-cong-&/⋯ = ~-cong-&/⋯ₛ
   --   }
 
-  &/⋯-&ₛ : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂) 
+  &/⋯-&ₛ : ∀ ⦃ 𝕂 ⦄ ⦃ W : WkKit 𝕂 kitᵣ ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂) 
            → let sub₂ = subst (µ₂ ⊢_) (ι-id/m→M ⦃ ⊑ₖ-⊤ ⦃ 𝕂 = 𝕂 ⦄ ⦄ m) in
              ` x ⋯ ϕ ≡ sub₂ (ι-∋/⊢ ⦃ ⊑ₖ-⊤ ⦃ 𝕂 = 𝕂 ⦄ ⦄ (x & ϕ))
   &/⋯-&ₛ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} x ϕ =
