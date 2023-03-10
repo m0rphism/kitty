@@ -247,17 +247,19 @@ record SubCompose (𝕊 : SubWithLaws) : Set₁ where
 infixl  9  _·[_]_
 infixr  9  _∘[_]_
 
-_·[_]_ : ∀ ⦃ 𝕊 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄ {µ₁} {µ₂} {µ₃}
+open SubCompose ⦃ … ⦄
+
+_·[_]_ : ∀ ⦃ 𝕊 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄ ⦃ 𝕊∁ : SubCompose 𝕊 ⦄ {µ₁} {µ₂} {µ₃}
          → µ₁ –[ 𝕂₁ ]→ µ₂
-         → SubCompose 𝕊
+         → ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂
          → µ₂ –[ 𝕂₂ ]→ µ₃
          → µ₁ –[ 𝕂₁⊔𝕂₂ ]→ µ₃
-ϕ₁ ·[ C ] ϕ₂ = ϕ₁ ·ₖ ϕ₂ where open SubCompose C
+ϕ₁ ·[ C ] ϕ₂ = _·ₖ_ ⦃ C = C ⦄ ϕ₁ ϕ₂
 
 
-_∘[_]_ : ∀ ⦃ 𝕊 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄ {µ₁} {µ₂} {µ₃}
+_∘[_]_ : ∀ ⦃ 𝕊 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄ ⦃ 𝕊∁ : SubCompose 𝕊 ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄ {µ₁} {µ₂} {µ₃}
          → µ₂ –[ 𝕂₂ ]→ µ₃
-         → SubCompose 𝕊
+         → ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂
          → µ₁ –[ 𝕂₁ ]→ µ₂
          → µ₁ –[ 𝕂₁⊔𝕂₂ ]→ µ₃
-ϕ₂ ∘[ C ] ϕ₁ = ϕ₂ ∘ₖ ϕ₁ where open SubCompose C
+ϕ₂ ∘[ C ] ϕ₁ = _∘ₖ_ ⦃ C = C ⦄ ϕ₂ ϕ₁
