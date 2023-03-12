@@ -420,35 +420,16 @@ record ComposeTraversal : Set₁ where
   ⋯-idₛ = ⋯-id
   ⋯-idᵣ = ⋯-id
 
-  -- TODO: We can transfer this from ⋯-id if we extend ComposeKit with a lemma,
-  -- that operations on terms determine operations on &/⋯
-  -- We could go even further and say operations on &/⋯ and ⋯ are determined by
-  -- operations on ap. Note that this is precisely what KitAltSimple does!!!!
-  &/⋯-id :
-    ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 : Kit ⦄
-      ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
-      {µ} {m/M} (x/t : µ ∋/⊢[ 𝕂₁ ] m/M)
-    → x/t &/⋯ id ⦃ 𝕂 = 𝕂₂ ⦄ ≡ ι-∋/⊢ x/t
-  &/⋯-id ⦃ 𝕂 ⦄ {µ} {M} x/t = {!!}
-
-  -- does not require ⋯-id if we have heterogenous homotopies.
-  ren→sub : ∀ (t : µ₁ ⊢ M) (ρ : µ₁ →ᵣ µ₂) →
-            t ⋯ᵣ ρ ≡ t ⋯ₛ ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑-ᵣₛ ⦄ ρ
-  ren→sub t ρ =
-    t ⋯ᵣ ρ                      ≡⟨ sym (⋯-idₛ (t ⋯ᵣ ρ)) ⟩
-    t ⋯ᵣ ρ ⋯ₛ id                ≡⟨ ⋯-assoc t ρ id ⟩
-    t ⋯ₛ (ρ ᵣ·ₛ id)             ≡⟨ ? ⟩
-    t ⋯ₛ ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑-ᵣₛ ⦄ ρ ∎
-
-  -- ren→sub' : ∀ ⦃ 𝕂₂ 𝕂 : Kit ⦄
-  --              ⦃ Cᵣ : ComposeKit ⦃ kitᵣ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂 ⦄ ⦄
-  --              ⦃ Cₛ : ComposeKit ⦃ kitₛ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂 ⦄ ⦄
-  --              (e : µ₁ ∋/⊢[ 𝕂₂ ] id/m→M m) (ρ : µ₁ →ᵣ µ₂) →
-  --            e &/⋯[ Cᵣ ] ρ ≡ e &/⋯[ Cₛ ] (idₛ ₛ∘ᵣ ρ)
-  -- ren→sub' e ρ = {!!}
-  --   -- e ⋯ᵣ ρ           ≡⟨ sym (⋯-idₛ (e ⋯ᵣ ρ)) ⟩
-  --   -- e ⋯ᵣ ρ ⋯ₛ idₛ    ≡⟨ ⋯-assoc e ρ id/` ⟩
-  --   -- e ⋯ₛ (idₛ ₛ∘ᵣ ρ) ∎
+  -- -- TODO OLD: We can transfer this from ⋯-id if we extend ComposeKit with a lemma,
+  -- -- that operations on terms determine operations on &/⋯
+  -- -- We could go even further and say operations on &/⋯ and ⋯ are determined by
+  -- -- operations on ap. Note that this is precisely what KitAltSimple does!!!!
+  -- &/⋯-id :
+  --   ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 : Kit ⦄
+  --     ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
+  --     {µ} {m/M} (x/t : µ ∋/⊢[ 𝕂₁ ] m/M)
+  --   → x/t &/⋯ id ⦃ 𝕂 = 𝕂₂ ⦄ ≡ ι-∋/⊢ x/t
+  -- &/⋯-id ⦃ 𝕂 ⦄ {µ} {M} x/t = {!!}
 
   wk-cancels-⦅⦆ :
     ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 : Kit ⦄
