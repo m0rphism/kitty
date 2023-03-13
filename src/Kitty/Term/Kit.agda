@@ -86,3 +86,4 @@ Kit.id/`-injective   kitᵣ = λ eq → eq
 Kit.`/id-injective   kitᵣ = λ eq → `-injective eq
 Kit.`/id'-injective  kitᵣ = λ eq → `-injective eq
 
+open Kit ⦃ … ⦄

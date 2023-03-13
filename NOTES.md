@@ -1,3 +1,9 @@
+- Problem with Heterogenous Homotopies:
+  We need to prove ~-cong-⋯ with KitAltSimple without having a lot of lemmas.
+  Heterogeneous ~-cong-⋯ requires heterogeneous ~-cong-↑ due to ⋯-↑ from KitAltSimple,
+  but ~-cong-↑ in turn requires WkKit or something similar, which already requires ~-cong-⋯ ...
+  Solution: KitK and KitWk...
+
 - ap/⋯ may need to work for general m/M, because we ne need laws involving id for Typing.Kit cases for
   type-preservation of terms like "clauses" which have no var-mode.
   
