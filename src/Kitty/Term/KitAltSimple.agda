@@ -163,32 +163,32 @@ module Derive (KT : KitTraversalAlt) where
   kit-homotopy : KitHomotopy kit-traversal
   kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
-  -- open import Kitty.Term.Compose 𝕋 kit-traversal kit-homotopy
+  open import Kitty.Term.ComposeTraversal 𝕋 kit-traversal kit-homotopy
 
-  -- open ComposeKit {{...}} public
+  open ComposeKit {{...}} public
 
-  -- private
-  --   ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
-  --               (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
-  --     v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
-  --   ⋯-assoc {{𝕂₁}} {{𝕂₂}} {{𝕂}} v f g =
-  --     v ⋯ f ⋯ g                            ≡⟨ refl ⟩
-  --     v ⋯* (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
-  --       ≡⟨ ⋯-↑ (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
-  --             ((g ∘ₖ f) ∷[ 𝕂 ] [])
-  --             (λ {µ} x →
-  --               ` x ⋯ f ↑* µ ⋯ g ↑* µ                ≡⟨ cong (_⋯ g ↑* µ) (⋯-var x (f ↑* µ)) ⟩
-  --               (`/id _ ((f ↑* µ) _ x)) ⋯ g ↑* µ     ≡⟨ tm-⋯-∘ (f ↑* µ) (g ↑* µ) x ⟩
-  --               `/id _ (((g ↑* µ) ∘ₖ (f ↑* µ)) _ x)  ≡⟨ cong (λ h → `/id {{𝕂}} _ h) (sym (dist-↑*-∘ µ g f _ x)) ⟩
-  --               `/id _ (((g ∘ₖ f) ↑* µ) _ x)         ≡⟨ sym (⋯-var x ((g ∘ₖ f) ↑* µ)) ⟩
-  --               ` x ⋯ (g ∘ₖ f) ↑* µ                  ∎)
-  --             v
-  --       ⟩
-  --     v ⋯* (_∷_ {b = 𝕂} (g ∘ₖ f) [])       ≡⟨ refl ⟩
-  --     v ⋯ (g ∘ₖ f)       ∎
+  private
+    ⋯-assoc : ∀ {{𝕂₁ 𝕂₂ 𝕂 : Kit}} {{𝔸 : ComposeKit {{𝕂₁}} {{𝕂₂}} {{𝕂}} }}
+                (v : µ₁ ⊢ M) (f : µ₁ –[ 𝕂₂ ]→ µ₂) (g : µ₂ –[ 𝕂₁ ]→ µ₃) →
+      v ⋯ f ⋯ g ≡ v ⋯ (g ∘ₖ f)
+    ⋯-assoc {{𝕂₁}} {{𝕂₂}} {{𝕂}} v f g =
+      v ⋯ f ⋯ g                            ≡⟨ refl ⟩
+      v ⋯* (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
+        ≡⟨ ⋯-↑ (g ∷[ 𝕂₁ ] f ∷[ 𝕂₂ ] [])
+              ((g ∘ₖ f) ∷[ 𝕂 ] [])
+              (λ {µ} x →
+                ` x ⋯ f ↑* µ ⋯ g ↑* µ                ≡⟨ {!cong (_⋯ g ↑* µ) (⋯-var x (f ↑* µ))!} ⟩
+                (`/id _ ((f ↑* µ) _ x)) ⋯ g ↑* µ     ≡⟨ {!tm-⋯-∘ (f ↑* µ) (g ↑* µ) x!} ⟩
+                `/id _ (((g ↑* µ) ∘ₖ (f ↑* µ)) _ x)  ≡⟨ {!cong (λ h → `/id {{𝕂}} _ h) (sym (dist-↑*-∘ µ g f _ x))!} ⟩
+                `/id _ (((g ∘ₖ f) ↑* µ) _ x)         ≡⟨ {!sym (⋯-var x ((g ∘ₖ f) ↑* µ))!} ⟩
+                ` x ⋯ (g ∘ₖ f) ↑* µ                  ∎)
+              v
+        ⟩
+      v ⋯* (_∷_ {b = 𝕂} (g ∘ₖ f) [])       ≡⟨ refl ⟩
+      v ⋯ (g ∘ₖ f)       ∎
 
-  -- kit-assoc : KitAssoc
-  -- kit-assoc = record { ⋯-assoc = ⋯-assoc }
+  kit-assoc : KitAssoc
+  kit-assoc = record { ⋯-assoc = ⋯-assoc }
 
   -- open KitAssoc kit-assoc public hiding (kitᵣᵣ; kitᵣₛ; kitₛᵣ; kitₛₛ; wk-kitᵣ; wk-kitₛ)
 
