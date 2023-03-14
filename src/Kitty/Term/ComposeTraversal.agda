@@ -4,8 +4,8 @@ open import Kitty.Term.KitHomotopy using (KitHomotopy)
 import Kitty.Term.Sub
 import Kitty.Term.SubCompose
 
-module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋)
-                                   (H : KitHomotopy 𝕋 T 𝕊) (𝕊C : Kitty.Term.SubCompose.SubCompose 𝕋 T 𝕊 H) where
+module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊)
+                                   (H : KitHomotopy 𝕋 𝕊 T) (𝕊C : Kitty.Term.SubCompose.SubCompose 𝕋 𝕊 T H) where
 
 open import Data.List using (List; []; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
@@ -17,11 +17,11 @@ open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.KitT 𝕋 T 𝕊
+open import Kitty.Term.KitT 𝕋 𝕊 T
 open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
-open import Kitty.Term.ComposeKit 𝕋 T 𝕊 H
-open import Kitty.Term.SubCompose 𝕋 T 𝕊 H
+open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
+open import Kitty.Term.SubCompose 𝕋 𝕊 T H
 open import Kitty.Util.SubstProperties
 
 open Modes 𝕄
@@ -30,8 +30,8 @@ open Traversal T
 open KitHomotopy H
 open Kit ⦃ … ⦄
 open Sub ⦃ … ⦄
-open SubWithLaws ⦃ … ⦄
-open SubCompose ⦃ … ⦄
+open SubWithLaws 𝕊
+open SubCompose 𝕊C
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 open ComposeKit ⦃ … ⦄
@@ -40,8 +40,6 @@ private instance
   _ = kitᵣ
   _ = kitₛ
   _ = ckitᵣ
-  _ = 𝕊
-  _ = 𝕊C
   _ = kittᵣ
   _ = kittₛ
 
@@ -313,8 +311,10 @@ record ComposeTraversal : Set₁ where
 
   private instance _ = ckitₛₛ
 
-  infixl  9  _ₛ·_  _ₛ·ᵣ_  _ₛ·ₛ_
-  infixr  9  _∘ₛ_  _ᵣ∘ₛ_  _ₛ∘ₛ_
+  -- infixl  9  _ₛ·_  _ₛ·ᵣ_  _ₛ·ₛ_
+  -- infixr  9  _∘ₛ_  _ᵣ∘ₛ_  _ₛ∘ₛ_
+  infixl  9  _ₛ·ᵣ_  _ₛ·ₛ_
+  infixr  9  _ᵣ∘ₛ_  _ₛ∘ₛ_
 
   -- _ₛ·_ : ∀ ⦃ 𝕂₂ : Kit ⦄ {µ₁} {µ₂} {µ₃}
   --       → µ₁ –[ kitₛ ]→ µ₂

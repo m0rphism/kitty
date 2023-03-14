@@ -3,7 +3,7 @@ open import Kitty.Term.Traversal using (Traversal)
 open import Kitty.Term.KitHomotopy using (KitHomotopy)
 open import Kitty.Term.Sub using (SubWithLaws)
 
-module Kitty.Term.SubCompose {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (𝕊 : SubWithLaws 𝕋) (H : KitHomotopy 𝕋 T 𝕊) where
+module Kitty.Term.SubCompose {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T) where
 
 open import Data.List.Properties using (++-assoc; ++-identityʳ)
 open import Data.List.Relation.Unary.Any using (here; there)
@@ -11,10 +11,10 @@ open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
 open ≡-Reasoning
 
-open import Kitty.Term.ComposeKit 𝕋 T 𝕊 H
+open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
 open import Kitty.Term.Kit 𝕋
 open import Kitty.Term.KitOrder 𝕋
-open import Kitty.Term.KitT 𝕋 T 𝕊
+open import Kitty.Term.KitT 𝕋 𝕊 T
 open import Kitty.Term.Prelude
 open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties
@@ -27,8 +27,6 @@ open Terms 𝕋
 open Traversal T
 open _⊑ₖ_ ⦃ … ⦄
 open ~-Reasoning
-
-private instance _ = 𝕊
 
 record SubCompose : Set₁ where
   infixl  9  _·ₖ_

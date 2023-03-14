@@ -62,38 +62,38 @@ module Derive (KT : KitTraversalAlt) where
 
   open KitTraversalAlt KT public
 
-  private
-    ⋯-id' : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ {µ M} (v : µ ⊢ M) → v ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ v
-    ⋯-id' ⦃ 𝕂 ⦄ {µ} {M} v =
-      ⋯-↑ {µ₁ = µ} (id ∷[ 𝕂 ] [])
-          []
-          (λ {µ} x →
-            ` x ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ        ≡⟨ ⋯-var x (id ↑*' µ) ⟩
-            `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ)) ≡⟨ ↑*'~↑* µ _ x ⟩
-            `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑* µ))  ≡⟨ id↑*~id µ _ _ x ⟩
-            `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄))       ≡⟨ cong `/id (&-id x) ⟩
-            `/id (id/` x)                   ≡⟨ id/`/id x ⟩
-            ` x                             ∎)
-          v
-
-  kit-traversal : Traversal
-  kit-traversal = record
-    { _⋯_   = _⋯_
-    ; ⋯-var = ⋯-var
-    ; ⋯-id  = ⋯-id'
-    }
-
-  open Traversal kit-traversal hiding (_⋯_; ⋯-var; _≈ₜ_; _≈ₓ_; _⋯*_; subst-⋯) public
-
   module WithSub (𝕊 : SubWithLaws) where
     private instance _ = 𝕊
 
-    open import Kitty.Term.KitT terms kit-traversal 𝕊 public
+    private
+      ⋯-id' : ∀ ⦃ 𝕂 : Kit ⦄ {µ M} (v : µ ⊢ M) → v ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ v
+      ⋯-id' ⦃ 𝕂 ⦄ {µ} {M} v =
+        ⋯-↑ {µ₁ = µ} (id ∷[ 𝕂 ] [])
+            []
+            (λ {µ} x →
+              ` x ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ        ≡⟨ ⋯-var x (id ↑*' µ) ⟩
+              `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ)) ≡⟨ ↑*'~↑* µ _ x ⟩
+              `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑* µ))  ≡⟨ id↑*~id µ _ _ x ⟩
+              `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄))       ≡⟨ cong `/id (&-id x) ⟩
+              `/id (id/` x)                   ≡⟨ id/`/id x ⟩
+              ` x                             ∎)
+            v
+
+    kit-traversal : Traversal 𝕊
+    kit-traversal = record
+      { _⋯_   = _⋯_
+      ; ⋯-var = ⋯-var
+      ; ⋯-id  = ⋯-id'
+      }
+
+    open Traversal 𝕊 kit-traversal hiding (_⋯_; ⋯-var; _≈ₜ_; _≈ₓ_; _⋯*_; subst-⋯) public
+
+    open import Kitty.Term.KitT terms 𝕊 kit-traversal public
 
     private instance _ = kitᵣ; _ = kitₛ
     private instance _ = kittᵣ; _ = kittₛ
 
-    open import Kitty.Term.KitHomotopy terms kit-traversal 𝕊 public
+    open import Kitty.Term.KitHomotopy terms 𝕊 kit-traversal public
 
     ~-cong-↑*''' :
       ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
@@ -124,12 +124,12 @@ module Derive (KT : KitTraversalAlt) where
     kit-homotopy : KitHomotopy
     kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
-    open import Kitty.Term.ComposeKit 𝕋 kit-traversal 𝕊 kit-homotopy public
-    open import Kitty.Term.SubCompose 𝕋 kit-traversal 𝕊 kit-homotopy public
+    open import Kitty.Term.ComposeKit 𝕋 𝕊 kit-traversal kit-homotopy public
+    open import Kitty.Term.SubCompose 𝕋 𝕊 kit-traversal kit-homotopy public
 
     module WithSubCompose (𝕊C : SubCompose) where
       private instance _ = 𝕊C
-      open import Kitty.Term.ComposeTraversal 𝕋 kit-traversal 𝕊 kit-homotopy 𝕊C
+      open import Kitty.Term.ComposeTraversal 𝕋 𝕊 kit-traversal kit-homotopy 𝕊C
 
       open ComposeKit ⦃ … ⦄ public
       open SubCompose ⦃ … ⦄ public
@@ -172,7 +172,8 @@ module Derive (KT : KitTraversalAlt) where
 
   instance
     kitᵣ'  = kitᵣ
-    kitₛ'  = Traversal.kitₛ kit-traversal
+    kitₛ'  : ∀ ⦃ 𝕊 : SubWithLaws ⦄ → Kit
+    kitₛ' ⦃ 𝕊 ⦄ = Traversal.kitₛ 𝕊 kit-traversal
     kitᵣᵣ = ckitᵣ
     kitₛᵣ = ckitₛᵣ
     kitₛₛ = ckitₛₛ
