@@ -9,48 +9,54 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym
 open ≡-Reasoning
 
 open import Kitty.Term.Prelude
--- open import Kitty.Term.Kit 𝕋
+open import Kitty.Term.Kit 𝕋
 open import Kitty.Term.KitT 𝕋 T 𝕊
-open import Kitty.Term.KitOrder 𝕋 hiding (_⊑ₖ_)
+open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties
 
 open Modes 𝕄
 open Terms 𝕋
 open Traversal T
-open KitT ⦃ … ⦄
-open Sub ⦃ … ⦄ hiding (_–[_]→_)
+open Kit ⦃ … ⦄
+open Sub ⦃ … ⦄
 open SubWithLaws ⦃ … ⦄
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
 private instance _ = 𝕊
+private instance _ = kitᵣ; _ = kitₛ
 private instance _ = kittᵣ; _ = kittₛ
 
 record KitHomotopy : Set₁ where
   field
     ~-cong-⋯ :
-      ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄
+      ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
+        ⦃ KT₁ : KitT 𝕂₁ ⦄ ⦃ KT₂ : KitT 𝕂₂ ⦄
         {µ₁ µ₂ M}
         {f : µ₁ –[ 𝕂₁ ]→ µ₂} {g : µ₁ –[ 𝕂₂ ]→ µ₂} (t : µ₁ ⊢ M)
       → f ~ g
       → t ⋯ f ≡ t ⋯ g
 
   ⋯-ι-→ :
-    ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄ ⦃ 𝕂₁⊑𝕂₂ : 𝕂₁ ⊑ₖ 𝕂₂ ⦄
+    ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
+      ⦃ KT₁ : KitT 𝕂₁ ⦄ ⦃ KT₂ : KitT 𝕂₂ ⦄
+      ⦃ 𝕂₁⊑𝕂₂ : 𝕂₁ ⊑ₖ 𝕂₂ ⦄
       {µ₁ µ₂ M}
       (t : µ₁ ⊢ M) (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂)
     → t ⋯ ϕ ≡ t ⋯ ι-→ ϕ
   ⋯-ι-→ t ϕ = ~-cong-⋯ t (~-ι-→ ϕ)
 
-  ren→sub : ∀ {µ₁ µ₂ M} (t : µ₁ ⊢ M) (ρ : µ₁ →ᵣ µ₂) →
-            t ⋯ᵣ ρ ≡ t ⋯ₛ ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑-ᵣₛ ⦄ ρ
+  ren→sub :
+    ∀ {µ₁ µ₂ M} (t : µ₁ ⊢ M) (ρ : µ₁ →ᵣ µ₂)
+    → t ⋯ᵣ ρ ≡ t ⋯ₛ ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑-ᵣₛ ⦄ ρ
   ren→sub = ⋯-ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑-ᵣₛ ⦄
 
-  open KitT using (KitT-kit)
-
-  wk~wk : ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄ {m} {µ} →
-    wkₖ ⦃ 𝕂 = KitT-kit 𝕂₁ ⦄ m id ~ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ m (id {µ = µ})
+  wk~wk :
+    ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
+      ⦃ KT₁ : KitT 𝕂₁ ⦄ ⦃ KT₂ : KitT 𝕂₂ ⦄
+      {m} {µ}
+    → wkₖ ⦃ 𝕂 = 𝕂₁ ⦄ m id ~ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ m (id {µ = µ})
   wk~wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {m} {µ} mx x =
     `/id ⦃ 𝕂₁ ⦄ (x & wkₖ    m id) ≡⟨ cong (`/id ⦃ 𝕂₁ ⦄) (&-wkₖ-wk id x) ⟩
     `/id ⦃ 𝕂₁ ⦄ (wk _ (x & id))   ≡⟨ cong (λ ■ → `/id ⦃ 𝕂₁ ⦄ (wk ⦃ 𝕂₁ ⦄ _ ■)) (&-id x) ⟩
@@ -62,25 +68,28 @@ record KitHomotopy : Set₁ where
     `/id ⦃ 𝕂₂ ⦄ (wk _ (x & id))   ≡⟨ cong (`/id ⦃ 𝕂₂ ⦄) (sym (&-wkₖ-wk id x)) ⟩
     `/id ⦃ 𝕂₂ ⦄ (x & wkₖ m id)    ∎
 
-  open import Kitty.Term.Kit 𝕋 using (kitᵣ) -- TODO
-  open KitT using (KitT-kit)
-
-  ⋯-x/t-wk' : ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄ {µ₁} {m'} {m/M : VarMode/TermMode ⦃ 𝕂₁ ⦄} (x/t : µ₁ ∋/⊢ m/M)
-              → (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ m' id) ≡ `/id' (wk m' x/t)
+  ⋯-x/t-wk' :
+    ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
+      ⦃ KT₁ : KitT 𝕂₁ ⦄ ⦃ KT₂ : KitT 𝕂₂ ⦄
+      {µ₁} {m'} {m/M : VarMode/TermMode ⦃ 𝕂₁ ⦄} (x/t : µ₁ ∋/⊢ m/M)
+    → (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ m' id) ≡ `/id' (wk m' x/t)
   ⋯-x/t-wk' ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {µ₁} {m'} {m/M} x/t =
-    `/id' x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ _ id ≡⟨ ~-cong-⋯ (`/id' x/t) wk~wk ⟩
-    `/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id        ≡⟨ wkₖ-⋯' ⟩
-    `/id' (wk m' x/t)                         ∎
+    `/id' x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id   ≡⟨ ~-cong-⋯ (`/id' x/t) wk~wk ⟩
+    `/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨ wkₖ-⋯' ⟩
+    `/id' (wk m' x/t)                  ∎
 
-  ⋯-x/t-wk : ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄ {µ} {m'} {m} (x/t : µ ∋/⊢[ 𝕂₁ ] id/m→M m)
-              → (`/id x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ _ id) ≡ `/id (wk m' x/t)
+  ⋯-x/t-wk :
+    ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
+      ⦃ KT₁ : KitT 𝕂₁ ⦄ ⦃ KT₂ : KitT 𝕂₂ ⦄
+      {µ} {m'} {m} (x/t : µ ∋/⊢[ 𝕂₁ ] id/m→M m)
+    → (`/id x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id) ≡ `/id (wk m' x/t)
   ⋯-x/t-wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {µ} {m'} {m} x/t =
-    `/id x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ _ id ≡⟨ ~-cong-⋯ (`/id x/t) wk~wk ⟩
-    `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id        ≡⟨ wkₖ-⋯ ⟩
-    `/id (wk m' x/t)                         ∎
+    `/id x/t ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id   ≡⟨ ~-cong-⋯ (`/id x/t) wk~wk ⟩
+    `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨ wkₖ-⋯ ⟩
+    `/id (wk m' x/t)                  ∎
 
-  ⊑ₖ-⊤ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : KitT ⦄ → 𝕂 ⊑ₖ kittₛ
-  ⊑ₖ-⊤ ⦃ 𝕊 ⦄ ⦃ 𝕂 ⦄ = record
+  ⊑ₖ-⊤ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ KT : KitT 𝕂 ⦄ → 𝕂 ⊑ₖ kitₛ
+  ⊑ₖ-⊤ ⦃ 𝕂 ⦄ = record
     { ι-Mode   = m→M/id
     ; ι-id/m→M = id/m→M/id
     ; ι-m→M/id = λ m/M → refl

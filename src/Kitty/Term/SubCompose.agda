@@ -1,7 +1,9 @@
 open import Kitty.Term.Modes
-open import Kitty.Term.Traversal using (Traversal; KitHomotopy)
+open import Kitty.Term.Traversal using (Traversal)
+open import Kitty.Term.KitHomotopy using (KitHomotopy)
+open import Kitty.Term.Sub using (SubWithLaws)
 
-module Kitty.Term.SubCompose {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (H : KitHomotopy 𝕋 T) where
+module Kitty.Term.SubCompose {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (𝕊 : SubWithLaws 𝕋) (H : KitHomotopy 𝕋 T 𝕊) where
 
 open import Data.List.Properties using (++-assoc; ++-identityʳ)
 open import Data.List.Relation.Unary.Any using (here; there)
@@ -9,29 +11,28 @@ open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
 open ≡-Reasoning
 
-open import Kitty.Term.Prelude
+open import Kitty.Term.ComposeKit 𝕋 T 𝕊 H
 open import Kitty.Term.Kit 𝕋
-import Kitty.Term.ComposeKit 𝕋 T H as CC
-open CC ⦃ … ⦄
-open ComposeKit ⦃ … ⦄
-open WkKit ⦃ … ⦄
--- open import Kitty.Term.KitOrder 𝕋 ⦃ … ⦄
 open import Kitty.Term.KitOrder 𝕋
+open import Kitty.Term.KitT 𝕋 T 𝕊
+open import Kitty.Term.Prelude
 open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties
-open Modes 𝕄
-open Terms 𝕋
+open ComposeKit ⦃ … ⦄
 open Kit ⦃ … ⦄
+open Kitty.Term.Sub.SubWithLaws 𝕊
+open Modes 𝕄
 open Sub ⦃ … ⦄
-open SubWithLaws ⦃ … ⦄
-open ~-Reasoning
-open _⊑ₖ_ ⦃ … ⦄
+open Terms 𝕋
 open Traversal T
+open _⊑ₖ_ ⦃ … ⦄
+open ~-Reasoning
 
-record SubCompose (𝕊 : SubWithLaws) : Set₁ where
+private instance _ = 𝕊
+
+record SubCompose : Set₁ where
   infixl  9  _·ₖ_
   infixr  9  _∘ₖ_
-  private instance _ = 𝕊
 
   field
     _·ₖ_ : ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄ {µ₁ µ₂ µ₃}
@@ -192,7 +193,8 @@ record SubCompose (𝕊 : SubWithLaws) : Set₁ where
   wk-ϕ-id :
     ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
       ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
-      ⦃ W : WkKit 𝕂₁ ⦄
+      ⦃ W₁ : KitT 𝕂₁ ⦄
+      ⦃ W₂ : KitT 𝕂₂ ⦄
       {µ₁} {µ₂} {m}
       (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂)
     → wkₖ m ϕ ~ (ϕ ·ₖ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ m id)
@@ -208,7 +210,8 @@ record SubCompose (𝕊 : SubWithLaws) : Set₁ where
     ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
       ⦃ C₁ : ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
       ⦃ C₂ : ComposeKit 𝕂₂ 𝕂₁ 𝕂₁⊔𝕂₂ ⦄
-      ⦃ W : WkKit 𝕂₁ ⦄
+      ⦃ W₁ : KitT 𝕂₁ ⦄
+      ⦃ W₂ : KitT 𝕂₂ ⦄
       {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂) m
     → (ϕ ·[ C₁ ] wkₖ m id) ~ (wkₖ m id ·[ C₂ ] (ϕ ↑ m))
   ↑-wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂₁⊔𝕂₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ {µ₁} {µ₂} ϕ m =

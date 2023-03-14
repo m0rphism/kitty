@@ -1,10 +1,11 @@
 open import Kitty.Term.Modes
-open import Kitty.Term.Traversal using (Traversal; KitHomotopy)
+open import Kitty.Term.Traversal using (Traversal)
+open import Kitty.Term.KitHomotopy using (KitHomotopy)
 import Kitty.Term.Sub
 import Kitty.Term.SubCompose
 
-module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (H : KitHomotopy 𝕋 T)
-                                   (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) (𝕊C : Kitty.Term.SubCompose.SubCompose 𝕋 T H 𝕊) where
+module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : Traversal 𝕋) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋)
+                                   (H : KitHomotopy 𝕋 T 𝕊) (𝕊C : Kitty.Term.SubCompose.SubCompose 𝕋 T 𝕊 H) where
 
 open import Data.List using (List; []; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
@@ -16,10 +17,11 @@ open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
+open import Kitty.Term.KitT 𝕋 T 𝕊
 open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
-open import Kitty.Term.ComposeKit 𝕋 T H 𝕊
-open import Kitty.Term.SubCompose 𝕋 T H
+open import Kitty.Term.ComposeKit 𝕋 T 𝕊 H
+open import Kitty.Term.SubCompose 𝕋 T 𝕊 H
 open import Kitty.Util.SubstProperties
 
 open Modes 𝕄
@@ -33,7 +35,6 @@ open SubCompose ⦃ … ⦄
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 open ComposeKit ⦃ … ⦄
-open WkKit ⦃ … ⦄
 
 private instance
   _ = kitᵣ
@@ -41,8 +42,8 @@ private instance
   _ = ckitᵣ
   _ = 𝕊
   _ = 𝕊C
-  _ = wkkitᵣ
-  _ = wkkitₛ
+  _ = kittᵣ
+  _ = kittₛ
 
 private variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
@@ -76,7 +77,9 @@ record ComposeTraversal : Set₁ where
     ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
       ⦃ C₁ : ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
       ⦃ C₂ : ComposeKit 𝕂₂ 𝕂₁ 𝕂₁⊔𝕂₂ ⦄
-      ⦃ W : WkKit 𝕂₁ ⦄
+      ⦃ W₁ : KitT 𝕂₁ ⦄
+      ⦃ W₂ : KitT 𝕂₂ ⦄
+      ⦃ W₁₂ : KitT 𝕂₁⊔𝕂₂ ⦄
       (t : µ₁ ⊢ M) (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂)
     → t ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id ⋯ (ϕ ↑ m) ≡ t ⋯ ϕ ⋯ wkₖ ⦃ 𝕂 = 𝕂₂ ⦄ _ id
   dist-↑-f ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂₁⊔𝕂₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ t ϕ =
@@ -133,7 +136,7 @@ record ComposeTraversal : Set₁ where
       ⦃ C₁ : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
       ⦃ C₂ : ComposeKit 𝕂₂ 𝕂 𝕂 ⦄
       ⦃ C₃ : ComposeKit 𝕂₂ 𝕂₂ 𝕂₂ ⦄
-      ⦃ W₂ : WkKit 𝕂₂ ⦄
+      ⦃ W₂ : KitT 𝕂₂ ⦄
       {µ₁ µ₂ m} (x/t : µ₁ ∋/⊢[ 𝕂₁ ] id/m→M m) (ϕ : µ₁ –[ 𝕂₂ ]→ µ₂) →
       let sub = subst (µ₂ ∋/⊢[ 𝕂 ]_) (ι-id/m→M m) in
     (⦅ x/t ⦆ ·[ C₁ ] ϕ) ~ ((ϕ ↑ m) ·[ C₂ ] ⦅ sub (x/t &/⋯[ C₁ ] ϕ) ⦆)
@@ -229,7 +232,7 @@ record ComposeTraversal : Set₁ where
   --   ; ~-cong-&/⋯ = ~-cong-&/⋯ₛ
   --   }
 
-  &/⋯-&ₛ : ∀ ⦃ 𝕂 ⦄ ⦃ W : WkKit 𝕂 ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂) 
+  &/⋯-&ₛ : ∀ ⦃ 𝕂 ⦄ ⦃ W : KitT 𝕂 ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂) 
            → let sub₂ = subst (µ₂ ⊢_) (ι-id/m→M ⦃ ⊑ₖ-⊤ ⦃ 𝕂 = 𝕂 ⦄ ⦄ m) in
              ` x ⋯ ϕ ≡ sub₂ (ι-∋/⊢ ⦃ ⊑ₖ-⊤ ⦃ 𝕂 = 𝕂 ⦄ ⦄ (x & ϕ))
   &/⋯-&ₛ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} x ϕ =
@@ -239,7 +242,7 @@ record ComposeTraversal : Set₁ where
     sub₂ (ι-∋/⊢ ⦃ ⊑ₖ-⊤ ⦃ 𝕂 = 𝕂 ⦄ ⦄ (x & ϕ)) ∎
 
   ~-cong-&/⋯ₛ :
-    ∀ ⦃ 𝕂 ⦄ {m} {t₁ t₂ : µ₁ ⊢ m→M m}
+    ∀ ⦃ 𝕂 ⦄ ⦃ W : KitT 𝕂 ⦄ {m} {t₁ t₂ : µ₁ ⊢ m→M m}
       {ϕ₁ ϕ₂ : µ₁ –[ 𝕂 ]→ µ₂}
     → t₁ ≡ t₂
     → ϕ₁ ~ ϕ₂
@@ -261,7 +264,7 @@ record ComposeTraversal : Set₁ where
   ckitₛᵣ : ComposeKit kitₛ kitᵣ kitₛ
   ckitₛᵣ = record
     { 𝕂₁⊑𝕂₁⊔𝕂₂  = ⊑ₖ-refl ⦃ kitₛ ⦄
-    ; 𝕂₂⊑𝕂₁⊔𝕂₂  = ⊑ₖ-⊤ ⦃ 𝕊 ⦄ ⦃ kitᵣ ⦄
+    ; 𝕂₂⊑𝕂₁⊔𝕂₂  = ⊑ₖ-⊤ ⦃ kitᵣ ⦄
     ; _&/⋯_      = _⋯_
     ; &/⋯-⋯      = λ x/t ϕ → refl
     ; &/⋯-&      = &/⋯-&ₛ
@@ -286,7 +289,7 @@ record ComposeTraversal : Set₁ where
   ckitₛₛ : ComposeKit kitₛ kitₛ kitₛ
   ckitₛₛ = record
     { 𝕂₁⊑𝕂₁⊔𝕂₂  = ⊑ₖ-refl ⦃ kitₛ ⦄
-    ; 𝕂₂⊑𝕂₁⊔𝕂₂  = ⊑ₖ-⊤ ⦃ 𝕊 ⦄ ⦃ kitₛ ⦄
+    ; 𝕂₂⊑𝕂₁⊔𝕂₂  = ⊑ₖ-⊤ ⦃ kitₛ ⦄
     ; _&/⋯_      = _⋯_
     ; &/⋯-⋯      = λ x/t ϕ → refl
     ; &/⋯-&      = &/⋯-&ₛ
@@ -331,7 +334,7 @@ record ComposeTraversal : Set₁ where
 --     t ⋯ ϕ₁' ·[ 𝔸' ] ϕ₂' ≡⟨ sym (⋯-assoc t ϕ₁' ϕ₂') ⟩
 --     t ⋯ ϕ₁' ⋯ ϕ₂'  ∎
 
-  wk-cancels-,ₖ : ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
+  wk-cancels-,ₖ : ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 ⦄ ⦃ W₂ : KitT 𝕂₂ ⦄ ⦃ W : KitT 𝕂 ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
                     (t : µ₁ ⊢ M) (ϕ : µ₁ –[ 𝕂₂ ]→ µ₂) (x/t : µ₂ ∋/⊢[ 𝕂₂ ] id/m→M m) →
     t ⋯ wkₖ ⦃ 𝕂 = 𝕂₁ ⦄ _ id ⋯ (ϕ ,ₖ x/t) ≡ t ⋯ ϕ
   wk-cancels-,ₖ ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂 ⦄ ⦃ C = C ⦄ t ϕ x/t =
@@ -339,7 +342,7 @@ record ComposeTraversal : Set₁ where
     t ⋯ (wkₖ ⦃ 𝕂 = 𝕂₁ ⦄ _ id ·[ C ] (ϕ ,ₖ x/t)) ≡⟨ ~-cong-⋯ _ (wk-cancels-,ₖ-· ⦃ C = C ⦄ ϕ x/t) ⟩
     t ⋯ ϕ                                       ∎
 
-  wkᵣ-cancels-,ₖ : ∀ ⦃ 𝕂₂ : Kit ⦄
+  wkᵣ-cancels-,ₖ : ∀ ⦃ 𝕂₂ : Kit ⦄ ⦃ W₂ : KitT 𝕂₂ ⦄
                      (t : µ₁ ⊢ M) (ϕ : µ₁ –[ 𝕂₂ ]→ µ₂) (x/t : µ₂ ∋/⊢[ 𝕂₂ ] id/m→M m) →
     t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ⋯ (ϕ ,ₖ x/t) ≡ t ⋯ ϕ
   wkᵣ-cancels-,ₖ = wk-cancels-,ₖ ⦃ C = ckitᵣ ⦄
@@ -385,7 +388,8 @@ record ComposeTraversal : Set₁ where
       ⦃ C₁ : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
       ⦃ C₂ : ComposeKit 𝕂₂ 𝕂 𝕂 ⦄
       ⦃ C₂ : ComposeKit 𝕂₂ 𝕂₂ 𝕂₂ ⦄
-      ⦃ W : WkKit 𝕂₂ ⦄
+      ⦃ W₂ : KitT 𝕂₂ ⦄
+      ⦃ W : KitT 𝕂 ⦄
       {µ₁ µ₂ m M}
       (t : (m ∷ µ₁) ⊢ M) (x/t : µ₁ ∋/⊢[ 𝕂₁ ] id/m→M m) (ϕ : µ₁ –[ 𝕂₂ ]→ µ₂) →
     let sub = subst (µ₂ ∋/⊢[ 𝕂 ]_) (ι-id/m→M m) in
@@ -433,6 +437,7 @@ record ComposeTraversal : Set₁ where
 
   wk-cancels-⦅⦆ :
     ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 : Kit ⦄
+      ⦃ KT₁ : KitT 𝕂₁ ⦄ ⦃ KT₂ : KitT 𝕂₂ ⦄ ⦃ KT : KitT 𝕂 ⦄
       ⦃ C₁ : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄
       ⦃ C₂ : ComposeKit 𝕂₂ 𝕂₁ 𝕂 ⦄
       (t : µ ⊢ M) (x/t : µ ∋/⊢[ 𝕂₂ ] id/m→M m) →
