@@ -4,7 +4,7 @@ module Kitty.Term.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Data.List using (List; [])
 open import Data.List.Properties using (++-assoc)
-open import Level using (Level; _⊔_; 0ℓ)
+open import Level using (Level; _⊔_; 0ℓ) renaming (suc to lsuc)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
@@ -64,8 +64,19 @@ record Kit : Set₁ where
   -- wk'* : µ –→ (µ ▷▷ µ')
   -- wk'* _ x = wk* _ (id/` x)
 
-_∋/⊢[_]_ : List VarMode → (𝕂 : Kit) → Kit.VarMode/TermMode 𝕂 → Set
-µ ∋/⊢[ 𝕂 ] sm = Kit._∋/⊢_ 𝕂 µ sm
+record HasKit {ℓ} (A : Set ℓ) : Set (lsuc 0ℓ ⊔ ℓ) where
+  field
+    get-kit : A → Kit
+
+open HasKit ⦃ … ⦄
+
+
+instance
+  HasKit-kitᵣ : HasKit Kit
+  HasKit-kitᵣ = record { get-kit = λ 𝕂 → 𝕂 }
+
+_∋/⊢[_]_ : ∀ {ℓ} {A : Set ℓ} ⦃ _ : HasKit A ⦄ → List VarMode → (𝕂 : A) → Kit.VarMode/TermMode (get-kit 𝕂) → Set
+µ ∋/⊢[ 𝕂 ] sm = Kit._∋/⊢_ (get-kit 𝕂) µ sm
 
 kitᵣ : Kit
 Kit.VarMode/TermMode kitᵣ = VarMode
