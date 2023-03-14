@@ -29,10 +29,23 @@ private instance _ = kitᵣ; _ = kitₛ
 record KitK (𝕂 : Kit) : Set₁ where
   private instance _ = 𝕂
   field
-    wkₖ-⋯ :
-      ∀ {µ} {m} {mx}
-        {x/t : µ ∋/⊢[ 𝕂 ]' id/m→M mx}
-      → `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id ≡ `/id (wk m x/t)
+    wkₖ-⋯' :
+      ∀ {µ} {m} {m/M}
+        {x/t : µ ∋/⊢[ 𝕂 ]' m/M}
+      → `/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id ≡ `/id' (wk m x/t)
+
+  wkₖ-⋯ :
+    ∀ {µ} {m} {mx}
+      {x/t : µ ∋/⊢[ 𝕂 ]' id/m→M mx}
+    → `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id ≡ `/id (wk m x/t)
+  wkₖ-⋯ {µ} {m} {mx} {x/t} =
+    let sub₁ = subst (µ ⊢_) (id/m→M/id mx) in
+    let sub₂ = subst ((µ ▷ m) ⊢_) (id/m→M/id mx) in
+    `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id         ≡⟨ cong (_⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id) (`/id≡`/id' x/t) ⟩
+    sub₁ (`/id' x/t) ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id ≡⟨ dist-subst (_⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id) (id/m→M/id mx) (`/id' x/t) ⟩
+    sub₂ (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id) ≡⟨ cong sub₂ wkₖ-⋯' ⟩
+    sub₂ (`/id' (wk m x/t))                   ≡⟨ sym (`/id≡`/id' (wk m x/t)) ⟩
+    `/id (wk m x/t)                           ∎
 
 wkₖ-⋯ᵣ :
   ∀ {µ} {m} {mx} {x : µ ∋ mx}
@@ -44,10 +57,10 @@ wkₖ-⋯ᵣ {µ} {m} {mx} {x} =
   ` there x                     ∎
 
 kitkᵣ : KitK kitᵣ
-kitkᵣ = record { wkₖ-⋯ = wkₖ-⋯ᵣ }
+kitkᵣ = record { wkₖ-⋯' = wkₖ-⋯ᵣ }
 
 kitkₛ : KitK kitₛ
-kitkₛ = record { wkₖ-⋯ = refl }
+kitkₛ = record { wkₖ-⋯' = refl }
 
 open KitK ⦃ … ⦄
 

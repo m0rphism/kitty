@@ -47,6 +47,62 @@ record KitHomotopy : Set₁ where
             t ⋯ᵣ ρ ≡ t ⋯ₛ ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑-ᵣₛ ⦄ ρ
   ren→sub = ⋯-ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑-ᵣₛ ⦄
 
+  open KitT using (KitT-kit)
+
+  wk~wk : ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄ {m} {µ} →
+    wkₖ ⦃ 𝕂 = KitT-kit 𝕂₁ ⦄ m id ~ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ m (id {µ = µ})
+  wk~wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {m} {µ} mx x =
+    `/id ⦃ 𝕂₁ ⦄ (x & wkₖ    m id) ≡⟨ cong (`/id ⦃ 𝕂₁ ⦄) (&-wkₖ-wk id x) ⟩
+    `/id ⦃ 𝕂₁ ⦄ (wk _ (x & id))   ≡⟨ cong (λ ■ → `/id ⦃ 𝕂₁ ⦄ (wk ⦃ 𝕂₁ ⦄ _ ■)) (&-id x) ⟩
+    `/id ⦃ 𝕂₁ ⦄ (wk _ (id/` x ))  ≡⟨ cong (`/id ⦃ 𝕂₁ ⦄) (wk-id/` _ x) ⟩
+    `/id ⦃ 𝕂₁ ⦄ (id/` (there x))  ≡⟨ id/`/id (there x) ⟩
+    ` there x                     ≡⟨ sym (id/`/id (there x)) ⟩
+    `/id ⦃ 𝕂₂ ⦄ (id/` (there x))  ≡⟨ cong (`/id ⦃ 𝕂₂ ⦄) (sym (wk-id/` _ x)) ⟩
+    `/id ⦃ 𝕂₂ ⦄ (wk _ (id/` x ))  ≡⟨ cong (λ ■ → `/id ⦃ 𝕂₂ ⦄ (wk ⦃ 𝕂₂ ⦄ _ ■)) (sym (&-id x)) ⟩
+    `/id ⦃ 𝕂₂ ⦄ (wk _ (x & id))   ≡⟨ cong (`/id ⦃ 𝕂₂ ⦄) (sym (&-wkₖ-wk id x)) ⟩
+    `/id ⦃ 𝕂₂ ⦄ (x & wkₖ m id)    ∎
+
+  open import Kitty.Term.Kit 𝕋 using (kitᵣ) -- TODO
+  open KitT using (KitT-kit)
+
+  ⋯-x/t-wk' : ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄ {µ₁} {m'} {m/M : VarMode/TermMode ⦃ 𝕂₁ ⦄} (x/t : µ₁ ∋/⊢ m/M)
+              → (`/id' x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ m' id) ≡ `/id' (wk m' x/t)
+  ⋯-x/t-wk' ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {µ₁} {m'} {m/M} x/t =
+    `/id' x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ _ id ≡⟨ ~-cong-⋯ (`/id' x/t) wk~wk ⟩
+    `/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id        ≡⟨ wkₖ-⋯' ⟩
+    `/id' (wk m' x/t)                         ∎
+
+  ⋯-x/t-wk : ∀ ⦃ 𝕂₁ 𝕂₂ : KitT ⦄ {µ} {m'} {m} (x/t : µ ∋/⊢[ 𝕂₁ ] id/m→M m)
+              → (`/id x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ _ id) ≡ `/id (wk m' x/t)
+  ⋯-x/t-wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {µ} {m'} {m} x/t =
+    `/id x/t ⋯ wkₖ ⦃ 𝕂 = KitT-kit 𝕂₂ ⦄ _ id ≡⟨ ~-cong-⋯ (`/id x/t) wk~wk ⟩
+    `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id        ≡⟨ wkₖ-⋯ ⟩
+    `/id (wk m' x/t)                         ∎
+
+  ⊑ₖ-⊤ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : KitT ⦄ → 𝕂 ⊑ₖ kittₛ
+  ⊑ₖ-⊤ ⦃ 𝕊 ⦄ ⦃ 𝕂 ⦄ = record
+    { ι-Mode   = m→M/id
+    ; ι-id/m→M = id/m→M/id
+    ; ι-m→M/id = λ m/M → refl
+    ; ι-∋/⊢    = `/id'
+    ; ι-id/`   = id/`/id'
+    ; ι-`/id   = λ {µ} {m} x/t →
+        let sub = subst (µ ⊢_) (id/m→M/id m) in
+        `/id x/t        ≡⟨ `/id≡`/id' x/t ⟩
+        sub (`/id' x/t) ∎
+    ; ι-`/id'  = λ x/t → refl
+    ; ι-wk     = λ {m'} {m} {µ} {m/M} x/t →
+        `/id' (wk _ x/t)                  ≡⟨ sym (⋯-x/t-wk' x/t) ⟩
+        `/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨⟩
+        wk _ (`/id' x/t)   ∎
+    ; ι-∋/⊢-id = λ { refl x/t → refl }
+    ; ι-∋/⊢-~ₜ = λ {µ} {m} x/t →
+        let sub = subst (µ ⊢_) (id/m→M/id m) in
+        sub (`/id' ⦃ 𝕂 ⦄ x/t) ≡⟨ sym (`/id≡`/id' x/t) ⟩
+        `/id x/t              ∎
+    ; ι-∋/⊢-~ₜ[] = λ x/t → refl
+    }
+
 -- open import Axiom.Extensionality.Propositional using (Extensionality)
 
 -- Extensionality→KitHomotopy : ∀ {T} → Extensionality 0ℓ 0ℓ → KitHomotopy T
