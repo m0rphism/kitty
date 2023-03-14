@@ -9,8 +9,8 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym
 open ≡-Reasoning
 
 open import Kitty.Term.Prelude
-open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.KitOrder 𝕋
+open import Kitty.Term.Kit 𝕋 renaming (_∋/⊢[_]_ to _∋/⊢[_]'_)
+open import Kitty.Term.KitOrder 𝕋 renaming (_⊑ₖ_ to _⊑ₖ'_)
 open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties
 
@@ -18,10 +18,10 @@ open Modes 𝕄
 open Terms 𝕋
 open Traversal T
 open Kit ⦃ … ⦄
-open Sub ⦃ … ⦄
+open Sub ⦃ … ⦄ renaming (_–[_]→_ to _–[_]→'_)
 open SubWithLaws ⦃ … ⦄
 open ~-Reasoning
-open _⊑ₖ_ ⦃ … ⦄
+open _⊑ₖ'_ ⦃ … ⦄
 
 private instance _ = 𝕊
 private instance _ = kitᵣ; _ = kitₛ
@@ -31,7 +31,7 @@ record KitK (𝕂 : Kit) : Set₁ where
   field
     wkₖ-⋯ :
       ∀ {µ} {m} {mx}
-        {x/t : µ ∋/⊢[ 𝕂 ] id/m→M mx}
+        {x/t : µ ∋/⊢[ 𝕂 ]' id/m→M mx}
       → `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ m id ≡ `/id (wk m x/t)
 
 wkₖ-⋯ᵣ :
@@ -58,8 +58,8 @@ record KitWk (𝕂₁ : Kit) : Set₁ where
   field
     ~-wk :
       ∀ ⦃ 𝕂₂ : Kit ⦄ ⦃ KK₂ : KitK 𝕂₂ ⦄ {µ} {m} {mx}
-        {x/t₁ : µ ∋/⊢[ 𝕂₁ ] id/m→M mx}
-        {x/t₂ : µ ∋/⊢[ 𝕂₂ ] id/m→M mx}
+        {x/t₁ : µ ∋/⊢[ 𝕂₁ ]' id/m→M mx}
+        {x/t₂ : µ ∋/⊢[ 𝕂₂ ]' id/m→M mx}
       → `/id x/t₁ ≡ `/id x/t₂
       → `/id (wk m x/t₁) ≡ `/id (wk m x/t₂)
 
@@ -68,7 +68,7 @@ open KitWk ⦃ … ⦄
 ~-wkᵣ :
   ∀ ⦃ 𝕂₂ : Kit ⦄ {µ} {m} {mx}
     {x₁ : µ ∋ mx}
-    {x/t₂ : µ ∋/⊢[ 𝕂₂ ] id/m→M mx}
+    {x/t₂ : µ ∋/⊢[ 𝕂₂ ]' id/m→M mx}
   → ` x₁ ≡ `/id x/t₂
   → ` there x₁ ≡ `/id (wk m x/t₂)
 ~-wkᵣ ⦃ 𝕂₂ ⦄ {µ} {m} {mx} {x₁} {x/t₂} eq =
@@ -83,7 +83,7 @@ kitwkᵣ = record { ~-wk = ~-wkᵣ }
 ~-wkₛ :
   ∀ ⦃ 𝕂₂ : Kit ⦄ ⦃ KK₂ : KitK 𝕂₂ ⦄ {µ} {m} {mx}
     {t₁ : µ ⊢ m→M mx}
-    {x/t₂ : µ ∋/⊢[ 𝕂₂ ] id/m→M mx}
+    {x/t₂ : µ ∋/⊢[ 𝕂₂ ]' id/m→M mx}
   → t₁ ≡ `/id x/t₂
   → wk m t₁ ≡ `/id (wk m x/t₂)
 ~-wkₛ ⦃ 𝕂₂ ⦄ {µ} {m} {mx} {_} {x/t₂} refl =
@@ -98,7 +98,7 @@ kitwkₛ = record { ~-wk = ~-wkₛ }
   ∀ ⦃ 𝕂₁ 𝕂₂ ⦄
     ⦃ K₁ : KitK 𝕂₁ ⦄ ⦃ K₂ : KitK 𝕂₂ ⦄
     ⦃ W₁ : KitWk 𝕂₁ ⦄ ⦃ W₂ : KitWk 𝕂₂ ⦄
-    {µ₁} {µ₂} {m} {ϕ : µ₁ –[ 𝕂₁ ]→ µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→ µ₂} →
+    {µ₁} {µ₂} {m} {ϕ : µ₁ –[ 𝕂₁ ]→' µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→' µ₂} →
   ϕ ~ ϕ' →
   wkₖ m ϕ ~ wkₖ m ϕ'
 ~-cong-wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ {µ₁} {µ₂} {m} {ϕ} {ϕ'} ϕ~ϕ' mx x =
@@ -112,7 +112,7 @@ open ~-Reasoning
   ∀ ⦃ 𝕂₁ 𝕂₂ ⦄
     ⦃ K₁ : KitK 𝕂₁ ⦄ ⦃ K₂ : KitK 𝕂₂ ⦄
     ⦃ W₁ : KitWk 𝕂₁ ⦄ ⦃ W₂ : KitWk 𝕂₂ ⦄
-    {µ₁} {µ₂} {µ} {ϕ : µ₁ –[ 𝕂₁ ]→ µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→ µ₂} →
+    {µ₁} {µ₂} {µ} {ϕ : µ₁ –[ 𝕂₁ ]→' µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→' µ₂} →
   ϕ ~ ϕ' →
   wkₖ* µ ϕ ~ wkₖ* µ ϕ'
 ~-cong-wk* {µ = []} {ϕ} {ϕ'} ϕ~ϕ' =
@@ -130,7 +130,7 @@ open ~-Reasoning
   ∀ ⦃ 𝕂₁ 𝕂₂ ⦄
     ⦃ K₁ : KitK 𝕂₁ ⦄ ⦃ K₂ : KitK 𝕂₂ ⦄
     ⦃ W₁ : KitWk 𝕂₁ ⦄ ⦃ W₂ : KitWk 𝕂₂ ⦄
-    {µ₁} {µ₂} {m} {ϕ : µ₁ –[ 𝕂₁ ]→ µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→ µ₂} →
+    {µ₁} {µ₂} {m} {ϕ : µ₁ –[ 𝕂₁ ]→' µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→' µ₂} →
   ϕ ~ ϕ' →
   (ϕ ↑ m) ~ (ϕ' ↑ m)
 ~-cong-↑ {µ₁} {µ₂} {m} {ϕ} {ϕ'} ϕ~ϕ' =
@@ -143,7 +143,7 @@ open ~-Reasoning
   ∀ ⦃ 𝕂₁ 𝕂₂ ⦄
     ⦃ K₁ : KitK 𝕂₁ ⦄ ⦃ K₂ : KitK 𝕂₂ ⦄
     ⦃ W₁ : KitWk 𝕂₁ ⦄ ⦃ W₂ : KitWk 𝕂₂ ⦄
-    {µ₁} {µ₂} {µ} {ϕ : µ₁ –[ 𝕂₁ ]→ µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→ µ₂} →
+    {µ₁} {µ₂} {µ} {ϕ : µ₁ –[ 𝕂₁ ]→' µ₂} {ϕ' : µ₁ –[ 𝕂₂ ]→' µ₂} →
   ϕ ~ ϕ' →
   (ϕ ↑* µ) ~ (ϕ' ↑* µ)
 ~-cong-↑* {µ = []}    {ϕ = ϕ} {ϕ' = ϕ'} ϕ~ϕ' =
@@ -159,9 +159,9 @@ open ~-Reasoning
 
 record KitT : Set₁ where
   field
-    ⦃ KitT-kit ⦄   : Kit
-    ⦃ KitT-kitk ⦄  : KitK KitT-kit
-    ⦃ KitT-kitwk ⦄ : KitWk KitT-kit
+    instance KitT-kit   : Kit
+    instance KitT-kitk  : KitK KitT-kit
+    instance KitT-kitwk : KitWk KitT-kit
 
   open Kit KitT-kit     public
   open KitK KitT-kitk   public
@@ -181,6 +181,13 @@ kittₛ = record
   ; KitT-kitwk = kitwkₛ
   }
 
-instance
-  HasKit-kitᵣ : HasKit KitT
-  HasKit-kitᵣ = record { get-kit = λ ⦃ kt ⦄ → KitT.KitT-kit kt }
+_∋/⊢[_]_ : List VarMode → (𝕂 : KitT) → KitT.VarMode/TermMode 𝕂 → Set
+µ ∋/⊢[ 𝕂 ] sm = KitT._∋/⊢_ 𝕂 µ sm
+
+_–[_]→_ : List VarMode → KitT → List VarMode → Set
+µ₁ –[ 𝕂 ]→ µ₂ = µ₁ –[ KitT.KitT-kit 𝕂 ]→' µ₂ 
+
+_⊑ₖ_ : (𝕂₁ 𝕂₂ : KitT) → Set₁
+𝕂₁ ⊑ₖ 𝕂₂ = KitT.KitT-kit 𝕂₁ ⊑ₖ' KitT.KitT-kit 𝕂₂
+
+module _⊑ₖ_ {𝕂₁ 𝕂₂ : KitT} = _⊑ₖ'_ {KitT.KitT-kit 𝕂₁} {KitT.KitT-kit 𝕂₂}
