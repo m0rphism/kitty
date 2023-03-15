@@ -172,6 +172,9 @@ module Derive (KT : KitTraversalAlt) where
     open WithSub SubWithLaws-→ public
     open Fun-SubCompose kit-traversal kit-homotopy
     open WithSubCompose SubCompose-→ public
+    open Sub Sub-→ public
+    open SubWithLaws SubWithLaws-→ public
+    open KitT ⦃ … ⦄ public
 
     instance
       kitᵣ' = kitᵣ
