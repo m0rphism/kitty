@@ -843,13 +843,14 @@ module Example where
     ⋯-var' = ⋯-var
 
     ⋯-↑' : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
-           → f ≈ₓ g → f ≈ₜ g
+          → f ≈ₓ g → f ≈ₜ g
     ⋯-↑' = ⋯-↑
 
     kit-traversal-alt : KitTraversalAlt
     kit-traversal-alt = mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
 
     open Derived kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
+    open Sub-Functional
 
     `id : [] ⊢ 𝕖
     `id = λx ` here refl
@@ -857,15 +858,16 @@ module Example where
     `f : [ 𝕖 ] ⊢ 𝕖
     `f = λx (` here refl) · (` there (here refl))
 
-    -- `f' : [] ⊢ 𝕖
-    -- `f' = `f ⋯ ⦅ `id ⦆ₛ
+    `f' : [] ⊢ 𝕖
+    `f' = `f ⋯ ⦅ `id ⦆ₛ
 
-    -- test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
-    -- test-`f' = refl
+    test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    test-`f' = refl
 
   module Derived' where
     unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
     open Derived traversal
+    open Sub-Functional
 
     open import Data.List.Relation.Unary.Any using (here; there)
 
@@ -875,11 +877,11 @@ module Example where
     `f : [ 𝕖 ] ⊢ 𝕖
     `f = λx (` here refl) · (` there (here refl))
 
-    -- `f' : [] ⊢ 𝕖
-    -- `f' = `f ⋯ ⦅ `id ⦆ₛ
+    `f' : [] ⊢ 𝕖
+    `f' = `f ⋯ ⦅ `id ⦆ₛ
 
-    -- test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
-    -- test-`f' = refl
+    test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    test-`f' = refl
 
 module ExampleVarEq where
   open import Kitty.Term.Prelude

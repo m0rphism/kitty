@@ -167,18 +167,37 @@ module Derive (KT : KitTraversalAlt) where
 
       open ComposeTraversal compose-traversal public
 
-  open WithSub ⦃ … ⦄ public renaming (module WithSubCompose to WithSubCompose')
-  open WithSubCompose' ⦃ … ⦄ public
+  module Sub-Functional where
+    open import Kitty.Term.Sub.Functional terms
+    open WithSub SubWithLaws-→ public
+    open Fun-SubCompose kit-traversal kit-homotopy
+    open WithSubCompose SubCompose-→ public
 
-  instance
-    kitᵣ'  = kitᵣ
-    kitₛ'  : ∀ ⦃ 𝕊 : SubWithLaws ⦄ → Kit
-    kitₛ' ⦃ 𝕊 ⦄ = Traversal.kitₛ 𝕊 kit-traversal
-    kitᵣᵣ = ckitᵣ
-    kitₛᵣ = ckitₛᵣ
-    kitₛₛ = ckitₛₛ
-    wk-kitᵣ = kittᵣ
-    wk-kitₛ = kittₛ
+    instance
+      kitᵣ' = kitᵣ
+      kitₛ' = kitₛ
+      kitᵣᵣ = ckitᵣ
+      kitₛᵣ = ckitₛᵣ
+      kitₛₛ = ckitₛₛ
+      wk-kitᵣ = kittᵣ
+      wk-kitₛ = kittₛ
+      sub-→ = Sub-→
+      subwithlaws-→ = SubWithLaws-→
+      subcompose-→ = SubCompose-→
+
+  module Sub-Instance where
+    open WithSub ⦃ … ⦄ public renaming (module WithSubCompose to WithSubCompose')
+    open WithSubCompose' ⦃ … ⦄ public
+
+    -- instance
+    --   kitᵣ'  = kitᵣ
+    --   kitₛ'  : ∀ ⦃ 𝕊 : SubWithLaws ⦄ → Kit
+    --   kitₛ' ⦃ 𝕊 ⦄ = Traversal.kitₛ 𝕊 kit-traversal
+    --   kitᵣᵣ = ckitᵣ
+    --   kitₛᵣ = ckitₛᵣ
+    --   kitₛₛ = ckitₛₛ
+    --   wk-kitᵣ = kittᵣ
+    --   wk-kitₛ = kittₛ
 
   open Kit ⦃ … ⦄ public
   open import Kitty.Term.Kit 𝕋 public
