@@ -680,36 +680,36 @@ module Deriving where
       ⋯-↑-ty
       (var-clause ∷ non-var-clauses)
 
-  -- derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
-  -- derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
-  --   𝕋-nm ← term→name =<< quoteTC' 𝕋
-  --   let body =
-  --         con (quote Kitty.Term.KitAltSimple.mkKitTraversalAlt)
-  --           [ argᵥ (def ⋯-nm [])
-  --           ; argᵥ (def ⋯-var-nm [])
-  --           ; argᵥ (def ⋯-↑-nm [])
-  --           ]
-  --   defdecFun'
-  --     (argᵥ kit-traversal-nm)
-  --     (def (quote Kitty.Term.KitAltSimple.KitTraversalAlt) [ argᵥ (def 𝕋-nm []) ])
-  --     [ clause [] [] body ]
+  derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
+  derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
+    𝕋-nm ← term→name =<< quoteTC' 𝕋
+    let body =
+          con (quote Kitty.Term.KitAltSimple.mkKitTraversalAlt)
+            [ argᵥ (def ⋯-nm [])
+            ; argᵥ (def ⋯-var-nm [])
+            ; argᵥ (def ⋯-↑-nm [])
+            ]
+    defdecFun'
+      (argᵥ kit-traversal-nm)
+      (def (quote Kitty.Term.KitAltSimple.KitTraversalAlt) [ argᵥ (def 𝕋-nm []) ])
+      [ clause [] [] body ]
 
-  -- derive-traversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
-  -- derive-traversal 𝕄 _⊢_ traversal-nm = do
-  --   terms-nm ← freshName "terms"
-  --   derive-Terms 𝕄 _⊢_ terms-nm
-  --   terms ← unquoteTC {A = Terms 𝕄} (def terms-nm [])
+  derive-traversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
+  derive-traversal 𝕄 _⊢_ traversal-nm = do
+    terms-nm ← freshName "terms"
+    derive-Terms 𝕄 _⊢_ terms-nm
+    terms ← unquoteTC {A = Terms 𝕄} (def terms-nm [])
 
-  --   ⋯-nm ← freshName "⋯"
-  --   derive-⋯ terms ⋯-nm
+    ⋯-nm ← freshName "⋯"
+    derive-⋯ terms ⋯-nm
 
-  --   ⋯-var-nm ← freshName "⋯-var"
-  --   derive-⋯-var terms ⋯-nm ⋯-var-nm
+    ⋯-var-nm ← freshName "⋯-var"
+    derive-⋯-var terms ⋯-nm ⋯-var-nm
 
-  --   ⋯-↑-nm ← freshName "⋯-↑"
-  --   derive-⋯-↑ terms ⋯-nm ⋯-↑-nm
+    ⋯-↑-nm ← freshName "⋯-↑"
+    derive-⋯-↑ terms ⋯-nm ⋯-↑-nm
 
-  --   derive-KitTraversalAlt terms ⋯-nm ⋯-var-nm ⋯-↑-nm traversal-nm
+    derive-KitTraversalAlt terms ⋯-nm ⋯-var-nm ⋯-↑-nm traversal-nm
 
 
   module Derived {𝕄 : Modes} {𝕋 : Terms 𝕄} (T : Kitty.Term.KitAltSimple.KitTraversalAlt 𝕋) where
@@ -820,58 +820,69 @@ module Example where
     unquoteDecl ⋯-var = derive-⋯-var terms (quote _⋯_) ⋯-var
     unquoteDecl ⋯-↑   = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
 
---     -- Tests
---     open import Kitty.Term.KitAltSimple terms
---     open Kitty.Term.Kit terms
---     open Kit ⦃ … ⦄
---     open TraversalOps _⋯_
+    -- Tests
+    open import Data.List.Relation.Unary.Any using (here; there)
+    open import Kitty.Term.KitAltSimple terms
+    open import Kitty.Term.Kit terms
+    open import Kitty.Term.Sub terms
+    open import Kitty.Term.MultiSub terms
+    open Kit ⦃ … ⦄
+    open Sub ⦃ … ⦄
+    open SubWithLaws ⦃ … ⦄
+    open TraversalOps _⋯_
 
---     _⋯'_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
---     _⋯'_ = _⋯_
+    _⋯'_ : ∀ ⦃ 𝕊 : Sub ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    _⋯'_ = _⋯_
 
---     ⋯-var' : ∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
---             (` x) ⋯ f ≡ `/id _ (f _ x)
---     ⋯-var' = ⋯-var
+    ⋯-var' : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+            (` x) ⋯ f ≡ `/id (x & f)
+    ⋯-var' = ⋯-var
 
---     ⋯-↑' : ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂ } (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
---            → f ≈ₓ g → f ≈ₜ g
---     ⋯-↑' = ⋯-↑
+    ⋯-↑' : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
+           → f ≈ₓ g → f ≈ₜ g
+    ⋯-↑' = ⋯-↑
 
---     kit-traversal-alt : KitTraversalAlt
---     kit-traversal-alt = Kitty.Term.KitAltSimple.mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
+    kit-traversal-alt : KitTraversalAlt
+    kit-traversal-alt = mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
 
---     open Derived kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
+    open Derived kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
 
---     `id : [] ⊢ 𝕖
---     `id = λx ` here refl
+    `id : [] ⊢ 𝕖
+    `id = λx ` here refl
 
---     `f : [ 𝕖 ] ⊢ 𝕖
---     `f = λx (` here refl) · (` there (here refl))
+    `f : [ 𝕖 ] ⊢ 𝕖
+    `f = λx (` here refl) · (` there (here refl))
 
---     `f' : [] ⊢ 𝕖
---     `f' = `f ⋯ ⦅ `id ⦆ₛ
+    -- `f' : [] ⊢ 𝕖
+    -- `f' = `f ⋯ ⦅ `id ⦆ₛ
 
---     test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
---     test-`f' = refl
+    -- test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    -- test-`f' = refl
 
---   module Derived' where
---     unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
---     open Derived traversal
+  module Derived' where
+    unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
+    open Derived traversal
 
---     `id : [] ⊢ 𝕖
---     `id = λx ` here refl
+    open import Data.List.Relation.Unary.Any using (here; there)
 
---     `f : [ 𝕖 ] ⊢ 𝕖
---     `f = λx (` here refl) · (` there (here refl))
+    `id : [] ⊢ 𝕖
+    `id = λx ` here refl
 
---     `f' : [] ⊢ 𝕖
---     `f' = `f ⋯ ⦅ `id ⦆ₛ
+    `f : [ 𝕖 ] ⊢ 𝕖
+    `f = λx (` here refl) · (` there (here refl))
 
---     test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
---     test-`f' = refl
+    -- `f' : [] ⊢ 𝕖
+    -- `f' = `f ⋯ ⦅ `id ⦆ₛ
+
+    -- test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    -- test-`f' = refl
 
 -- module ExampleVarEq where
---   open Kitty.Term.Prelude
+--   open import Kitty.Term.Prelude
+--   open import Kitty.Term.Modes
+--   open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; trans; sym; subst₂; module ≡-Reasoning)
+--   open ≡-Reasoning
+--   open import ReflectionLib.Categorical
 
 --   data Modeᵥ : Set where 𝕖 : Modeᵥ
 --   data Modeₜ : Set where 𝕖 : Modeₜ
