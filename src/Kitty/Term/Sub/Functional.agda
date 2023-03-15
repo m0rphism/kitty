@@ -130,16 +130,13 @@ instance
     ; invert'      = invert'
     }
 
--- open SubWithLaws SubWithLaws-→
--- x : ∀ ⦃ 𝕂 : Kit ⦄ (µ : List VarMode) (m : VarMode) → {!!}
--- x µ m = {!invert'-rec (id {µ ▷ m})!}
-
-open import Kitty.Term.Traversal 𝕋
+open import Kitty.Term.Traversal 𝕋 SubWithLaws-→
+open import Kitty.Term.KitHomotopy 𝕋 SubWithLaws-→
 module Fun-SubCompose (T : Traversal) (H : KitHomotopy T) where
   open Traversal T
-  open KitHomotopy H
-  open import Kitty.Term.ComposeKit 𝕋 T H SubWithLaws-→
-  open import Kitty.Term.SubCompose 𝕋 T H
+  open KitHomotopy T H
+  open import Kitty.Term.ComposeKit 𝕋 SubWithLaws-→ T H
+  open import Kitty.Term.SubCompose 𝕋 SubWithLaws-→ T H
   open ComposeKit ⦃ … ⦄
 
   _·ₖ_ : ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄ {µ₁ µ₂ µ₃}
@@ -148,7 +145,7 @@ module Fun-SubCompose (T : Traversal) (H : KitHomotopy T) where
         → µ₁ –[ 𝕂  ]→ µ₃
   _·ₖ_ ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂 ⦄ ⦃ C ⦄ {µ₁} {µ₂} {µ₃} ϕ₁ ϕ₂ = λ m x → subst (µ₃ ∋/⊢[ 𝕂 ]_) (ι-id/m→M m) (x & ϕ₁ &/⋯ ϕ₂)
 
-  SubCompose-→ : SubCompose SubWithLaws-→
+  SubCompose-→ : SubCompose
   SubCompose-→ = record
     { _·ₖ_     = _·ₖ_
     ; &-·ₖ-&/⋯ = λ ϕ₁ ϕ₂ x → refl
