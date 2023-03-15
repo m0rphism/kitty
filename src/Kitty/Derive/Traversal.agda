@@ -720,7 +720,8 @@ module Deriving where
     import Kitty.Term.KitAltSimple
     open Kitty.Term.KitAltSimple.Derive _ T public
 
-open Deriving
+open Deriving using  (module Derived; derive-traversal) public 
+open Deriving hiding (module Derived; derive-traversal) 
 
 module Example where
   open import Kitty.Term.Prelude

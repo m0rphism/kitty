@@ -62,6 +62,7 @@ variable
 open import Kitty.Derive.Traversal using (derive-traversal; module Derived)
 unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
 open Derived traversal public
+open Sub-Functional public
 
 pattern `_ x = `[ refl ] x  
 
