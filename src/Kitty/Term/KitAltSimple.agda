@@ -168,9 +168,11 @@ module Derive (KT : KitTraversalAlt) where
       open ComposeTraversal compose-traversal public
 
   module Sub-Functional where
-    open import Kitty.Term.Sub.Functional terms
+    open import Kitty.Term.Sub.Functional terms hiding (Sub-→; SubWithLaws-→)
+    open import Kitty.Term.Sub.Functional terms using  (Sub-→; SubWithLaws-→) public
     open WithSub SubWithLaws-→ public
-    open Fun-SubCompose kit-traversal kit-homotopy
+    open Fun-SubCompose kit-traversal kit-homotopy hiding (SubCompose-→)
+    open Fun-SubCompose kit-traversal kit-homotopy using  (SubCompose-→) public
     open WithSubCompose SubCompose-→ public
     open Sub Sub-→ public
     open SubWithLaws SubWithLaws-→ public

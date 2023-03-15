@@ -54,8 +54,7 @@ record IKit
     (𝕂 : Kit)
     (K : KitT 𝕂)
     (C₁ : ComposeKit 𝕂 kitᵣ 𝕂)
-    (C₂ : ComposeKit kitᵣ 𝕂 𝕂)
-    (C₃ : ComposeKit 𝕂 𝕂 𝕂)
+    (C₂ : ComposeKit 𝕂 𝕂 𝕂)
     : Set₁ where
 
   infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
@@ -67,11 +66,11 @@ record IKit
   private instance _ = kitₛ
   private instance _ = kittᵣ
   private instance _ = kittₛ
+  private instance _ = ckitᵣ
   private instance _ = 𝕂
   private instance _ = K
   private instance _ = C₁
   private instance _ = C₂
-  private instance _ = C₃
 
   open Kit 𝕂
   open KitT K
@@ -219,8 +218,8 @@ open IKit ⦃ ... ⦄
 
 infixl  5  _∋*/⊢*[_]_∶_
 _∋*/⊢*[_]_∶_ :
-  ∀ {𝕂} {K : KitT 𝕂} {C₁ : ComposeKit 𝕂 kitᵣ 𝕂} {C₂ : ComposeKit kitᵣ 𝕂 𝕂} {C₃ : ComposeKit 𝕂 𝕂 𝕂}
-  → Ctx µ₂ → IKit 𝕂 K C₁ C₂ C₃ → µ₁ –[ 𝕂 ]→ µ₂ → Ctx µ₁ → Set
+  ∀ {𝕂} {K : KitT 𝕂} {C₁ : ComposeKit 𝕂 kitᵣ 𝕂} {C₂ : ComposeKit 𝕂 𝕂 𝕂}
+  → Ctx µ₂ → IKit 𝕂 K C₁ C₂ → µ₁ –[ 𝕂 ]→ µ₂ → Ctx µ₁ → Set
 Γ₂ ∋*/⊢*[ IK ] f ∶ Γ₁ = Γ₂ ∋*/⊢* f ∶ Γ₁ where instance _ = IK
 
 open Kit ⦃ ... ⦄
@@ -239,8 +238,8 @@ record ITraversal : Set₁ where
 
   field
     -- Substitution/Renaming preserves typing
-    _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit kitᵣ 𝕂 𝕂 ⦄ ⦃ C₃ : ComposeKit 𝕂 𝕂 𝕂 ⦄
-             ⦃ IK : IKit 𝕂 K C₁ C₂ C₃ ⦄
+    _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+             ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
              {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
            Γ₁ ⊢ e ∶ t →
            Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
@@ -249,7 +248,7 @@ record ITraversal : Set₁ where
     -- ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
     --         (` x) ⋯ f ≡ subst (µ₂ ⊢_) (id/m→M/id m) (tm _ (f _ x))
 
-  ikitᵣ : IKit kitᵣ kittᵣ ckitᵣ ckitᵣ ckitᵣ
+  ikitᵣ : IKit kitᵣ kittᵣ ckitᵣ ckitᵣ
   IKit._∋/⊢_∶_ ikitᵣ = _∋_∶_
   IKit.∋/⊢∶-lookup ikitᵣ = λ _ → refl
   IKit.id/⊢`   ikitᵣ = λ ⊢x → ⊢x
@@ -259,7 +258,7 @@ record ITraversal : Set₁ where
 
   private instance _ = ikitᵣ
 
-  ikitₛ : IKit kitₛ kittₛ ckitₛᵣ ckitᵣ ckitₛₛ
+  ikitₛ : IKit kitₛ kittₛ ckitₛᵣ ckitₛₛ
   IKit._∋/⊢_∶_ ikitₛ = _⊢_∶_
   IKit.∋/⊢∶-lookup ikitₛ = λ _ → ⊢` refl
   IKit.id/⊢`   ikitₛ = ⊢`

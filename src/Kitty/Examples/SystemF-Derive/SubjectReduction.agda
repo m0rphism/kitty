@@ -6,18 +6,19 @@ open ≡-Reasoning
 
 open import Kitty.Examples.SystemF-Derive.Definitions
 
-open import Kitty.Typing.ITerms terms kit-traversal kit-homotopy kit-assoc kit-assoc-lemmas kit-type
+open import Kitty.Typing.ITerms terms SubWithLaws-→ kit-traversal kit-homotopy SubCompose-→ compose-traversal kit-type
 
 iterms : ITerms
 iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 
-open import Kitty.Typing.IKit terms kit-traversal kit-homotopy kit-assoc kit-assoc-lemmas kit-type iterms
+open import Kitty.Typing.IKit terms SubWithLaws-→ kit-traversal kit-homotopy SubCompose-→ compose-traversal kit-type iterms
 
 open IKit ⦃ … ⦄
 
-open WkDistKit ⦃ … ⦄
+open KitT ⦃ … ⦄
 
-_⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄ ⦃ WK : WkDistKit ⦃ 𝕂 ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄ ⦄ ⦃ IK : IKit 𝕂 WK ⦄
+_⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+         ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
          {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
        Γ₁ ⊢ e ∶ t →
        Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
@@ -30,10 +31,10 @@ _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄ ⦃ WK : WkDis
                                                  (⊢∙ (⊢t₁ ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)) (⊢t₂ ⊢⋯ ⊢ϕ) (⊢e₁ ⊢⋯ ⊢ϕ))
 ⊢τ                                 ⊢⋯ ⊢ϕ = ⊢τ
 
-ikit-traversal : IKitTraversal
-ikit-traversal = record { _⊢⋯_ = _⊢⋯_ }
+itraversal : ITraversal
+itraversal = record { _⊢⋯_ = _⊢⋯_ }
 
-open IKitTraversal ikit-traversal public hiding (_⊢⋯_)
+open ITraversal itraversal public hiding (_⊢⋯_)
 
 instance
   _ = ikitᵣ
@@ -43,7 +44,7 @@ subject-reduction :
   Γ ⊢ e ∶ t →
   e ↪ e' →
   Γ ⊢ e' ∶ t
-subject-reduction (⊢· {t₂ = t₂} (⊢λ ⊢e₁) ⊢e₂)   β-λ          = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ₛ t₂ _) (⊢e₁ ⊢⋯ ⊢⦅ ⊢e₂ ⦆)
+subject-reduction (⊢· {t₂ = t₂} (⊢λ ⊢e₁) ⊢e₂)   β-λ          = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ t₂ _) (⊢e₁ ⊢⋯ ⊢⦅ ⊢e₂ ⦆)
 subject-reduction (⊢∙ ⊢t₁ ⊢t₂ (⊢Λ ⊢e₁))         β-Λ          = ⊢e₁ ⊢⋯ ⊢⦅ ⊢t₂ ⦆
 subject-reduction (⊢λ ⊢e)                      (ξ-λ e↪e')    = ⊢λ (subject-reduction ⊢e e↪e')
 subject-reduction (⊢Λ ⊢e)                      (ξ-Λ e↪e')    = ⊢Λ (subject-reduction ⊢e e↪e')
