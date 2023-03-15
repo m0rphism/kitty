@@ -40,7 +40,7 @@ module Deriving where
   open import Kitty.Term.Modes
   import Kitty.Term.Kit
   import Kitty.Term.KitAltSimple
-  open import Kitty.Util.Star
+  open import Kitty.Util.Star using (Star; []; _∷_)
   open import Kitty.Derive.Common
   import Kitty.Term.Sub
   import Kitty.Term.MultiSub
@@ -275,389 +275,410 @@ module Deriving where
   --         (` x) ⋯ f ≡ `/id _ (f _ x)
   -- ⋯-var x f = refl
 
-  -- -- Deriving n-ary cong ---------------------------------------------------------
+  -- Deriving n-ary cong ---------------------------------------------------------
 
-  -- -- cong₂ : ∀ {a : Level} {A : Set a}
-  -- --           {b : Level} {B : Set b}
-  -- --           {c : Level} {C : Set c}
-  -- --           (f : A → B → C)
-  -- --           {x y : A}
-  -- --           {u v : B}
-  -- --         → x ≡ y
-  -- --         → u ≡ v
-  -- --         → f x u ≡ f y v
-  -- -- cong₂ f refl refl = refl
+  -- cong₂ : ∀ {a : Level} {A : Set a}
+  --           {b : Level} {B : Set b}
+  --           {c : Level} {C : Set c}
+  --           (f : A → B → C)
+  --           {x y : A}
+  --           {u v : B}
+  --         → x ≡ y
+  --         → u ≡ v
+  --         → f x u ≡ f y v
+  -- cong₂ f refl refl = refl
 
-  -- cong-n : ℕ → Name → FreshT TC ⊤
-  -- cong-n n nm = do
-  --   levels    ← fresh-ids n "ℓ"
-  --   sets      ← fresh-ids n "A"
-  --   out-level ← fresh-id "ℓ"
-  --   out-set   ← fresh-id "A"
-  --   let all-levels = levels ++ [ out-level ]
-  --   let all-sets   = sets ++ [ out-set ]
-  --   let level-tel  = map (λ ℓ → (ℓ , argₕ (def (quote Level) []))) all-levels
-  --   let set-tel    = map (λ (ℓ , A) → (A , argₕ (agda-sort (set (var ℓ []))))) (zip all-levels all-sets)
-  --   f ← fresh-id "f"
-  --   let f-ty  = tel→pi (map (λ A → ("_" , argᵥ (var A []))) sets) (var out-set [])
-  --   let f-tel = [ f , argᵥ f-ty ]
-  --   args-x ← fresh-ids (length sets) "x"
-  --   args-y ← fresh-ids (length sets) "y"
-  --   let args-x-tel = map (λ (x , A) → (x , argₕ (var A []))) (zip args-x sets)
-  --   let args-y-tel = map (λ (x , A) → (x , argₕ (var A []))) (zip args-y sets)
-  --   let eq-tel = map
-  --         (λ (x , y) → ("_", argᵥ (def (quote _≡_) [ argᵥ (var x []) ; argᵥ (var y []) ])))
-  --         (zip args-x args-y)
-  --   let eq-res = def (quote _≡_) [ argᵥ (var f (map (λ x → argᵥ (var x [])) args-x))
-  --                                ; argᵥ (var f (map (λ y → argᵥ (var y [])) args-y)) ]
-  --   let tel = level-tel ++ set-tel ++ f-tel ++ args-x-tel ++ args-y-tel ++ eq-tel
-  --   let cong-ty = tel→pi tel eq-res
-  --   let cong-clause = clause
-  --         (level-tel ++ set-tel ++ f-tel)
-  --         (List.map (λ x → argₕ (var x)) all-levels ++
-  --         List.map (λ x → argₕ (var x)) all-sets ++
-  --         argᵥ (var f) ∷ List.map (λ _ → argᵥ (con (quote refl) [])) eq-tel)
-  --         (con (quote refl) [])
-  --   defdecFun' (argᵥ nm) cong-ty [ cong-clause ]
+  cong-n : ℕ → Name → FreshT TC ⊤
+  cong-n n nm = do
+    levels    ← fresh-ids n "ℓ"
+    sets      ← fresh-ids n "A"
+    out-level ← fresh-id "ℓ"
+    out-set   ← fresh-id "A"
+    let all-levels = levels ++ [ out-level ]
+    let all-sets   = sets ++ [ out-set ]
+    let level-tel  = map (λ ℓ → (ℓ , argₕ (def (quote Level) []))) all-levels
+    let set-tel    = map (λ (ℓ , A) → (A , argₕ (agda-sort (set (var ℓ []))))) (zip all-levels all-sets)
+    f ← fresh-id "f"
+    let f-ty  = tel→pi (map (λ A → ("_" , argᵥ (var A []))) sets) (var out-set [])
+    let f-tel = [ f , argᵥ f-ty ]
+    args-x ← fresh-ids (length sets) "x"
+    args-y ← fresh-ids (length sets) "y"
+    let args-x-tel = map (λ (x , A) → (x , argₕ (var A []))) (zip args-x sets)
+    let args-y-tel = map (λ (x , A) → (x , argₕ (var A []))) (zip args-y sets)
+    let eq-tel = map
+          (λ (x , y) → ("_", argᵥ (def (quote _≡_) [ argᵥ (var x []) ; argᵥ (var y []) ])))
+          (zip args-x args-y)
+    let eq-res = def (quote _≡_) [ argᵥ (var f (map (λ x → argᵥ (var x [])) args-x))
+                                 ; argᵥ (var f (map (λ y → argᵥ (var y [])) args-y)) ]
+    let tel = level-tel ++ set-tel ++ f-tel ++ args-x-tel ++ args-y-tel ++ eq-tel
+    let cong-ty = tel→pi tel eq-res
+    let cong-clause = clause
+          (level-tel ++ set-tel ++ f-tel)
+          (List.map (λ x → argₕ (var x)) all-levels ++
+          List.map (λ x → argₕ (var x)) all-sets ++
+          argᵥ (var f) ∷ List.map (λ _ → argᵥ (con (quote refl) [])) eq-tel)
+          (con (quote refl) [])
+    defdecFun' (argᵥ nm) cong-ty [ cong-clause ]
 
-  -- tel→args : Telescope' → List (Arg Term')
-  -- tel→args [] = []
-  -- tel→args ((x , arg i t) ∷ tel) = arg i (var x []) ∷ tel→args tel
+  tel→args : Telescope' → List (Arg Term')
+  tel→args [] = []
+  tel→args ((x , arg i t) ∷ tel) = arg i (var x []) ∷ tel→args tel
 
-  -- µ→[]' : String → Term' → Term'
-  -- µ→[]' `µ t₂ =
-  --   let t₂ = rw (λ { ⦃ `Term ⦄ t → case un-++ t of λ where
-  --                      (just (xs , var ys [])) → case `µ String.≟ ys of λ where
-  --                                                  (yes _) → just xs
-  --                                                  (no  _) → nothing
-  --                      _                        → nothing
-  --                  ; ⦃ T     ⦄ t → nothing
-  --                  }) t₂
-  --   in t₂ [ `µ ↦ con (quote List.List.[]) [] ]
+  µ→[]' : String → Term' → Term'
+  µ→[]' `µ t₂ =
+    let t₂ = rw (λ { ⦃ `Term ⦄ t → case un-++ t of λ where
+                       (just (xs , var ys [])) → case `µ String.≟ ys of λ where
+                                                   (yes _) → just xs
+                                                   (no  _) → nothing
+                       _                        → nothing
+                   ; ⦃ T     ⦄ t → nothing
+                   }) t₂
+    in t₂ [ `µ ↦ con (quote List.List.[]) [] ]
 
-  -- derive-⋯-↑-con : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → TC ⊤
-  -- derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
-  --   let open Modes 𝕄
-  --   let open Terms 𝕋
-  --   let open Kitty.Term.Kit 𝕋
-  --   let open Kitty.Term.Prelude using (_▷▷_)
-  --   let open Kitty.Term.KitAltSimple 𝕋
+  derive-⋯-↑-con : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → TC ⊤
+  derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
+    let open Modes 𝕄
+    let open Terms 𝕋
+    let open Kitty.Term.Kit 𝕋
+    let open Kitty.Term.Prelude using (_▷▷_)
+    let open Kitty.Term.KitAltSimple 𝕋
+    let open Kitty.Term.Sub 𝕋
+    let open Sub ⦃ … ⦄
+    let open SubWithLaws ⦃ … ⦄
 
-  --   𝕄-nm ← quoteNameTC 𝕄
-  --   ⊢-nm ← quoteNameTC _⊢_
-  --   ⊢-def ← getDefinition ⊢-nm
-  --   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
-  --   𝕋-nm ← term→name =<< quoteTC' 𝕋
+    liftTC $ printStr "Entering"
+    liftTC $ printAST con-nm
 
-  --   _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M}
-  --                     (lam visible (abs "_" (def ⋯-nm [])))
-  --   let open Kitty.Term.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
+    𝕄-nm ← quoteNameTC 𝕄
+    ⊢-nm ← quoteNameTC _⊢_
+    ⊢-def ← getDefinition ⊢-nm
+    `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+    𝕋-nm ← term→name =<< quoteTC' 𝕋
 
-  --   -- Get constructor telescope
-  --   c-ty ← getType' con-nm
-  --   let (c-tel , c-ret) = pi→tel c-ty
+    _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕊 : Sub ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M}
+                      (lam visible (abs "_" (def ⋯-nm [])))
+    let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
 
-  --   -- Retrieve variable name used for `µ`
-  --   c-µ ← case unterm ⊢-nm c-ret of λ where
-  --     (just (var µ [] , M)) → pure µ
-  --     (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
-  --     nothing → liftTC $ failStr "impossible"
+    -- Get constructor telescope
+    c-ty ← getType' con-nm
+    let (c-tel , c-ret) = pi→tel c-ty
 
-  --   -- Rename `µ` to `µ₁` and replace `µ` occurences with `µ₁ ▷▷ µ₁'`
-  --   let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
-  --                                           (no _)  → (x , b [ c-µ ↦ def (quote _▷▷_) [ argᵥ (var "µ₁" []) ; argᵥ (var "µ₁'" []) ] ])
-  --                                           (yes _) → ("µ₁" , b)
-  --                             }) c-tel
+    -- Retrieve variable name used for `µ`
+    c-µ ← case unterm ⊢-nm c-ret of λ where
+      (just (var µ [] , M)) → pure µ
+      (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
+      nothing → liftTC $ failStr "impossible"
 
-  --   -- Remove `µ₁` binding, since it's already bound on the outside
-  --   let c-tel'x = List.boolFilter
-  --         (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
-  --         c-tel'
+    -- Rename `µ` to `µ₁` and replace `µ` occurences with `µ₁ ▷▷ µ₁'`
+    let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
+                                            (no _)  → (x , b [ c-µ ↦ def (quote _▷▷_) [ argᵥ (var "µ₁" []) ; argᵥ (var "µ₁'" []) ] ])
+                                            (yes _) → ("µ₁" , b)
+                              }) c-tel
 
-  --   Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
-  --   Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
-  --   VarModes` ← quoteTC' (List VarMode)
+    -- Remove `µ₁` binding, since it's already bound on the outside
+    let c-tel'x = List.boolFilter
+          (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
+          c-tel'
 
-  --   -- Convert tel bindings (x , t) to var arguments, but replace `µ₁` with `µ₁ ▷▷ µ₁'`
-  --   let con-term = con con-nm $ List.map
-  --                    (λ where (x , arg i _) → case x String.≟ "µ₁" of λ where
-  --                               (yes _) → arg i (def (quote _▷▷_)
-  --                                                    [ argᵥ (var "µ₁" [])
-  --                                                    ; argᵥ (var "µ₁'" []) ])
-  --                               (no _) → arg i (var x [])
-  --                    )
-  --                    c-tel'
-  --   -- ((λx t) ⋯* (f ↑** µ₁')) ≡ λx (t ⋯* (f ↑** µ₁' ↑** [ 𝕖 ]))
-  --   let _⋯*`_ = (Term' → Term' → Term') by
-  --                 λ t fs → def (quote Kitty.Term.KitAltSimple.TraversalOps'._⋯*_)
-  --                         [ argᵥ (def 𝕋-nm [])
-  --                         ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
-  --                         ; argᵥ t
-  --                         ; argᵥ fs
-  --                         ]
-  --   let _↑**`_ = (Term' → Term' → Term') by
-  --                 λ fs µ → def (quote Kitty.Term.KitAltSimple._↑**_)
-  --                              [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
-  --   let lhs = con-term ⋯*` (var "fs" [] ↑**` var "µ₁'" [])
-  --   let rhs = con con-nm $ List.map
-  --                    (λ where (x , arg i t) → case x String.≟ c-µ of λ where
-  --                               (yes _) → arg i (def (quote _▷▷_)
-  --                                                    [ argᵥ (var "µ₂" [])
-  --                                                    ; argᵥ (var "µ₁'" []) ])
-  --                               (no _) → case unterm ⊢-nm t of λ where
-  --                                          (just (µ , _)) → let µ' = µ→[]' c-µ µ in
-  --                                                           arg i (var x [] ⋯*` ((var "fs" [] ↑**` var "µ₁'" []) ↑**` µ'))
-  --                                          nothing        → arg i (var x [])
-  --                    )
-  --                    c-tel
-  --   let ⋯-↑-con-ty = tel→pi
-  --         ( [ ("𝕂s"  , argₕ Kits`)
-  --           ; ("µ₁"  , argₕ VarModes`) 
-  --           ; ("µ₂"  , argₕ VarModes`) 
-  --           ; ("µ₁'" , argₕ VarModes`)
-  --           ; ("fs"  , argᵥ (def (quote Kitty.Term.KitAltSimple._–[_]→*_)
-  --                           [ argᵥ (def 𝕋-nm []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µ₂" []) ]))
-  --           ] ++ c-tel'x)
-  --         (def (quote _≡_) [ argᵥ lhs ; argᵥ rhs ])
+    Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
+    Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
+    VarModes` ← quoteTC' (List VarMode)
+    SubWithLaws` ← quoteTC' (Kitty.Term.Sub.SubWithLaws 𝕋)
 
-  --   let mk-tel 𝕂s-binds fs-binds = Telescope' by
-  --         (𝕂s-binds ++
-  --         [ ("µ₁" , argₕ VarModes`)
-  --         ; ("µ₂" , argₕ VarModes`)
-  --         ; ("µ₁'" , argₕ VarModes`)
-  --         ] ++
-  --         fs-binds ++
-  --         c-tel'x)
-  --   let c-pats = List (Arg Pattern') by
-  --                List.map (λ { (x , arg i _) → arg i (var x) }) c-tel'x
-  --   let mk-pats 𝕂s-pats fs-pats = List (Arg Pattern') by
-  --         𝕂s-pats ++
-  --         [ argₕ (var "µ₁")
-  --         ; argₕ (var "µ₂")
-  --         ; argₕ (var "µ₁'")
-  --         ] ++ fs-pats ++ c-pats
+    -- Convert tel bindings (x , t) to var arguments, but replace `µ₁` with `µ₁ ▷▷ µ₁'`
+    let con-term = con con-nm $ List.map
+                     (λ where (x , arg i _) → case x String.≟ "µ₁" of λ where
+                                (yes _) → arg i (def (quote _▷▷_)
+                                                     [ argᵥ (var "µ₁" [])
+                                                     ; argᵥ (var "µ₁'" []) ])
+                                (no _) → arg i (var x [])
+                     )
+                     c-tel'
+    -- ((λx t) ⋯* (f ↑** µ₁')) ≡ λx (t ⋯* (f ↑** µ₁' ↑** [ 𝕖 ]))
+    let _⋯*`_ = (Term' → Term' → Term') by
+                  λ t fs → def (quote Kitty.Term.MultiSub.TraversalOps'._⋯*_)
+                          [ argᵥ (def 𝕋-nm [])
+                          ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                          ; argᵥ t
+                          ; argᵥ fs
+                          ]
+    let _↑**`_ = (Term' → Term' → Term') by
+                  λ fs µ → def (quote Kitty.Term.MultiSub._↑**_)
+                               [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
+    let lhs = con-term ⋯*` (var "fs" [] ↑**` var "µ₁'" [])
+    let rhs = con con-nm $ List.map
+                     (λ where (x , arg i t) → case x String.≟ c-µ of λ where
+                                (yes _) → arg i (def (quote _▷▷_)
+                                                     [ argᵥ (var "µ₂" [])
+                                                     ; argᵥ (var "µ₁'" []) ])
+                                (no _) → case unterm ⊢-nm t of λ where
+                                           (just (µ , _)) → let µ' = µ→[]' c-µ µ in
+                                                            arg i (var x [] ⋯*` ((var "fs" [] ↑**` var "µ₁'" []) ↑**` µ'))
+                                           nothing        → arg i (var x [])
+                     )
+                     c-tel
+    let ⋯-↑-con-ty = tel→pi
+          ( [ ("𝕊"  , argᵢ SubWithLaws`)
+            ; ("𝕂s"  , argₕ Kits`)
+            ; ("µ₁"  , argₕ VarModes`) 
+            ; ("µ₂"  , argₕ VarModes`) 
+            ; ("µ₁'" , argₕ VarModes`)
+            ; ("fs"  , argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
+                            [ argᵥ (def 𝕋-nm []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µ₂" []) ]))
+            ] ++ c-tel'x)
+          (def (quote _≡_) [ argᵥ lhs ; argᵥ rhs ])
 
-  --   -- ⋯-↑-λ : ∀ {𝕂s : List Kit} {µ₁ µ₂ µ₁'} (f : µ₁ –[ 𝕂s ]→* µ₂)
-  --   --         → (t : (µ₁ ▷▷ µ₁' ▷ 𝕖) ⊢ 𝕖)
-  --   --         → ((λx t) ⋯* (f ↑** µ₁')) ≡ λx (t ⋯* (f ↑** µ₁' ↑** [ 𝕖 ]))
+    let mk-tel 𝕂s-binds fs-binds = Telescope' by
+          ([ ("𝕊" , argᵢ SubWithLaws`) ] ++
+           𝕂s-binds ++
+           [ ("µ₁" , argₕ VarModes`)
+           ; ("µ₂" , argₕ VarModes`)
+           ; ("µ₁'" , argₕ VarModes`)
+           ] ++
+           fs-binds ++
+           c-tel'x)
+    let c-pats = List (Arg Pattern') by
+                 List.map (λ { (x , arg i _) → arg i (var x) }) c-tel'x
+    let mk-pats 𝕂s-pats fs-pats = List (Arg Pattern') by
+          [ argᵢ (var "𝕊") ] ++
+          𝕂s-pats ++
+          [ argₕ (var "µ₁")
+          ; argₕ (var "µ₂")
+          ; argₕ (var "µ₁'")
+          ] ++ fs-pats ++ c-pats
 
-  --   -- ⋯-↑-λ           []       t = refl
-  --   let clause₁ = clause
-  --         (mk-tel [] [])
-  --         (mk-pats [ argₕ (con (quote Agda.Builtin.List.List.[]) []) ]
-  --                  [ argᵥ (con (quote Kitty.Util.Star.[]) []) ])
-  --         (con (quote refl) [])
+    -- ⋯-↑-λ : ∀ {𝕂s : List Kit} {µ₁ µ₂ µ₁'} (f : µ₁ –[ 𝕂s ]→* µ₂)
+    --         → (t : (µ₁ ▷▷ µ₁' ▷ 𝕖) ⊢ 𝕖)
+    --         → ((λx t) ⋯* (f ↑** µ₁')) ≡ λx (t ⋯* (f ↑** µ₁' ↑** [ 𝕖 ]))
 
-  --   -- ⋯-↑-λ {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-λ fs t) refl
-  --   let con-args = List.map
-  --                    (λ where (x , arg i _) → arg i (var x []))
-  --                    c-tel'x
-  --   let rec = def ⋯-↑-con-nm ([ argᵥ (var "fs" []) ] ++ con-args)
-  --   let clause₂ = clause
-  --         (mk-tel [ ("𝕂" , argₕ Kit`) ; ("𝕂s" , argₕ Kits`) ]
-  --                 [ ("µₓ" , argₕ VarModes`)
-  --                 ; ("f" , argᵥ (def (quote Kitty.Term.Kit._–[_]→_)
-  --                       [ argᵥ (def 𝕋-nm [])
-  --                       ; argᵥ (var "µₓ" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ]))
-  --                 ; ("fs" , argᵥ (def (quote Kitty.Term.KitAltSimple._–[_]→*_)
-  --                       [ argᵥ (def 𝕋-nm [])
-  --                       ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µₓ" []) ]))
-  --                 ])
-  --         (mk-pats [ argₕ (con (quote Agda.Builtin.List.List._∷_) [ argᵥ (var "𝕂") ; argᵥ (var "𝕂s") ]) ]
-  --                  [ argᵥ (con (quote Kitty.Util.Star._∷_) [ argₕ (dot (var "µ₂" []))
-  --                                                          ; argₕ (var "µₓ")
-  --                                                          ; argₕ (dot (var "µ₁" []))
-  --                                                          ; argᵥ (var "f") ; argᵥ (var "fs") ])
-  --                  ])
-  --         (def (quote cong₂)
-  --           [ argᵥ (def ⋯-nm [ argᵢ (var "𝕂" []) ])
-  --           ; argᵥ rec
-  --           ; argᵥ (con (quote refl) [])
-  --           ])
+    -- ⋯-↑-λ           []       t = refl
+    let clause₁ = clause
+          (mk-tel [] [])
+          (mk-pats [ argₕ (con (quote Agda.Builtin.List.List.[]) []) ]
+                   [ argᵥ (con (quote Kitty.Util.Star.Star.[]) []) ])
+          (con (quote refl) [])
 
-  --   defdecFun'
-  --     (argᵥ ⋯-↑-con-nm)
-  --     ⋯-↑-con-ty
-  --     [ clause₁ ; clause₂ ]
+    let 𝕤 = def (quote Kitty.Term.Sub.SubWithLaws.SubWithLaws-Sub)
+              [ argᵥ (var "𝕊" [])
+              ]
 
-  -- derive-⋯-↑ : {𝕄 : Modes} → Terms 𝕄 → Name → Name → TC ⊤
-  -- derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
-  --   let open Modes 𝕄
-  --   let open Terms 𝕋
-  --   let open Kitty.Term.Kit 𝕋
-  --   let open Kitty.Term.Prelude using (_▷▷_)
-  --   let open Kitty.Term.KitAltSimple 𝕋
+    -- ⋯-↑-λ {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-λ fs t) refl
+    let con-args = List.map
+                     (λ where (x , arg i _) → arg i (var x []))
+                     c-tel'x
+    let rec = def ⋯-↑-con-nm ([ argᵥ (var "fs" []) ] ++ con-args)
+    let clause₂ = clause
+          (mk-tel [ ("𝕂" , argₕ Kit`) ; ("𝕂s" , argₕ Kits`) ]
+                  [ ("µₓ" , argₕ VarModes`)
+                  ; ("f" , argᵥ (def (quote Kitty.Term.Sub.Sub._–[_]→_)
+                        [ argᵥ 𝕤
+                        ; argᵥ (var "µₓ" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ]))
+                  ; ("fs" , argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
+                        [ argᵥ (def 𝕋-nm [])
+                        ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µₓ" []) ]))
+                  ])
+          (mk-pats [ argₕ (con (quote Agda.Builtin.List.List._∷_) [ argᵥ (var "𝕂") ; argᵥ (var "𝕂s") ]) ]
+                   [ argᵥ (con (quote Kitty.Util.Star._∷_) [ argₕ (dot (var "µ₂" []))
+                                                           ; argₕ (var "µₓ")
+                                                           ; argₕ (dot (var "µ₁" []))
+                                                           ; argᵥ (var "f") ; argᵥ (var "fs") ])
+                   ])
+          (def (quote cong₂)
+            [ argᵥ (def ⋯-nm [ argᵢ 𝕤 ; argᵢ (var "𝕂" []) ])
+            ; argᵥ rec
+            ; argᵥ (con (quote refl) [])
+            ])
 
-  --   𝕄-nm ← quoteNameTC 𝕄
-  --   ⊢-nm ← quoteNameTC _⊢_
-  --   ⊢-def ← getDefinition ⊢-nm
-  --   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
-  --   var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
-  --   𝕋-nm ← term→name =<< quoteTC' 𝕋
+    defdecFun'
+      (argᵥ ⋯-↑-con-nm)
+      ⋯-↑-con-ty
+      [ clause₁ ; clause₂ ]
 
-  --   Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
-  --   Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
-  --   VarModes` ← quoteTC' (List VarMode)
+  derive-⋯-↑ : {𝕄 : Modes} → Terms 𝕄 → Name → Name → TC ⊤
+  derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
+    let open Modes 𝕄
+    let open Terms 𝕋
+    let open Kitty.Term.Kit 𝕋
+    let open Kitty.Term.Prelude using (_▷▷_)
+    let open Kitty.Term.KitAltSimple 𝕋
+    let open Kitty.Term.Sub 𝕋
+    let open Kitty.Term.MultiSub 𝕋
+    let open Sub ⦃ … ⦄
+    let open SubWithLaws ⦃ … ⦄
 
-  --   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
-  --   _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
+    𝕄-nm ← quoteNameTC 𝕄
+    ⊢-nm ← quoteNameTC _⊢_
+    ⊢-def ← getDefinition ⊢-nm
+    `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+    var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
+    𝕋-nm ← term→name =<< quoteTC' 𝕋
 
-  --   let open Kitty.Term.KitAltSimple.TraversalOps' 𝕋 _⋯⊤_
+    Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
+    Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
+    VarModes` ← quoteTC' (List VarMode)
+    SubWithLaws` ← quoteTC' (Kitty.Term.Sub.SubWithLaws 𝕋)
 
-  --   let mk-tel c-tel =
-  --         [ "𝕂s₁" , argₕ Kits`
-  --         ; "𝕂s₂" , argₕ Kits`
-  --         ; "µ₁" , argₕ VarModes`
-  --         ; "µ₂" , argₕ VarModes`
-  --         ; "fs" , argᵥ (def (quote Kitty.Term.KitAltSimple._–[_]→*_)
-  --             [ argᵥ (def 𝕋-nm [])
-  --             ; argᵥ (var "µ₁" [])
-  --             ; argᵥ (var "𝕂s₁" [])
-  --             ; argᵥ (var "µ₂" [])
-  --             ])
-  --         ; "gs" , argᵥ (def (quote Kitty.Term.KitAltSimple._–[_]→*_)
-  --             [ argᵥ (def 𝕋-nm [])
-  --             ; argᵥ (var "µ₁" [])
-  --             ; argᵥ (var "𝕂s₂" [])
-  --             ; argᵥ (var "µ₂" [])
-  --             ])
-  --         ; "fs≈gs" , argᵥ (def (quote Kitty.Term.KitAltSimple.TraversalOps'._≈ₓ_)
-  --             [ argᵥ (def 𝕋-nm [])
-  --             ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
-  --             ; argᵥ (var "fs" [])
-  --             ; argᵥ (var "gs" [])
-  --             ])
-  --         ; "µ₁'" , argₕ VarModes`
-  --         ] ++ c-tel
-  --   let mk-pats c-pat = 
-  --         [ argₕ (var "𝕂s₁")
-  --         ; argₕ (var "𝕂s₂")
-  --         ; argₕ (var "µ₁")
-  --         ; argₕ (var "µ₂")
-  --         ; argᵥ (var "fs" )
-  --         ; argᵥ (var "gs" )
-  --         ; argᵥ (var "fs≈gs" )
-  --         ; argₕ (var "µ₁'")
-  --         ] ++ c-pat ∷ []
+    _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
+    _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
 
-  --   non-var-clauses ← forM (enumerate con-nms) λ (i , c) → do
-  --     ⋯-↑-con-nm ← freshName "⋯-↑-con"
-  --     liftTC (derive-⋯-↑-con 𝕋 ⋯-nm c ⋯-↑-con-nm)
+    let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
 
-  --     -- Get constructor telescope
-  --     c-ty ← getType' c
-  --     let (c-tel , c-ret) = pi→tel c-ty
+    let mk-tel c-tel =
+          [ "𝕊" , argᵢ SubWithLaws`
+          ; "𝕂s₁" , argₕ Kits`
+          ; "𝕂s₂" , argₕ Kits`
+          ; "µ₁" , argₕ VarModes`
+          ; "µ₂" , argₕ VarModes`
+          ; "fs" , argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
+              [ argᵥ (def 𝕋-nm [])
+              ; argᵥ (var "µ₁" [])
+              ; argᵥ (var "𝕂s₁" [])
+              ; argᵥ (var "µ₂" [])
+              ])
+          ; "gs" , argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
+              [ argᵥ (def 𝕋-nm [])
+              ; argᵥ (var "µ₁" [])
+              ; argᵥ (var "𝕂s₂" [])
+              ; argᵥ (var "µ₂" [])
+              ])
+          ; "fs≈gs" , argᵥ (def (quote Kitty.Term.MultiSub.TraversalOps'._≈ₓ_)
+              [ argᵥ (def 𝕋-nm [])
+              ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+              ; argᵥ (var "fs" [])
+              ; argᵥ (var "gs" [])
+              ])
+          ; "µ₁'" , argₕ VarModes`
+          ] ++ c-tel
+    let mk-pats c-pat = 
+          [ argᵢ (var "𝕊")
+          ; argₕ (var "𝕂s₁")
+          ; argₕ (var "𝕂s₂")
+          ; argₕ (var "µ₁")
+          ; argₕ (var "µ₂")
+          ; argᵥ (var "fs" )
+          ; argᵥ (var "gs" )
+          ; argᵥ (var "fs≈gs" )
+          ; argₕ (var "µ₁'")
+          ] ++ c-pat ∷ []
 
-  --     -- Retrieve variable name used for `µ`
-  --     c-µ ← case unterm ⊢-nm c-ret of λ where
-  --       (just (var µ [] , M)) → pure µ
-  --       (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
-  --       nothing → liftTC $ failStr "impossible"
+    non-var-clauses ← forM (enumerate con-nms) λ (i , c) → do
+      ⋯-↑-con-nm ← freshName "⋯-↑-con"
+      liftTC (derive-⋯-↑-con 𝕋 ⋯-nm c ⋯-↑-con-nm)
 
-  --     -- Rename `µ` to `µ₁` and replace `µ` occurences with `µ₁ ▷▷ µ₁'`
-  --     let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
-  --                                             (no _)  → (x , b [ c-µ ↦ def (quote _▷▷_) [ argᵥ (var "µ₁" []) ; argᵥ (var "µ₁'" []) ] ])
-  --                                             (yes _) → ("µ₁" , b)
-  --                               }) c-tel
+      -- Get constructor telescope
+      c-ty ← getType' c
+      let (c-tel , c-ret) = pi→tel c-ty
 
-  --     -- Remove `µ₁` binding, since it's already bound on the outside
-  --     let c-tel'x = List.boolFilter
-  --           (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
-  --           c-tel'
+      -- Retrieve variable name used for `µ`
+      c-µ ← case unterm ⊢-nm c-ret of λ where
+        (just (var µ [] , M)) → pure µ
+        (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
+        nothing → liftTC $ failStr "impossible"
 
-  --     -- Convert tel bindings (x , t) to var patterns, but replace `µ₁` with `µ₁ ▷▷ µ₁'`
-  --     let c-pats = List.map (λ { (x , arg i _) → case x String.≟ c-µ of λ where
-  --                                                  (no _)  → arg i (var x)
-  --                                                  (yes _) → arg i (dot (def (quote _▷▷_)
-  --                                                     [ argᵥ (var "µ₁" [])
-  --                                                     ; argᵥ (var "µ₁'" []) ]))
-  --                              }) c-tel
-  --     let c-pat = argᵥ (con c c-pats)
+      -- Rename `µ` to `µ₁` and replace `µ` occurences with `µ₁ ▷▷ µ₁'`
+      let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
+                                              (no _)  → (x , b [ c-µ ↦ def (quote _▷▷_) [ argᵥ (var "µ₁" []) ; argᵥ (var "µ₁'" []) ] ])
+                                              (yes _) → ("µ₁" , b)
+                                }) c-tel
+
+      -- Remove `µ₁` binding, since it's already bound on the outside
+      let c-tel'x = List.boolFilter
+            (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
+            c-tel'
+
+      -- Convert tel bindings (x , t) to var patterns, but replace `µ₁` with `µ₁ ▷▷ µ₁'`
+      let c-pats = List.map (λ { (x , arg i _) → case x String.≟ c-µ of λ where
+                                                   (no _)  → arg i (var x)
+                                                   (yes _) → arg i (dot (def (quote _▷▷_)
+                                                      [ argᵥ (var "µ₁" [])
+                                                      ; argᵥ (var "µ₁'" []) ]))
+                               }) c-tel
+      let c-pat = argᵥ (con c c-pats)
 
 
-  --     let ⋯-↑-con` = (Term' → Term' → Term') by λ 𝕂s fs →
-  --           def ⋯-↑-con-nm
-  --             ([ argₕ 𝕂s
-  --              ; argₕ (var "µ₁" [])
-  --              ; argₕ (var "µ₂" [])
-  --              ; argₕ (var "µ₁'" [])
-  --              ; argᵥ fs
-  --              ] ++ List.map (λ { (x , arg i t) → arg i (var x []) }) c-tel'x)
-  --     let sym` = (Term' → Term') by λ eq → def (quote sym) [ argᵥ eq ]
-  --     let trans` = (Term' → Term' → Term') by λ eq₁ eq₂ → def (quote trans) [ argᵥ eq₁ ; argᵥ eq₂ ]
-  --     let 𝕂s₁` = Term' by (var "𝕂s₁" [])
-  --     let 𝕂s₂` = Term' by (var "𝕂s₂" [])
-  --     let fs` = Term' by (var "fs" [])
-  --     let gs` = Term' by (var "gs" [])
-  --     let µ₁'` = Term' by (var "µ₁'" [])
-  --     let fs≈gs` = Term' by (var "fs≈gs" [])
-  --     let cong` = (Term' → Term' → Term') by λ f eq → def (quote cong) [ argᵥ f ; argᵥ eq ]
-  --     let _⋯*`_ = (Term' → Term' → Term') by
-  --                   λ t fs → def (quote Kitty.Term.KitAltSimple.TraversalOps'._⋯*_)
-  --                           [ argᵥ (def 𝕋-nm [])
-  --                           ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
-  --                           ; argᵥ t
-  --                           ; argᵥ fs
-  --                           ]
-  --     let _↑**`_ = (Term' → Term' → Term') by
-  --                   λ fs µ → def (quote Kitty.Term.KitAltSimple._↑**_)
-  --                               [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
-  --     let ⋯-↑` = (Term' → Term' → Term' → Term' → Term') by λ fs gs fs≈gs t →
-  --                def ⋯-↑-nm [ argᵥ fs ; argᵥ gs ; argᵥ fs≈gs ; argᵥ t ]
-  --     let ≈↑**` = (Term' → Term' → Term' → Term') by λ fs gs fs≈gs →
-  --                def (quote Kitty.Term.KitAltSimple.TraversalOps'.≈↑**)
-  --                    [ argᵥ (def 𝕋-nm [])
-  --                    ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
-  --                    ; argᵥ fs ; argᵥ gs ; argᵥ fs≈gs
-  --                    ]
+      let ⋯-↑-con` = (Term' → Term' → Term') by λ 𝕂s fs →
+            def ⋯-↑-con-nm
+              ([ argₕ 𝕂s
+               ; argₕ (var "µ₁" [])
+               ; argₕ (var "µ₂" [])
+               ; argₕ (var "µ₁'" [])
+               ; argᵥ fs
+               ] ++ List.map (λ { (x , arg i t) → arg i (var x []) }) c-tel'x)
+      let sym` = (Term' → Term') by λ eq → def (quote sym) [ argᵥ eq ]
+      let trans` = (Term' → Term' → Term') by λ eq₁ eq₂ → def (quote trans) [ argᵥ eq₁ ; argᵥ eq₂ ]
+      let 𝕂s₁` = Term' by (var "𝕂s₁" [])
+      let 𝕂s₂` = Term' by (var "𝕂s₂" [])
+      let fs` = Term' by (var "fs" [])
+      let gs` = Term' by (var "gs" [])
+      let µ₁'` = Term' by (var "µ₁'" [])
+      let fs≈gs` = Term' by (var "fs≈gs" [])
+      let cong` = (Term' → Term' → Term') by λ f eq → def (quote cong) [ argᵥ f ; argᵥ eq ]
+      let _⋯*`_ = (Term' → Term' → Term') by
+                    λ t fs → def (quote Kitty.Term.MultiSub.TraversalOps'._⋯*_)
+                            [ argᵥ (def 𝕋-nm [])
+                            ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                            ; argᵥ t
+                            ; argᵥ fs
+                            ]
+      let _↑**`_ = (Term' → Term' → Term') by
+                    λ fs µ → def (quote Kitty.Term.MultiSub._↑**_)
+                                [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
+      let ⋯-↑` = (Term' → Term' → Term' → Term' → Term') by λ fs gs fs≈gs t →
+                 def ⋯-↑-nm [ argᵥ fs ; argᵥ gs ; argᵥ fs≈gs ; argᵥ t ]
+      let ≈↑**` = (Term' → Term' → Term' → Term') by λ fs gs fs≈gs →
+                 def (quote Kitty.Term.MultiSub.TraversalOps'.≈↑**)
+                     [ argᵥ (def 𝕋-nm [])
+                     ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                     ; argᵥ fs ; argᵥ gs ; argᵥ fs≈gs
+                     ]
 
-  --     let rec = (Term' → Term') by λ t →
-  --           ⋯-↑` (fs` ↑**` µ₁'`) (gs` ↑**` µ₁'`) (≈↑**` fs` gs` fs≈gs`) t
+      let rec = (Term' → Term') by λ t →
+            ⋯-↑` (fs` ↑**` µ₁'`) (gs` ↑**` µ₁'`) (≈↑**` fs` gs` fs≈gs`) t
 
-  --     let tel-rec , tel-non-rec = splitRec c-tel ⊢-nm
-  --     let rec-ids = map proj₁ tel-rec
-  --     let non-rec-ids = map proj₁ tel-non-rec
-  --     cong-name ← freshName "cong-n"
-  --     cong-n (length rec-ids) cong-name
-  --     let cong-fun = tel→lam tel-rec $ con c $
-  --                     List.map (λ{ (x , arg i t) → case x String.≟ c-µ of λ where
-  --                                     (no _)  → arg i (var x [])
-  --                                     (yes _) → arg i (def (quote _▷▷_)
-  --                                                       [ argᵥ (var "µ₂" [])
-  --                                                       ; argᵥ (var "µ₁'" []) ])
-  --                                }) c-tel
+      let tel-rec , tel-non-rec = splitRec c-tel ⊢-nm
+      let rec-ids = map proj₁ tel-rec
+      let non-rec-ids = map proj₁ tel-non-rec
+      cong-name ← freshName "cong-n"
+      cong-n (length rec-ids) cong-name
+      let cong-fun = tel→lam tel-rec $ con c $
+                      List.map (λ{ (x , arg i t) → case x String.≟ c-µ of λ where
+                                      (no _)  → arg i (var x [])
+                                      (yes _) → arg i (def (quote _▷▷_)
+                                                        [ argᵥ (var "µ₂" [])
+                                                        ; argᵥ (var "µ₁'" []) ])
+                                 }) c-tel
 
-  --     let eqq = def cong-name (argᵥ cong-fun ∷ List.map (λ x → argᵥ (rec (var x []))) rec-ids)
+      let eqq = def cong-name (argᵥ cong-fun ∷ List.map (λ x → argᵥ (rec (var x []))) rec-ids)
 
-  --     let body = trans` (⋯-↑-con` 𝕂s₁` fs`) (
-  --                trans` eqq
-  --                       (sym` (⋯-↑-con` 𝕂s₂` gs`)))
+      let body = trans` (⋯-↑-con` 𝕂s₁` fs`) (
+                 trans` eqq
+                        (sym` (⋯-↑-con` 𝕂s₂` gs`)))
 
-  --     pure $ clause
-  --       (mk-tel c-tel'x)
-  --       (mk-pats c-pat)
-  --       body
+      pure $ clause
+        (mk-tel c-tel'x)
+        (mk-pats c-pat)
+        body
 
-  --   ⋯-↑-ty ← quoteTC' (
-  --       ∀ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
-  --         f ≈ₓ g → f ≈ₜ g
-  --     )
+    ⋯-↑-ty ← quoteTC' (
+        ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
+          f ≈ₓ g → f ≈ₜ g
+      )
 
-  --   let var-clause = clause
-  --         (mk-tel [ "x" , argᵥ (def (quote _∋_) [ argᵥ (def (quote List._++_)
-  --                                                        [ argᵥ (var "µ₁'" [])
-  --                                                        ; argᵥ (var "µ₁" [])
-  --                                                        ])
-  --                                               ; argᵥ unknown
-  --                                               ])
-  --                 ])
-  --         (mk-pats (argᵥ (pat` var-con (var "x"))))
-  --         (var "fs≈gs" [ argᵥ (var "x" []) ])
+    let var-clause = clause
+          (mk-tel [ "x" , argᵥ (def (quote _∋_) [ argᵥ (def (quote List._++_)
+                                                         [ argᵥ (var "µ₁'" [])
+                                                         ; argᵥ (var "µ₁" [])
+                                                         ])
+                                                ; argᵥ unknown
+                                                ])
+                  ])
+          (mk-pats (argᵥ (pat` var-con (var "x"))))
+          (var "fs≈gs" [ argᵥ (var "x" []) ])
 
-  --   defdecFun'
-  --     (argᵥ ⋯-↑-nm)
-  --     ⋯-↑-ty
-  --     (var-clause ∷ non-var-clauses)
+    defdecFun'
+      (argᵥ ⋯-↑-nm)
+      ⋯-↑-ty
+      (var-clause ∷ non-var-clauses)
 
   -- derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
   -- derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
@@ -797,7 +818,7 @@ module Example where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
     unquoteDecl _⋯_   = derive-⋯ terms _⋯_
     unquoteDecl ⋯-var = derive-⋯-var terms (quote _⋯_) ⋯-var
---     unquoteDecl ⋯-↑   = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
+    unquoteDecl ⋯-↑   = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
 
 --     -- Tests
 --     open import Kitty.Term.KitAltSimple terms

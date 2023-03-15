@@ -174,7 +174,7 @@ module TraversalOps (_⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {µ₁} {
     ((` x) ⋯* ((g ↑** µ₁') ↑** µ₁'')) ∎
 
 open import Data.Unit using (⊤; tt)
-module TraversalOps' (_⋯_ : ⊤ → ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂ → µ₂ ⊢ M) where
+module TraversalOps' (_⋯_ : ⊤ → ∀ ⦃ 𝕊 : Sub ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ; 𝕊 ]→ µ₂ → µ₂ ⊢ M) where
   open TraversalOps (_⋯_ tt) public
 
 instance

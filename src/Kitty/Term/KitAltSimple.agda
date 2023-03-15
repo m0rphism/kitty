@@ -42,15 +42,15 @@ record KitTraversalAlt : Set₁ where
   infixl  5  _⋯_
 
   field
-    _⋯_   : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ →
+    _⋯_   : ∀ ⦃ 𝕊 : Sub ⦄ ⦃ 𝕂 : Kit ⦄ →
             µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
 
   open TraversalOps _⋯_ public
 
   field
-    ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : SubWithLaws ⦄ (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂) →
+    ⋯-var : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂) →
             (` x) ⋯ f ≡ `/id (x & f)
-    ⋯-↑ : ∀ {𝕂s₁ 𝕂s₂ : List Kit} ⦃ 𝕊 : SubWithLaws ⦄ {µ₁} {µ₂} (fs : µ₁ –[ 𝕂s₁ ]→* µ₂) (gs : µ₁ –[ 𝕂s₂ ]→* µ₂)
+    ⋯-↑ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (fs : µ₁ –[ 𝕂s₁ ]→* µ₂) (gs : µ₁ –[ 𝕂s₂ ]→* µ₂)
           → fs ≈ₓ gs
           → fs ≈ₜ gs
 
@@ -86,7 +86,7 @@ module Derive (KT : KitTraversalAlt) where
       ; ⋯-id  = ⋯-id'
       }
 
-    open Traversal 𝕊 kit-traversal hiding (_⋯_; ⋯-var; _≈ₜ_; _≈ₓ_; _⋯*_; subst-⋯) public
+    open Traversal 𝕊 kit-traversal hiding (_⋯_; ⋯-var) public
 
     open import Kitty.Term.KitT terms 𝕊 kit-traversal public
 
