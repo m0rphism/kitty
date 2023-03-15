@@ -237,40 +237,43 @@ module Deriving where
       ⋯-ty
       (var-clause ∷ clauses)
 
-  -- -- _⋯_ : ∀ {µ₁} {µ₂} {M} {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
-  -- -- (` x)     ⋯ f = `/id _ (f _ x)
-  -- -- (λx t)    ⋯ f = λx (t ⋯ (f ↑* _))
-  -- -- (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
-  -- -- (foo t)   ⋯ f = foo (t ⋯ (f ↑* _))
+  -- _⋯_ : ∀ {µ₁} {µ₂} {M} {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+  -- (` x)     ⋯ f = `/id _ (f _ x)
+  -- (λx t)    ⋯ f = λx (t ⋯ (f ↑* _))
+  -- (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
+  -- (foo t)   ⋯ f = foo (t ⋯ (f ↑* _))
 
-  -- derive-⋯-var : {𝕄 : Modes} → Terms 𝕄 → Name → Name → TC ⊤
-  -- derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
-  --   let open Modes 𝕄
-  --   let open Terms 𝕋
-  --   let open Kitty.Term.Kit 𝕋
+  derive-⋯-var : {𝕄 : Modes} → Terms 𝕄 → Name → Name → TC ⊤
+  derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
+    let open Modes 𝕄
+    let open Terms 𝕋
+    let open Kitty.Term.Kit 𝕋
+    let open Kitty.Term.Sub 𝕋
+    let open Sub ⦃ … ⦄
+    let open SubWithLaws ⦃ … ⦄
 
-  --   𝕄-nm ← quoteNameTC 𝕄
-  --   ⊢-nm ← quoteNameTC _⊢_
-  --   ⊢-def ← getDefinition ⊢-nm
-  --   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
-  --   var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
-  --   𝕋-nm ← term→name =<< quoteTC' 𝕋
+    𝕄-nm ← quoteNameTC 𝕄
+    ⊢-nm ← quoteNameTC _⊢_
+    ⊢-def ← getDefinition ⊢-nm
+    `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+    var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
+    𝕋-nm ← term→name =<< quoteTC' 𝕋
 
-  --   _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
+    _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
 
-  --   let body = lam visible (abs "x" (
-  --              lam visible (abs "f" (
-  --              con (quote refl) []))))
-  --   ⋯-var-ty ← quoteTC' (∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
-  --                        → (ctor var-con x) ⋯ f ≡ Kit.`/id 𝕂 _ (f _ x))
-  --   defdecFun'
-  --     (argᵥ ⋯-var-nm)
-  --     ⋯-var-ty
-  --     [ clause [] [] body ]
+    let body = lam visible (abs "x" (
+               lam visible (abs "f" (
+               con (quote refl) []))))
+    ⋯-var-ty ← quoteTC' (∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
+                         → (ctor var-con x) ⋯ f ≡ Kit.`/id 𝕂 (x & f))
+    defdecFun'
+      (argᵥ ⋯-var-nm)
+      ⋯-var-ty
+      [ clause [] [] body ]
 
-  -- -- ⋯-var : ∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
-  -- --         (` x) ⋯ f ≡ `/id _ (f _ x)
-  -- -- ⋯-var x f = refl
+  -- ⋯-var : ∀ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+  --         (` x) ⋯ f ≡ `/id _ (f _ x)
+  -- ⋯-var x f = refl
 
   -- -- Deriving n-ary cong ---------------------------------------------------------
 
@@ -793,7 +796,7 @@ module Example where
   module Half-Derived where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
     unquoteDecl _⋯_   = derive-⋯ terms _⋯_
---     unquoteDecl ⋯-var = derive-⋯-var terms (quote _⋯_) ⋯-var
+    unquoteDecl ⋯-var = derive-⋯-var terms (quote _⋯_) ⋯-var
 --     unquoteDecl ⋯-↑   = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
 
 --     -- Tests
