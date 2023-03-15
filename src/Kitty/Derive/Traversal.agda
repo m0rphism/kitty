@@ -59,6 +59,9 @@ module Deriving where
       pat`  : Pattern' → Pattern'
       ctor  : ∀ {µ m} → µ ∋ m → µ ⊢ m→M m
 
+    ctor-lam` : Term'
+    ctor-lam` = lam visible (abs "x" (ctor` (var "x" [])))
+
   open VarCon
 
   get-var-con : (𝕄 : Modes) (_⊢_ : Scoped 𝕄) → Name → TC (VarCon 𝕄 _⊢_)
@@ -101,7 +104,7 @@ module Deriving where
     terms-ty ← quoteTC' (Terms 𝕄)
     -- terms-body ← quoteTC' (mkTerms _⊢_ (ctor var-con) `-injective)
     let `-injective = pat-lam [ clause [] [ argᵥ (con (quote refl) []) ] (con (quote refl) []) ] []
-    let terms-body = def (quote mkTerms) [ argᵥ (def ⊢-nm []) ; argᵥ (con `-nm []) ; argᵥ `-injective ]
+    let terms-body = def (quote mkTerms) [ argᵥ (def ⊢-nm []) ; argᵥ (ctor-lam` var-con) ; argᵥ `-injective ]
     -- let terms-ty = def (quote Terms) [ argᵥ (def 𝕄-nm []) ]
     -- let terms-body = def (quote mkTerms) [ argᵥ (def ⊢-nm []) ; argᵥ (con `-nm []) ] 
     defdecFun'
@@ -345,9 +348,6 @@ module Deriving where
     let open Kitty.Term.Sub 𝕋
     let open Sub ⦃ … ⦄
     let open SubWithLaws ⦃ … ⦄
-
-    liftTC $ printStr "Entering"
-    liftTC $ printAST con-nm
 
     𝕄-nm ← quoteNameTC 𝕄
     ⊢-nm ← quoteNameTC _⊢_
@@ -696,16 +696,20 @@ module Deriving where
 
   derive-traversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
   derive-traversal 𝕄 _⊢_ traversal-nm = do
+    liftTC $ printStr "Deriving Terms"
     terms-nm ← freshName "terms"
     derive-Terms 𝕄 _⊢_ terms-nm
     terms ← unquoteTC {A = Terms 𝕄} (def terms-nm [])
 
+    liftTC $ printStr "Deriving ⋯"
     ⋯-nm ← freshName "⋯"
     derive-⋯ terms ⋯-nm
 
+    liftTC $ printStr "Deriving ⋯-var"
     ⋯-var-nm ← freshName "⋯-var"
     derive-⋯-var terms ⋯-nm ⋯-var-nm
 
+    liftTC $ printStr "Deriving ⋯-↑"
     ⋯-↑-nm ← freshName "⋯-↑"
     derive-⋯-↑ terms ⋯-nm ⋯-↑-nm
 
@@ -877,33 +881,33 @@ module Example where
     -- test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
     -- test-`f' = refl
 
--- module ExampleVarEq where
---   open import Kitty.Term.Prelude
---   open import Kitty.Term.Modes
---   open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; trans; sym; subst₂; module ≡-Reasoning)
---   open ≡-Reasoning
---   open import ReflectionLib.Categorical
+module ExampleVarEq where
+  open import Kitty.Term.Prelude
+  open import Kitty.Term.Modes
+  open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; trans; sym; subst₂; module ≡-Reasoning)
+  open ≡-Reasoning
+  open import ReflectionLib.Categorical
 
---   data Modeᵥ : Set where 𝕖 : Modeᵥ
---   data Modeₜ : Set where 𝕖 : Modeₜ
+  data Modeᵥ : Set where 𝕖 : Modeᵥ
+  data Modeₜ : Set where 𝕖 : Modeₜ
 
---   m→M : Modeᵥ → Modeₜ
---   m→M 𝕖 = 𝕖
+  m→M : Modeᵥ → Modeₜ
+  m→M 𝕖 = 𝕖
 
---   𝕄 : Modes
---   𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
+  𝕄 : Modes
+  𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
 
---   infix  30 `[_]_
---   infixl 20 _·_
---   infixr 10 λx_
+  infix  30 `[_]_
+  infixl 20 _·_
+  infixr 10 λx_
 
---   data _⊢_ : List Modeᵥ → Modeₜ → Set where
---     `[_]_ : ∀ {µ m M}  →  m→M m ≡ M  →  µ ∋ m  →  µ ⊢ M
---     λx_   : ∀ {µ}  →  (µ ▷ 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
---     _·_   : ∀ {µ}  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
---     foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
+  data _⊢_ : List Modeᵥ → Modeₜ → Set where
+    `[_]_ : ∀ {µ m M}  →  m→M m ≡ M  →  µ ∋ m  →  µ ⊢ M
+    λx_   : ∀ {µ}  →  (µ ▷ 𝕖) ⊢ 𝕖  →  µ ⊢ 𝕖
+    _·_   : ∀ {µ}  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
+    foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
 
---   module Derived' where
---     unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
---     open Derived traversal
+  module Derived' where
+    unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
+    open Derived traversal
 
