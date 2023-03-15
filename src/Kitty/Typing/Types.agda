@@ -110,11 +110,17 @@ record KitType : Set₁ where
   ∅'' ()
 
 open import Kitty.Term.Kit 𝕋
+open import Kitty.Term.Traversal 𝕋
+open import Kitty.Term.Sub 𝕋
 
-record KitTypeSubst (KT : KitType) (T : KitTraversal) : Set where
+module KitTypeSubst (KT : KitType) (𝕊 : SubWithLaws) (T : Traversal 𝕊) where
+  private instance _ = 𝕊
+
   open KitType KT
-  open KitTraversal T
-  open Kit {{...}}
+  open Traversal 𝕊 T
+  open Kit ⦃ … ⦄
+  open Sub ⦃ … ⦄
+  open SubWithLaws ⦃ … ⦄
 
   drop-∈-▷▷₁ : (x : µ' ∋ m) → drop-∈ x (µ ▷▷ µ') ≡ µ ▷▷ drop-∈ x µ'
   drop-∈-▷▷₁ (here px) = refl
@@ -125,7 +131,7 @@ record KitTypeSubst (KT : KitType) (T : KitTraversal) : Set where
     -- drop-∈ (there x) (m' ∷ µ') ++ µ   ∎
 
   infixl  5  _⋯Ctx'_
-  _⋯Ctx'_ : ∀ {{𝕂 : Kit}} → Ctx' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx' µ₂ µ'
+  _⋯Ctx'_ : ∀ ⦃ 𝕂 : Kit ⦄ → Ctx' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx' µ₂ µ'
   _⋯Ctx'_ {µ' = µ'} {{𝕂}} Γ f x = Γ x ⋯ f' where
     f' = subst₂
            (λ x y → x –[ 𝕂 ]→ y)

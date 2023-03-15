@@ -1,10 +1,13 @@
 open import Kitty.Term.Modes
-open import Kitty.Term.Kit using (KitTraversal; KitHomotopy)
-open import Kitty.Term.Compose using (KitAssoc)
+open import Kitty.Term.Sub
+open import Kitty.Term.Traversal using (Traversal)
+open import Kitty.Term.KitHomotopy using (KitHomotopy)
+open import Kitty.Term.SubCompose using (SubCompose)
+open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
-open KitAssoc using (KitAssocLemmas)
 
-module Kitty.Typing.OPE {𝕄 : Modes} {𝕋 : Terms 𝕄} {T : KitTraversal 𝕋} {H : KitHomotopy 𝕋 T} {A : KitAssoc 𝕋 T H} (AL : KitAssocLemmas A) (KT : KitType 𝕋) where
+module Kitty.Typing.OPE {𝕄 : Modes} {𝕋 : Terms 𝕄} {𝕊 : SubWithLaws 𝕋} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
+                        {𝕊C : SubCompose 𝕋 𝕊 T H} {C : ComposeTraversal 𝕋 𝕊 T H 𝕊C} (KT : KitType 𝕋) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -12,21 +15,25 @@ open ≡-Reasoning
 open import Data.List using (List; []; drop)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Function using (id; _∘_)
+-- open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Kitty.Term.Prelude
 
 open Modes 𝕄
 open Terms 𝕋
-open Kitty.Term.Kit 𝕋
-open Kitty.Term.Kit.KitTraversal T
-open Kitty.Term.Compose 𝕋 T
-open Kitty.Term.Compose.KitAssoc A
-open Kitty.Term.Compose.KitAssoc.KitAssocLemmas AL
+open import Kitty.Term.Kit 𝕋
+open Kitty.Term.Traversal.Traversal T
+open import Kitty.Term.KitT 𝕋 𝕊 T
+open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
+open Kitty.Term.ComposeTraversal.ComposeTraversal C
 open Kitty.Typing.Types.KitType KT
 
-open Kit {{...}}
-open ComposeKit {{...}}
+open Kit ⦃ … ⦄
+open KitT ⦃ … ⦄
+open ComposeKit ⦃ … ⦄
+open Sub ⦃ … ⦄
+open SubWithLaws ⦃ … ⦄
+open SubCompose ⦃ … ⦄
 
 private
   variable
@@ -37,10 +44,13 @@ private
 
 private instance _ = kitᵣ
 private instance _ = kitₛ
-private instance _ = kitᵣᵣ
-private instance _ = kitᵣₛ
-private instance _ = kitₛᵣ
-private instance _ = kitₛₛ
+private instance _ = kittᵣ
+private instance _ = kittₛ
+private instance _ = ckitᵣ
+private instance _ = ckitₛᵣ
+private instance _ = ckitₛₛ
+private instance _ = 𝕊
+private instance _ = 𝕊C
 
 private
   variable
@@ -79,21 +89,37 @@ data OPE : µ₁ →ᵣ µ₂ → Ctx µ₁ → Ctx µ₂ → Set where
     OPE (ρ ↑ m) (Γ₁ ▶ T) (Γ₂ ▶ (T ⋯ ρ))
   ope-drop  : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : µ₂ ∶⊢ m→M m} →
     OPE  ρ        Γ₁  Γ₂ →
-    OPE (wk ∘ᵣ ρ) Γ₁ (Γ₂ ▶ T)
+    OPE (ρ ·ₖ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) Γ₁ (Γ₂ ▶ T)
 
-ope-pres-telescope : ∀ {ρ : µ₁ →ᵣ µ₂} (x : µ₁ ∋ m) →
+ope-pres-telescope : ∀ {µ₁} {µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ρ : µ₁ →ᵣ µ₂} {m} (x : µ₁ ∋ m) →
   OPE ρ Γ₁ Γ₂ →
-  wk-telescope Γ₂ (ρ m x) ≡ wk-telescope Γ₁ x ⋯ ρ
-ope-pres-telescope x           ope-id = sym (⋯-id _)
-ope-pres-telescope (here refl) (ope-keep {ρ = ρ} {T = T} ope) = sym (dist-↑-ren T ρ)
-ope-pres-telescope (there x)   (ope-keep {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ₂} ope) =
-  wk _ (wk-drop-∈ (ρ _ x) (Γ₂ (ρ _ x))) ≡⟨ cong (wk _) (ope-pres-telescope x ope) ⟩
-  wk _ (wk-drop-∈ x (Γ₁ x) ⋯ ρ)         ≡⟨ sym (dist-↑-ren (wk-drop-∈ x (Γ₁ x)) ρ) ⟩
-  wk _ (wk-drop-∈ x (Γ₁ x)) ⋯ ρ ↑ _     ∎
-ope-pres-telescope x           (ope-drop {ρ = ρ} {Γ₁ = Γ₁} {Γ₂ = Γ₂} ope) =
-  wk-drop-∈ (ρ _ x) (Γ₂ (ρ _ x)) ⋯ wk ≡⟨ cong (_⋯ wk) (ope-pres-telescope x ope) ⟩
-  wk-drop-∈ x (Γ₁ x) ⋯ ρ         ⋯ wk ≡⟨ ⋯-assoc (wk-drop-∈ x (Γ₁ x)) ρ wk ⟩
-  wk-drop-∈ x (Γ₁ x) ⋯ wk ∘ᵣ ρ        ∎
+  wk-telescope Γ₂ (x & ρ) ≡ wk-telescope Γ₁ x ⋯ ρ
+ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x ope-id =
+  wk-telescope Γ₁ (x & idᵣ) ≡⟨ cong (wk-telescope Γ₁) (&-id x) ⟩
+  wk-telescope Γ₁ x         ≡⟨ sym (⋯-id (wk-telescope Γ₁ x)) ⟩
+  wk-telescope Γ₁ x ⋯ idᵣ   ∎
+ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x@(here refl) (ope-keep {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
+  wk-telescope (Γ₂' ▶ T ⋯ ρ') (x & ρ' ↑ m) ≡⟨ cong (wk-telescope (Γ₂' ▶ T ⋯ ρ')) (&-↑-here ρ') ⟩
+  wk-telescope (Γ₂' ▶ T ⋯ ρ') (here refl)  ≡⟨⟩
+  wk _ (T ⋯ ρ')                            ≡⟨ sym (dist-↑-f T ρ') ⟩
+  wk _ T ⋯ (ρ' ↑ m)                        ≡⟨⟩
+  wk-telescope (Γ₁' ▶ T) x ⋯ (ρ' ↑ m)      ∎
+ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x@(there y)   (ope-keep {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
+  wk-telescope (Γ₂' ▶ T ⋯ ρ') (x & ρ' ↑ _)     ≡⟨ cong (wk-telescope (Γ₂' ▶ T ⋯ ρ')) (&-↑-there ρ' y) ⟩
+  wk-telescope (Γ₂' ▶ T ⋯ ρ') (there (y & ρ')) ≡⟨⟩
+  wk _ (wk-telescope Γ₂' (y & ρ'))             ≡⟨ cong (wk _) (ope-pres-telescope y ope) ⟩
+  wk _ (wk-telescope Γ₁' y ⋯ ρ')               ≡⟨ sym (dist-↑-f (wk-telescope Γ₁' y) ρ') ⟩
+  wk _ (wk-telescope Γ₁' y) ⋯ (ρ' ↑ _)         ≡⟨⟩
+  wk-telescope (Γ₁' ▶ T) x ⋯ (ρ' ↑ _)          ∎
+ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x           (ope-drop {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
+  wk-telescope (Γ₂' ▶ T) (x & (ρ' ·ₖ wkₖ _ id))     ≡⟨ cong (wk-telescope (Γ₂' ▶ T)) (&-·ₖ-&/⋯ ρ' (wkₖ _ id) x) ⟩
+  wk-telescope (Γ₂' ▶ T) ((x & ρ') & wkₖ _ id)      ≡⟨ cong (wk-telescope (Γ₂' ▶ T)) (&-wkₖ-wk id (x & ρ')) ⟩
+  wk-telescope (Γ₂' ▶ T) (there (x & ρ' & id))      ≡⟨ cong (λ ■ → wk-telescope (Γ₂' ▶ T) (there ■)) (&-id (x & ρ')) ⟩
+  wk-telescope (Γ₂' ▶ T) (there (x & ρ'))           ≡⟨⟩
+  wk _ (wk-telescope Γ₂' (x & ρ'))                  ≡⟨⟩
+  wk-telescope Γ₂' (x & ρ') ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨ cong (_⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) (ope-pres-telescope x ope) ⟩
+  wk-telescope Γ₁ x ⋯ ρ' ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id    ≡⟨ ⋯-assoc (wk-telescope Γ₁ x) ρ' (wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) ⟩
+  wk-telescope Γ₁ x ⋯ (ρ' ·ₖ wkₖ _ id)              ∎
 
 -- _∋*_∶_ : Ctx µ₂ → µ₁ →ᵣ µ₂ → Ctx µ₁ → Set
 -- _∋*_∶_ {µ₁ = µ₁} Γ₂ ρ Γ₁ = ∀ {m} (x : µ₁ ∋ m) → wk-telescope Γ₂ (ρ _ x) ≡ wk-telescope Γ₁ x ⋯ ρ
