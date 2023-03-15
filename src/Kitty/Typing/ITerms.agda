@@ -1,10 +1,13 @@
 open import Kitty.Term.Modes
-open import Kitty.Term.Kit using (KitTraversal; KitHomotopy)
-open import Kitty.Term.Compose using (KitAssoc)
+open import Kitty.Term.Traversal using (Traversal)
+open import Kitty.Term.KitHomotopy using (KitHomotopy)
+open import Kitty.Term.Sub using (SubWithLaws)
+open import Kitty.Term.SubCompose using (SubCompose)
+open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
-open KitAssoc using (KitAssocLemmas)
 
-module Kitty.Typing.ITerms {𝕄 : Modes} (𝕋 : Terms 𝕄) (T : KitTraversal 𝕋) (H : KitHomotopy 𝕋 T) (A : KitAssoc 𝕋 T H) (AL : KitAssocLemmas A) (KT : KitType 𝕋) where
+module Kitty.Typing.ITerms {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T)
+                           (𝕊C : SubCompose 𝕋 𝕊 T H) (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -15,10 +18,11 @@ open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Kitty.Term.Prelude
 
+open import Kitty.Term.Kit 𝕋
 open Modes 𝕄
 open Terms 𝕋
 open Kitty.Typing.Types.KitType KT
-open import Kitty.Typing.OPE AL KT
+open import Kitty.Typing.OPE C KT
 
 private
   variable

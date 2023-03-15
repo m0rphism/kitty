@@ -119,6 +119,8 @@ mutual
     Λα_     : ∀ (e : (µ ▷ 𝕥) ⊢ 𝕖) → Value (Λα e)
     neutral : Neutral e → Value e
 
+pattern `ⁿ_ x = `[ refl ] x  
+
 data _↪_ : µ ⊢ M → µ ⊢ M → Set where
   β-λ : ∀ {e₂ : µ ⊢ 𝕖} →
     (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆ₛ
