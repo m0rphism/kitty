@@ -42,8 +42,8 @@ module Deriving where
   import Kitty.Term.KitAltSimple
   open import Kitty.Util.Star
   open import Kitty.Derive.Common
-  open import Kitty.Term.Sub
-  open import Kitty.Term.MultiSub
+  import Kitty.Term.Sub
+  import Kitty.Term.MultiSub
 
   private variable
     ℓ ℓ₁ ℓ₂ ℓ₃ ℓ' : Level
@@ -109,128 +109,133 @@ module Deriving where
       terms-ty
       [ clause [] [] terms-body ]
 
-  -- -- record DeriveContext : Set₁ where
-  -- --   field
-  -- --     𝕄 : Modes
-  -- --     𝕋 : Terms 𝕄
+  -- record DeriveContext : Set₁ where
+  --   field
+  --     𝕄 : Modes
+  --     𝕋 : Terms 𝕄
 
-  -- --     `𝕄 : Name
-  -- --     `𝕋 : Name
-  -- --     `⊢ : Name
-  -- --     `VarMode : Name
-  -- --     `TermMode : Name
-  -- --     `Kit : Name
-  -- --     `⋯ : Name
+  --     `𝕄 : Name
+  --     `𝕋 : Name
+  --     `⊢ : Name
+  --     `VarMode : Name
+  --     `TermMode : Name
+  --     `Kit : Name
+  --     `⋯ : Name
 
-  -- --     `var : Name
-  -- --     `cons : List Name
-  -- --     con-tys : List Type'
-  -- --     con-tels : List Telescope'
+  --     `var : Name
+  --     `cons : List Name
+  --     con-tys : List Type'
+  --     con-tels : List Telescope'
 
-  -- --   open Modes 𝕄 public
-  -- --   open Terms 𝕋 public
-  -- --   open Kitty.Kit 𝕋 public
+  --   open Modes 𝕄 public
+  --   open Terms 𝕋 public
+  --   open Kitty.Kit 𝕋 public
 
-  -- derive-⋯ : {𝕄 : Modes} → Terms 𝕄 → Name → TC ⊤
-  -- derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
-  --   let open Modes 𝕄
-  --   let open Terms 𝕋
-  --   let open Kitty.Term.Kit 𝕋
-  --   𝕄-nm ← quoteNameTC 𝕄
-  --   ⊢-nm ← quoteNameTC _⊢_
-  --   ⊢-def ← getDefinition ⊢-nm
-  --   `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
-  --   var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
-  --   𝕋-nm ← term→name =<< quoteTC' 𝕋
-  --   VarMode` ← quoteNormTC' VarMode
-  --   VarModes` ← quoteNormTC' (List VarMode)
-  --   Kit` ← quoteTC' Kit
+  derive-⋯ : {𝕄 : Modes} → Terms 𝕄 → Name → TC ⊤
+  derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
+    let open Modes 𝕄
+    let open Terms 𝕋
+    let open Kitty.Term.Kit 𝕋
+    let open Kitty.Term.Sub 𝕋
+    let open Sub ⦃ … ⦄
+    𝕄-nm ← quoteNameTC 𝕄
+    ⊢-nm ← quoteNameTC _⊢_
+    ⊢-def ← getDefinition ⊢-nm
+    `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
+    var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
+    𝕋-nm ← term→name =<< quoteTC' 𝕋
+    VarMode` ← quoteNormTC' VarMode
+    VarModes` ← quoteNormTC' (List VarMode)
+    Kit` ← quoteTC' Kit
+    Sub` ← quoteTC' Sub
 
-  --   let mk-tel c-tel =
-  --         [ "𝕂" , argᵢ Kit`
-  --         ; "µ₁" , argₕ VarModes`
-  --         ; "µ₂" , argₕ VarModes`
-  --         ] ++ c-tel ++
-  --         [ "f" , argᵥ (def (quote Kitty.Term.Kit._–[_]→_)
-  --             [ argᵥ (def 𝕋-nm [])
-  --             ; argᵥ (var "µ₁" [])
-  --             ; argᵥ (var "𝕂" [])
-  --             ; argᵥ (var "µ₂" [])
-  --             ])
-  --         ]
-  --   let mk-pats c-pat = 
-  --         [ argᵢ (var "𝕂")
-  --         ; argₕ (var "µ₁")
-  --         ; argₕ (var "µ₂")
-  --         ] ++ c-pat ∷
-  --         [ argᵥ (var "f" ) ]
+    let mk-tel c-tel =
+          [ "𝕊" , argᵢ Sub`
+          ; "𝕂" , argᵢ Kit`
+          ; "µ₁" , argₕ VarModes`
+          ; "µ₂" , argₕ VarModes`
+          ] ++ c-tel ++
+          [ "f" , argᵥ (def (quote Kitty.Term.Sub.Sub._–[_]→_)
+              [ argᵥ (var "𝕊" [])
+              ; argᵥ (var "µ₁" [])
+              ; argᵥ (var "𝕂" [])
+              ; argᵥ (var "µ₂" [])
+              ])
+          ]
+    let mk-pats c-pat = 
+          [ argᵢ (var "𝕊")
+          ; argᵢ (var "𝕂")
+          ; argₕ (var "µ₁")
+          ; argₕ (var "µ₂")
+          ] ++ c-pat ∷
+          [ argᵥ (var "f" ) ]
 
-  --   clauses ← forM (enumerate con-nms) λ (i , c) → do
-  --     -- Get constructor telescope
-  --     c-ty ← getType' c
-  --     let (c-tel , c-ret) = pi→tel c-ty
+    clauses ← forM (enumerate con-nms) λ (i , c) → do
+      -- Get constructor telescope
+      c-ty ← getType' c
+      let (c-tel , c-ret) = pi→tel c-ty
 
-  --     -- Retrieve variable name used for `µ`
-  --     c-µ ← case unterm ⊢-nm c-ret of λ where
-  --       (just (var µ [] , M)) → pure µ
-  --       (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
-  --       nothing → liftTC $ failStr "impossible"
+      -- Retrieve variable name used for `µ`
+      c-µ ← case unterm ⊢-nm c-ret of λ where
+        (just (var µ [] , M)) → pure µ
+        (just (µ , M)) → liftTC $ failStr "constructed type has to return variable as µ."
+        nothing → liftTC $ failStr "impossible"
 
-  --     -- Rename `µ` binding and occurences to `µ₁`
-  --     let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
-  --                                            (no _)  → (x , b [ c-µ ↦ var "µ₁" [] ])
-  --                                            (yes _) → ("µ₁" , b)
-  --                              }) c-tel
+      -- Rename `µ` binding and occurences to `µ₁`
+      let c-tel' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
+                                             (no _)  → (x , b [ c-µ ↦ var "µ₁" [] ])
+                                             (yes _) → ("µ₁" , b)
+                               }) c-tel
 
-  --     -- Remove `µ₁` binding, since it's already bound on the outside
-  --     let c-tel'x = List.boolFilter
-  --           (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
-  --           c-tel'
+      -- Remove `µ₁` binding, since it's already bound on the outside
+      let c-tel'x = List.boolFilter
+            (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
+            c-tel'
 
-  --     let c-tel'' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
-  --                                             (no _)  → (x , b [ c-µ ↦ var "µ₂" [] ])
-  --                                             (yes _) → ("µ₂" , b)
-  --                               }) c-tel
-  --     let c-pats = List.map (λ { (x , arg i _) → case x String.≟ c-µ of λ where
-  --                                                  (no _)  → arg i (var x)
-  --                                                  (yes _) → arg i (dot (var "µ₁" []))
-  --                              }) c-tel'
-  --     let c-pat = argᵥ (con c c-pats)
-  --     let body = con c $ foldr' c-tel'' [] λ where
-  --           (s , arg i t) c-args → _∷ c-args $ case unterm ⊢-nm t of λ where
-  --             (just _) → arg i (def ⋯-nm [ argᵥ (var s [])
-  --                                        ; argᵥ (def (quote Kitty.Term.Kit.Kit._↑*_)
-  --                                            [ argᵥ (var "𝕂" [])
-  --                                            ; argᵥ (var "f" [])
-  --                                            ; argᵥ unknown
-  --                                            ])
-  --                                        ]) 
-  --             nothing  → case s String.≟ c-µ of λ where
-  --                           (no _)  → arg i (var s [])
-  --                           (yes _) → arg i (var "µ₂" [])
-  --     pure $ clause (mk-tel c-tel'x) (mk-pats c-pat) body
+      let c-tel'' = List.map (λ { (x , b) → case x String.≟ c-µ of λ where
+                                              (no _)  → (x , b [ c-µ ↦ var "µ₂" [] ])
+                                              (yes _) → ("µ₂" , b)
+                                }) c-tel
+      let c-pats = List.map (λ { (x , arg i _) → case x String.≟ c-µ of λ where
+                                                   (no _)  → arg i (var x)
+                                                   (yes _) → arg i (dot (var "µ₁" []))
+                               }) c-tel'
+      let c-pat = argᵥ (con c c-pats)
+      let body = con c $ foldr' c-tel'' [] λ where
+            (s , arg i t) c-args → _∷ c-args $ case unterm ⊢-nm t of λ where
+              (just _) → arg i (def ⋯-nm [ argᵥ (var s [])
+                                         ; argᵥ (def (quote Kitty.Term.MultiSub._↑*'_)
+                                             [ argᵥ (def 𝕋-nm [])
+                                             ; argᵥ (var "f" [])
+                                             ; argᵥ unknown
+                                             ])
+                                         ]) 
+              nothing  → case s String.≟ c-µ of λ where
+                            (no _)  → arg i (var s [])
+                            (yes _) → arg i (var "µ₂" [])
+      pure $ clause (mk-tel c-tel'x) (mk-pats c-pat) body
 
-  --   let var-tel = [ "x" , argᵥ (def (quote _∋_) [ argᵥ (var "µ₁" [])
-  --                                               ; argᵥ unknown
-  --                                               ])
-  --                 ]
-  --   let var-pat = argᵥ (pat` var-con (var "x"))
-  --   let var-clause = clause (mk-tel var-tel)
-  --                           (mk-pats var-pat)
-  --                           (def (quote Kitty.Term.Kit.Kit.`/id)
-  --                             [ argᵥ (var "𝕂" [])
-  --                             ; argᵥ unknown
-  --                             ; argᵥ (var "f" [ argᵥ unknown
-  --                                             ; argᵥ (var "x" [])
-  --                                             ])
-  --                             ])
+    let var-tel = [ "x" , argᵥ (def (quote _∋_) [ argᵥ (var "µ₁" [])
+                                                ; argᵥ unknown
+                                                ])
+                  ]
+    let var-pat = argᵥ (pat` var-con (var "x"))
+    let var-clause = clause (mk-tel var-tel)
+                            (mk-pats var-pat)
+                            (def (quote Kitty.Term.Kit.Kit.`/id)
+                              [ argᵥ (var "𝕂" [])
+                              ; argᵥ (def (quote Kitty.Term.Sub.Sub._&_) [ argᵥ (var "𝕊" [])
+                                                                         ; argᵥ (var "x" [])
+                                                                         ; argᵥ (var "f" [])
+                                                                         ])
+                              ])
 
-  --   ⋯-ty ← quoteTC' (∀ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
+    ⋯-ty ← quoteTC' (∀ ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
 
-  --   defdecFun'
-  --     (argᵥ ⋯-nm)
-  --     ⋯-ty
-  --     (var-clause ∷ clauses)
+    defdecFun'
+      (argᵥ ⋯-nm)
+      ⋯-ty
+      (var-clause ∷ clauses)
 
   -- -- _⋯_ : ∀ {µ₁} {µ₂} {M} {{𝕂 : Kit}} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
   -- -- (` x)     ⋯ f = `/id _ (f _ x)
@@ -787,7 +792,7 @@ module Example where
 
   module Half-Derived where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
---     unquoteDecl _⋯_   = derive-⋯ terms _⋯_
+    unquoteDecl _⋯_   = derive-⋯ terms _⋯_
 --     unquoteDecl ⋯-var = derive-⋯-var terms (quote _⋯_) ⋯-var
 --     unquoteDecl ⋯-↑   = derive-⋯-↑ terms (quote _⋯_) ⋯-↑
 
