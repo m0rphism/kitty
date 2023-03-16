@@ -240,6 +240,8 @@ record ITraversal : Set₁ where
     -- Substitution/Renaming preserves typing
     _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
              ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
+             ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
+             ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
              {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
            Γ₁ ⊢ e ∶ t →
            Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
