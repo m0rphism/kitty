@@ -52,6 +52,8 @@ data _⊢_ : List Modeᵥ → Modeₜ → Set where
   _⇒_       : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
   ★         : µ ⊢ 𝕜
 
+pattern `_ x = `[ refl ] x  
+
 variable
   e e₁ e₂ e₃ e' e₁' e₂' : µ ⊢ 𝕖
   t t₁ t₂ t₃ t' t₁' t₂' : µ ⊢ 𝕥
@@ -60,11 +62,11 @@ variable
 
 -- Deriving Renaming/Substitution and related lemmas.
 open import Kitty.Derive using (derive; module Derived)
-unquoteDecl multi-traversal = derive 𝕄 _⊢_ multi-traversal
-open Derived multi-traversal public
-open Sub-Functional public
 
-pattern `_ x = `[ refl ] x  
+unquoteDecl D = derive 𝕄 _⊢_ D
+
+open Derived D public
+open Sub-Functional public
 
 -- Types and Contexts ----------------------------------------------------------
 
