@@ -7,9 +7,9 @@ open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
 open import Kitty.Typing.ITerms using (ITerms)
 
-module Kitty.Typing.IKit {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T)
-                         (𝕊C : SubCompose 𝕋 𝕊 T H) (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋)
-                         (IT : ITerms 𝕋 𝕊 T H 𝕊C C KT) where
+module Kitty.Typing.IKit {𝕄 : Modes} {𝕋 : Terms 𝕄} {ℓ} {𝕊 : SubWithLaws 𝕋 ℓ} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
+                         {𝕊C : SubCompose 𝕋 𝕊 T H} (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋)
+                         (IT : ITerms C KT) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂; module ≡-Reasoning)
@@ -34,7 +34,7 @@ open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
 open Kitty.Term.ComposeTraversal.ComposeTraversal C
 open Kitty.Typing.Types.KitType KT
 open import Kitty.Typing.OPE C KT
-open Kitty.Typing.ITerms 𝕋 𝕊 T H 𝕊C C KT
+open Kitty.Typing.ITerms C KT
 open Kitty.Typing.ITerms.ITerms IT
 
 private
