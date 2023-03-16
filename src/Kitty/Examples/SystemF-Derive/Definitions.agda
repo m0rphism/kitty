@@ -65,8 +65,7 @@ open import Kitty.Derive using (derive; module Derived)
 
 unquoteDecl D = derive 𝕄 _⊢_ D
 
-open Derived D public
-open Sub-Functional public
+open Derived.Functional D public
 
 -- Types and Contexts ----------------------------------------------------------
 

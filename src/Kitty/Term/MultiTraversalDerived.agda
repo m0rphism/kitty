@@ -3,37 +3,38 @@ open import Kitty.Term.MultiTraversal using (MultiTraversal)
 
 module Kitty.Term.MultiTraversalDerived {𝕄 : Modes} {𝕋 : Terms 𝕄} (MT : MultiTraversal 𝕋) where
 
-open import Level using (_⊔_; Setω)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; subst₂; sym; module ≡-Reasoning)
-open ≡-Reasoning
+import Kitty.Term.Sub
 
-open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.MultiSub 𝕋
-open import Kitty.Term.Prelude
-open import Kitty.Term.Sub 𝕋
-open import Kitty.Term.Traversal 𝕋
-open import Kitty.Util.Star
+module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
+  open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; subst₂; sym; module ≡-Reasoning)
+  open ≡-Reasoning
 
-open Modes 𝕄
-open Terms 𝕋
-open Kit ⦃ … ⦄
-open Sub ⦃ … ⦄
-open SubWithLaws ⦃ … ⦄
+  open import Kitty.Term.Kit 𝕋 public
+  open import Kitty.Term.MultiSub 𝕋
+  open import Kitty.Term.Prelude
+  open import Kitty.Term.Sub 𝕋
+  open import Kitty.Term.Traversal 𝕋
+  open import Kitty.Util.Star
 
-open import Kitty.Util.SubstProperties
+  open Kit ⦃ … ⦄ public
+  open Modes 𝕄
+  open Terms 𝕋
+  open SubWithLaws S public
+  open Sub SubWithLaws-Sub public
 
-terms : Terms 𝕄
-terms = 𝕋
+  open import Kitty.Util.SubstProperties
 
-open Terms terms public using (#_)
+  terms : Terms 𝕄
+  terms = 𝕋
 
-open MultiTraversal MT public
+  open Terms terms public using (#_)
 
-open import Kitty.Term.KitOrder terms public
-open _⊑ₖ_ ⦃ … ⦄ public
+  open MultiTraversal MT public
 
-module WithSub {ℓ} (𝕊 : SubWithLaws ℓ) where
-  private instance _ = 𝕊
+  open import Kitty.Term.KitOrder terms public
+  open _⊑ₖ_ ⦃ … ⦄ public
+
+  instance 𝕊 = S
 
   private
     ⋯-id' : ∀ ⦃ 𝕂 : Kit ⦄ {µ M} (v : µ ⊢ M) → v ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ v
@@ -61,8 +62,7 @@ module WithSub {ℓ} (𝕊 : SubWithLaws ℓ) where
   open import Kitty.Term.KitT terms 𝕊 kit-traversal public
   open KitT ⦃ … ⦄ public
 
-  private instance _ = kitᵣ; _ = kitₛ
-  private instance _ = kittᵣ; _ = kittₛ
+  instance 𝕂ᵣ = kitᵣ; 𝕂ₛ = kitₛ; Kᵣ = kittᵣ; Kₛ = kittₛ
 
   open import Kitty.Term.KitHomotopy terms 𝕊 kit-traversal public
 
@@ -99,8 +99,8 @@ module WithSub {ℓ} (𝕊 : SubWithLaws ℓ) where
   open import Kitty.Term.ComposeKit 𝕋 𝕊 kit-traversal kit-homotopy public
   open import Kitty.Term.SubCompose 𝕋 𝕊 kit-traversal kit-homotopy public
 
-  module WithSubCompose (𝕊C : SubCompose) where
-    private instance _ = 𝕊C
+  module WithSubCompose (SC : SubCompose) where
+    instance 𝕊C = SC
     open import Kitty.Term.ComposeTraversal 𝕋 𝕊 kit-traversal kit-homotopy 𝕊C
 
     open ComposeKit ⦃ … ⦄ public
@@ -140,29 +140,18 @@ module WithSub {ℓ} (𝕊 : SubWithLaws ℓ) where
 
     open ComposeTraversal compose-traversal public
 
-module Sub-Functional where
-  open import Kitty.Term.Sub.Functional terms hiding (Sub-→; SubWithLaws-→)
-  open import Kitty.Term.Sub.Functional terms using  (Sub-→; SubWithLaws-→) public
+    instance Cᵣ = ckitᵣ; Cₛᵣ = ckitₛᵣ; Cₛₛ = ckitₛₛ
+
+module Functional where
+  open import Kitty.Term.Sub.Functional 𝕋 hiding (Sub-→; SubWithLaws-→)
+  open import Kitty.Term.Sub.Functional 𝕋 using  (Sub-→; SubWithLaws-→) public
   open WithSub SubWithLaws-→ public
+
   open Fun-SubCompose kit-traversal kit-homotopy hiding (SubCompose-→)
   open Fun-SubCompose kit-traversal kit-homotopy using  (SubCompose-→) public
   open WithSubCompose SubCompose-→ public
-  open Sub Sub-→ public
-  open SubWithLaws SubWithLaws-→ public
 
-  instance
-    kitᵣ' = kitᵣ
-    kitₛ' = kitₛ
-    kitᵣᵣ = ckitᵣ
-    kitₛᵣ = ckitₛᵣ
-    kitₛₛ = ckitₛₛ
-    wk-kitᵣ = kittᵣ
-    wk-kitₛ = kittₛ
-    sub-→ = Sub-→
-    subwithlaws-→ = SubWithLaws-→
-    subcompose-→ = SubCompose-→
-
-module Sub-Instance where
+module Instance where
   open WithSub ⦃ … ⦄ public renaming (module WithSubCompose to WithSubCompose')
   open WithSubCompose' ⦃ … ⦄ public
 
@@ -175,9 +164,6 @@ module Sub-Instance where
   --   kitₛₛ = ckitₛₛ
   --   wk-kitᵣ = kittᵣ
   --   wk-kitₛ = kittₛ
-
-open Kit ⦃ … ⦄ public
-open import Kitty.Term.Kit 𝕋 public
 
 -- module StarAttempt where
 --   open import Kitty.Util.Star
