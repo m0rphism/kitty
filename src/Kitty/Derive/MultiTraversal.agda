@@ -147,13 +147,17 @@ module Deriving where
     `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
     var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
     𝕋-nm ← term→name =<< quoteTC' 𝕋
+    TermMode` ← quoteNormTC' TermMode
     VarMode` ← quoteNormTC' VarMode
     VarModes` ← quoteNormTC' (List VarMode)
     Kit` ← quoteTC' Kit
-    Sub` ← quoteTC' Sub
+    Level` ← quoteTC' Level
+    let Sub` : Term' → Term'
+        Sub` ℓ = def (quote Kitty.Term.Sub.Sub) [ argᵥ (def 𝕋-nm []) ; argᵥ ℓ ]
 
     let mk-tel c-tel =
-          [ "𝕊" , argᵢ Sub`
+          [ "ℓ" , argₕ Level`
+          ; "𝕊" , argᵢ (Sub` (var "ℓ" []))
           ; "𝕂" , argᵢ Kit`
           ; "µ₁" , argₕ VarModes`
           ; "µ₂" , argₕ VarModes`
@@ -166,7 +170,8 @@ module Deriving where
               ])
           ]
     let mk-pats c-pat = 
-          [ argᵢ (var "𝕊")
+          [ argₕ (var "ℓ")
+          ; argᵢ (var "𝕊")
           ; argᵢ (var "𝕂")
           ; argₕ (var "µ₁")
           ; argₕ (var "µ₂")
@@ -233,7 +238,17 @@ module Deriving where
                                                                          ])
                               ])
 
-    ⋯-ty ← quoteTC' (∀ ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
+    -- ⋯-ty ← quoteTC' (∀ {ℓ} ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
+    let ⋯-ty = pi (argₕ (def (quote Level) [])) (abs "ℓ" (
+               pi (argᵢ (def (quote Kitty.Term.Sub.Sub) [ argᵥ (def 𝕋-nm []) ; argᵥ (var "ℓ" []) ])) (abs "𝕊" (
+               pi (argᵢ (def (quote Kitty.Term.Kit.Kit) [ argᵥ (def 𝕋-nm []) ])) (abs "𝕂" (
+               pi (argₕ VarModes`) (abs "µ₁" (
+               pi (argₕ VarModes`) (abs "µ₂" (
+               pi (argₕ TermMode`) (abs "M" (
+               pi (argᵥ (def ⊢-nm [ argᵥ (var "µ₁" []) ; argᵥ (var "M" []) ])) (abs "_" (
+               pi (argᵥ (def (quote Kitty.Term.Sub.Sub._–[_]→_)
+                          [ argᵥ (var "𝕊" []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ])) (abs "_" (
+               def ⊢-nm [ argᵥ (var "µ₂" []) ; argᵥ (var "M" []) ]))))))))))))))))
 
     defdecFun'
       (argᵥ ⋯-nm)
@@ -261,14 +276,37 @@ module Deriving where
     `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
     var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
     𝕋-nm ← term→name =<< quoteTC' 𝕋
+    VarMode` ← quoteNormTC' VarMode
+    VarModes` ← quoteNormTC' (List VarMode)
 
-    _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
+    -- _⋯_ ← unquoteTC' {A = ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
 
     let body = lam visible (abs "x" (
                lam visible (abs "f" (
                con (quote refl) []))))
-    ⋯-var-ty ← quoteTC' (∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
-                         → (ctor var-con x) ⋯ f ≡ Kit.`/id 𝕂 (x & f))
+
+    -- ⋯-var-ty ← quoteTC' (∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
+    --                      → (ctor var-con x) ⋯ f ≡ Kit.`/id 𝕂 (x & f))
+    let 𝕤` = def (quote Kitty.Term.Sub.SubWithLaws.SubWithLaws-Sub) [ argᵥ (var "𝕊" []) ]
+    let ⋯-var-ty =
+          pi (argₕ (def (quote Level) [])) (abs "ℓ" (
+          pi (argᵢ (def (quote Kitty.Term.Sub.SubWithLaws) [ argᵥ (def 𝕋-nm []) ; argᵥ (var "ℓ" []) ])) (abs "𝕊" (
+          pi (argᵢ (def (quote Kitty.Term.Kit.Kit) [ argᵥ (def 𝕋-nm []) ])) (abs "𝕂" (
+          pi (argₕ VarModes`) (abs "µ₁" (
+          pi (argₕ VarModes`) (abs "µ₂" (
+          pi (argₕ VarMode`) (abs "m" (
+          pi (argᵥ (def (quote _∋_) [ argᵥ (var "µ₁" []) ; argᵥ (var "m" []) ])) (abs "x" (
+          pi (argᵥ (def (quote Kitty.Term.Sub.Sub._–[_]→_)
+                     [ argᵥ 𝕤` ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ])) (abs "f" (
+          def (quote _≡_) [ argᵥ (def ⋯-nm [ argᵥ (ctor` var-con (var "x" []))
+                                           ; argᵥ (var "f" []) ])
+                          ; argᵥ (def (quote Kitty.Term.Kit.Kit.`/id)
+                             [ argᵥ (var "𝕂" [])
+                             ; argᵥ (def (quote Kitty.Term.Sub.Sub._&_) [ argᵥ 𝕤`
+                                                                        ; argᵥ (var "x" [])
+                                                                        ; argᵥ (var "f" []) ]) ]) ]
+          ))))))))))))))))
+
     defdecFun'
       (argᵥ ⋯-var-nm)
       ⋯-var-ty
@@ -355,9 +393,12 @@ module Deriving where
     `-nm , con-nms ← split-term-ctors (ctors ⊢-def)
     𝕋-nm ← term→name =<< quoteTC' 𝕋
 
-    _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕊 : Sub ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M}
-                      (lam visible (abs "_" (def ⋯-nm [])))
-    let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
+    -- _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) {ℓ} ⦃ 𝕊 : Sub ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M}
+    --                   (lam visible (abs "_" (def ⋯-nm [])))
+    -- let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
+    let ⋯⊤' : Term'
+        ⋯⊤' = lam visible (abs "_" (def ⋯-nm []))
+    let open Kitty.Term.MultiSub.TraversalOps' 𝕋
 
     -- Get constructor telescope
     c-ty ← getType' con-nm
@@ -383,7 +424,8 @@ module Deriving where
     Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
     Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
     VarModes` ← quoteTC' (List VarMode)
-    SubWithLaws` ← quoteTC' (Kitty.Term.Sub.SubWithLaws 𝕋)
+    let SubWithLaws` : Term' → Term'
+        SubWithLaws` ℓ = def (quote Kitty.Term.Sub.SubWithLaws) [ argᵥ (def 𝕋-nm []) ; argᵥ ℓ ]
 
     -- Convert tel bindings (x , t) to var arguments, but replace `µ₁` with `µ₁ ▷▷ µ₁'`
     let con-term = con con-nm $ List.map
@@ -398,7 +440,7 @@ module Deriving where
     let _⋯*`_ = (Term' → Term' → Term') by
                   λ t fs → def (quote Kitty.Term.MultiSub.TraversalOps'._⋯*_)
                           [ argᵥ (def 𝕋-nm [])
-                          ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                          ; argᵥ ⋯⊤'
                           ; argᵥ t
                           ; argᵥ fs
                           ]
@@ -418,7 +460,8 @@ module Deriving where
                      )
                      c-tel
     let ⋯-↑-con-ty = tel→pi
-          ( [ ("𝕊"  , argᵢ SubWithLaws`)
+          ( [ ("ℓ"   , argₕ (def (quote Level) []))
+            ; ("𝕊"   , argᵢ (SubWithLaws` (var "ℓ" [])))
             ; ("𝕂s"  , argₕ Kits`)
             ; ("µ₁"  , argₕ VarModes`) 
             ; ("µ₂"  , argₕ VarModes`) 
@@ -429,7 +472,9 @@ module Deriving where
           (def (quote _≡_) [ argᵥ lhs ; argᵥ rhs ])
 
     let mk-tel 𝕂s-binds fs-binds = Telescope' by
-          ([ ("𝕊" , argᵢ SubWithLaws`) ] ++
+          ([ ("ℓ"   , argₕ (def (quote Level) []))
+           ; ("𝕊"   , argᵢ (SubWithLaws` (var "ℓ" [])))
+           ] ++
            𝕂s-binds ++
            [ ("µ₁" , argₕ VarModes`)
            ; ("µ₂" , argₕ VarModes`)
@@ -440,7 +485,8 @@ module Deriving where
     let c-pats = List (Arg Pattern') by
                  List.map (λ { (x , arg i _) → arg i (var x) }) c-tel'x
     let mk-pats 𝕂s-pats fs-pats = List (Arg Pattern') by
-          [ argᵢ (var "𝕊") ] ++
+          [ argₕ (var "ℓ")
+          ; argᵢ (var "𝕊") ] ++
           𝕂s-pats ++
           [ argₕ (var "µ₁")
           ; argₕ (var "µ₂")
@@ -515,16 +561,21 @@ module Deriving where
 
     Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
     Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
+    VarMode` ← quoteNormTC' VarMode
     VarModes` ← quoteTC' (List VarMode)
-    SubWithLaws` ← quoteTC' (Kitty.Term.Sub.SubWithLaws 𝕋)
+    let SubWithLaws` : Term' → Term'
+        SubWithLaws` ℓ = def (quote Kitty.Term.Sub.SubWithLaws) [ argᵥ (def 𝕋-nm []) ; argᵥ ℓ ]
 
-    _⋯_ ← unquoteTC' {A = ∀ ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
-    _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
-
-    let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
+    -- _⋯_ ← unquoteTC' {A = ∀ {ℓ} ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
+    -- _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) {ℓ} ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
+    -- let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
+    let ⋯⊤` : Term'
+        ⋯⊤` = lam visible (abs "_" (def ⋯-nm []))
+    let open Kitty.Term.MultiSub.TraversalOps' 𝕋
 
     let mk-tel c-tel =
-          [ "𝕊" , argᵢ SubWithLaws`
+          [ "ℓ", argₕ (def (quote Level) [])
+          ; "𝕊" , argᵢ (SubWithLaws` (var "ℓ" []))
           ; "𝕂s₁" , argₕ Kits`
           ; "𝕂s₂" , argₕ Kits`
           ; "µ₁" , argₕ VarModes`
@@ -543,14 +594,15 @@ module Deriving where
               ])
           ; "fs≈gs" , argᵥ (def (quote Kitty.Term.MultiSub.TraversalOps'._≈ₓ_)
               [ argᵥ (def 𝕋-nm [])
-              ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+              ; argᵥ ⋯⊤`
               ; argᵥ (var "fs" [])
               ; argᵥ (var "gs" [])
               ])
           ; "µ₁'" , argₕ VarModes`
           ] ++ c-tel
     let mk-pats c-pat = 
-          [ argᵢ (var "𝕊")
+          [ argₕ (var "ℓ")
+          ; argᵢ (var "𝕊")
           ; argₕ (var "𝕂s₁")
           ; argₕ (var "𝕂s₂")
           ; argₕ (var "µ₁")
@@ -598,7 +650,8 @@ module Deriving where
 
       let ⋯-↑-con` = (Term' → Term' → Term') by λ 𝕂s fs →
             def ⋯-↑-con-nm
-              ([ argₕ 𝕂s
+              ([ argₕ unknown
+               ; argₕ 𝕂s
                ; argₕ (var "µ₁" [])
                ; argₕ (var "µ₂" [])
                ; argₕ (var "µ₁'" [])
@@ -616,7 +669,7 @@ module Deriving where
       let _⋯*`_ = (Term' → Term' → Term') by
                     λ t fs → def (quote Kitty.Term.MultiSub.TraversalOps'._⋯*_)
                             [ argᵥ (def 𝕋-nm [])
-                            ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                            ; argᵥ ⋯⊤`
                             ; argᵥ t
                             ; argᵥ fs
                             ]
@@ -628,7 +681,7 @@ module Deriving where
       let ≈↑**` = (Term' → Term' → Term' → Term') by λ fs gs fs≈gs →
                  def (quote Kitty.Term.MultiSub.TraversalOps'.≈↑**)
                      [ argᵥ (def 𝕋-nm [])
-                     ; argᵥ (lam visible (abs "_" (def ⋯-nm [])))
+                     ; argᵥ ⋯⊤`
                      ; argᵥ fs ; argᵥ gs ; argᵥ fs≈gs
                      ]
 
@@ -659,10 +712,32 @@ module Deriving where
         (mk-pats c-pat)
         body
 
-    ⋯-↑-ty ← quoteTC' (
-        ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
-          f ≈ₓ g → f ≈ₜ g
-      )
+    -- ⋯-↑-ty ← quoteTC' (
+    --     ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂) →
+    --       f ≈ₓ g → f ≈ₜ g
+    --   )
+    let ⋯-↑-ty =
+          pi (argₕ (def (quote Level) [])) (abs "ℓ" (
+          pi (argᵢ (def (quote Kitty.Term.Sub.SubWithLaws) [ argᵥ (def 𝕋-nm []) ; argᵥ (var "ℓ" []) ])) (abs "𝕊" (
+          pi (argₕ Kits`) (abs "𝕂s₁" (
+          pi (argₕ Kits`) (abs "𝕂s₂" (
+          pi (argₕ VarModes`) (abs "µ₁" (
+          pi (argₕ VarModes`) (abs "µ₂" (
+          pi (argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
+                     [ argᵥ (def 𝕋-nm []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s₁" []) ; argᵥ (var "µ₂" []) ])) (abs "f" (
+          pi (argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
+                     [ argᵥ (def 𝕋-nm []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s₂" []) ; argᵥ (var "µ₂" []) ])) (abs "g" (
+          pi (argᵥ (def (quote Kitty.Term.MultiSub.TraversalOps'._≈ₓ_)
+                     [ argᵥ (def 𝕋-nm [])
+                     ; argᵥ ⋯⊤`
+                     ; argᵥ (var "f" [])
+                     ; argᵥ (var "g" []) ])) (abs "_" (
+          (def (quote Kitty.Term.MultiSub.TraversalOps'._≈ₜ_)
+                     [ argᵥ (def 𝕋-nm [])
+                     ; argᵥ ⋯⊤`
+                     ; argᵥ (var "f" [])
+                     ; argᵥ (var "g" []) ])
+          ))))))))))))))))))
 
     let var-clause = clause
           (mk-tel [ "x" , argᵥ (def (quote _∋_) [ argᵥ (def (quote List._++_)
@@ -761,39 +836,39 @@ module Example where
     open Sub ⦃ ... ⦄
     open SubWithLaws ⦃ ... ⦄
 
-    _⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    _⋯_ : ∀ {ℓ} ⦃ 𝕂 : Kit ⦄ ⦃ 𝕊 : Sub ℓ ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
     (` x)     ⋯ f = `/id (x & f)
     (λx t)    ⋯ f = λx (t ⋯ (f ↑*' _))
     (t₁ · t₂) ⋯ f = _·_ (t₁ ⋯ f) (t₂ ⋯ f)
     (foo t)   ⋯ f = foo (t ⋯ (f ↑*' _))
 
-    ⋯-var : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+    ⋯-var : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {{𝕂 : Kit}} {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
             (` x) ⋯ f ≡ `/id (x & f)
     ⋯-var x f = refl
 
     open TraversalOps _⋯_
 
-    ⋯-↑-· : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s : List Kit} {µ₁ µ₂ µ₁'} (f : µ₁ –[ 𝕂s ]→* µ₂)
+    ⋯-↑-· : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s : List Kit} {µ₁ µ₂ µ₁'} (f : µ₁ –[ 𝕂s ]→* µ₂)
             → (t₁ t₂ : (µ₁ ▷▷ µ₁') ⊢ 𝕖)
             → ((t₁ · t₂) ⋯* (f ↑** µ₁')) ≡ (t₁ ⋯* (f ↑** µ₁' ↑** [])) · (t₂ ⋯* (f ↑** µ₁' ↑** []))
-    ⋯-↑-· {.[]}     []       t₁ t₂ = refl
-    ⋯-↑-· {𝕂 ∷ 𝕂s} (f ∷ fs) t₁ t₂ = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-· fs t₁ t₂) refl
+    ⋯-↑-· {ℓ} {.[]}     []       t₁ t₂ = refl
+    ⋯-↑-· {ℓ} {𝕂 ∷ 𝕂s} (f ∷ fs) t₁ t₂ = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-· fs t₁ t₂) refl
 
-    ⋯-↑-λ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s : List Kit} {µ₁ µ₂ µ₁'} (f : µ₁ –[ 𝕂s ]→* µ₂)
+    ⋯-↑-λ : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s : List Kit} {µ₁ µ₂ µ₁'} (f : µ₁ –[ 𝕂s ]→* µ₂)
             → (t : (µ₁ ▷▷ µ₁' ▷ 𝕖) ⊢ 𝕖)
             → ((λx t) ⋯* (f ↑** µ₁')) ≡ λx (t ⋯* (f ↑** µ₁' ↑** [ 𝕖 ]))
-    ⋯-↑-λ           []       t = refl
-    ⋯-↑-λ {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-λ fs t) refl
+    ⋯-↑-λ               []       t = refl
+    ⋯-↑-λ {ℓ} {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-λ fs t) refl
 
-    ⋯-↑-foo : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s : List Kit} {µ₁ µ₂ µ₁' µ} (f : µ₁ –[ 𝕂s ]→* µ₂)
+    ⋯-↑-foo : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s : List Kit} {µ₁ µ₂ µ₁' µ} (f : µ₁ –[ 𝕂s ]→* µ₂)
              → (t : (µ₁ ▷▷ µ₁' ▷▷ µ) ⊢ 𝕖)
              → (foo {µ' = µ} t) ⋯* (f ↑** µ₁')
              ≡ foo {µ' = µ} (t ⋯* ((f ↑** µ₁') ↑** µ))
-    ⋯-↑-foo {.[]}     []       t = refl
-    ⋯-↑-foo {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-foo fs t) refl
+    ⋯-↑-foo {ℓ} {.[]}     []       t = refl
+    ⋯-↑-foo {ℓ} {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-foo fs t) refl
 
     -- TODO: does it still work if we pull out the µ₁'?
-    ⋯-↑ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂ } (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
+    ⋯-↑ : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂ } (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
           → f ≈ₓ g → f ≈ₜ g
     ⋯-↑ f g f≈g (` x) = f≈g x
     ⋯-↑ f g f≈g {µ₁' = µ₁'} (λx t) =
@@ -807,7 +882,7 @@ module Example where
                                                                            (⋯-↑ (f ↑** µ₁') (g ↑** µ₁') (≈↑** f g f≈g) t₂) ⟩
       (t₁ ⋯* (g ↑** µ₁' ↑** [])) · (t₂ ⋯* (g ↑** µ₁' ↑** [])) ≡⟨ sym (⋯-↑-· g t₁ t₂) ⟩
       (t₁ · t₂) ⋯* (g ↑** µ₁')                                ∎
-    ⋯-↑ {𝕂s₁} {𝕂s₂} {µ₁ = µ₁} {µ₂ = µ₂} f g f≈g {µ₁' = µ₁'} (foo {µ' = µ} t) =
+    ⋯-↑ f g f≈g {µ₁' = µ₁'} (foo {µ' = µ} t) =
       foo t ⋯* (f ↑** µ₁')                  ≡⟨ ⋯-↑-foo f t ⟩
       foo {µ' = µ} (t ⋯* (f ↑** µ₁' ↑** µ)) ≡⟨ cong foo (⋯-↑ (f ↑** µ₁') (g ↑** µ₁') (≈↑** f g f≈g) t) ⟩
       foo {µ' = µ} (t ⋯* (g ↑** µ₁' ↑** µ)) ≡⟨ sym (⋯-↑-foo g t) ⟩
@@ -835,14 +910,14 @@ module Example where
     open SubWithLaws ⦃ … ⦄
     open TraversalOps _⋯_
 
-    _⋯'_ : ∀ ⦃ 𝕊 : Sub ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    _⋯'_ : ∀ {ℓ} ⦃ 𝕊 : Sub ℓ ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
     _⋯'_ = _⋯_
 
-    ⋯-var' : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
+    ⋯-var' : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
             (` x) ⋯ f ≡ `/id (x & f)
     ⋯-var' = ⋯-var
 
-    ⋯-↑' : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
+    ⋯-↑' : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁ µ₂} (f : µ₁ –[ 𝕂s₁ ]→* µ₂) (g : µ₁ –[ 𝕂s₂ ]→* µ₂)
           → f ≈ₓ g → f ≈ₜ g
     ⋯-↑' = ⋯-↑
 

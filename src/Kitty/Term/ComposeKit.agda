@@ -3,7 +3,7 @@ open import Kitty.Term.Traversal using (Traversal)
 open import Kitty.Term.KitHomotopy using (KitHomotopy)
 import Kitty.Term.Sub
 
-module Kitty.Term.ComposeKit {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T) where
+module Kitty.Term.ComposeKit {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T) where
 
 open import Data.List using (List; []; _∷_; length)
 open import Data.List.Properties using (++-identityʳ)
@@ -43,7 +43,7 @@ private instance
   _ = kittᵣ
   _ = kittₛ
 
-record ComposeKit (𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ : Kit) : Set₁ where
+record ComposeKit (𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ : Kit) : Set (lsuc ℓ) where
   infixl  8  _&/⋯_
 
   private instance _ = 𝕂₁; _ = 𝕂₂; _ = 𝕂₁⊔𝕂₂

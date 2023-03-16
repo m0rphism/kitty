@@ -2,6 +2,7 @@ open import Kitty.Term.Modes
 
 module Kitty.Term.Sub {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
+open import Level renaming (suc to lsuc)
 open import Data.List.Properties using (++-assoc; ++-identityʳ)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
@@ -16,7 +17,7 @@ open Terms 𝕋
 open Kit ⦃ … ⦄
 open _⊑ₖ_ ⦃ … ⦄
 
-record Sub : Set₁ where
+record Sub ℓ : Set (lsuc ℓ) where
   infixl  12  _,ₖ_
   infixl  11  _↑_  _↑*_
   infixl  9  _∥_
@@ -24,7 +25,7 @@ record Sub : Set₁ where
   infix   4  _~_  _~'_
 
   field
-    _–[_]→_ : List VarMode → Kit → List VarMode → Set
+    _–[_]→_ : List VarMode → Kit → List VarMode → Set ℓ
 
     []ₖ  : ∀ ⦃ 𝕂 ⦄ → [] –[ 𝕂 ]→ []
     _,ₖ_ : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ∋/⊢[ 𝕂 ] id/m→M m → (µ₁ ▷ m) –[ 𝕂 ]→ µ₂
@@ -51,7 +52,7 @@ record Sub : Set₁ where
 
   -- Renaming/Substitution
 
-  _–→_ : ⦃ 𝕂 : Kit ⦄ → List VarMode → List VarMode → Set
+  _–→_ : ⦃ 𝕂 : Kit ⦄ → List VarMode → List VarMode → Set ℓ
   _–→_ ⦃ 𝕂 ⦄ µ₁ µ₂ = µ₁ –[ 𝕂 ]→ µ₂
 
   -- Extensional Equality
@@ -256,7 +257,7 @@ record Sub : Set₁ where
     syntax step-~'≡  f g~'h f≡g = f ~'≡⟨ f≡g ⟩ g~'h
     syntax step-~'˘ f g~'h g~'f = f ~'˘⟨ g~'f ⟩ g~'h
 
-  data Invert-ϕ ⦃ 𝕂 ⦄ {µ₂} : {µ₁ : List VarMode} → µ₁ –[ 𝕂 ]→ µ₂ → Set where
+  data Invert-ϕ ⦃ 𝕂 ⦄ {µ₂} : {µ₁ : List VarMode} → µ₁ –[ 𝕂 ]→ µ₂ → Set ℓ where
     ϕ~[]* : ∀ {ϕ} →
       ϕ ~ []* →
       Invert-ϕ ϕ
@@ -266,7 +267,7 @@ record Sub : Set₁ where
       ϕ ~ (ϕ' ,ₖ x/t) →
       Invert-ϕ ϕ
 
-  data Invert-ϕ' ⦃ 𝕂 ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) : Set where
+  data Invert-ϕ' ⦃ 𝕂 ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) : Set ℓ where
     ϕ~[]* :
       (eq : µ₁ ≡ []) →
       let sub = subst (_–[ 𝕂 ]→ µ₂) (sym eq) in
@@ -280,7 +281,7 @@ record Sub : Set₁ where
       ϕ ~ sub (ϕ' ,ₖ x/t) →
       Invert-ϕ' ϕ
 
-  data Invert-ϕ'-Rec ⦃ 𝕂 ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) : µ₁ –[ 𝕂 ]→ µ₂ → Set where
+  data Invert-ϕ'-Rec ⦃ 𝕂 ⦄ {µ₁} {µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) : µ₁ –[ 𝕂 ]→ µ₂ → Set ℓ where
     ϕ~[]* :
       (eq : µ₁ ≡ []) →
       let sub = subst (_–[ 𝕂 ]→ µ₂) (sym eq) in
@@ -306,13 +307,13 @@ record Sub : Set₁ where
   -- invert-ϕ'→ϕ' {µ₁} {µ₂} {ϕ} (ϕ~[]* µ₁≡[] ϕ~) = {!subst₂ (λ ■ ■' → Invert-ϕ {µ₁ = ■} ■') ? ? {!ϕ~[]* ϕ~!}!}
   -- invert-ϕ'→ϕ' (ϕ~,ₖ refl ϕ' x/t ϕ~) = ϕ~,ₖ ϕ' x/t ϕ~
 
-_–[_;_]→_ : List VarMode → Kit → Sub → List VarMode → Set
+_–[_;_]→_ : ∀ {ℓ} → List VarMode → Kit → Sub ℓ → List VarMode → Set ℓ
 _–[_;_]→_ µ₁ 𝕂 𝕊 µ₂ = Sub._–[_]→_ 𝕊 µ₁ 𝕂 µ₂
 
-record SubWithLaws : Set₁ where
+record SubWithLaws ℓ : Set (lsuc ℓ) where
   open Sub ⦃ … ⦄
   field
-    ⦃ SubWithLaws-Sub ⦄ : Sub
+    ⦃ SubWithLaws-Sub ⦄ : Sub ℓ
 
     &-,ₖ-here : ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) (x/t : µ₂ ∋/⊢[ 𝕂 ] id/m→M m)
                   → here refl & (ϕ ,ₖ x/t) ≡ x/t
@@ -340,16 +341,16 @@ record SubWithLaws : Set₁ where
       → (ϕ ↑* (µ ▷ m)) ~ ((ϕ ↑* µ) ↑ m)
 
     id-[] : ∀ ⦃ 𝕂 : Kit ⦄
-      → id {[]} ~ []ₖ
+      → id {µ = []} ~ []ₖ
 
     id-▷ : ∀ ⦃ 𝕂 : Kit ⦄ {µ m}
-      → id {µ ▷ m} ~ (id {µ} ↑ m)
+      → id {µ = µ ▷ m} ~ (id {µ = µ} ↑ m)
 
     []*-[]  : ∀ ⦃ 𝕂 : Kit ⦄
-      → []* {[]} ~ []ₖ
+      → []* {µ₂ = []} ~ []ₖ
 
     []*-▷  : ∀ ⦃ 𝕂 : Kit ⦄ {µ m}
-      → []* {µ ▷ m} ~ wkₖ m ([]* {µ})
+      → []* {µ₂ = µ ▷ m} ~ wkₖ m ([]* {µ₂ = µ})
 
     ↓-,ₖ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) (x/t : µ₂ ∋/⊢[ 𝕂 ] id/m→M m)
       → ((ϕ ,ₖ x/t) ↓) ~ ϕ
@@ -383,20 +384,20 @@ record SubWithLaws : Set₁ where
     `/id (x & ϕ)               ∎
 
   &-id : ∀ ⦃ 𝕂 : Kit ⦄ {µ} {m} (x : µ ∋ m)
-           → x & id {µ} ≡ id/` x
+           → x & id {µ = µ} ≡ id/` x
   &-id ⦃ 𝕂 ⦄ {µ ▷ m'} {m} x@(here refl) =
-    x & (id {µ ▷ m'})              ≡⟨ ~→~' id-▷ m' x ⟩
-    x & (id {µ} ↑ m')              ≡⟨ ~→~' (↑-,ₖ id m') _ x ⟩
-    x & (wkₖ _ (id {µ}) ,ₖ id/` x) ≡⟨ &-,ₖ-here (wkₖ _ (id {µ})) (id/` x) ⟩
-    id/` x                         ∎
+    x & (id {µ = µ ▷ m'})              ≡⟨ ~→~' id-▷ m' x ⟩
+    x & (id {µ = µ} ↑ m')              ≡⟨ ~→~' (↑-,ₖ id m') _ x ⟩
+    x & (wkₖ _ (id {µ = µ}) ,ₖ id/` x) ≡⟨ &-,ₖ-here (wkₖ _ (id {µ = µ})) (id/` x) ⟩
+    id/` x                             ∎
   &-id ⦃ 𝕂 ⦄ {µ ▷ m'} {m} (there x) =
-    there x & (id {µ ▷ m'})                        ≡⟨ ~→~' id-▷ _ (there x) ⟩
-    there x & (id {µ} ↑ m')                        ≡⟨ ~→~' (↑-,ₖ id m') _ (there x) ⟩
-    there x & (wkₖ _ (id {µ}) ,ₖ id/` (here refl)) ≡⟨ &-,ₖ-there (wkₖ _ (id {µ})) (id/` (here refl)) x ⟩
-    x & (wkₖ _ (id {µ}))                           ≡⟨ &-wkₖ-wk id x ⟩
-    wk m' (x & id {µ})                             ≡⟨ cong (wk m') (&-id x) ⟩
-    wk m' (id/` x)                                 ≡⟨ wk-id/` m' x ⟩
-    id/` (there x)                                 ∎
+    there x & (id {µ = µ ▷ m'})                        ≡⟨ ~→~' id-▷ _ (there x) ⟩
+    there x & (id {µ = µ} ↑ m')                        ≡⟨ ~→~' (↑-,ₖ id m') _ (there x) ⟩
+    there x & (wkₖ _ (id {µ = µ}) ,ₖ id/` (here refl)) ≡⟨ &-,ₖ-there (wkₖ _ (id {µ = µ})) (id/` (here refl)) x ⟩
+    x & (wkₖ _ (id {µ = µ}))                           ≡⟨ &-wkₖ-wk id x ⟩
+    wk m' (x & id {µ = µ})                             ≡⟨ cong (wk m') (&-id x) ⟩
+    wk m' (id/` x)                                     ≡⟨ wk-id/` m' x ⟩
+    id/` (there x)                                     ∎
 
   -- id-▷▷ : ∀ ⦃ 𝕂 : Kit ⦄ {µ µ'}
   --   → id {µ ▷▷ µ'} ~ (id {µ} ↑* µ')

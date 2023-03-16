@@ -113,7 +113,7 @@ open import Kitty.Term.Kit 𝕋
 open import Kitty.Term.Traversal 𝕋
 open import Kitty.Term.Sub 𝕋
 
-module KitTypeSubst (KT : KitType) (𝕊 : SubWithLaws) (T : Traversal 𝕊) where
+module KitTypeSubst {ℓ} (KT : KitType) (𝕊 : SubWithLaws ℓ) (T : Traversal 𝕊) where
   private instance _ = 𝕊
 
   open KitType KT

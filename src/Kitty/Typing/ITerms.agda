@@ -6,7 +6,7 @@ open import Kitty.Term.SubCompose using (SubCompose)
 open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
 
-module Kitty.Typing.ITerms {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T)
+module Kitty.Typing.ITerms {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T)
                            (𝕊C : SubCompose 𝕋 𝕊 T H) (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
@@ -29,7 +29,7 @@ private
     m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
     M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
     µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
-    ℓ ℓ₁ ℓ₂ : Level
+    ℓ₁ ℓ₂ : Level
     Γ Γ₁ Γ₂ : Ctx µ
     x y z : µ ∋ m
 

@@ -7,7 +7,7 @@ open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
 open import Kitty.Typing.ITerms using (ITerms)
 
-module Kitty.Typing.IKit {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T)
+module Kitty.Typing.IKit {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T)
                          (𝕊C : SubCompose 𝕋 𝕊 T H) (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋)
                          (IT : ITerms 𝕋 𝕊 T H 𝕊C C KT) where
 
@@ -42,7 +42,7 @@ private
     m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
     M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
     µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
-    ℓ ℓ₁ ℓ₂ : Level
+    ℓ₁ ℓ₂ : Level
     Γ Γ₁ Γ₂ : Ctx µ
     x y z : µ ∋ m
     𝕂 : Kit
@@ -233,7 +233,7 @@ private instance _ = ckitᵣ
 private instance _ = ckitₛᵣ
 private instance _ = ckitₛₛ
 
-record ITraversal : Set₁ where
+record ITraversal : Set (lsuc ℓ) where
   infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
   field

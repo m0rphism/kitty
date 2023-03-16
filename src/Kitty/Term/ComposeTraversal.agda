@@ -4,7 +4,7 @@ open import Kitty.Term.KitHomotopy using (KitHomotopy)
 import Kitty.Term.Sub
 import Kitty.Term.SubCompose
 
-module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊)
+module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊)
                                    (H : KitHomotopy 𝕋 𝕊 T) (𝕊C : Kitty.Term.SubCompose.SubCompose 𝕋 𝕊 T H) where
 
 open import Data.List using (List; []; _∷_)
@@ -53,7 +53,7 @@ private variable
 -- If the client provides a `ComposeTraversal` which works for all `ComposeKit`s,
 -- they get `⋯-assoc` for `_ᵣ∘ᵣ_`, `_ₛ∘ᵣ_`, `_ᵣ∘ₛ_`, and `_ₛ∘ₛ_`.
 
-record ComposeTraversal : Set₁ where
+record ComposeTraversal : Set (lsuc ℓ) where
   field
     ⋯-assoc :
       ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ : Kit ⦄

@@ -3,11 +3,12 @@ open import Kitty.Term.Traversal using (Traversal)
 open import Kitty.Term.KitHomotopy using (KitHomotopy)
 open import Kitty.Term.Sub using (SubWithLaws)
 
-module Kitty.Term.SubCompose {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : SubWithLaws 𝕋) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T) where
+module Kitty.Term.SubCompose {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T) where
 
 open import Data.List.Properties using (++-assoc; ++-identityʳ)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
+open import Level using () renaming (suc to lsuc)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
 open ≡-Reasoning
 
@@ -28,7 +29,7 @@ open Traversal T
 open _⊑ₖ_ ⦃ … ⦄
 open ~-Reasoning
 
-record SubCompose : Set₁ where
+record SubCompose : Set (lsuc ℓ) where
   infixl  9  _·ₖ_
   infixr  9  _∘ₖ_
 

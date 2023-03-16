@@ -73,7 +73,7 @@ open _⊑ₖ_ ⦃ … ⦄
 open import Kitty.Term.KitOrder 𝕋
 
 instance
-  Sub-→ : Sub
+  Sub-→ : Sub 0ℓ
   Sub-→ = record
     { _–[_]→_ = _–[_]→_
     ; []ₖ     = []ₖ
@@ -106,7 +106,7 @@ invert' {µ₁ = µ₁ ▷ m₁} ϕ = ϕ~,ₖ refl (ϕ ↓) (ϕ _ (here refl)) �
   m (there x) → refl
 
 instance
-  SubWithLaws-→ : SubWithLaws
+  SubWithLaws-→ : SubWithLaws 0ℓ
   SubWithLaws-→ = record
     { &-,ₖ-here  = λ ϕ x/t → refl
     ; &-,ₖ-there = λ ϕ x/t x → refl

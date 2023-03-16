@@ -6,7 +6,7 @@ open import Kitty.Term.SubCompose using (SubCompose)
 open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
 
-module Kitty.Typing.OPE {𝕄 : Modes} {𝕋 : Terms 𝕄} {𝕊 : SubWithLaws 𝕋} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
+module Kitty.Typing.OPE {𝕄 : Modes} {𝕋 : Terms 𝕄} {ℓ} {𝕊 : SubWithLaws 𝕋 ℓ} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
                         {𝕊C : SubCompose 𝕋 𝕊 T H} (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋) where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
@@ -40,7 +40,7 @@ private
     m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
     M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
     µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
-    ℓ ℓ₁ ℓ₂ : Level
+    ℓ₁ ℓ₂ : Level
 
 private instance _ = kitᵣ
 private instance _ = kitₛ
@@ -81,7 +81,7 @@ _∋_∶_ : Ctx µ → µ ∋ m → µ ∶⊢ m→M m → Set
 -- constructor).
 -- Also arbitrary renamings would allow swapping types in the context which
 -- could violate the telescoping (I think).
-data OPE : µ₁ →ᵣ µ₂ → Ctx µ₁ → Ctx µ₂ → Set where
+data OPE : µ₁ →ᵣ µ₂ → Ctx µ₁ → Ctx µ₂ → Set ℓ where
   ope-id : ∀ {Γ : Ctx µ} →
     OPE idᵣ Γ Γ
   ope-keep  : ∀ {ρ : µ₁ →ᵣ µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {T : µ₁ ∶⊢ m→M m} →

@@ -8,7 +8,7 @@ open import Axiom.Extensionality.Propositional using (Extensionality)
 open import Data.List using (List; []; _∷_; _++_)
 open import Data.List.Properties using (++-assoc)
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Level using (_⊔_)
+open import Level using (_⊔_; Setω)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; subst₂; sym; module ≡-Reasoning)
 open ≡-Reasoning
 
@@ -35,20 +35,20 @@ private
 
 -- Alternative KitTraversal ----------------------------------------------------
 
-record MultiTraversal : Set₁ where
+record MultiTraversal : Setω where
   constructor mkMultiTraversal
   infixl  5  _⋯_
 
   field
-    _⋯_   : ∀ ⦃ 𝕊 : Sub ⦄ ⦃ 𝕂 : Kit ⦄ →
+    _⋯_   : ∀ {ℓ} ⦃ 𝕊 : Sub ℓ ⦄ ⦃ 𝕂 : Kit ⦄ →
             µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
 
   open TraversalOps _⋯_ public
 
   field
-    ⋯-var : ∀ ⦃ 𝕊 : SubWithLaws ⦄ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂) →
+    ⋯-var : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂) →
             (` x) ⋯ f ≡ `/id (x & f)
-    ⋯-↑ : ∀ ⦃ 𝕊 : SubWithLaws ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (fs : µ₁ –[ 𝕂s₁ ]→* µ₂) (gs : µ₁ –[ 𝕂s₂ ]→* µ₂)
+    ⋯-↑ : ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s₁ 𝕂s₂ : List Kit} {µ₁} {µ₂} (fs : µ₁ –[ 𝕂s₁ ]→* µ₂) (gs : µ₁ –[ 𝕂s₂ ]→* µ₂)
           → fs ≈ₓ gs
           → fs ≈ₜ gs
 
@@ -63,7 +63,7 @@ module Derive (MT : MultiTraversal) where
   open import Kitty.Term.KitOrder terms public
   open _⊑ₖ_ ⦃ … ⦄ public
 
-  module WithSub (𝕊 : SubWithLaws) where
+  module WithSub {ℓ} (𝕊 : SubWithLaws ℓ) where
     private instance _ = 𝕊
 
     private

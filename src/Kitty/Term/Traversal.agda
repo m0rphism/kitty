@@ -1,11 +1,12 @@
 open import Kitty.Term.Modes
 import Kitty.Term.Sub as S
 
-module Kitty.Term.Traversal {𝕄 : Modes} (𝕋 : Terms 𝕄) (𝕊 : S.SubWithLaws 𝕋) where
+module Kitty.Term.Traversal {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : S.SubWithLaws 𝕋 ℓ) where
 
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
 open ≡-Reasoning
+open import Level using () renaming (suc to lsuc)
 
 open import Kitty.Term.Prelude
 open import Kitty.Util.SubstProperties
@@ -27,7 +28,7 @@ private variable
 
 private instance _ = kitᵣ
 
-record Traversal : Set₁ where
+record Traversal : Set (lsuc ℓ) where
   infixl   8  _⋯_
 
   field
@@ -139,8 +140,8 @@ record Traversal : Set₁ where
 
   -- Substitution / Renaming
 
-  _→ᵣ_ : List VarMode → List VarMode → Set
-  _→ₛ_ : List VarMode → List VarMode → Set
+  _→ᵣ_ : List VarMode → List VarMode → Set ℓ
+  _→ₛ_ : List VarMode → List VarMode → Set ℓ
   _→ᵣ_ = _–[ kitᵣ ]→_
   _→ₛ_ = _–[ kitₛ ]→_
 
