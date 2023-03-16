@@ -1,14 +1,9 @@
 module Kitty.Examples.SystemF-Derive.SubjectReduction where
 
-open import Data.List.Relation.Unary.Any using (here; there)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
-open ≡-Reasoning
-
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
 open import Kitty.Examples.SystemF-Derive.Definitions
-
 open import Kitty.Typing.IKit terms SubWithLaws-→ kit-traversal kit-homotopy SubCompose-→ compose-traversal kit-type
   record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
-
 open IKit ⦃ … ⦄
 
 _⊢⋯_ :
