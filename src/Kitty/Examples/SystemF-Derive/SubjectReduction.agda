@@ -6,23 +6,20 @@ open ≡-Reasoning
 
 open import Kitty.Examples.SystemF-Derive.Definitions
 
-open import Kitty.Typing.ITerms terms SubWithLaws-→ kit-traversal kit-homotopy SubCompose-→ compose-traversal kit-type
-
-iterms : ITerms
-iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
-
-open import Kitty.Typing.IKit terms SubWithLaws-→ kit-traversal kit-homotopy SubCompose-→ compose-traversal kit-type iterms
+open import Kitty.Typing.IKit terms SubWithLaws-→ kit-traversal kit-homotopy SubCompose-→ compose-traversal kit-type
+  record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 
 open IKit ⦃ … ⦄
 
-_⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
-         ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
-         ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
-         ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-         {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
-       Γ₁ ⊢ e ∶ t →
-       Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
-       Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+_⊢⋯_ :
+  ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+    ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
+    ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
+    ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
+    {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
+  Γ₁ ⊢ e ∶ t →
+  Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
+  Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
 ⊢` ∋x                              ⊢⋯ ⊢ϕ = ⊢`/id (⊢ϕ _ _ ∋x)
 ⊢λ {t₂ = t₂} ⊢e                    ⊢⋯ ⊢ϕ = ⊢λ (subst (_ ⊢ _ ∶_) (dist-↑-f t₂ _) (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)))
 ⊢Λ {t₂ = t₂} ⊢e                    ⊢⋯ ⊢ϕ = ⊢Λ (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _))
@@ -31,10 +28,7 @@ _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit �
                                                  (⊢∙ (⊢t₁ ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)) (⊢t₂ ⊢⋯ ⊢ϕ) (⊢e₁ ⊢⋯ ⊢ϕ))
 ⊢τ                                 ⊢⋯ ⊢ϕ = ⊢τ
 
-itraversal : ITraversal
-itraversal = record { _⊢⋯_ = _⊢⋯_ }
-
-open ITraversal itraversal public hiding (_⊢⋯_)
+open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
 subject-reduction :
   Γ ⊢ e ∶ t →
