@@ -14,10 +14,6 @@ iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 open import Kitty.Typing.IKit terms SubWithLaws-→ kit-traversal kit-homotopy SubCompose-→ compose-traversal kit-type iterms
 
 open IKit ⦃ … ⦄
-open import Kitty.Term.KitOrder terms
-open _⊑ₖ_ ⦃ … ⦄
-
-open KitT ⦃ … ⦄
 
 _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
          ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
@@ -39,10 +35,6 @@ itraversal : ITraversal
 itraversal = record { _⊢⋯_ = _⊢⋯_ }
 
 open ITraversal itraversal public hiding (_⊢⋯_)
-
-instance
-  _ = ikitᵣ
-  _ = ikitₛ
 
 subject-reduction :
   Γ ⊢ e ∶ t →

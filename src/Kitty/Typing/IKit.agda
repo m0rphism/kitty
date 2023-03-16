@@ -250,30 +250,27 @@ record ITraversal : Set₁ where
     -- ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
     --         (` x) ⋯ f ≡ subst (µ₂ ⊢_) (id/m→M/id m) (tm _ (f _ x))
 
-  ikitᵣ : IKit kitᵣ kittᵣ ckitᵣ ckitᵣ
-  IKit._∋/⊢_∶_ ikitᵣ = _∋_∶_
-  IKit.∋/⊢∶-lookup ikitᵣ = λ _ → refl
-  IKit.id/⊢`   ikitᵣ = λ ⊢x → ⊢x
-  IKit.⊢`/id   ikitᵣ = ⊢`
-  IKit.⊢`/id'  ikitᵣ = ⊢`
-  IKit.∋wk/⊢wk ikitᵣ _ _ _ _ refl = refl
+  instance
+    ikitᵣ : IKit kitᵣ kittᵣ ckitᵣ ckitᵣ
+    IKit._∋/⊢_∶_ ikitᵣ = _∋_∶_
+    IKit.∋/⊢∶-lookup ikitᵣ = λ _ → refl
+    IKit.id/⊢`   ikitᵣ = λ ⊢x → ⊢x
+    IKit.⊢`/id   ikitᵣ = ⊢`
+    IKit.⊢`/id'  ikitᵣ = ⊢`
+    IKit.∋wk/⊢wk ikitᵣ _ _ _ _ refl = refl
 
-  private instance _ = ikitᵣ
-
-  ikitₛ : IKit kitₛ kittₛ ckitₛᵣ ckitₛₛ
-  IKit._∋/⊢_∶_ ikitₛ = _⊢_∶_
-  IKit.∋/⊢∶-lookup ikitₛ = λ _ → ⊢` refl
-  IKit.id/⊢`   ikitₛ = ⊢`
-  IKit.⊢`/id   ikitₛ = λ ⊢t → ⊢t
-  IKit.⊢`/id'  ikitₛ = λ ⊢t → ⊢t
-  IKit.∋wk/⊢wk ikitₛ Γ t' x t ⊢e = ⊢e ⊢⋯ λ x₁ t₁ ⊢x₁ →
-    (Γ ▶ t') ∋ (x₁ & wknᵣ) ∶ (t₁ ⋯ wknᵣ)
-      by subst (λ ■ → (Γ ▶ t') ∋ ■ ∶ (t₁ ⋯ wknᵣ))
-               (sym (trans (&-wkₖ-wk id x₁) (cong there (&-id x₁)))) (
-    (Γ ▶ t') ∋ (there x₁) ∶ (t₁ ⋯ wknᵣ)
-      by (∋wk/⊢wk Γ t' x₁ t₁ ⊢x₁))
-
-  private instance _ = ikitₛ
+    ikitₛ : IKit kitₛ kittₛ ckitₛᵣ ckitₛₛ
+    IKit._∋/⊢_∶_ ikitₛ = _⊢_∶_
+    IKit.∋/⊢∶-lookup ikitₛ = λ _ → ⊢` refl
+    IKit.id/⊢`   ikitₛ = ⊢`
+    IKit.⊢`/id   ikitₛ = λ ⊢t → ⊢t
+    IKit.⊢`/id'  ikitₛ = λ ⊢t → ⊢t
+    IKit.∋wk/⊢wk ikitₛ Γ t' x t ⊢e = ⊢e ⊢⋯ λ x₁ t₁ ⊢x₁ →
+      (Γ ▶ t') ∋ (x₁ & wknᵣ) ∶ (t₁ ⋯ wknᵣ)
+        by subst (λ ■ → (Γ ▶ t') ∋ ■ ∶ (t₁ ⋯ wknᵣ))
+                (sym (trans (&-wkₖ-wk id x₁) (cong there (&-id x₁)))) (
+      (Γ ▶ t') ∋ (there x₁) ∶ (t₁ ⋯ wknᵣ)
+        by (∋wk/⊢wk Γ t' x₁ t₁ ⊢x₁))
 
   open IKit ikitᵣ public using () renaming (_∋*/⊢*_∶_ to _∋*_∶_; ∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
   open IKit ikitₛ public using () renaming (_∋*/⊢*_∶_ to _⊢*_∶_; ∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)

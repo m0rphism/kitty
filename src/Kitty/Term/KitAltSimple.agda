@@ -13,7 +13,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong
 open ≡-Reasoning
 
 open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.MultiSub 𝕋
 open import Kitty.Term.Prelude
 open import Kitty.Term.Sub 𝕋
@@ -25,7 +24,6 @@ open Terms 𝕋
 open Kit ⦃ … ⦄
 open Sub ⦃ … ⦄
 open SubWithLaws ⦃ … ⦄
-open _⊑ₖ_ ⦃ … ⦄
 
 open import Kitty.Util.SubstProperties
 
@@ -62,6 +60,9 @@ module Derive (KT : KitTraversalAlt) where
 
   open KitTraversalAlt KT public
 
+  open import Kitty.Term.KitOrder terms public
+  open _⊑ₖ_ ⦃ … ⦄ public
+
   module WithSub (𝕊 : SubWithLaws) where
     private instance _ = 𝕊
 
@@ -89,6 +90,7 @@ module Derive (KT : KitTraversalAlt) where
     open Traversal 𝕊 kit-traversal hiding (_⋯_; ⋯-var) public
 
     open import Kitty.Term.KitT terms 𝕊 kit-traversal public
+    open KitT ⦃ … ⦄ public
 
     private instance _ = kitᵣ; _ = kitₛ
     private instance _ = kittᵣ; _ = kittₛ
@@ -176,7 +178,6 @@ module Derive (KT : KitTraversalAlt) where
     open WithSubCompose SubCompose-→ public
     open Sub Sub-→ public
     open SubWithLaws SubWithLaws-→ public
-    open KitT ⦃ … ⦄ public
 
     instance
       kitᵣ' = kitᵣ
