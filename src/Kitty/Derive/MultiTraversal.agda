@@ -928,15 +928,15 @@ module Example where
     open Sub-Functional
 
     `id : [] ⊢ 𝕖
-    `id = λx ` here refl
+    `id = λx (# 0)
 
     `f : [ 𝕖 ] ⊢ 𝕖
-    `f = λx (` here refl) · (` there (here refl))
+    `f = λx (# 0) · (# 1)
 
     `f' : [] ⊢ 𝕖
     `f' = `f ⋯ ⦅ `id ⦆ₛ
 
-    test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    test-`f' : `f' ≡ λx (# 0) · (λx (# 0))
     test-`f' = refl
 
   module Derived' where
@@ -947,15 +947,15 @@ module Example where
     open import Data.List.Relation.Unary.Any using (here; there)
 
     `id : [] ⊢ 𝕖
-    `id = λx ` here refl
+    `id = λx (# 0)
 
     `f : [ 𝕖 ] ⊢ 𝕖
-    `f = λx (` here refl) · (` there (here refl))
+    `f = λx (# 0) · (# 1)
 
     `f' : [] ⊢ 𝕖
     `f' = `f ⋯ ⦅ `id ⦆ₛ
 
-    test-`f' : `f' ≡ λx (` here refl) · (λx ` here refl)
+    test-`f' : `f' ≡ λx (# 0) · (λx (# 0))
     test-`f' = refl
 
 module ExampleVarEq where

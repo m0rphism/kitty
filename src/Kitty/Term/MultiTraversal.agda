@@ -58,6 +58,8 @@ module Derive (MT : MultiTraversal) where
   terms : Terms 𝕄
   terms = 𝕋
 
+  open Terms terms public using (#_)
+
   open MultiTraversal MT public
 
   open import Kitty.Term.KitOrder terms public

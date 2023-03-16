@@ -35,7 +35,7 @@ record Terms (𝕄 : Modes) : Set₁ where
     count {_} {_ ▷ _} {zero}    (s≤s z≤n)  =  here refl
     count {_} {µ ▷ _} {(suc n)} (s≤s p)    =  there (count p)
 
-    infix  9 #_
+    infix  99 #_
 
     #_ : ∀ {µ : List VarMode}
       → (n : ℕ)
