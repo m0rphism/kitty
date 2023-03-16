@@ -59,9 +59,9 @@ variable
   E E₁ E₂ E₃ E' E₁' E₂' : µ ⊢ M
 
 -- Deriving Renaming/Substitution and related lemmas.
-open import Kitty.Derive.Traversal using (derive-traversal; module Derived)
-unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
-open Derived traversal public
+open import Kitty.Derive.MultiTraversal using (derive-MultiTraversal; module Derived)
+unquoteDecl multi-traversal = derive-MultiTraversal 𝕄 _⊢_ multi-traversal
+open Derived multi-traversal public
 open Sub-Functional public
 
 pattern `_ x = `[ refl ] x  

@@ -2,7 +2,7 @@ open import Kitty.Term.Modes
 
 -- Version of KitAlt with a simpler KitTraversal.⋯-↑ field.
 
-module Kitty.Term.KitAltSimple {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.Term.MultiTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) where
 
 open import Axiom.Extensionality.Propositional using (Extensionality)
 open import Data.List using (List; []; _∷_; _++_)
@@ -35,8 +35,8 @@ private
 
 -- Alternative KitTraversal ----------------------------------------------------
 
-record KitTraversalAlt : Set₁ where
-  constructor mkKitTraversalAlt
+record MultiTraversal : Set₁ where
+  constructor mkMultiTraversal
   infixl  5  _⋯_
 
   field
@@ -52,13 +52,13 @@ record KitTraversalAlt : Set₁ where
           → fs ≈ₓ gs
           → fs ≈ₜ gs
 
--- Deriving KitTraversal, KitAssoc, and KitAssocLemmas -------------------------
+-- Deriving all other term-level structures ------------------------------------
 
-module Derive (KT : KitTraversalAlt) where
+module Derive (MT : MultiTraversal) where
   terms : Terms 𝕄
   terms = 𝕋
 
-  open KitTraversalAlt KT public
+  open MultiTraversal MT public
 
   open import Kitty.Term.KitOrder terms public
   open _⊑ₖ_ ⦃ … ⦄ public

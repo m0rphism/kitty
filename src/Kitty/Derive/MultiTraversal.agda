@@ -1,6 +1,6 @@
 {-# OPTIONS -vreflection-debug:10 #-}
 
-module Kitty.Derive.Traversal where
+module Kitty.Derive.MultiTraversal where
 
 module Deriving where
   open import Agda.Primitive using (Level; _⊔_) renaming (lzero to 0ℓ)
@@ -39,7 +39,7 @@ module Deriving where
   open import Kitty.Term.Prelude using (_∋_)
   open import Kitty.Term.Modes
   import Kitty.Term.Kit
-  import Kitty.Term.KitAltSimple
+  import Kitty.Term.MultiTraversal
   open import Kitty.Util.Star using (Star; []; _∷_)
   open import Kitty.Derive.Common
   import Kitty.Term.Sub
@@ -344,7 +344,7 @@ module Deriving where
     let open Terms 𝕋
     let open Kitty.Term.Kit 𝕋
     let open Kitty.Term.Prelude using (_▷▷_)
-    let open Kitty.Term.KitAltSimple 𝕋
+    let open Kitty.Term.MultiTraversal 𝕋
     let open Kitty.Term.Sub 𝕋
     let open Sub ⦃ … ⦄
     let open SubWithLaws ⦃ … ⦄
@@ -500,7 +500,7 @@ module Deriving where
     let open Terms 𝕋
     let open Kitty.Term.Kit 𝕋
     let open Kitty.Term.Prelude using (_▷▷_)
-    let open Kitty.Term.KitAltSimple 𝕋
+    let open Kitty.Term.MultiTraversal 𝕋
     let open Kitty.Term.Sub 𝕋
     let open Kitty.Term.MultiSub 𝕋
     let open Sub ⦃ … ⦄
@@ -680,22 +680,22 @@ module Deriving where
       ⋯-↑-ty
       (var-clause ∷ non-var-clauses)
 
-  derive-KitTraversalAlt : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
-  derive-KitTraversalAlt {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
+  derive-MultiTraversal-record : {𝕄 : Modes} → Terms 𝕄 → Name → Name → Name → Name → TC ⊤
+  derive-MultiTraversal-record {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traversal-nm = runFreshT do
     𝕋-nm ← term→name =<< quoteTC' 𝕋
     let body =
-          con (quote Kitty.Term.KitAltSimple.mkKitTraversalAlt)
+          con (quote Kitty.Term.MultiTraversal.mkMultiTraversal)
             [ argᵥ (def ⋯-nm [])
             ; argᵥ (def ⋯-var-nm [])
             ; argᵥ (def ⋯-↑-nm [])
             ]
     defdecFun'
       (argᵥ kit-traversal-nm)
-      (def (quote Kitty.Term.KitAltSimple.KitTraversalAlt) [ argᵥ (def 𝕋-nm []) ])
+      (def (quote Kitty.Term.MultiTraversal.MultiTraversal) [ argᵥ (def 𝕋-nm []) ])
       [ clause [] [] body ]
 
-  derive-traversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
-  derive-traversal 𝕄 _⊢_ traversal-nm = do
+  derive-MultiTraversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
+  derive-MultiTraversal 𝕄 _⊢_ traversal-nm = do
     liftTC $ printStr "Deriving Terms"
     terms-nm ← freshName "terms"
     derive-Terms 𝕄 _⊢_ terms-nm
@@ -713,15 +713,14 @@ module Deriving where
     ⋯-↑-nm ← freshName "⋯-↑"
     derive-⋯-↑ terms ⋯-nm ⋯-↑-nm
 
-    derive-KitTraversalAlt terms ⋯-nm ⋯-var-nm ⋯-↑-nm traversal-nm
+    derive-MultiTraversal-record terms ⋯-nm ⋯-var-nm ⋯-↑-nm traversal-nm
 
+  module Derived {𝕄 : Modes} {𝕋 : Terms 𝕄} (T : Kitty.Term.MultiTraversal.MultiTraversal 𝕋) where
+    import Kitty.Term.MultiTraversal
+    open Kitty.Term.MultiTraversal.Derive _ T public
 
-  module Derived {𝕄 : Modes} {𝕋 : Terms 𝕄} (T : Kitty.Term.KitAltSimple.KitTraversalAlt 𝕋) where
-    import Kitty.Term.KitAltSimple
-    open Kitty.Term.KitAltSimple.Derive _ T public
-
-open Deriving using  (module Derived; derive-traversal) public 
-open Deriving hiding (module Derived; derive-traversal) 
+open Deriving using  (module Derived; derive-MultiTraversal) public 
+open Deriving hiding (module Derived; derive-MultiTraversal) 
 
 module Example where
   open import Kitty.Term.Prelude
@@ -755,7 +754,7 @@ module Example where
 
     open import Kitty.Term.Sub terms
     open import Kitty.Term.MultiSub terms
-    open import Kitty.Term.KitAltSimple terms
+    open import Kitty.Term.MultiTraversal terms
     open import Kitty.Term.Kit terms
     open import Kitty.Util.Star
     open Kit ⦃ ... ⦄
@@ -814,10 +813,10 @@ module Example where
       foo {µ' = µ} (t ⋯* (g ↑** µ₁' ↑** µ)) ≡⟨ sym (⋯-↑-foo g t) ⟩
       foo t ⋯* (g ↑** µ₁')                  ∎
 
-    kit-traversal-alt : KitTraversalAlt
-    kit-traversal-alt = mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
+    multi-traversal : MultiTraversal
+    multi-traversal = mkMultiTraversal _⋯_ ⋯-var ⋯-↑
 
-    open Derived kit-traversal-alt
+    open Derived multi-traversal
 
   module Half-Derived where
     unquoteDecl terms = derive-Terms 𝕄 _⊢_ terms
@@ -827,7 +826,7 @@ module Example where
 
     -- Tests
     open import Data.List.Relation.Unary.Any using (here; there)
-    open import Kitty.Term.KitAltSimple terms
+    open import Kitty.Term.MultiTraversal terms
     open import Kitty.Term.Kit terms
     open import Kitty.Term.Sub terms
     open import Kitty.Term.MultiSub terms
@@ -847,10 +846,10 @@ module Example where
           → f ≈ₓ g → f ≈ₜ g
     ⋯-↑' = ⋯-↑
 
-    kit-traversal-alt : KitTraversalAlt
-    kit-traversal-alt = mkKitTraversalAlt _⋯_ ⋯-var ⋯-↑
+    multi-traversal : MultiTraversal
+    multi-traversal = mkMultiTraversal _⋯_ ⋯-var ⋯-↑
 
-    open Derived kit-traversal-alt hiding (_⋯_; ⋯-var; ⋯-↑)
+    open Derived multi-traversal hiding (_⋯_; ⋯-var; ⋯-↑)
     open Sub-Functional
 
     `id : [] ⊢ 𝕖
@@ -866,7 +865,7 @@ module Example where
     test-`f' = refl
 
   module Derived' where
-    unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
+    unquoteDecl traversal = derive-MultiTraversal 𝕄 _⊢_ traversal
     open Derived traversal
     open Sub-Functional
 
@@ -911,6 +910,6 @@ module ExampleVarEq where
     foo   : ∀ {µ µ'}  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕖
 
   module Derived' where
-    unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
+    unquoteDecl traversal = derive-MultiTraversal 𝕄 _⊢_ traversal
     open Derived traversal
 
