@@ -46,8 +46,8 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
             `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ)) ≡⟨ ↑*'~↑* µ _ x ⟩
             `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑* µ))  ≡⟨ id↑*~id µ _ _ x ⟩
             `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄))       ≡⟨ cong `/id (&-id x) ⟩
-            `/id (id/` x)                   ≡⟨ id/`/id x ⟩
-            ` x                             ∎)
+            `/id (id/` x)                    ≡⟨ id/`/id x ⟩
+            ` x                              ∎)
           v
 
   kit-traversal : Traversal 𝕊

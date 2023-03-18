@@ -28,11 +28,11 @@ open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
 open Kitty.Term.ComposeTraversal.ComposeTraversal C
 open Kitty.Typing.Types.KitType KT
 
+open SubWithLaws 𝕊
+open Sub SubWithLaws-Sub
 open Kit ⦃ … ⦄
 open KitT ⦃ … ⦄
 open ComposeKit ⦃ … ⦄
-open Sub ⦃ … ⦄
-open SubWithLaws ⦃ … ⦄
 open SubCompose ⦃ … ⦄
 
 private
