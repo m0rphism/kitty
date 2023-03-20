@@ -32,7 +32,7 @@ subject-reduction : ∀ {Σ : Ctx µ} {σ : µ →ₛ µ} {σ' : µ' →ₛ µ'}
 subject-reduction {Σ = Σ} (⊢⟨⟩ ⊢σ (⊢· {t₂ = t₂} (⊢λ ⊢e₁) ⊢e₂)) β-λ = Σ , ⊢⟨⟩ ⊢σ (subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ t₂ _) (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆))
 subject-reduction {Σ = Σ} (⊢⟨⟩ {t = t} ⊢σ ⊢e) β-new = Σ ▶ wk*' _ t ,
                                                       ⊢⟨⟩ {!⊢σ ∋↑/⊢↑ ?!} (⊢` {!refl!})
-subject-reduction {Σ = Σ} (⊢⟨⟩ ⊢σ (⊢get (⊢` {x = x} ⊢x))) β-* = Σ , ⊢⟨⟩ ⊢σ {!⊢σ x _ ⊢x!}
+subject-reduction {Σ = Σ} (⊢⟨⟩ ⊢σ (⊢get (⊢` {x = x} ⊢x))) β-* = Σ , ⊢⟨⟩ ⊢σ {!⊢σ x _ !}
 subject-reduction {Σ = Σ} (⊢⟨⟩ ⊢σ ⊢e) β-≔ = {!!}
 subject-reduction {Σ = Σ} (⊢⟨⟩ ⊢σ ⊢e) (ξ-·₁ e↪e') = {!!}
 subject-reduction {Σ = Σ} (⊢⟨⟩ ⊢σ ⊢e) (ξ-·₂ e↪e') = {!!}
