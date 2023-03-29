@@ -7,7 +7,7 @@ open import Data.List.Relation.Unary.Any using (here; there) public
 
 -- Fixities --------------------------------------------------------------------
 
-infix   3  _⊢_  _↪_  _⊢_∶_
+infix   3  _⊢_  _↪_  _↪*_  _⊢_∶_
 infixr  5  λx_  ∀[x∶_]_
 -- infixr  6  _⇒_
 infixl  6  _·_
@@ -129,48 +129,45 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
   ⊢` : ∀ {x : µ ∋ m} →
     Γ ∋ x ∶ T →
     Γ ⊢ ` x ∶ T
-  -- ⊢`[_] : ∀ {x : µ ∋ m} {M} {T : µ ⊢ M} →
-  --   M ≡ m→M m →
-  --   Γ ∋ x ∶ T →
-  --   Γ ⊢ ` x ∶ T
   ⊢λ :
-    Value t₁ →
     Γ ⊢ t₁ ∶ ★ →
     Γ ▶ t₁ ⊢ e ∶ t₂ →
     Γ ⊢ λx e ∶ ∀[x∶ t₁ ] t₂
   ⊢∀ :
-    t₁ ⇓ t₁' →
     Γ ⊢ t₁ ∶ ★ →
-    Γ ▶ t₁' ⊢ t₂ ∶ ★ →
+    Γ ▶ t₁ ⊢ t₂ ∶ ★ →
     Γ ⊢ ∀[x∶ t₁ ] t₂ ∶ ★
   ⊢· :
     Γ ⊢ e₁ ∶ ∀[x∶ t₁ ] t₂ →
     Γ ⊢ e₂ ∶ t₁ →
-    (t₂ ⋯ₛ ⦅ t₁ ⦆ₛ) ⇓ t →
-    Γ ⊢ e₁ · e₂ ∶ t
+    Γ ⊢ e₁ · e₂ ∶ t₂ ⋯ₛ ⦅ t₁ ⦆ₛ
   ⊢★ :
     Γ ⊢ ★ ∶ ★
+  ⊢↪ :
+    t ↪ t' →
+    Γ ⊢ e ∶ t →
+    Γ ⊢ e ∶ t'
 
-Values : Ctx µ → Set
-Values {µ} Γ = ∀ {m} (x : µ ∋ m) → Value (Γ x) 
+-- Values : Ctx µ → Set
+-- Values {µ} Γ = ∀ {m} (x : µ ∋ m) → Value (Γ x) 
 
-Values-ext : ∀ {Γ : Ctx µ} → Values Γ → Value t → Values (Γ ▶ t)
-Values-ext {µ} VΓ Vt (here refl) = Vt
-Values-ext {µ} VΓ Vt (there x) = VΓ x
+-- Values-ext : ∀ {Γ : Ctx µ} → Values Γ → Value t → Values (Γ ▶ t)
+-- Values-ext {µ} VΓ Vt (here refl) = Vt
+-- Values-ext {µ} VΓ Vt (there x) = VΓ x
 
-postulate
-  Value-wk-telescope : Value (Γ x) → Value (wk-telescope Γ x)
--- Value-wk-telescope : Value (Γ x) → Value (wk-telescope Γ x)
--- Value-wk-telescope {x = here refl} VΓx = {!VΓx!}
--- Value-wk-telescope {x = there x} VΓx = {!!}
+-- postulate
+--   Value-wk-telescope : Value (Γ x) → Value (wk-telescope Γ x)
+-- -- Value-wk-telescope : Value (Γ x) → Value (wk-telescope Γ x)
+-- -- Value-wk-telescope {x = here refl} VΓx = {!VΓx!}
+-- -- Value-wk-telescope {x = there x} VΓx = {!!}
 
-⊢-Value :
-  ∀ {µ} {Γ : Ctx µ} {M} {e : µ ⊢ M} {t : µ ⊢ M}
-  → Values Γ
-  → Γ ⊢ e ∶ t
-  → Value t
-⊢-Value {Γ = Γ} VΓ (⊢` {x = x} refl) = Value-wk-telescope {Γ = Γ} (VΓ x)
-⊢-Value VΓ (⊢λ Vt₁ ⊢e₁ ⊢e₂)          = ∀[x∶ Vt₁ ] ⊢-Value (Values-ext VΓ Vt₁) ⊢e₂
-⊢-Value VΓ (⊢∀ t₁⇓t₁' ⊢t₁ ⊢t₂)       = ★
-⊢-Value VΓ (⊢· ⊢e₁ ⊢e₂ ⇓[ _ , Vt ])  = Vt
-⊢-Value VΓ ⊢★                        = ★
+-- ⊢-Value :
+--   ∀ {µ} {Γ : Ctx µ} {M} {e : µ ⊢ M} {t : µ ⊢ M}
+--   → Values Γ
+--   → Γ ⊢ e ∶ t
+--   → Value t
+-- ⊢-Value {Γ = Γ} VΓ (⊢` {x = x} refl) = Value-wk-telescope {Γ = Γ} (VΓ x)
+-- ⊢-Value VΓ (⊢λ Vt₁ ⊢e₁ ⊢e₂)          = ∀[x∶ Vt₁ ] ⊢-Value (Values-ext VΓ Vt₁) ⊢e₂
+-- ⊢-Value VΓ (⊢∀ t₁⇓t₁' ⊢t₁ ⊢t₂)       = ★
+-- ⊢-Value VΓ (⊢· ⊢e₁ ⊢e₂ ⇓[ _ , Vt ])  = Vt
+-- ⊢-Value VΓ ⊢★                        = ★
