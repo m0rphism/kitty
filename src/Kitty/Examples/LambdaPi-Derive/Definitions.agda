@@ -109,18 +109,18 @@ data _↪_ : µ ⊢ M → µ ⊢ M → Set where
 
 data _≣_ : µ ⊢ M → µ ⊢ M → Set where
   ≣-refl : e ≣ e
-  ≣-↪ : e₁ ↪ e₂ → e₂ ≣ e₃ → e₁ ≣ e₃
-  ≣-↩ : e₂ ↪ e₁ → e₂ ≣ e₃ → e₁ ≣ e₃
+  ≣-step-↪ : e₁ ↪ e₂ → e₂ ≣ e₃ → e₁ ≣ e₃
+  ≣-step-↩ : e₂ ↪ e₁ → e₂ ≣ e₃ → e₁ ≣ e₃
 
 ≣-trans : e₁ ≣ e₂ → e₂ ≣ e₃ → e₁ ≣ e₃
 ≣-trans ≣-refl        e₂≣e₃ = e₂≣e₃
-≣-trans {e₂ = e₃} {e₃ = e₄} (≣-↪ e₁↪e₂ e₂≣e₃) e₃≣e₄ = ≣-↪ e₁↪e₂ (≣-trans e₂≣e₃ e₃≣e₄)
-≣-trans {e₂ = e₃} {e₃ = e₄} (≣-↩ e₂↪e₁ e₂≣e₃) e₃≣e₄ = ≣-↩ e₂↪e₁ (≣-trans e₂≣e₃ e₃≣e₄)
+≣-trans {e₂ = e₃} {e₃ = e₄} (≣-step-↪ e₁↪e₂ e₂≣e₃) e₃≣e₄ = ≣-step-↪ e₁↪e₂ (≣-trans e₂≣e₃ e₃≣e₄)
+≣-trans {e₂ = e₃} {e₃ = e₄} (≣-step-↩ e₂↪e₁ e₂≣e₃) e₃≣e₄ = ≣-step-↩ e₂↪e₁ (≣-trans e₂≣e₃ e₃≣e₄)
 
 ≣-sym : e₁ ≣ e₂ → e₂ ≣ e₁
-≣-sym ≣-refl                      = ≣-refl
-≣-sym {e₂ = e₃} (≣-↪ e₁↪e₂ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-↩ e₁↪e₂ ≣-refl)
-≣-sym {e₂ = e₃} (≣-↩ e₂↪e₁ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-↪ e₂↪e₁ ≣-refl)
+≣-sym ≣-refl                           = ≣-refl
+≣-sym {e₂ = e₃} (≣-step-↪ e₁↪e₂ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-step-↩ e₁↪e₂ ≣-refl)
+≣-sym {e₂ = e₃} (≣-step-↩ e₂↪e₁ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-step-↪ e₂↪e₁ ≣-refl)
 
 ≣-f :
   ∀ {µ} {µ'} {M}
@@ -130,8 +130,14 @@ data _≣_ : µ ⊢ M → µ ⊢ M → Set where
   → e ≣ e'
   → f e ≣ f e'
 ≣-f f F ≣-refl = ≣-refl
-≣-f f F {e' = e''} (≣-↪ e↪e' e'≣e'') = ≣-↪ (F e↪e') (≣-f f F e'≣e'')
-≣-f f F {e' = e''} (≣-↩ e'↪e e'≣e'') = ≣-↩ (F e'↪e) (≣-f f F e'≣e'')
+≣-f f F {e' = e''} (≣-step-↪ e↪e' e'≣e'') = ≣-step-↪ (F e↪e') (≣-f f F e'≣e'')
+≣-f f F {e' = e''} (≣-step-↩ e'↪e e'≣e'') = ≣-step-↩ (F e'↪e) (≣-f f F e'≣e'')
+
+≣-↪ : e ↪ e' → e ≣ e'
+≣-↪ e↪e' = ≣-step-↪ e↪e' ≣-refl
+
+≣-↩ : e' ↪ e → e ≣ e'
+≣-↩ e'↪e = ≣-step-↩ e'↪e ≣-refl
 
 ≣-λ : e ≣ e' → λx e ≣ λx e'
 ≣-λ = ≣-f λx_ ξ-λ
