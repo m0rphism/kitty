@@ -136,6 +136,10 @@ data _↪_ : µ ⊢ M → µ ⊢ M → Set where
 --   --   Cong R e₁ e₁' →
 --   --   Cong R e₂ e₂' →
 --   --   Cong R (e₁ · e₂) (e₁' · e₂')
+--
+-- We can also derive Congruency-Closure for call-by-value and
+-- call-by-name as a module that's parameterized over the
+-- Value-relation!
 
 -- _↪'_ : µ ⊢ M → µ ⊢ M → Set
 -- _↪'_ = Cong (_↪β_)
