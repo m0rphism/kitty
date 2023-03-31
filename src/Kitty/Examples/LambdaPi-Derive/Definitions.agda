@@ -4,6 +4,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Kitty.Term.Prelude using (_∋_; List; []; _▷_) public
 open import Kitty.Term.Modes using (Modes)
 open import Data.List.Relation.Unary.Any using (here; there) public
+open import Kitty.Examples.LambdaPi-Derive.Closures
 
 -- Fixities --------------------------------------------------------------------
 
@@ -181,13 +182,22 @@ data _↪_ : µ ⊢ M → µ ⊢ M → Set where
 -- ≣-sym {e₂ = e₃} (≣-step-↪ e₁↪e₂ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-step-↩ e₁↪e₂ ≣-refl)
 -- ≣-sym {e₂ = e₃} (≣-step-↩ e₂↪e₁ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-step-↪ e₂↪e₁ ≣-refl)
 
-data _↪*_ : µ ⊢ M → µ ⊢ M → Set where
-  refl :
-    t ↪* t
-  step :
-    t₁ ↪  t₂ →
-    t₂ ↪* t₃ →
-    t₁ ↪* t₃
+-- data _↪*_ : µ ⊢ M → µ ⊢ M → Set where
+--   refl :
+--     t ↪* t
+--   step :
+--     t₁ ↪  t₂ →
+--     t₂ ↪* t₃ →
+--     t₁ ↪* t₃
+
+open ReflexiveTransitiveClosure₂ (_⊢_) _↪_ renaming
+  ( ReflTrans to _↪*_
+  ; map-ReflTrans to map-↪*
+  ; _⟨_⟩_ to _↪⟨_⟩_
+  ; _*⟨_⟩_ to _↪*⟨_⟩_
+  ; _∎ to _↪∎
+  ; trans to ↪*-trans
+  ) public
 
 data _≣_ (e₁ e₂ : µ ⊢ M) : Set where
   mk-≣ : ∀ e → (e₁↪*e : e₁ ↪* e) → (e₂↪*e : e₂ ↪* e) → e₁ ≣ e₂

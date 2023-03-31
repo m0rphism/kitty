@@ -2,7 +2,8 @@ module Kitty.Examples.LambdaPi-Derive.Closures where
 
 open import Level using (_⊔_)
 
-module SymmetricClosure {ℓ₁ ℓ₂} {A : Set ℓ₁} (R : A → A → Set ℓ₂) where
+module SymmetricClosure {ℓ₁ ℓ₂} (A : Set ℓ₁) (R : A → A → Set ℓ₂) where
+  infix 2 Sym
   data Sym : A → A → Set ℓ₂ where
     fwd : ∀ {a₁ a₂} → R a₁ a₂ → Sym a₁ a₂  
     bwd : ∀ {a₁ a₂} → R a₂ a₁ → Sym a₁ a₂  
@@ -20,10 +21,12 @@ module SymmetricClosure {ℓ₁ ℓ₂} {A : Set ℓ₁} (R : A → A → Set �
   map-Sym F (fwd r₁₂) = fwd (F r₁₂)
   map-Sym F (bwd r₂₁) = bwd (F r₂₁)
 
-module SymmetricClosure₂ {ℓ₁ ℓ₂ ℓ₃ ℓ₄} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-                         (R : ∀ {a} → {b : B a} → C a b → C a b → Set ℓ₄) where
+module SymmetricClosure₂
+    {ℓ₁ ℓ₂ ℓ₃ ℓ₄} {A : Set ℓ₁} {B : A → Set ℓ₂} (C : (a : A) → B a → Set ℓ₃)
+    (R : ∀ {a} → {b : B a} → C a b → C a b → Set ℓ₄) where
+
   module _ {a : A} {b : B a} where
-    open SymmetricClosure {A = C a b} (R {a} {b}) public hiding (map-Sym; fwd; bwd)
+    open SymmetricClosure (C a b) (R {a} {b}) public hiding (map-Sym; fwd; bwd)
 
   -- We need to import them directly, otherwise they can't be used as patterns.
   open SymmetricClosure public using (fwd; bwd)
@@ -39,7 +42,8 @@ module SymmetricClosure₂ {ℓ₁ ℓ₂ ℓ₃ ℓ₄} {A : Set ℓ₁} {B : A
   map-Sym F (fwd r₁₂) = fwd (F r₁₂)
   map-Sym F (bwd r₂₁) = bwd (F r₂₁)
 
-module ReflexiveTransitiveClosure {ℓ₁ ℓ₂} {A : Set ℓ₁} (R : A → A → Set ℓ₂) where
+module ReflexiveTransitiveClosure {ℓ₁ ℓ₂} (A : Set ℓ₁) (R : A → A → Set ℓ₂) where
+  infix 2 ReflTrans
   data ReflTrans : A → A → Set (ℓ₁ ⊔ ℓ₂) where
     refl : ∀ {a} → ReflTrans a a
     step : ∀ {a₁ a₂ a₃} → R a₁ a₂ → ReflTrans a₂ a₃ → ReflTrans a₁ a₃
@@ -64,3 +68,64 @@ module ReflexiveTransitiveClosure {ℓ₁ ℓ₂} {A : Set ℓ₁} (R : A → A 
     sym : ∀ {a₁ a₂} → ReflTrans a₁ a₂ → ReflTrans a₂ a₁
     sym refl = refl
     sym (step r₁₂ r₂₃) = trans (sym r₂₃) (embed (R-sym r₁₂))
+
+  -- module Reasoning where
+  infixr  2  _⟨_⟩_  _*⟨_⟩_
+  infix   3  _∎
+
+  _∎ : ∀ a → ReflTrans a a
+  a ∎ = refl
+
+  _⟨_⟩_ : ∀ (a₁ : A) {a₂ a₃ : A}
+    → R a₁ a₂
+    → ReflTrans a₂ a₃
+    → ReflTrans a₁ a₃
+  a₁ ⟨ p ⟩ q = step p q
+
+  _*⟨_⟩_ : ∀ (a₁ : A) {a₂ a₃ : A}
+    → ReflTrans a₁ a₂
+    → ReflTrans a₂ a₃
+    → ReflTrans a₁ a₃
+  a₁ *⟨ p ⟩ q = trans p q
+
+
+module ReflexiveTransitiveClosure₂
+    {ℓ₁ ℓ₂ ℓ₃ ℓ₄} {A : Set ℓ₁} {B : A → Set ℓ₂} (C : (a : A) → B a → Set ℓ₃)
+    (R : ∀ {a} → {b : B a} → C a b → C a b → Set ℓ₄) where
+
+  module _ {a : A} {b : B a} where
+    open ReflexiveTransitiveClosure (C a b) (R {a} {b}) public hiding (map-ReflTrans; refl; step)
+
+  -- We need to import them directly, otherwise they can't be used as patterns.
+  open ReflexiveTransitiveClosure public using (refl; step)
+
+  -- Generalized form of `ReflexiveTransitiveClosure.map-ReflTrans` allowing `F` to change indices.
+  map-ReflTrans :
+    ∀ {a} {a'} {b : B a} {b' : B a'}
+      {f : C a b → C a' b'}
+      (F : ∀ {c₁ c₂ : C a b} → R c₁ c₂ → R (f c₁) (f c₂))
+      {c₁ c₂ : C a b}
+    → ReflTrans c₁ c₂
+    → ReflTrans (f c₁) (f c₂)
+  map-ReflTrans F refl = refl
+  map-ReflTrans F (step r₁₂ r₂₃) = step (F r₁₂) (map-ReflTrans F r₂₃)
+
+module ReflexiveTransitiveSymmtetricClosure₂
+    {ℓ₁ ℓ₂ ℓ₃ ℓ₄} {A : Set ℓ₁} {B : A → Set ℓ₂} (C : (a : A) → B a → Set ℓ₃)
+    (R : ∀ {a} → {b : B a} → C a b → C a b → Set ℓ₄) where
+
+  open SymmetricClosure₂ C R public using (fwd; bwd)
+  open SymmetricClosure₂ C R using (Sym; map-Sym) renaming (sym to sym')
+  open ReflexiveTransitiveClosure₂ C Sym public hiding (map-ReflTrans; module Symmetric) renaming (ReflTrans to ReflTransSym)
+  open ReflexiveTransitiveClosure₂ C Sym using (map-ReflTrans; module Symmetric)
+  module _ {a : A} {b : B a} where
+    open Symmetric {a} {b} sym' public
+
+  map-ReflTransSym :
+    ∀ {a} {a'} {b : B a} {b' : B a'}
+      {f : C a b → C a' b'}
+      (F : ∀ {c₁ c₂ : C a b} → R c₁ c₂ → R (f c₁) (f c₂))
+      {c₁ c₂ : C a b}
+    → ReflTransSym c₁ c₂
+    → ReflTransSym (f c₁) (f c₂)
+  map-ReflTransSym F = map-ReflTrans (map-Sym F)
