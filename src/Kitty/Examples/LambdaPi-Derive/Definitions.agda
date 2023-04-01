@@ -199,8 +199,8 @@ open ReflexiveTransitiveClosure₂ (_⊢_) _↪_ renaming
   ; trans to ↪*-trans
   ) public
 
-data _≣_ (e₁ e₂ : µ ⊢ M) : Set where
-  mk-≣ : ∀ e → (e₁↪*e : e₁ ↪* e) → (e₂↪*e : e₂ ↪* e) → e₁ ≣ e₂
+data _≣_ (t₁ t₂ : µ ⊢ M) : Set where
+  mk-≣ : ∀ t → (t₁↪*t : t₁ ↪* t) → (t₂↪*t : t₂ ↪* t) → t₁ ≣ t₂
 
 data _⇓_ (e₁ e₂ : µ ⊢ M) : Set where
   ⇓[_,_] :
