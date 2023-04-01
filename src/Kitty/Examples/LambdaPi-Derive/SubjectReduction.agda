@@ -254,11 +254,34 @@ _≣*_ : ∀ {µ} (Γ₁ Γ₂ : Ctx µ) → Set
   (Γ₁ ▶ t) ≣* (Γ₂ ▶ t)
 ≣*-↑ {M = 𝕖} ≣Γ = ≣*-ext ≣Γ ≣-refl
 
+↪-wk : {t₁ t₂ : µ ⊢ M} →
+  t₁ ↪ t₂ →
+  wk m t₁ ↪ wk m t₂
+↪-wk {M = 𝕖} β-λ          = {!β-λ!}
+↪-wk {M = 𝕖} (ξ-λ t₁↪t₂)  = ξ-λ {!↪-wk t₁↪t₂!}
+↪-wk {M = 𝕖} (ξ-∀₁ t₁↪t₂) = ξ-∀₁ (↪-wk t₁↪t₂)
+↪-wk {M = 𝕖} (ξ-∀₂ t₁↪t₂) = ξ-∀₂ {!↪-wk t₁↪t₂!}
+↪-wk {M = 𝕖} (ξ-·₁ t₁↪t₂) = ξ-·₁ (↪-wk t₁↪t₂)
+↪-wk {M = 𝕖} (ξ-·₂ t₁↪t₂) = ξ-·₂ (↪-wk t₁↪t₂)
+
+≣-wk : {t₁ t₂ : µ ⊢ M} →
+  t₁ ≣ t₂ →
+  wk m t₁ ≣ wk m t₂
+≣-wk = map-≣ ↪-wk
+
+≣*-wk-telescope :
+  Γ₁ x ≣ Γ₂ x →
+  wk-telescope Γ₁ x ≣ wk-telescope Γ₂ x
+≣*-wk-telescope {x = here refl} eq = ≣-wk eq
+≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq = ≣-wk (≣*-wk-telescope {Γ₁ = λ x → Γ₁ (there x)}
+                                                                              {Γ₂ = λ x → Γ₂ (there x)}
+                                                                              eq)
+
 ≣*-pres : ∀ {µ} {Γ₁ Γ₂ : Ctx µ} {M} {e : µ ⊢ M} {t : µ ⊢ M} →
   Γ₁ ≣* Γ₂ →
   Γ₁ ⊢ e ∶ t →
   Γ₂ ⊢ e ∶ t
-≣*-pres {M = 𝕖} Γ≣ (⊢` {x = x} refl) = ⊢≣ (≣-sym ?) (⊢` refl)
+≣*-pres {Γ₁ = Γ₁} {Γ₂ = Γ₂} {M = 𝕖} Γ≣ (⊢` {x = x} refl) = ⊢≣ (≣-sym (≣*-wk-telescope {Γ₁ = Γ₁} {Γ₂ = Γ₂} (Γ≣ x))) (⊢` refl)
 ≣*-pres Γ≣ (⊢λ ⊢t₁ ⊢e)  = ⊢λ (≣*-pres Γ≣ ⊢t₁) (≣*-pres (≣*-↑ Γ≣) ⊢e)
 ≣*-pres Γ≣ (⊢∀ ⊢t₁ ⊢t₂) = ⊢∀ (≣*-pres Γ≣ ⊢t₁) (≣*-pres (≣*-↑ Γ≣) ⊢t₂)
 ≣*-pres Γ≣ (⊢· ⊢e₁ ⊢e₂) = ⊢· (≣*-pres Γ≣ ⊢e₁) (≣*-pres Γ≣ ⊢e₂)
