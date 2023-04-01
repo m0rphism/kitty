@@ -45,7 +45,7 @@ data _⊢_ : List Mode → Mode → Set where
 
 variable
   e e₁ e₂ e₃ e' e₁' e₂' e₃' : µ ⊢ 𝕖
-  t t₁ t₂ t₃ t' t₁' t₂' t₃' : µ ⊢ 𝕖
+  t t₁ t₂ t₃ t' t₁' t₂' t₃' : µ ⊢ M
   E E₁ E₂ E₃ E' E₁' E₂' E₃' : µ ⊢ M
 
 -- Deriving Renaming/Substitution and related lemmas.

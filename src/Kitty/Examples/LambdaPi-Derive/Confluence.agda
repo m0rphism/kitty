@@ -37,7 +37,7 @@ open import Data.Product using (∃-syntax; _×_ ; _,_)
 
 infix   3  _↪ₚ_
 data _↪ₚ_ : µ ⊢ M → µ ⊢ M → Set where
-  ξ-` : ∀ {x : µ ∋ 𝕖} →
+  ξ-` : ∀ {x : µ ∋ m} →
     ` x ↪ₚ ` x
   β-λ : ∀ {t₁ t₁' : (µ ▷ 𝕖) ⊢ 𝕖} {t₂ t₂' : µ ⊢ 𝕖} →
     t₁ ↪ₚ t₁' →
@@ -71,7 +71,8 @@ open ReflexiveTransitiveClosure₂ (_⊢_) _↪ₚ_ renaming
   ; _*⟨_⟩_ to _↪ₚ*⟨_⟩_
   ; _∎ to _↪ₚ∎
   ; trans to ↪ₚ*-trans
-  ) hiding (refl; step)
+  ; embed to ↪ₚ*-embed
+  ) hiding (refl; step) public
 
 ↪→↪ₚ : t ↪ t' → t ↪ₚ t'
 ↪→↪ₚ β-λ           = β-λ ↪ₚ-refl ↪ₚ-refl

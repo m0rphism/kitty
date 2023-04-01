@@ -3,7 +3,7 @@ module Kitty.Examples.LambdaPi-Derive.Closures where
 open import Level using (_⊔_)
 
 module SymmetricClosure {ℓ₁ ℓ₂} (A : Set ℓ₁) (R : A → A → Set ℓ₂) where
-  infix 2 Sym
+  infix 3 Sym
   data Sym : A → A → Set ℓ₂ where
     fwd : ∀ {a₁ a₂} → R a₁ a₂ → Sym a₁ a₂  
     bwd : ∀ {a₁ a₂} → R a₂ a₁ → Sym a₁ a₂  
@@ -43,7 +43,7 @@ module SymmetricClosure₂
   map-Sym F (bwd r₂₁) = bwd (F r₂₁)
 
 module ReflexiveTransitiveClosure {ℓ₁ ℓ₂} (A : Set ℓ₁) (R : A → A → Set ℓ₂) where
-  infix 2 ReflTrans
+  infix 3 ReflTrans
   data ReflTrans : A → A → Set (ℓ₁ ⊔ ℓ₂) where
     refl : ∀ {a} → ReflTrans a a
     step : ∀ {a₁ a₂ a₃} → R a₁ a₂ → ReflTrans a₂ a₃ → ReflTrans a₁ a₃
@@ -129,3 +129,31 @@ module ReflexiveTransitiveSymmtetricClosure₂
     → ReflTransSym c₁ c₂
     → ReflTransSym (f c₁) (f c₂)
   map-ReflTransSym F = map-ReflTrans (map-Sym F)
+
+-- TODO: Other direction
+
+-- data _↪*'_ : µ ⊢ M → µ ⊢ M → Set where
+--   refl :
+--     t ↪*' t
+--   step :
+--     t₁ ↪*'  t₂ →
+--     t₂ ↪ t₃ →
+--     t₁ ↪*' t₃
+
+-- ↪*'-trans :
+--     t₁ ↪*' t₂ →
+--     t₂ ↪*' t₃ →
+--     t₁ ↪*' t₃
+-- ↪*'-trans = {!!}
+
+-- ↪*-to-↪*' :
+--     t₁ ↪* t₂ →
+--     t₁ ↪*' t₂
+-- ↪*-to-↪*' refl = refl
+-- ↪*-to-↪*' (step x y) = ↪*'-trans (step refl x) (↪*-to-↪*' y)
+
+-- ↪*'-to-↪* :
+--     t₁ ↪*' t₂ →
+--     t₁ ↪* t₂
+-- ↪*'-to-↪* refl = refl
+-- ↪*'-to-↪* (step y x) = ↪*-trans (↪*'-to-↪* y) (step x refl)
