@@ -1,6 +1,6 @@
 module Kitty.Examples.LambdaPi-Derive.SubjectReduction where
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong-app; subst; module ≡-Reasoning)
 open ≡-Reasoning
 open import Kitty.Examples.LambdaPi-Derive.Definitions
 open import Kitty.Examples.LambdaPi-Derive.Confluence
@@ -42,19 +42,91 @@ _≣σ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
   ⦅ t₁ ⦆ₛ ≣σ ⦅ t₂ ⦆ₛ
 ≣σ-⦅ t₁≣t₂ ⦆ = ≣σ-ext (≣σ-refl {σ = idₛ}) t₁≣t₂
 
+_↪σ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
+σ₁ ↪σ σ₂ = ∀ {m} (x : _ ∋ m) → σ₁ _ x ↪ σ₂ _ x
+
 _↪*σ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
 σ₁ ↪*σ σ₂ = ∀ {m} (x : _ ∋ m) → σ₁ _ x ↪* σ₂ _ x
 
--- ↪σ-⋯ : ∀ {µ₁ µ₂ m} {t t' : µ₁ ⊢ m} {σ σ' : µ₁ →ₛ µ₂} →
---   t ↪ₚ t' →
---   σ ↪ₚσ σ' →
---   t ⋯ σ ↪ₚ t' ⋯ σ'
+_↪ₚ*σ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
+σ₁ ↪ₚ*σ σ₂ = ∀ {m} (x : _ ∋ m) → σ₁ _ x ↪ₚ* σ₂ _ x
+
+open ReflexiveTransitiveClosure₂ (_→ₛ_) _↪ₚσ_ renaming
+  ( ReflTrans to _↪ₚσ*_
+  ; map-ReflTrans to map-↪ₚσ*
+  ; _⟨_⟩_ to _↪ₚσ⟨_⟩_
+  ; _*⟨_⟩_ to _↪ₚσ*⟨_⟩_
+  ; _∎ to _↪ₚσ∎
+  ; trans to ↪ₚσ*-trans
+  ; embed to ↪ₚσ*-embed
+  ) hiding (refl; step) public
+
+to''' : ∀ {µ₁ µ₂ m} {σ₁ σ₂ : (µ₁ ▷ m) →ₛ µ₂} {t₂'} →
+  σ₁ ↓ₛ ≡ σ₂ ↓ₛ →
+  t₂' ≡ σ₂ _ (here refl) →
+  σ₁ _ (here refl) ↪ₚ* t₂' →
+  σ₁ ↪ₚσ* σ₂
+to''' {σ₁ = σ₁} {σ₂ = σ₂} p q refl =
+  step (λ { (here refl) → subst (_ ↪ₚ_) q ↪ₚ-refl
+          ; (there x)   → subst (_ ↪ₚ_) (cong-app (cong-app p _) x ) ↪ₚ-refl})
+        refl
+to''' {σ₁ = σ₁} xx refl (step {a₂ = t'} t₁↪t' t'↪*t₂) =
+  step {a₂ = (σ₁ ↓ₛ) ,ₛ t'}
+       (λ { (here refl) → t₁↪t'
+          ; (there x) → ↪ₚ-refl})
+       (to''' xx refl t'↪*t₂)
+
+to'' : ∀ {µ₁ µ₂ m} {σ₁ σ₂ : (µ₁ ▷ m) →ₛ µ₂} {t₂'} {σ₂'} →
+  σ₂' ≡ σ₂ ↓ₛ →
+  t₂' ≡ σ₂ _ (here refl) →
+  σ₁ ↓ₛ ↪ₚσ* σ₂' →
+  σ₁ _ (here refl) ↪ₚ* t₂' →
+  σ₁ ↪ₚσ* σ₂
+to'' p q refl t₁↪*t₂ = to''' p q t₁↪*t₂
+to'' {σ₁ = σ₁} refl q (step {a₂ = σ'} σ₁↪*σ' σ'↪*σ₂) t₁↪*t₂ =
+  step {a₂ = σ' ,ₛ σ₁ _ (here refl)}
+       (λ { (here refl) → ↪ₚ-refl
+          ; (there x)   → σ₁↪*σ' x})
+       (to'' refl q σ'↪*σ₂ t₁↪*t₂)
+
+to' : ∀ {µ₁ µ₂ m} {σ₁ σ₂ : (µ₁ ▷ m) →ₛ µ₂} →
+  σ₁ ↓ₛ ↪ₚσ* σ₂ ↓ₛ →
+  σ₁ _ (here refl) ↪ₚ* σ₂ _ (here refl) →
+  σ₁ ↪ₚσ* σ₂
+to' = to'' refl refl
+
+to : ∀ {µ₁ µ₂} {σ₁ σ₂ : µ₁ →ₛ µ₂} →
+  σ₁ ↪ₚ*σ σ₂ →
+  σ₁ ↪ₚσ* σ₂
+to {[]}     σ₁↪*σ₂ = step (λ ()) refl
+to {µ₁ ▷ m} σ₁↪*σ₂ with to (λ x → σ₁↪*σ₂ (there x))
+... | σ₁↪*σ₂' = to' σ₁↪*σ₂' (σ₁↪*σ₂ (here refl))
+
+↪ₚ*σ-⋯' : ∀ {µ₁ µ₂ m} {t t' : µ₁ ⊢ m} {σ σ' : µ₁ →ₛ µ₂} →
+  t ↪ₚ* t' →
+  σ ↪ₚσ σ' →
+  t ⋯ σ ↪ₚ* t' ⋯ σ'
+↪ₚ*σ-⋯' {t = t} refl          σ↪ₚσ' = step (↪ₚσ-⋯ {t = t} ↪ₚ-refl σ↪ₚσ') refl
+↪ₚ*σ-⋯' (step t↪ₚt' t'↪ₚ*t'') σ↪ₚσ' = step (↪ₚσ-⋯ t↪ₚt' λ x → ↪ₚ-refl) (↪ₚ*σ-⋯' t'↪ₚ*t'' σ↪ₚσ')
+
+↪ₚ*σ-⋯ : ∀ {µ₁ µ₂ m} {t t' : µ₁ ⊢ m} {σ σ' : µ₁ →ₛ µ₂} →
+  t ↪ₚ* t' →
+  σ ↪ₚσ* σ' →
+  t ⋯ σ ↪ₚ* t' ⋯ σ'
+↪ₚ*σ-⋯ t↪ₚ*t' refl = ↪ₚ*σ-⋯' t↪ₚ*t' (λ x → ↪ₚ-refl)
+↪ₚ*σ-⋯ {t = t} t↪ₚ*t' (step {a₂ = σ'} σ↪ₚσ' σ'↪ₚ*σ'') = step {a₂ = t ⋯ σ'} (↪ₚσ-⋯ {t = t} ↪ₚ-refl σ↪ₚσ') (↪ₚ*σ-⋯ t↪ₚ*t' σ'↪ₚ*σ'')
+
+↪σ-⋯ₛ : ∀ {µ₁ µ₂ m} {σ σ' : µ₁ →ₛ µ₂} {t t' : µ₁ ⊢ m} →
+  t ↪ t' →
+  σ ↪σ σ' →
+  t ⋯ₛ σ ↪* t' ⋯ₛ σ'
+↪σ-⋯ₛ t↪t' σ↪σ' = ↪ₚ→↪* (↪ₚσ-⋯ (↪→↪ₚ t↪t') (λ x → ↪→↪ₚ (σ↪σ' x)))
 
 ↪*-⋯ₛ : ∀ {µ₁ µ₂ m} {σ σ' : µ₁ →ₛ µ₂} {t t' : µ₁ ⊢ m} →
   t ↪* t' →
   σ ↪*σ σ' →
   t ⋯ₛ σ ↪* t' ⋯ₛ σ'
-↪*-⋯ₛ = {!!}
+↪*-⋯ₛ t↪*t' σ↪*σ' = ↪ₚ*→↪* (↪ₚ*σ-⋯ (↪*→↪ₚ* t↪*t') (to (λ x → ↪*→↪ₚ* (σ↪*σ' x)))) 
 
 ≣→Σ : t₁ ≣ t₂ → ∃[ t ] t₁ ↪* t × t₂ ↪* t 
 ≣→Σ (mk-≣ t t₁↪*t t₂↪*t) = t , t₁↪*t , t₂↪*t
