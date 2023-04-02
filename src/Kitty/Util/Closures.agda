@@ -1,4 +1,4 @@
-module Kitty.Examples.LambdaPi-Derive.Closures where
+module Kitty.Util.Closures where
 
 open import Level using (_⊔_)
 

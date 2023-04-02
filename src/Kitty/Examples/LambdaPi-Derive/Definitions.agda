@@ -1,10 +1,10 @@
 module Kitty.Examples.LambdaPi-Derive.Definitions where
 
+open import Data.List.Relation.Unary.Any using (here; there) public
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Kitty.Term.Prelude using (_∋_; List; []; _▷_) public
 open import Kitty.Term.Modes using (Modes)
-open import Data.List.Relation.Unary.Any using (here; there) public
-open import Kitty.Examples.LambdaPi-Derive.Closures
+open import Kitty.Util.Closures
 
 -- Fixities --------------------------------------------------------------------
 

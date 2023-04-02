@@ -3,7 +3,7 @@ module Kitty.Examples.LambdaPi-Derive.Confluence where
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; module ≡-Reasoning)
 open ≡-Reasoning
 open import Kitty.Examples.LambdaPi-Derive.Definitions
-open import Kitty.Examples.LambdaPi-Derive.Closures
+open import Kitty.Util.Closures
 open import Kitty.Typing.IKit compose-traversal kit-type record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 open IKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
