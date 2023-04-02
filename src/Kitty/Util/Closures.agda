@@ -1,6 +1,7 @@
 module Kitty.Util.Closures where
 
 open import Level using (_⊔_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 module SymmetricClosure {ℓ₁ ℓ₂} (A : Set ℓ₁) (R : A → A → Set ℓ₂) where
   infix 3 Sym
@@ -87,6 +88,12 @@ module ReflexiveTransitiveClosure {ℓ₁ ℓ₂} (A : Set ℓ₁) (R : A → A 
     → ReflTrans a₂ a₃
     → ReflTrans a₁ a₃
   a₁ *⟨ p ⟩ q = trans p q
+
+  _≡R⟨_⟩_ : ∀ (a₁ : A) {a₂ a₃ : A}
+    → a₁ ≡ a₂
+    → ReflTrans a₂ a₃
+    → ReflTrans a₁ a₃
+  a₁ ≡R⟨ refl ⟩ q = q
 
 
 module ReflexiveTransitiveClosure₂
