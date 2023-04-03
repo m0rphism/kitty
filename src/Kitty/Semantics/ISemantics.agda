@@ -763,16 +763,16 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
     -- ↪-⋯ {ϕ = ϕ} {ϕ'} t↪*t' ϕ↪*ϕ' = ↪ₚ*→↪* {!Semₚ.↪*ϕ-⋯!}
     -- -- ↪-⋯' {ϕ = ϕ} {ϕ'} t↪*t' ϕ↪*ϕ' = ↪ₚ*→↪* (Semₚ.↪*ϕ-⋯ {!↪*→↪ₚ* t↪*t'!} ([↪*ϕ]→[↪ϕ*] (λ x → {!↪*→↪ₚ* (ϕ↪*ϕ' x)!}))) 
 
-  module SemTrans-diamond (diamond : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} → t ↪ₚ t₁ → t ↪ₚ t₂ → ∃[ t' ] t₁ ↪ₚ t' × t₂ ↪ₚ t') where
-    strip : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} → 
+  module SemTrans-confluence (diamondₚ : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} → t ↪ₚ t₁ → t ↪ₚ t₂ → ∃[ t' ] t₁ ↪ₚ t' × t₂ ↪ₚ t') where
+    stripₚ : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} → 
       t ↪ₚ t₁ →
       t ↪ₚ* t₂ →
       ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ t')
-    strip {t = t} {t₁} {t₂} t↪ₚt₁ refl = t₁ , refl , t↪ₚt₁
-    strip {t = t} {t₁} {t₂} t↪ₚt₁ (step t↪ₚt₂' t₂'↪ₚ*t₂)
-      with diamond t↪ₚt₁ t↪ₚt₂'
+    stripₚ {t = t} {t₁} {t₂} t↪ₚt₁ refl = t₁ , refl , t↪ₚt₁
+    stripₚ {t = t} {t₁} {t₂} t↪ₚt₁ (step t↪ₚt₂' t₂'↪ₚ*t₂)
+      with diamondₚ t↪ₚt₁ t↪ₚt₂'
     ... | T , t₁↪ₚT , t₂'↪ₚT
-      with strip t₂'↪ₚT t₂'↪ₚ*t₂
+      with stripₚ t₂'↪ₚT t₂'↪ₚ*t₂
     ... | U , T↪ₚ*U , t₂↪U
       = U , step t₁↪ₚT T↪ₚ*U , t₂↪U
 
@@ -782,7 +782,7 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
       ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ* t')
     confluenceₚ refl                   t↪ₚ*t₂ = _ , t↪ₚ*t₂ , refl
     confluenceₚ (step t↪ₚt₁' t₁'↪ₚ*t₁) t↪ₚ*t₂
-      with strip t↪ₚt₁' t↪ₚ*t₂
+      with stripₚ t↪ₚt₁' t↪ₚ*t₂
     ... | T , t₁'↪ₚ*T , t₂↪ₚT
       with confluenceₚ t₁'↪ₚ*t₁ t₁'↪ₚ*T
     ... | U , t₁↪ₚ*U , T↪ₚ*U

@@ -151,36 +151,36 @@ open SemTrans-↪-⋯ sem-traversal public
 
 --------------------------------------------------------------------------------
 
-diamond :
+diamondₚ :
   t ↪ₚ t₁ →
   t ↪ₚ t₂ →
   ∃[ t' ] t₁ ↪ₚ t' × t₂ ↪ₚ t'
-diamond ξ-`             ξ-`               = _ , ξ-` , ξ-`
-diamond (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+diamondₚ ξ-`             ξ-`               = _ , ξ-` , ξ-`
+diamondₚ (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
+  with diamondₚ t₁↪t₁' t₁↪t₁'' | diamondₚ t₂↪t₂' t₂↪t₂''
 ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
   = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , ↪ₚσ-⋯ t₁'↪T₁ Semₚ.↪σ-⦅ t₂'↪T₂ ⦆ , ↪ₚσ-⋯ t₁''↪T₁ Semₚ.↪σ-⦅ t₂''↪T₂ ⦆
-diamond (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (ξ-· (ξ-λ t₁↪t₁'') t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+diamondₚ (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (ξ-· (ξ-λ t₁↪t₁'') t₂↪t₂'')
+  with diamondₚ t₁↪t₁' t₁↪t₁'' | diamondₚ t₂↪t₂' t₂↪t₂''
 ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
   = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , ↪ₚσ-⋯ t₁'↪T₁ Semₚ.↪σ-⦅ t₂'↪T₂ ⦆ , (β-λ t₁''↪T₁ t₂''↪T₂)
-diamond (ξ-λ t↪t') (ξ-λ t↪t'')
-  with diamond t↪t' t↪t''
+diamondₚ (ξ-λ t↪t') (ξ-λ t↪t'')
+  with diamondₚ t↪t' t↪t''
 ...  | T , t'↪T , t''↪T
   = λx T , ξ-λ t'↪T , ξ-λ t''↪T
-diamond (ξ-∀ t₁↪t₁' t₂↪t₂') (ξ-∀ t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+diamondₚ (ξ-∀ t₁↪t₁' t₂↪t₂') (ξ-∀ t₁↪t₁'' t₂↪t₂'')
+  with diamondₚ t₁↪t₁' t₁↪t₁'' | diamondₚ t₂↪t₂' t₂↪t₂''
 ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
   = ∀[x∶ T₁ ] T₂ , ξ-∀ t₁'↪T₁ t₂'↪T₂ , ξ-∀ t₁''↪T₁ t₂''↪T₂
-diamond (ξ-· (ξ-λ t₁↪t₁') t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+diamondₚ (ξ-· (ξ-λ t₁↪t₁') t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
+  with diamondₚ t₁↪t₁' t₁↪t₁'' | diamondₚ t₂↪t₂' t₂↪t₂''
 ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
   = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , β-λ t₁'↪T₁ t₂'↪T₂ , ↪ₚσ-⋯ t₁''↪T₁ Semₚ.↪σ-⦅ t₂''↪T₂ ⦆
-diamond (ξ-· t₁↪t₁' t₂↪t₂') (ξ-· t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+diamondₚ (ξ-· t₁↪t₁' t₂↪t₂') (ξ-· t₁↪t₁'' t₂↪t₂'')
+  with diamondₚ t₁↪t₁' t₁↪t₁'' | diamondₚ t₂↪t₂' t₂↪t₂''
 ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
   = T₁ · T₂ , ξ-· t₁'↪T₁ t₂'↪T₂ , ξ-· t₁''↪T₁ t₂''↪T₂
-diamond ξ-★ ξ-★ = ★ , ξ-★ , ξ-★
+diamondₚ ξ-★ ξ-★ = ★ , ξ-★ , ξ-★
 
-open SemTrans-diamond diamond public
-  using (strip; confluenceₚ; confluence)
+open SemTrans-confluence diamondₚ public
+  using (stripₚ; confluenceₚ; confluence)
