@@ -9,7 +9,7 @@ open import Kitty.Typing.ITerms using (ITerms)
 
 module Kitty.Semantics.ISemantics {𝕄 : Modes} {𝕋 : Terms 𝕄} {ℓ} {𝕊 : SubWithLaws 𝕋 ℓ} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
                          {𝕊C : SubCompose 𝕋 𝕊 T H} (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋)
-                         (IT : ITerms C KT) where
+                         where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong-app; subst; subst₂; module ≡-Reasoning)
@@ -36,8 +36,8 @@ open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
 open Kitty.Term.ComposeTraversal.ComposeTraversal C
 open Kitty.Typing.Types.KitType KT
 open import Kitty.Typing.OPE C KT
-open Kitty.Typing.ITerms C KT
-open Kitty.Typing.ITerms.ITerms IT
+
+open ~-Reasoning
 
 private
   variable
@@ -60,15 +60,12 @@ private instance _ = ckitᵣ
 private instance _ = ckitₛᵣ
 private instance _ = ckitₛₛ
 
+open ReflexiveTransitiveClosure using (step; refl)
+
 record Semantics : Set₁ where
   infix 3 _↪_
   field
     _↪_ : µ ⊢ M → µ ⊢ M → Set
-
-    ↪-refl : ∀ {µ m} {t : µ ⊢ m} →
-      t ↪ t
-
-  open ReflexiveTransitiveClosure using (step; refl)
 
   open ReflexiveTransitiveClosure₂ (_⊢_) _↪_ renaming
     ( ReflTrans to _↪*_
@@ -81,11 +78,51 @@ record Semantics : Set₁ where
     ; embed to ↪*-embed
     ) hiding (refl; step; module Symmetric) public
 
+  infix   3 _↪σ_ _↪*σ_  _≣_ _≣σ_
+
   _↪σ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
   σ₁ ↪σ σ₂ = ∀ {m} (x : _ ∋ m) → x & σ₁ ↪ x & σ₂
 
+  ↪σ-ext : ∀ {µ₁ µ₂ m} {σ₁ σ₂ : µ₁ →ₛ µ₂} {t₁ t₂ : µ₂ ⊢ m→M m} →
+    σ₁ ↪σ σ₂ →
+    t₁ ↪ t₂ →
+    (σ₁ ,ₛ t₁) ↪σ (σ₂ ,ₛ t₂)
+  ↪σ-ext {µ₁} {µ₂} {m} {σ₁} {σ₂} {t₁} {t₂} σ₁≣σ₂ t₁≣t₂ (here refl) =
+    subst₂ (_↪_) (sym (&-,ₖ-here σ₁ t₁))
+                 (sym (&-,ₖ-here σ₂ t₂))
+                 t₁≣t₂
+  ↪σ-ext {µ₁} {µ₂} {m} {σ₁} {σ₂} {t₁} {t₂} σ₁≣σ₂ t₁≣t₂ (there x) =
+    subst₂ (_↪_) (sym (&-,ₖ-there σ₁ t₁ x))
+                 (sym (&-,ₖ-there σ₂ t₂ x))
+                 (σ₁≣σ₂ x)
+
   _↪*σ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
   σ₁ ↪*σ σ₂ = ∀ {m} (x : _ ∋ m) → x & σ₁ ↪* x & σ₂
+
+  ↪*σ-refl : ∀ {µ₁ µ₂} {σ : µ₁ →ₛ µ₂} →
+    σ ↪*σ σ
+  ↪*σ-refl {m = 𝕖} x = refl
+
+  ↪*σ-ext : ∀ {µ₁ µ₂ m} {σ₁ σ₂ : µ₁ →ₛ µ₂} {t₁ t₂ : µ₂ ⊢ m→M m} →
+    σ₁ ↪*σ σ₂ →
+    t₁ ↪* t₂ →
+    (σ₁ ,ₛ t₁) ↪*σ (σ₂ ,ₛ t₂)
+  ↪*σ-ext {µ₁} {µ₂} {m} {σ₁} {σ₂} {t₁} {t₂} σ₁≣σ₂ t₁≣t₂ (here refl) =
+    subst₂ (_↪*_) (sym (&-,ₖ-here σ₁ t₁))
+                 (sym (&-,ₖ-here σ₂ t₂))
+                 t₁≣t₂
+  ↪*σ-ext {µ₁} {µ₂} {m} {σ₁} {σ₂} {t₁} {t₂} σ₁≣σ₂ t₁≣t₂ (there x) =
+    subst₂ (_↪*_) (sym (&-,ₖ-there σ₁ t₁ x))
+                 (sym (&-,ₖ-there σ₂ t₂ x))
+                 (σ₁≣σ₂ x)
+
+  ↪*σ-⦅_⦆ : ∀ {µ m} {t₁ t₂ : µ ⊢ m→M m} →
+    t₁ ↪* t₂ →
+    ⦅ t₁ ⦆ₛ ↪*σ ⦅ t₂ ⦆ₛ
+  ↪*σ-⦅_⦆ {t₁ = t₁} {t₂}  t₁≣t₂  = λ x →
+    subst₂ (_↪*_) (sym (~→~' (⦅⦆-,ₖ t₁) _ x))
+                 (sym (~→~' (⦅⦆-,ₖ t₂) _ x))
+                 (↪*σ-ext (↪*σ-refl {σ = idₛ}) t₁≣t₂ x)
 
   open ReflexiveTransitiveClosure₂ (_→ₛ_) _↪σ_ renaming
     ( ReflTrans to _↪σ*_
@@ -200,6 +237,25 @@ record Semantics : Set₁ where
               , (λ x → subst (x & σ  ↪*_) (sym (&-to-ϕ _ x)) (proj₁ (proj₂ (≣→Σ (σ≣σ' x)))))
               , (λ x → subst (x & σ' ↪*_) (sym (&-to-ϕ _ x)) (proj₂ (proj₂ (≣→Σ (σ≣σ' x)))))
 
+  _≣*_ : ∀ {µ} (Γ₁ Γ₂ : Ctx µ) → Set
+  Γ₁ ≣* Γ₂ = ∀ {m} (x : _ ∋ m) → Γ₁ x ≣ Γ₂ x
+
+  ≣*-refl : ∀ {µ} {Γ : Ctx µ} →
+    Γ ≣* Γ
+  ≣*-refl {m = 𝕖} x = ≣-refl
+
+  ≣*-ext : ∀ {µ} {Γ₁ Γ₂ : Ctx µ} {m} {t₁ t₂ : µ ∶⊢ m→M m} →
+    Γ₁ ≣* Γ₂ →
+    t₁ ≣ t₂ →
+    (Γ₁ ▶ t₁) ≣* (Γ₂ ▶ t₂)
+  ≣*-ext Γ₁≣Γ₂ t₁≣t₂ (here refl) = t₁≣t₂
+  ≣*-ext Γ₁≣Γ₂ t₁≣t₂ (there x)   = Γ₁≣Γ₂ x
+
+  ≣*-↑ : ∀ {µ} {Γ₁ Γ₂ : Ctx µ} {m} {t : µ ∶⊢ m→M m} →
+    Γ₁ ≣* Γ₂ →
+    (Γ₁ ▶ t) ≣* (Γ₂ ▶ t)
+  ≣*-↑ ≣Γ = ≣*-ext ≣Γ ≣-refl
+
   module Valued (Value : ∀ {µ M} → µ ⊢ M → Set) where
     data _⇓_ (e₁ e₂ : µ ⊢ M) : Set where
       ⇓[_,_] :
@@ -207,7 +263,25 @@ record Semantics : Set₁ where
         → Value e₂
         → e₁ ⇓ e₂
 
-  open ~-Reasoning
+record ReflexiveSemantics (Sem : Semantics) : Set₁ where
+  open Semantics Sem
+
+  field
+    ↪-refl : ∀ {µ m} {t : µ ⊢ m} →
+      t ↪ t
+
+  ↪σ-refl : ∀ {µ₁ µ₂} {σ : µ₁ →ₛ µ₂} →
+    σ ↪σ σ
+  ↪σ-refl {m = 𝕖} x = ↪-refl
+
+  ↪σ-⦅_⦆ : ∀ {µ m} {t₁ t₂ : µ ⊢ m→M m} →
+    t₁ ↪ t₂ →
+    ⦅ t₁ ⦆ₛ ↪σ ⦅ t₂ ⦆ₛ
+  ↪σ-⦅_⦆ {t₁ = t₁} {t₂}  t₁≣t₂  = λ x →
+    subst₂ (_↪_) (sym (~→~' (⦅⦆-,ₖ t₁) _ x))
+                 (sym (~→~' (⦅⦆-,ₖ t₂) _ x))
+                 (↪σ-ext (↪σ-refl {σ = idₛ}) t₁≣t₂ x)
+
   to''' : ∀ {µ₁ µ₂ m} {σ₁ σ₂ : (µ₁ ▷ m) →ₛ µ₂} {t₂' t₁'} →
     σ₁ ↓ₛ ~ σ₂ ↓ₛ →
     t₁' ≡ here refl & σ₁ →
@@ -283,244 +357,73 @@ record Semantics : Set₁ where
   [↪*σ]→[↪σ*] {µ₁ ▷ m} σ₁↪*σ₂ with [↪*σ]→[↪σ*] (λ x → subst₂ (_↪*_) (sym (&-↓ _ x)) (sym (&-↓ _ x)) (σ₁↪*σ₂ (there x)))
   ... | σ₁↪*σ₂' = to' σ₁↪*σ₂' (σ₁↪*σ₂ (here refl))
 
--- record ISemKit
---     (𝕂 : Kit)
---     (K : KitT 𝕂)
---     (C₁ : ComposeKit 𝕂 kitᵣ 𝕂)
---     (C₂ : ComposeKit 𝕂 𝕂 𝕂)
---     : Set₁ where
+record SemKit (Sem : Semantics)
+    (𝕂 : Kit)
+    (K : KitT 𝕂)
+    (C₁ : ComposeKit 𝕂 kitᵣ 𝕂)
+    (C₂ : ComposeKit 𝕂 𝕂 𝕂)
+    : Set₁ where
 
---   infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
---   infixl  6  _∋↑/⊢↑_
---   -- infixl  5  _,ₖ_
---   -- infixl  6  _↑_  _↑*_
+  open Semantics Sem
+  open Kit 𝕂
 
---   private instance _ = kitᵣ
---   private instance _ = kitₛ
---   private instance _ = kittᵣ
---   private instance _ = kittₛ
---   private instance _ = ckitᵣ
---   private instance _ = 𝕂
---   private instance _ = K
---   private instance _ = C₁
---   private instance _ = C₂
+  infix 3 _≡/↪_
 
---   open Kit 𝕂
---   open KitT K
+  field
+    _≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set
+    ↪-wk : ∀ {µ M m} {t₁ t₂ : µ ∋/⊢ M} →
+      t₁ ≡/↪ t₂ →
+      wk m t₁ ≡/↪ wk m t₂
 
---   field
---     -- Variable/Term Typing
---     _∋/⊢_∶_  : ∀ {m/M} → Ctx µ → µ ∋/⊢ m/M → µ ∶⊢ m→M/id m/M → Set
+record SemTraversal (Sem : Semantics) : Set (lsuc ℓ) where
+  open Semantics Sem
+  open SemKit ⦃ … ⦄
 
---     ∋/⊢∶-lookup : ∀ {m} x → Γ ∋/⊢ id/` x ∶ subst (µ ∶⊢_) (sym (id/m→M/id m)) (wk-telescope Γ x)
+  _↪ϕ_ :
+    ∀ ⦃ 𝕂 : Kit ⦄
+      ⦃ K : KitT 𝕂 ⦄
+      ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
+      ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+      ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ ⦄
+      {µ₁ µ₂}
+      (ϕ₁ ϕ₂ : µ₁ –[ 𝕂 ]→ µ₂) → Set
+  ϕ₁ ↪ϕ ϕ₂ = ∀ {m} (x : _ ∋ m) → (x & ϕ₁) ≡/↪ (x & ϕ₂)
 
---     -- Conditional Applications of Variable-Typing-Rule
---     id/⊢`    : ∀ {x : µ ∋ m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ}
---                → Γ ∋ x ∶ t
---                →  Γ ∋/⊢ id/` x ∶ subst (µ ∶⊢_) (sym (id/m→M/id m)) t
---     ⊢`/id    : ∀ {e : µ ∋/⊢ id/m→M m} {t : µ ∶⊢ m→M m} {Γ : Ctx µ}
---                → Γ ∋/⊢ e ∶ subst (_ ∶⊢_) (sym (id/m→M/id m)) t
---                → Γ ⊢ `/id e ∶ t
---     ⊢`/id'   : ∀ {m/M} {e : µ ∋/⊢ m/M} {t : µ ∶⊢ m→M/id m/M} {Γ : Ctx µ}
---                → Γ ∋/⊢ e ∶ t
---                → Γ ⊢ `/id' e ∶ t
+  field
+    ↪-⋯ :
+      ∀ ⦃ 𝕂 : Kit ⦄
+        ⦃ K : KitT 𝕂 ⦄
+        ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
+        ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+        ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ ⦄
+        {µ₁ µ₂ M} {t t' : µ₁ ⊢ M} {ϕ ϕ' : µ₁ –[ 𝕂 ]→ µ₂}
+      → t ↪ t'
+      → ϕ ↪ϕ ϕ'
+      → t ⋯ ϕ ↪ t' ⋯ ϕ'
 
---     -- Weakening preserveres variable/term typings.
---     ∋wk/⊢wk  : ∀ {m/M} (Γ : Ctx µ) (t' : µ ∶⊢ m→M m) (e : µ ∋/⊢ m/M) (t : µ ∶⊢ m→M/id m/M)
---                → Γ ∋/⊢ e ∶ t
---                → (Γ ▶ t') ∋/⊢ wk _ e ∶ Kit.wk kitₛ _ t
---     -- ⊢wk-vr : ∀ {x : µ ∋ m} {t : µ ∶⊢ M} (⊢x : Γ ∋ x ∶ t) →
---     --          ⊢wk (⊢vr ⊢x) ≡ ⊢vr (there x)
---     -- wk-vr     : ∀ m' (x : µ ∋ m) → wk {m' = m'} _ (vr _ x) ≡ vr _ (there x)
---     -- id/`/id     : ∀ x → subst (µ ⊢_) (m→m/M→M m) (tm _ (vr _ x)) ≡ ` x
+  semkitᵣ : SemKit Sem kitᵣ kittᵣ ckitᵣ ckitᵣ
+  semkitᵣ = record
+    { _≡/↪_ = _≡_
+    ; ↪-wk  = λ { refl → refl }
+    }
 
---   -- _⊢*_∶_ : Ctx µ₂ → µ₁ →ₛ µ₂ → Ctx µ₁ → Set
---   -- _⊢*_∶_ {µ₁ = µ₁} Γ₂ σ Γ₁ = ∀ (x : µ₁ ∋ 𝕖) → Γ₂ ⊢ σ _ x ∶ (wk-telescope Γ₁ x ⋯ σ)
---   -- _∋*_∶_ : Ctx µ₂ → µ₁ →ᵣ µ₂ → Ctx µ₁ → Set
---   -- _∋*_∶_ {µ₁ = µ₁} Γ₂ ρ Γ₁ = ∀ (x : µ₁ ∋ 𝕖) → wk-telescope Γ₂ (ρ _ x) ≡ wk-telescope Γ₁ x ⋯ ρ
---   -- TODO: IS THIS EQUIVALENT TO OPE?
+  private instance _ = semkitᵣ
 
---   _∋*/⊢*_∶_ : Ctx µ₂ → µ₁ –[ 𝕂 ]→ µ₂ → Ctx µ₁ → Set
---   _∋*/⊢*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ ϕ Γ₁ =
---     -- ∀ {m₁} → (x : µ₁ ∋ m₁) → Γ₂ ◆ f _ x ∶ subst (µ₂ ∶⊢_) (sym (m→m/M→M m₁)) (wk-telescope Γ₁ x ⋯ f)
---     ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ∶⊢ m→M m₁) (⊢x : Γ₁ ∋ x ∶ t)
---     → Γ₂ ∋/⊢ (x & ϕ) ∶ subst (µ₂ ∶⊢_) (sym (id/m→M/id m₁)) (t ⋯ ϕ)
+  ↪-⋯ᵣ : ∀ {µ₁ µ₂ M} {t t' : µ₁ ⊢ M} {ϕ : µ₁ →ᵣ µ₂} →
+    t ↪ t' →
+    t ⋯ᵣ ϕ ↪ t' ⋯ᵣ ϕ
+  ↪-⋯ᵣ t↪t' = ↪-⋯ t↪t' λ x → refl where instance _ = kitᵣ; _ = kittᵣ; _ = ckitₛᵣ; _ = ckitᵣ
 
---   _∋↑/⊢↑_ : ∀ {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
---     Γ₂             ∋*/⊢* ϕ       ∶ Γ₁ →
---     ∀ t →
---     (Γ₂ ▶ (t ⋯ ϕ)) ∋*/⊢* (ϕ ↑ m) ∶ (Γ₁ ▶ t)
---   _∋↑/⊢↑_ {µ₁ = µ₁} {µ₂ = µ₂} {Γ₁ = Γ₁} {Γ₂ = Γ₂} {ϕ = ϕ} ⊢ϕ t' (here refl) .(t' ⋯ᵣ wknᵣ) refl =
---     Γ₂ ▶ (t' ⋯ ϕ) ∋/⊢ (here refl & ϕ ↑ _) ∶ subst ((µ₂ ▷ _) ∶⊢_) (sym (id/m→M/id _)) (t' ⋯ᵣ wknᵣ ⋯ ϕ ↑ _)
---       by subst₂ (λ ■₁ ■₂ → Γ₂ ▶ (t' ⋯ ϕ) ∋/⊢ ■₁ ∶ ■₂)
---         (sym (&-↑-here ϕ))
---         (cong (subst _ _) (sym (dist-↑-f t' ϕ))) (
---     Γ₂ ▶ t' ⋯ ϕ ∋/⊢ id/` (here refl) ∶ subst (_∶⊢_ (µ₂ ▷ _)) (sym (id/m→M/id _)) (t' ⋯ ϕ ⋯ᵣ wknᵣ)
---       by id/⊢` {x = here refl} {Γ = Γ₂ ▶ (t' ⋯ ϕ)} refl)
---   _∋↑/⊢↑_ {µ₁ = µ₁} {µ₂ = µ₂} {Γ₁ = Γ₁} {Γ₂ = Γ₂} {ϕ = ϕ} ⊢ϕ t (there x) _ refl =
---     Γ₂ ▶ (t ⋯ ϕ) ∋/⊢ (there x & ϕ ↑ _) ∶ subst ((µ₂ ▷ _) ∶⊢_) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (there x) ⋯ ϕ ↑ _)
---       by subst₂ (λ ■₁ ■₂ → Γ₂ ▶ (t ⋯ ϕ) ∋/⊢ ■₁ ∶ ■₂)
---         (sym (&-↑-there ϕ x))
---         (
---          begin
---            subst (µ₂ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope Γ₁ x ⋯ ϕ) ⋯ᵣ wknᵣ
---          ≡⟨ dist-subst (_⋯ᵣ wknᵣ) ((sym (id/m→M/id _))) (wk-telescope Γ₁ x ⋯ ϕ) ⟩
---            subst (µ₂ ▷ _ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope Γ₁ x ⋯ ϕ ⋯ᵣ wknᵣ)
---          ≡⟨ cong (subst (µ₂ ▷ _ ∶⊢_) (sym (id/m→M/id _))) (sym (dist-↑-f (wk-telescope Γ₁ x) ϕ)) ⟩
---            subst (µ₂ ▷ _ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope Γ₁ x ⋯ᵣ wknᵣ ⋯ ϕ ↑ _)
---          ≡⟨⟩
---            subst (µ₂ ▷ _ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (there x) ⋯ ϕ ↑ _)
---          ∎
---         )
---       (∋wk/⊢wk _ _ _ _ (⊢ϕ x _ refl) )
+  semkitₛ : SemKit Sem kitₛ kittₛ ckitₛᵣ ckitₛₛ
+  semkitₛ = record
+    { _≡/↪_ = _↪_
+    ; ↪-wk  = ↪-⋯ᵣ
+    }
 
---   _,*_ : ∀ {m} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} {e : µ₂ ∋/⊢ id/m→M m} {t : µ₁ ∶⊢ m→M m} →
---     Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →
---     Γ₂ ∋/⊢   e ∶ subst (_ ∶⊢_) (sym (id/m→M/id m)) t ⋯ ϕ →
---     Γ₂ ∋*/⊢* ϕ ,ₖ e ∶ Γ₁ ▶ t
---   _,*_ {µ₁ = µ₁} {µ₂ = µ₂} {Γ₁ = Γ₁} {Γ₂ = Γ₂} {ϕ = ϕ} {e = e} {t = t} ⊢ϕ ⊢e (here refl) _ refl =
---     Γ₂ ∋/⊢ (here refl & ϕ ,ₖ e) ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (here refl) ⋯ (ϕ ,ₖ e))
---     by subst₂ (Γ₂ ∋/⊢_∶_) (sym (&-,ₖ-here ϕ e)) (
---       begin
---         subst (µ₁ ∶⊢_) (sym (id/m→M/id _)) t ⋯ ϕ
---       ≡⟨ sym (wk-cancels-,ₖ (subst (_ ∶⊢_) (sym (id/m→M/id _)) t) ϕ e) ⟩
---         (subst (µ₁ ∶⊢_) (sym (id/m→M/id _)) t) ⋯ᵣ wknᵣ ⋯ (ϕ ,ₖ e)
---       ≡⟨ dist-subst (λ ■ → ■ ⋯ᵣ wknᵣ ⋯ (ϕ ,ₖ e)) (sym (id/m→M/id _)) t ⟩
---         subst (µ₂ ∶⊢_) (sym (id/m→M/id _)) (t ⋯ᵣ wknᵣ ⋯ (ϕ ,ₖ e))
---       ≡⟨⟩
---         subst (µ₂ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (here refl) ⋯ (ϕ ,ₖ e))
---       ∎
---     ) ⊢e
---   _,*_ {µ₁ = µ₁} {µ₂ = µ₂} {Γ₁ = Γ₁} {Γ₂ = Γ₂} {ϕ = ϕ} {e = e} {t = t} ⊢ϕ ⊢e (there x) _ eq@refl =
---     Γ₂ ∋/⊢ (there x & ϕ ,ₖ e) ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (there x) ⋯ (ϕ ,ₖ e)) by (
---     Γ₂ ∋/⊢ (there x & ϕ ,ₖ e) ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (wk-telescope Γ₁ x ⋯ᵣ wknᵣ ⋯ (ϕ ,ₖ e)) by
---     subst₂ (λ ■₁ ■₂ → Γ₂ ∋/⊢ ■₁ ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) ■₂)
---       (sym (&-,ₖ-there ϕ e x))
---       (wk-telescope Γ₁ x ⋯ ϕ                ≡⟨ sym (wk-cancels-,ₖ (wk-telescope Γ₁ x) ϕ e) ⟩
---        wk-telescope Γ₁ x ⋯ᵣ wknᵣ ⋯ (ϕ ,ₖ e) ∎)
---     (Γ₂ ∋/⊢ x & ϕ ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (wk-telescope Γ₁ x ⋯ ϕ) by ⊢ϕ x _ refl ))
+  private instance _ = semkitₛ
 
---   ⊢id : ∀ {µ} {Γ : Ctx µ} → Γ ∋*/⊢* id ∶ Γ
---   ⊢id {Γ = Γ} x _ refl =
---     Γ ∋/⊢ x & id ∶ subst (_ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope Γ x ⋯ id)
---       by subst₂ (λ ■₁ ■₂ → Γ ∋/⊢ ■₁ ∶ subst (_ ∶⊢_) (sym (id/m→M/id _)) ■₂)
---          (sym (&-id x))
---          (sym (⋯-id (wk-telescope Γ x)))
---          (
---     Γ ∋/⊢ id/` x ∶ subst (_ ∶⊢_) (sym (id/m→M/id _)) (wk-telescope Γ x)
---       by ∋/⊢∶-lookup x)
-
---   ⊢*~ :
---     ∀ {µ₁} {µ₂} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ ϕ' : µ₁ –[ 𝕂 ]→ µ₂} 
---     → ϕ ~ ϕ'
---     → Γ₂ ∋*/⊢* ϕ ∶ Γ₁
---     → Γ₂ ∋*/⊢* ϕ' ∶ Γ₁
---   ⊢*~ {µ₁} {µ₂} {Γ₁} {Γ₂} {ϕ} {ϕ'} ϕ~ϕ' ⊢ϕ {m₁} x t ⊢x =
---     Γ₂ ∋/⊢ (x & ϕ') ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (t ⋯ ϕ')
---       by subst₂
---            (λ ■₁ ■₂ → Γ₂ ∋/⊢ ■₁ ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) ■₂)
---            (`/id-injective (ϕ~ϕ' _ x))
---            (~-cong-⋯ t ϕ~ϕ') (
---     Γ₂ ∋/⊢ (x & ϕ ) ∶ subst (_∶⊢_ µ₂) (sym (id/m→M/id _)) (t ⋯ ϕ )
---       by ⊢ϕ x t ⊢x)
-
---   ⊢⦅_⦆ : ∀ {m} {Γ : Ctx µ} {t : µ ∋/⊢ id/m→M m} {T : µ ∶⊢ m→M/id (id/m→M m)}
---     → Γ ∋/⊢ t ∶ T 
---     → Γ ∋*/⊢* ⦅ t ⦆ ∶ Γ ▶ subst (µ ∶⊢_) (id/m→M/id m) T
---   ⊢⦅_⦆ {µ} {m} {Γ} {t} {T} ⊢t =
---     let ⊢t' = subst (Γ ∋/⊢ t ∶_) (sym (
---                 begin
---                   subst
---                     (µ ∶⊢_)
---                     (sym (id/m→M/id _))
---                     (subst (µ ∶⊢_) (id/m→M/id _) T)
---                   ⋯ id
---                 ≡⟨ cong (_⋯ id) (cancel-subst (µ ∶⊢_) (id/m→M/id _) T) ⟩
---                   T ⋯ id
---                 ≡⟨ ⋯-id T ⟩
---                   T
---                 ∎
---               )) ⊢t in
---     Γ ∋*/⊢* ⦅ t ⦆ ∶ Γ ▶ subst (µ ∶⊢_) (id/m→M/id m) T
---       by ⊢*~ (~-sym (⦅⦆-,ₖ t)) (
---     Γ ∋*/⊢* (id ,ₖ t) ∶ Γ ▶ subst (µ ∶⊢_) (id/m→M/id m) T
---       by (⊢id ,* ⊢t')
---     )
-
--- open ISemKit ⦃ ... ⦄
-
--- infixl  5  _∋*/⊢*[_]_∶_
--- _∋*/⊢*[_]_∶_ :
---   ∀ {𝕂} {K : KitT 𝕂} {C₁ : ComposeKit 𝕂 kitᵣ 𝕂} {C₂ : ComposeKit 𝕂 𝕂 𝕂}
---   → Ctx µ₂ → ISemKit 𝕂 K C₁ C₂ → µ₁ –[ 𝕂 ]→ µ₂ → Ctx µ₁ → Set
--- Γ₂ ∋*/⊢*[ IK ] f ∶ Γ₁ = Γ₂ ∋*/⊢* f ∶ Γ₁ where instance _ = IK
-
--- open Kit ⦃ ... ⦄
--- open ComposeKit ⦃ ... ⦄
-
--- private instance _ = kitᵣ
--- private instance _ = kitₛ
--- private instance _ = kittᵣ
--- private instance _ = kittₛ
--- private instance _ = ckitᵣ
--- private instance _ = ckitₛᵣ
--- private instance _ = ckitₛₛ
-
--- record ITraversal : Set (lsuc ℓ) where
---   infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
-
---   field
---     -- Substitution/Renaming preserves typing
---     _⊢⋯_ : ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
---              ⦃ IK : ISemKit 𝕂 K C₁ C₂ ⦄
---              ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
---              ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
---              {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
---            Γ₁ ⊢ e ∶ t →
---            Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
---            Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
-
---     -- ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (f : µ₁ –→ µ₂) →
---     --         (` x) ⋯ f ≡ subst (µ₂ ⊢_) (id/m→M/id m) (tm _ (f _ x))
-
---   instance
---     ikitᵣ : ISemKit kitᵣ kittᵣ ckitᵣ ckitᵣ
---     IKit._∋/⊢_∶_ ikitᵣ = _∋_∶_
---     IKit.∋/⊢∶-lookup ikitᵣ = λ _ → refl
---     IKit.id/⊢`   ikitᵣ = λ ⊢x → ⊢x
---     IKit.⊢`/id   ikitᵣ = ⊢`
---     IKit.⊢`/id'  ikitᵣ = ⊢`
---     IKit.∋wk/⊢wk ikitᵣ _ _ _ _ refl = refl
-
---     ikitₛ : IKit kitₛ kittₛ ckitₛᵣ ckitₛₛ
---     IKit._∋/⊢_∶_ ikitₛ = _⊢_∶_
---     IKit.∋/⊢∶-lookup ikitₛ = λ _ → ⊢` refl
---     IKit.id/⊢`   ikitₛ = ⊢`
---     IKit.⊢`/id   ikitₛ = λ ⊢t → ⊢t
---     IKit.⊢`/id'  ikitₛ = λ ⊢t → ⊢t
---     IKit.∋wk/⊢wk ikitₛ Γ t' x t ⊢e = ⊢e ⊢⋯ λ x₁ t₁ ⊢x₁ →
---       (Γ ▶ t') ∋ (x₁ & wknᵣ) ∶ (t₁ ⋯ wknᵣ)
---         by subst (λ ■ → (Γ ▶ t') ∋ ■ ∶ (t₁ ⋯ wknᵣ))
---                 (sym (trans (&-wkₖ-wk id x₁) (cong there (&-id x₁)))) (
---       (Γ ▶ t') ∋ (there x₁) ∶ (t₁ ⋯ wknᵣ)
---         by (∋wk/⊢wk Γ t' x₁ t₁ ⊢x₁))
-
---   open IKit ikitᵣ public using () renaming (∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
---   open IKit ikitₛ public using () renaming (∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
-
---   -- Renaming preserves typing
-
---   _⊢⋯ᵣ_ : ∀ {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ρ : µ₁ →ᵣ µ₂} →
---           Γ₁ ⊢ e ∶ t →
---           Γ₂ ∋* ρ ∶ Γ₁ →
---           Γ₂ ⊢ e ⋯ ρ ∶ t ⋯ ρ
---   _⊢⋯ᵣ_ = _⊢⋯_
-
---   -- Substitution preserves typing
-
---   _⊢⋯ₛ_ : ∀ {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {σ : µ₁ →ₛ µ₂} →
---           Γ₁ ⊢ e ∶ t →
---           Γ₂ ⊢* σ ∶ Γ₁ →
---           Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
---   _⊢⋯ₛ_ = _⊢⋯_
-
+  ↪-⋯ₛ : ∀ {µ₁ µ₂ M} {t t' : µ₁ ⊢ M} {ϕ ϕ' : µ₁ →ₛ µ₂}
+    → t ↪ t'
+    → ϕ ↪ϕ ϕ'
+    → t ⋯ ϕ ↪ t' ⋯ ϕ'
+  ↪-⋯ₛ = ↪-⋯ where instance _ = kitₛ; _ = kittₛ; _ = ckitₛᵣ; _ = ckitₛₛ
