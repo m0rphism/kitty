@@ -14,12 +14,6 @@ open import Data.Product using (∃-syntax; Σ-syntax; _×_ ; _,_; proj₁; proj
 
 open ReflexiveTransitiveClosure using (refl; step)
 
-sem-trans : SemTrans semantics semanticsₚ
-sem-trans = record { toₚ = ↪→↪ₚ ; fromₚ = ↪ₚ→↪* }
-
-open SemTrans sem-trans
-open SemTrans-↪-⋯ sem-traversal
-
 --------------------------------------------------------------------------------
 
 _⊢⋯_ :

@@ -125,10 +125,6 @@ module Semₚ where
 ↪→↪ₚ (ξ-·₁ t₁↪t₁') = ξ-· (↪→↪ₚ t₁↪t₁') ↪ₚ-refl
 ↪→↪ₚ (ξ-·₂ t₂↪t₂') = ξ-· ↪ₚ-refl (↪→↪ₚ t₂↪t₂')
 
-↪*→↪ₚ* : t ↪* t' → t ↪ₚ* t'
-↪*→↪ₚ* refl                = refl
-↪*→↪ₚ* (step t↪t' t'↪*t'') = step (↪→↪ₚ t↪t') (↪*→↪ₚ* t'↪*t'')
-
 ↪ₚ→↪* : t ↪ₚ t' → t ↪* t'
 ↪ₚ→↪* ξ-`                    = refl
 ↪ₚ→↪* (β-λ {t₁ = t₁} {t₁'} {t₂} {t₂'} t₁↪ₚt₁' t₂↪ₚt₂'') =
@@ -147,9 +143,11 @@ module Semₚ where
   t₁' · t₂' ↪∎
 ↪ₚ→↪* ξ-★                    = refl
 
-↪ₚ*→↪* : t ↪ₚ* t' → t ↪* t'
-↪ₚ*→↪* refl                  = refl
-↪ₚ*→↪* (step t↪ₚt' t'↪ₚ*t'') = ↪*-trans (↪ₚ→↪* t↪ₚt') (↪ₚ*→↪* t'↪ₚ*t'')
+sem-trans : SemTrans semantics semanticsₚ
+sem-trans = record { toₚ = ↪→↪ₚ ; fromₚ = ↪ₚ→↪* }
+
+open SemTrans sem-trans public renaming (toₚ* to ↪*→↪ₚ*; fromₚ* to ↪ₚ*→↪*)
+open SemTrans-↪-⋯ sem-traversal public
 
 --------------------------------------------------------------------------------
 
