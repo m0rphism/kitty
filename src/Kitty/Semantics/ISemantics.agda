@@ -371,7 +371,7 @@ record SemKit (Sem : Semantics)
 
   field
     _≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set
-    ↪-wk : ∀ {µ M m} {t₁ t₂ : µ ∋/⊢ M} →
+    ≡/↪-wk : ∀ {µ M m} {t₁ t₂ : µ ∋/⊢ M} →
       t₁ ≡/↪ t₂ →
       wk m t₁ ≡/↪ wk m t₂
 
@@ -404,7 +404,7 @@ record SemTraversal (Sem : Semantics) : Set (lsuc ℓ) where
   semkitᵣ : SemKit Sem kitᵣ kittᵣ ckitᵣ ckitᵣ
   semkitᵣ = record
     { _≡/↪_ = _≡_
-    ; ↪-wk  = λ { refl → refl }
+    ; ≡/↪-wk  = λ { refl → refl }
     }
 
   private instance _ = semkitᵣ
@@ -417,7 +417,7 @@ record SemTraversal (Sem : Semantics) : Set (lsuc ℓ) where
   semkitₛ : SemKit Sem kitₛ kittₛ ckitₛᵣ ckitₛₛ
   semkitₛ = record
     { _≡/↪_ = _↪_
-    ; ↪-wk  = ↪-⋯ᵣ
+    ; ≡/↪-wk  = ↪-⋯ᵣ
     }
 
   private instance _ = semkitₛ
@@ -427,3 +427,18 @@ record SemTraversal (Sem : Semantics) : Set (lsuc ℓ) where
     → ϕ ↪ϕ ϕ'
     → t ⋯ ϕ ↪ t' ⋯ ϕ'
   ↪-⋯ₛ = ↪-⋯ where instance _ = kitₛ; _ = kittₛ; _ = ckitₛᵣ; _ = ckitₛₛ
+
+  open SemKit semkitₛ using () renaming (≡/↪-wk to ↪-wk) public
+
+  ≣-wk : {t₁ t₂ : µ ⊢ M} →
+    t₁ ≣ t₂ →
+    wkₛ m t₁ ≣ wkₛ m t₂
+  ≣-wk = map-≣ ↪-wk
+
+  ≣*-wk-telescope :
+    Γ₁ x ≣ Γ₂ x →
+    wk-telescope Γ₁ x ≣ wk-telescope Γ₂ x
+  ≣*-wk-telescope {x = here refl} eq = ≣-wk eq
+  ≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq = ≣-wk (≣*-wk-telescope {Γ₁ = λ x → Γ₁ (there x)}
+                                                                                {Γ₂ = λ x → Γ₂ (there x)}
+                                                                                eq)
