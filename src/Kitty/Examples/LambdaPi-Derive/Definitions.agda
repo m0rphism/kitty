@@ -8,7 +8,7 @@ open import Kitty.Util.Closures
 
 -- Fixities --------------------------------------------------------------------
 
-infix   3  _⊢_  _↪_  _↪β_  _↪*_  _≣_  _⊢_∶_
+infix   3  _⊢_  _↪_  _≣_  _⊢_∶_
 infixr  5  λx_  ∀[x∶_]_
 -- infixr  6  _⇒_
 infixl  6  _·_
