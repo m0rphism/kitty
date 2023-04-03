@@ -603,6 +603,12 @@ record SemTraversal {Sem : Semantics} (RSem : ReflexiveSemantics Sem) : Set (lsu
                                                                                 {Γ₂ = λ x → Γ₂ (there x)}
                                                                                 eq)
 
+  ↪ₚσ-⋯-⦅⦆ : ∀ {µ M m} {t₁ t₁' : (µ ▷ m) ⊢ M}  {t₂ t₂' : µ ⊢ m→M m} →
+    t₁ ↪ t₁' →
+    t₂ ↪ t₂' →
+    t₁ ⋯ ⦅ t₂ ⦆ₛ ↪ t₁' ⋯ ⦅ t₂' ⦆ₛ
+  ↪ₚσ-⋯-⦅⦆ t₁↪ₚt₁' t₂↪ₚt₂' = ↪-⋯ₛ t₁↪ₚt₁' ↪σ-⦅ t₂↪ₚt₂' ⦆
+
 record SemTrans (Sem Semₚ : Semantics) : Set₁ where
   module S = Semantics Sem
   module Sₚ = Semantics Semₚ
@@ -742,7 +748,6 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
                                                                                   {Γ₂ = λ x → Γ₂ (there x)}
                                                                                   eq)
 
-
     -- ↪-⋯ :
     --   ∀ ⦃ 𝕂 : Kit ⦄
     --     ⦃ K : KitT 𝕂 ⦄
@@ -757,3 +762,37 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
     --   → t ⋯ ϕ ↪* t' ⋯ ϕ'
     -- ↪-⋯ {ϕ = ϕ} {ϕ'} t↪*t' ϕ↪*ϕ' = ↪ₚ*→↪* {!Semₚ.↪*ϕ-⋯!}
     -- -- ↪-⋯' {ϕ = ϕ} {ϕ'} t↪*t' ϕ↪*ϕ' = ↪ₚ*→↪* (Semₚ.↪*ϕ-⋯ {!↪*→↪ₚ* t↪*t'!} ([↪*ϕ]→[↪ϕ*] (λ x → {!↪*→↪ₚ* (ϕ↪*ϕ' x)!}))) 
+
+  module SemTrans-diamond (diamond : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} → t ↪ₚ t₁ → t ↪ₚ t₂ → ∃[ t' ] t₁ ↪ₚ t' × t₂ ↪ₚ t') where
+    strip : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} → 
+      t ↪ₚ t₁ →
+      t ↪ₚ* t₂ →
+      ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ t')
+    strip {t = t} {t₁} {t₂} t↪ₚt₁ refl = t₁ , refl , t↪ₚt₁
+    strip {t = t} {t₁} {t₂} t↪ₚt₁ (step t↪ₚt₂' t₂'↪ₚ*t₂)
+      with diamond t↪ₚt₁ t↪ₚt₂'
+    ... | T , t₁↪ₚT , t₂'↪ₚT
+      with strip t₂'↪ₚT t₂'↪ₚ*t₂
+    ... | U , T↪ₚ*U , t₂↪U
+      = U , step t₁↪ₚT T↪ₚ*U , t₂↪U
+
+    confluenceₚ : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} →  
+      t ↪ₚ* t₁ →
+      t ↪ₚ* t₂ →
+      ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ* t')
+    confluenceₚ refl                   t↪ₚ*t₂ = _ , t↪ₚ*t₂ , refl
+    confluenceₚ (step t↪ₚt₁' t₁'↪ₚ*t₁) t↪ₚ*t₂
+      with strip t↪ₚt₁' t↪ₚ*t₂
+    ... | T , t₁'↪ₚ*T , t₂↪ₚT
+      with confluenceₚ t₁'↪ₚ*t₁ t₁'↪ₚ*T
+    ... | U , t₁↪ₚ*U , T↪ₚ*U
+      = U , t₁↪ₚ*U , step t₂↪ₚT T↪ₚ*U 
+
+    confluence : ∀ {µ M} {t t₁ t₂ : µ ⊢ M} → 
+      t ↪* t₁ →
+      t ↪* t₂ →
+      ∃[ t' ] (t₁ ↪* t') × (t₂ ↪* t')
+    confluence t↪*t₁ t↪*t₂
+      with confluenceₚ (toₚ* t↪*t₁) (toₚ* t↪*t₂)
+    ... | t' , t₁↪ₚ*t' , t₂↪ₚ*t'
+      = t' , fromₚ* t₁↪ₚ*t' , fromₚ* t₂↪ₚ*t'
