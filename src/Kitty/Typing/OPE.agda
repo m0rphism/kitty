@@ -99,14 +99,14 @@ ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x ope-id =
   wk-telescope Γ₁ x         ≡⟨ sym (⋯-id (wk-telescope Γ₁ x)) ⟩
   wk-telescope Γ₁ x ⋯ idᵣ   ∎
 ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x@(here refl) (ope-keep {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
-  wk-telescope (Γ₂' ▶ T ⋯ ρ') (x & ρ' ↑ m) ≡⟨ cong (wk-telescope (Γ₂' ▶ T ⋯ ρ')) (&-↑-here ρ') ⟩
-  wk-telescope (Γ₂' ▶ T ⋯ ρ') (here refl)  ≡⟨⟩
+  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (x & ρ' ↑ m) ≡⟨ cong (wk-telescope (Γ₂' ▶ (T ⋯ ρ'))) (&-↑-here ρ') ⟩
+  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (here refl)  ≡⟨⟩
   wk _ (T ⋯ ρ')                            ≡⟨ sym (dist-↑-f T ρ') ⟩
   wk _ T ⋯ (ρ' ↑ m)                        ≡⟨⟩
   wk-telescope (Γ₁' ▶ T) x ⋯ (ρ' ↑ m)      ∎
 ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x@(there y)   (ope-keep {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
-  wk-telescope (Γ₂' ▶ T ⋯ ρ') (x & ρ' ↑ _)     ≡⟨ cong (wk-telescope (Γ₂' ▶ T ⋯ ρ')) (&-↑-there ρ' y) ⟩
-  wk-telescope (Γ₂' ▶ T ⋯ ρ') (there (y & ρ')) ≡⟨⟩
+  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (x & ρ' ↑ _)     ≡⟨ cong (wk-telescope (Γ₂' ▶ (T ⋯ ρ'))) (&-↑-there ρ' y) ⟩
+  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (there (y & ρ')) ≡⟨⟩
   wk _ (wk-telescope Γ₂' (y & ρ'))             ≡⟨ cong (wk _) (ope-pres-telescope y ope) ⟩
   wk _ (wk-telescope Γ₁' y ⋯ ρ')               ≡⟨ sym (dist-↑-f (wk-telescope Γ₁' y) ρ') ⟩
   wk _ (wk-telescope Γ₁' y) ⋯ (ρ' ↑ _)         ≡⟨⟩

@@ -29,7 +29,7 @@ private variable
 private instance _ = kitᵣ
 
 record Traversal : Set (lsuc ℓ) where
-  infixl   8  _⋯_
+  infixl   5  _⋯_
 
   field
     _⋯_   : ∀ ⦃ 𝕂 : Kit ⦄ → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
@@ -132,7 +132,7 @@ record Traversal : Set (lsuc ℓ) where
         Kit.`/id' kitᵣ x            ∎
     }
 
-  infixl   8   _⋯ᵣ_  _⋯ₛ_ _⋯[_]_
+  infixl   5   _⋯ᵣ_  _⋯ₛ_ _⋯[_]_
   infixl   9  _∥ᵣ_  _∥ₛ_
 
   open Kit kitᵣ using () renaming (wk to wkᵣ) public

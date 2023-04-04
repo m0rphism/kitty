@@ -122,7 +122,7 @@ record IKit
       by subst₂ (λ ■₁ ■₂ → Γ₂ ▶ (t' ⋯ ϕ) ∋/⊢ ■₁ ∶ ■₂)
         (sym (&-↑-here ϕ))
         (cong (subst _ _) (sym (dist-↑-f t' ϕ))) (
-    Γ₂ ▶ t' ⋯ ϕ ∋/⊢ id/` (here refl) ∶ subst (_∶⊢_ (µ₂ ▷ _)) (sym (id/m→M/id _)) (t' ⋯ ϕ ⋯ᵣ wknᵣ)
+    Γ₂ ▶ (t' ⋯ ϕ) ∋/⊢ id/` (here refl) ∶ subst (_∶⊢_ (µ₂ ▷ _)) (sym (id/m→M/id _)) (t' ⋯ ϕ ⋯ᵣ wknᵣ)
       by id/⊢` {x = here refl} {Γ = Γ₂ ▶ (t' ⋯ ϕ)} refl)
   _∋↑/⊢↑_ {µ₁ = µ₁} {µ₂ = µ₂} {Γ₁ = Γ₁} {Γ₂ = Γ₂} {ϕ = ϕ} ⊢ϕ t (there x) _ refl =
     Γ₂ ▶ (t ⋯ ϕ) ∋/⊢ (there x & ϕ ↑ _) ∶ subst ((µ₂ ▷ _) ∶⊢_) (sym (id/m→M/id _)) (wk-telescope (Γ₁ ▶ t) (there x) ⋯ ϕ ↑ _)

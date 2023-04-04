@@ -29,42 +29,42 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
 
   open Terms terms public using (#_)
 
-  open MultiTraversal MT public
+  open MultiTraversal MT public renaming (⋯-var to ⋯-var-MT; _⋯_ to _⋯-MT_)
 
   open import Kitty.Term.KitOrder terms public
   open _⊑ₖ_ ⦃ … ⦄ public
 
-  instance 𝕊 = S
+  -- instance 𝕊 = S
 
   private
-    ⋯-id' : ∀ ⦃ 𝕂 : Kit ⦄ {µ M} (v : µ ⊢ M) → v ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ v
+    ⋯-id' : ∀ ⦃ 𝕂 : Kit ⦄ {µ M} (v : µ ⊢ M) → v ⋯-MT id ⦃ 𝕂 = 𝕂 ⦄ ≡ v
     ⋯-id' ⦃ 𝕂 ⦄ {µ} {M} v =
-      ⋯-↑ {µ₁ = µ} (id ∷[ 𝕂 ] [])
+      ⋯-↑ ⦃ 𝕊 = S ⦄ {µ₁ = µ} (id ∷[ 𝕂 ] [])
           []
           (λ {µ} x →
-            ` x ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ        ≡⟨ ⋯-var x (id ↑*' µ) ⟩
-            `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ)) ≡⟨ ↑*'~↑* µ _ x ⟩
+            ` x ⋯-MT id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ        ≡⟨ ⋯-var-MT ⦃ 𝕊 = S ⦄ x (id ↑*' µ) ⟩
+            `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑*' µ)) ≡⟨ ↑*'~↑* ⦃ 𝕊 = S ⦄ µ _ x ⟩
             `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄ ↑* µ))  ≡⟨ id↑*~id µ _ _ x ⟩
             `/id (x & (id ⦃ 𝕂 = 𝕂 ⦄))       ≡⟨ cong `/id (&-id x) ⟩
             `/id (id/` x)                    ≡⟨ id/`/id x ⟩
             ` x                              ∎)
           v
 
-  kit-traversal : Traversal 𝕊
+  kit-traversal : Traversal S
   kit-traversal = record
-    { _⋯_   = _⋯_
-    ; ⋯-var = ⋯-var
+    { _⋯_   = _⋯-MT_
+    ; ⋯-var = ⋯-var-MT ⦃ 𝕊 = S ⦄
     ; ⋯-id  = ⋯-id'
     }
 
-  open Traversal 𝕊 kit-traversal hiding (_⋯_; ⋯-var) public
+  open Traversal S kit-traversal public
 
-  open import Kitty.Term.KitT terms 𝕊 kit-traversal public
+  open import Kitty.Term.KitT terms S kit-traversal public
   open KitT ⦃ … ⦄ public
 
   instance 𝕂ᵣ = kitᵣ; 𝕂ₛ = kitₛ; Kᵣ = kittᵣ; Kₛ = kittₛ
 
-  open import Kitty.Term.KitHomotopy terms 𝕊 kit-traversal public
+  open import Kitty.Term.KitHomotopy terms S kit-traversal public
 
   ~-cong-↑*''' :
     ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
@@ -83,7 +83,8 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
     → f ~ g
     → t ⋯ f ≡ t ⋯ g
   ~-cong-⋯ ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕊 ⦄ {µ₁} {µ₂} {M} {f} {g} t f~g =
-    ⋯-↑ (f ∷ [])
+    ⋯-↑ ⦃ 𝕊 = S ⦄
+        (f ∷ [])
         (g ∷ [])
         (λ {µ} x →
           (` x) ⋯ f ↑*' µ      ≡⟨ ⋯-var x (f ↑*' µ) ⟩
@@ -96,15 +97,15 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
   kit-homotopy : KitHomotopy
   kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
-  open import Kitty.Term.ComposeKit 𝕋 𝕊 kit-traversal kit-homotopy public
-  open import Kitty.Term.SubCompose 𝕋 𝕊 kit-traversal kit-homotopy public
+  open import Kitty.Term.ComposeKit 𝕋 S kit-traversal kit-homotopy public
+  open import Kitty.Term.SubCompose 𝕋 S kit-traversal kit-homotopy public
 
   module WithSubCompose (SC : SubCompose) where
-    instance 𝕊C = SC
-    open import Kitty.Term.ComposeTraversal 𝕋 𝕊 kit-traversal kit-homotopy 𝕊C
+    -- instance 𝕊C = SC
+    open import Kitty.Term.ComposeTraversal 𝕋 S kit-traversal kit-homotopy SC
 
     open ComposeKit ⦃ … ⦄ public
-    open SubCompose ⦃ … ⦄ public
+    open SubCompose SC public
 
     private
       ⋯-assoc :
@@ -119,16 +120,17 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
       ⋯-assoc {{𝕂₁}} {{𝕂₂}} {{𝕂}} v f g =
         v ⋯ f ⋯ g                            ≡⟨ refl ⟩
         v ⋯* (g ∷[ 𝕂₂ ] f ∷[ 𝕂₁ ] [])
-          ≡⟨ ⋯-↑ (g ∷[ 𝕂₂ ] f ∷[ 𝕂₁ ] [])
+          ≡⟨ ⋯-↑ ⦃ 𝕊 = S ⦄
+                (g ∷[ 𝕂₂ ] f ∷[ 𝕂₁ ] [])
                 ((g ∘ₖ f) ∷[ 𝕂 ] [])
                 (λ {µ} x →
-                  ` x ⋯ f ↑*' µ ⋯ g ↑*' µ            ≡⟨ ~-cong-⋯ (` x ⋯ f ↑*' µ) (↑*'~↑* µ) ⟩
-                  ` x ⋯ f ↑*' µ ⋯ g ↑* µ             ≡⟨ cong (_⋯ (g ↑* µ)) (~-cong-⋯ (` x)  (↑*'~↑* µ)) ⟩
+                  ` x ⋯ f ↑*' µ ⋯ g ↑*' µ            ≡⟨ ~-cong-⋯ (` x ⋯ f ↑*' µ) (↑*'~↑* ⦃ 𝕊 = S ⦄ µ) ⟩
+                  ` x ⋯ f ↑*' µ ⋯ g ↑* µ             ≡⟨ cong (_⋯ (g ↑* µ)) (~-cong-⋯ (` x)  (↑*'~↑* ⦃ 𝕊 = S ⦄ µ)) ⟩
                   ` x ⋯ f ↑* µ ⋯ g ↑* µ              ≡⟨ cong (_⋯ g ↑* µ) (⋯-var x (f ↑* µ)) ⟩
                   (`/id (x & (f ↑* µ))) ⋯ g ↑* µ     ≡⟨ tm-⋯-· (f ↑* µ) (g ↑* µ) x ⟩
                   `/id (x & ((f ↑* µ) ·ₖ (g ↑* µ)))  ≡⟨ sym (dist-↑*-· µ f g _ x) ⟩
                   `/id (x & ((f ·ₖ g) ↑* µ))         ≡⟨ sym (⋯-var x ((g ∘ₖ f) ↑* µ)) ⟩
-                  ` x ⋯ (f ·ₖ g) ↑* µ                ≡⟨ sym (~-cong-⋯ (` x) (↑*'~↑* µ)) ⟩
+                  ` x ⋯ (f ·ₖ g) ↑* µ                ≡⟨ sym (~-cong-⋯ (` x) (↑*'~↑* ⦃ 𝕊 = S ⦄ µ)) ⟩
                   ` x ⋯ (f ·ₖ g) ↑*' µ               ∎)
                 v
           ⟩
