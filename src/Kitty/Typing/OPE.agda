@@ -18,6 +18,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 -- open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Kitty.Term.Prelude
+open import Kitty.Util.List
 
 open Modes 𝕄
 open Terms 𝕋

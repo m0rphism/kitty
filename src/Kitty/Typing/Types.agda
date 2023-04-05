@@ -12,6 +12,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using (id; _∘_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Kitty.Term.Prelude
+open import Kitty.Util.List public
 
 open Modes 𝕄
 open Terms 𝕋
@@ -31,15 +32,6 @@ record KitType : Set₁ where
 
   _∶⊢_ : List VarMode → TermMode → Set
   µ ∶⊢ M = µ ⊢ ↑ₜ M
-
-  depth : ∀ {A : Set ℓ} {x : A} {xs : List A} → xs ∋ x → ℕ
-  depth (here px) = zero
-  depth (there x) = suc (depth x)
-
-  -- We need to drop one extra using `suc`, because otherwise the types in a
-  -- context are allowed to use themselves.
-  drop-∈ : ∀ {A : Set ℓ} {x : A} {xs : List A} → xs ∋ x → List A → List A
-  drop-∈ = drop ∘ suc ∘ depth
 
   Ctx' : List VarMode → List VarMode → Set
   Ctx' µ µ' = ∀ {m} → (x : µ' ∋ m) → drop-∈ x (µ ▷▷ µ') ∶⊢ m→M m
