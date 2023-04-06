@@ -45,12 +45,35 @@ _∋*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ ϕ Γ₁ =
   ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ∶⊢ m→M m₁) (⊢x : Γ₁ ∋ x ∶ t)
   → Γ₂ ∋ (x & ϕ) ∶ t ⋯ ϕ
 
+_~₁_ : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : A → Set ℓ₂}
+        → (f g : (a : A) → B a) → Set (ℓ₁ ⊔ ℓ₂)
+f ~₁ g = ∀ a → f a ≡ g a
+
+_~₂_ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
+        → (f g : (a : A) → (b : B a) → C a b) → Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
+f ~₂ g = ∀ a b → f a b ≡ g a b
+
+~₂-refl : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
+            {f : (a : A) → (b : B a) → C a b}
+          → f ~₂ f
+~₂-refl a b = refl
+
+_~₂ᵢ_ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
+        → (f g : {a : A} → (b : B a) → C a b) → Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
+f ~₂ᵢ g = ∀ a b → f {a} b ≡ g {a} b
+
 record ITerms : Set₁ where
   infix   4  _⊢_∶_
   field
     _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set
+
     ⊢` : ∀ {Γ : Ctx µ} {x : µ ∋ m} {t} →
          Γ ∋ x ∶ t → Γ ⊢ ` x ∶ t
+
+    ~₂-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
+      (λ m → Γ₁ {m})  ~₂ (λ m → Γ₂ {m}) →
+      Γ₁ ⊢ e ∶ t →
+      Γ₂ ⊢ e ∶ t
 
   _⊢*_∶_ : Ctx µ₂ → µ₁ →ₛ µ₂ → Ctx µ₁ → Set
   _⊢*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ ϕ Γ₁ =
