@@ -33,109 +33,28 @@ record KitType : Set₁ where
   _∶⊢_ : List VarMode → TermMode → Set
   µ ∶⊢ M = µ ⊢ ↑ₜ M
 
-  Ctx' : List VarMode → List VarMode → Set
-  Ctx' µ µ' = ∀ {m} → (x : µ' ∋ m) → drop-∈ x (µ ▷▷ µ') ∶⊢ m→M m
+-- open import Kitty.Term.Kit 𝕋
+-- open import Kitty.Term.Traversal 𝕋
+-- open import Kitty.Term.Sub 𝕋
 
-  Ctx'' : List VarMode → List VarMode → Set
-  Ctx'' µ µ' = ∀ {m} → (x : µ' ∋ m) → µ ▷▷ drop-∈ x µ' ∶⊢ m→M m
+-- module KitTypeSubst {ℓ} (KT : KitType) (𝕊 : SubWithLaws ℓ) (T : Traversal 𝕊) where
+--   private instance _ = 𝕊
 
-  Ctx : List VarMode → Set
-  Ctx µ = ∀ {m} → (x : µ ∋ m) → drop-∈ x µ ∶⊢ m→M m
+--   open KitType KT
+--   open Traversal 𝕊 T
+--   open Kit ⦃ … ⦄
+--   open Sub ⦃ … ⦄
+--   open SubWithLaws ⦃ … ⦄
 
-  private
-    variable
-      Γ Γ₁ Γ₂    : Ctx µ
+--   infixl  5  _⋯Ctx'_
+--   _⋯Ctx'_ : ∀ ⦃ 𝕂 : Kit ⦄ → Ctx' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx' µ₂ µ'
+--   _⋯Ctx'_ {µ' = µ'} {{𝕂}} Γ f x = Γ x ⋯ f' where
+--     f' = subst₂
+--            (λ x y → x –[ 𝕂 ]→ y)
+--            (sym (drop-∈-▷▷ x))
+--            (sym (drop-∈-▷▷ x))
+--            (f ↑* drop-∈ x µ')
 
-  infixl  5  _▶_  _▶[_]_
-
-  _▶_ : Ctx µ → µ ∶⊢ m→M m → Ctx (µ ▷ m)
-  (Γ ▶ t) (here refl) = t
-  (Γ ▶ t) (there x) = Γ x
-
-  _▶[_]_ : Ctx µ → ∀ m → µ ∶⊢ m→M m → Ctx (µ ▷ m)
-  (Γ ▶[ _ ] t) = Γ ▶ t
-
-  -- ∈-++ : ∀ {ℓ} {A : Set ℓ} {xs ys : List A} {x : A} → (xs ++ ys) ∋ x → (xs ∋ x) ⊎ (ys ∋ x)
-  -- ∈-++ {xs = []} x∈ys = inj₂ x∈ys
-  -- ∈-++ {xs = xs , x'} (here px) = inj₁ (here px)
-  -- ∈-++ {xs = xs , x'} (there x∈[xs++ys]) with ∈-++ x∈[xs++ys]
-  -- ... | inj₁ x∈xs = inj₁ (there x∈xs)
-  -- ... | inj₂ x∈ys = inj₂ x∈ys
-
-  _▶▶_ : Ctx µ → Ctx' µ µ' → Ctx (µ ▷▷ µ')
-  _▶▶_ {µ' = []} Γ Γ' x = Γ x
-  _▶▶_ {µ' = µ' ▷ m} Γ Γ' (here px) = Γ' (here px)
-  _▶▶_ {µ = µ} {µ' = µ' ▷ m} Γ Γ' (there x) =
-    (Γ ▶▶ Γ'') x
-    where
-      Γ'' : Ctx' µ µ'
-      Γ'' x = Γ' (there x)
-
-  _▶▶'_ : Ctx' µ µ₁ → Ctx' (µ ▷▷ µ₁) µ₂ → Ctx' µ (µ₁ ▷▷ µ₂)
-  _▶▶'_ {µ = µ} {µ₁ = µ₁} {µ₂ = []}     Γ₁ Γ₂ = Γ₁
-  _▶▶'_ {µ = µ} {µ₁ = µ₁} {µ₂ = µ₂ ▷ m} Γ₁ Γ₂ (here px) rewrite ++-assoc µ₂ µ₁ µ = Γ₂ (here px)
-  _▶▶'_ {µ = µ} {µ₁ = µ₁} {µ₂ = µ₂ ▷ m} Γ₁ Γ₂ (there x) = (Γ₁ ▶▶' (λ x → Γ₂ (there x))) x 
-
-  _▶▶''_ : Ctx µ → Ctx'' µ µ' → Ctx (µ ▷▷ µ')
-  _▶▶''_ {µ' = []} Γ Γ' x = Γ x
-  _▶▶''_ {µ' = µ' ▷ m} Γ Γ' (here px) = Γ' (here px)
-  _▶▶''_ {µ = µ} {µ' = µ' ▷ m} Γ Γ' (there x) =
-    (Γ ▶▶'' Γ'') x
-    where
-      Γ'' : Ctx'' µ µ'
-      Γ'' x =  Γ' (there x) 
-
-  -- postulate
-    -- _++''_ : Ctx' µ₂ µ₃ → Ctx' µ₁ µ₂ → Ctx' µ₁ (µ₂ ++ µ₁)
-  -- _++''_ = {!!}
-
-  _▶'▶_ : Ctx'' µ₁ µ₂ → Ctx'' (µ₁ ▷▷ µ₂) µ₃ → Ctx'' µ₁ (µ₂ ▷▷ µ₃)
-  _▶'▶_ {µ₁ = µ₁} {µ₂ = µ₂} {µ₃ = []} Γ'₁ Γ'₂ x = Γ'₁ x
-  _▶'▶_ {µ₁ = µ₁} {µ₂ = µ₂} {µ₃ = µ₃ ▷ x₁} Γ'₁ Γ'₂ (here px) rewrite ++-assoc µ₃ µ₂ µ₁ = Γ'₂ (here px)
-  _▶'▶_ {µ₁ = µ₁} {µ₂ = µ₂} {µ₃ = µ₃ ▷ x₁} Γ'₁ Γ'₂ (there x) = (Γ'₁ ▶'▶ Γ'₃) x 
-    where
-      Γ'₃ : Ctx'' (µ₁ ▷▷ µ₂) µ₃
-      Γ'₃ x =  Γ'₂ (there x) 
-
-  ∅ : Ctx []
-  ∅ ()
-
-  ∅' : Ctx' µ []
-  ∅' ()
-
-  ∅'' : Ctx'' µ []
-  ∅'' ()
-
-open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.Traversal 𝕋
-open import Kitty.Term.Sub 𝕋
-
-module KitTypeSubst {ℓ} (KT : KitType) (𝕊 : SubWithLaws ℓ) (T : Traversal 𝕊) where
-  private instance _ = 𝕊
-
-  open KitType KT
-  open Traversal 𝕊 T
-  open Kit ⦃ … ⦄
-  open Sub ⦃ … ⦄
-  open SubWithLaws ⦃ … ⦄
-
-  drop-∈-▷▷₁ : (x : µ' ∋ m) → drop-∈ x (µ ▷▷ µ') ≡ µ ▷▷ drop-∈ x µ'
-  drop-∈-▷▷₁ (here px) = refl
-  drop-∈-▷▷₁ {µ' = µ' ▷ m'} {m = m} {µ = µ} (there x) = drop-∈-▷▷₁ x
-    -- drop-∈ (there x) (m' ∷ (µ' ++ µ)) ≡⟨ refl ⟩
-    -- drop-∈ x (µ' ++ µ) ≡⟨  ⟩
-    -- drop-∈ x µ' ++ µ   ≡⟨ refl ⟩
-    -- drop-∈ (there x) (m' ∷ µ') ++ µ   ∎
-
-  infixl  5  _⋯Ctx'_
-  _⋯Ctx'_ : ∀ ⦃ 𝕂 : Kit ⦄ → Ctx' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx' µ₂ µ'
-  _⋯Ctx'_ {µ' = µ'} {{𝕂}} Γ f x = Γ x ⋯ f' where
-    f' = subst₂
-           (λ x y → x –[ 𝕂 ]→ y)
-           (sym (drop-∈-▷▷₁ x))
-           (sym (drop-∈-▷▷₁ x))
-           (f ↑* drop-∈ x µ')
-
-  infixl  5  _⋯Ctx''_
-  _⋯Ctx''_ : ∀ {{𝕂 : Kit}} → Ctx'' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx'' µ₂ µ'
-  _⋯Ctx''_ {µ' = µ'} {{𝕂}} Γ f x = Γ x ⋯ (f ↑* drop-∈ x µ')
+--   infixl  5  _⋯Ctx''_
+--   _⋯Ctx''_ : ∀ {{𝕂 : Kit}} → Ctx'' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx'' µ₂ µ'
+--   _⋯Ctx''_ {µ' = µ'} {{𝕂}} Γ f x = Γ x ⋯ (f ↑* drop-∈ x µ')

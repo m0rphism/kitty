@@ -26,16 +26,15 @@ open Terms 𝕋
 open Traversal T
 open KitHomotopy H
 open Kit ⦃ … ⦄
-open Sub ⦃ … ⦄
 open SubWithLaws 𝕊
+open Sub SubWithLaws-Sub
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
-private
-  variable
-    m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
-    M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
-    µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
+private variable
+  m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
+  M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
+  µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
 private instance
   _ = kitᵣ

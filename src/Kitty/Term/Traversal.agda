@@ -93,7 +93,6 @@ record Traversal : Set (lsuc ℓ) where
     ; ι-`/id   = λ x/t → refl
     ; ι-`/id'  = λ x/t → refl
     ; ι-wk     = λ {m'} {m} {µ} {m} x →
-        let instance _ = kitᵣ in
         ` Kit.wk kitᵣ _ x   ≡⟨⟩
         ` there x           ≡⟨ cong (λ ■ → ` there ■) (sym (&-id x)) ⟩
         ` there (x & id)    ≡⟨ cong `_ (sym (&-wkₖ-wk id x)) ⟩

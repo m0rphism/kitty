@@ -103,7 +103,7 @@ record KitHomotopy : Set (lsuc ℓ) where
     ; ι-wk     = λ {m'} {m} {µ} {m/M} x/t →
         `/id' (wk _ x/t)                  ≡⟨ sym (⋯-x/t-wk' x/t) ⟩
         `/id' x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨⟩
-        wk _ (`/id' x/t)   ∎
+        wk _ (`/id' x/t)                   ∎
     ; ι-∋/⊢-id = λ { refl x/t → refl }
     ; ι-∋/⊢-~ₜ = λ {µ} {m} x/t →
         let sub = subst (µ ⊢_) (id/m→M/id m) in

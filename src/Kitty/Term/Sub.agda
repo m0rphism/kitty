@@ -408,9 +408,9 @@ record SubWithLaws ℓ : Set (lsuc ℓ) where
     ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
     → here refl & (ϕ ↑ m) ≡ id/` (here refl)
   &-↑-here ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} ϕ =
-    here refl & (ϕ ↑ m)                                       ≡⟨ ~→~' (↑-,ₖ ϕ m) m (here refl) ⟩
+    here refl & (ϕ ↑ m)                       ≡⟨ ~→~' (↑-,ₖ ϕ m) m (here refl) ⟩
     here refl & (wkₖ m ϕ ,ₖ id/` (here refl)) ≡⟨ &-,ₖ-here (wkₖ m ϕ) _ ⟩
-    id/` (here refl)                                ∎
+    id/` (here refl)                          ∎
 
   &-↑-there :
     ∀ ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} {m'} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) (x : µ₁ ∋ m')

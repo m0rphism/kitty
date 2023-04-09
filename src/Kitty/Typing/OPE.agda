@@ -5,9 +5,20 @@ open import Kitty.Term.KitHomotopy using (KitHomotopy)
 open import Kitty.Term.SubCompose using (SubCompose)
 open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
+open import Kitty.Typing.CtxRepr using (CtxRepr)
 
-module Kitty.Typing.OPE {𝕄 : Modes} {𝕋 : Terms 𝕄} {ℓ} {𝕊 : SubWithLaws 𝕋 ℓ} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
-                        {𝕊C : SubCompose 𝕋 𝕊 T H} (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋) where
+module Kitty.Typing.OPE
+  {𝕄 : Modes}
+  {𝕋 : Terms 𝕄}
+  {ℓ}
+  {𝕊 : SubWithLaws 𝕋 ℓ}
+  {T  : Traversal 𝕋 𝕊}
+  {H  : KitHomotopy 𝕋 𝕊 T}
+  {𝕊C : SubCompose 𝕋 𝕊 T H}
+  (C  : ComposeTraversal 𝕋 𝕊 T H 𝕊C)
+  (KT : KitType 𝕋)
+  (ℂ  : CtxRepr KT)
+  where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -34,7 +45,8 @@ open Sub SubWithLaws-Sub
 open Kit ⦃ … ⦄
 open KitT ⦃ … ⦄
 open ComposeKit ⦃ … ⦄
-open SubCompose ⦃ … ⦄
+open SubCompose 𝕊C
+open CtxRepr ℂ
 
 private
   variable
@@ -70,11 +82,26 @@ wk-drop-∈ (there x) t = wk _ (wk-drop-∈ x t)
 -- This function automatically weakens all the types in a `Ctx µ` such that they
 -- refer to `µ` instead of a `µ`-suffix.
 wk-telescope : Ctx µ → µ ∋ m → µ ∶⊢ m→M m
-wk-telescope Γ x = wk-drop-∈ x (Γ x)
+wk-telescope Γ x = wk-drop-∈ x (lookup Γ x)
 
 infix   4  _∋_∶_
 _∋_∶_ : Ctx µ → µ ∋ m → µ ∶⊢ m→M m → Set
 Γ ∋ x ∶ t = wk-telescope Γ x ≡ t
+
+wk-telescope-here : ∀ {µ m} (Γ : Ctx µ) (T : µ ∶⊢ m→M m) →
+  wk-telescope (Γ ▶ T) (here refl) ≡ wk _ T
+wk-telescope-here {µ} {m} Γ T =
+  wk-telescope (Γ ▶ T) (here refl)  ≡⟨⟩
+  wk _ (lookup (Γ ▶ T) (here refl)) ≡⟨ cong (wk _) (lookup-▶-here Γ T) ⟩
+  wk _ T                            ∎
+
+wk-telescope-there : ∀ {µ m mx} (Γ : Ctx µ) (T : µ ∶⊢ m→M m) (x : µ ∋ mx) →
+  wk-telescope (Γ ▶ T) (there x) ≡ wk _ (wk-telescope Γ x)
+wk-telescope-there {µ} {m} {mx} Γ T x =
+  wk-telescope (Γ ▶ T) (there x)                ≡⟨⟩
+  wk _ (wk-drop-∈ x (lookup (Γ ▶ T) (there x))) ≡⟨ cong (λ ■ → wk _ (wk-drop-∈ x ■)) (lookup-▶-there Γ T x) ⟩
+  wk _ (wk-drop-∈ x (lookup Γ x))               ≡⟨⟩
+  wk _ (wk-telescope Γ x)                       ∎
 
 -- Order Preserving Embeddings for Contexts. Required by wk-⊢', where we can't
 -- just say Γ₂ ≡ Γ₁ ⋯* ρ because weakenings in ρ require us to fill the gaps
@@ -101,29 +128,29 @@ ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x ope-id =
   wk-telescope Γ₁ x ⋯ idᵣ   ∎
 ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x@(here refl) (ope-keep {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
   wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (x & ρ' ↑ m) ≡⟨ cong (wk-telescope (Γ₂' ▶ (T ⋯ ρ'))) (&-↑-here ρ') ⟩
-  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (here refl)  ≡⟨⟩
-  wk _ (T ⋯ ρ')                            ≡⟨ sym (dist-↑-f T ρ') ⟩
-  wk _ T ⋯ (ρ' ↑ m)                        ≡⟨⟩
-  wk-telescope (Γ₁' ▶ T) x ⋯ (ρ' ↑ m)      ∎
+  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (here refl)  ≡⟨ wk-telescope-here Γ₂' (T ⋯ ρ') ⟩
+  wk _ (T ⋯ ρ')                              ≡⟨ sym (dist-↑-f T ρ') ⟩
+  wk _ T ⋯ (ρ' ↑ m)                          ≡⟨ cong (_⋯ (ρ' ↑ m)) (sym (wk-telescope-here Γ₁' T)) ⟩
+  wk-telescope (Γ₁' ▶ T) x ⋯ (ρ' ↑ m)        ∎
 ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x@(there y)   (ope-keep {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
   wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (x & ρ' ↑ _)     ≡⟨ cong (wk-telescope (Γ₂' ▶ (T ⋯ ρ'))) (&-↑-there ρ' y) ⟩
-  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (there (y & ρ')) ≡⟨⟩
+  wk-telescope (Γ₂' ▶ (T ⋯ ρ')) (there (y & ρ')) ≡⟨ wk-telescope-there Γ₂' (T ⋯ ρ') (y & ρ') ⟩
   wk _ (wk-telescope Γ₂' (y & ρ'))             ≡⟨ cong (wk _) (ope-pres-telescope y ope) ⟩
   wk _ (wk-telescope Γ₁' y ⋯ ρ')               ≡⟨ sym (dist-↑-f (wk-telescope Γ₁' y) ρ') ⟩
-  wk _ (wk-telescope Γ₁' y) ⋯ (ρ' ↑ _)         ≡⟨⟩
+  wk _ (wk-telescope Γ₁' y) ⋯ (ρ' ↑ _)         ≡⟨ cong (_⋯ ρ' ↑ _) (sym (wk-telescope-there Γ₁' T y)) ⟩
   wk-telescope (Γ₁' ▶ T) x ⋯ (ρ' ↑ _)          ∎
 ope-pres-telescope {µ₁} {µ₂} {Γ₁} {Γ₂} {ρ} {m} x           (ope-drop {ρ = ρ'} {Γ₁ = Γ₁'} {Γ₂ = Γ₂'} {T = T} ope) =
   wk-telescope (Γ₂' ▶ T) (x & (ρ' ·ₖ wkₖ _ id))     ≡⟨ cong (wk-telescope (Γ₂' ▶ T)) (&-·ₖ-&/⋯ ρ' (wkₖ _ id) x) ⟩
   wk-telescope (Γ₂' ▶ T) ((x & ρ') & wkₖ _ id)      ≡⟨ cong (wk-telescope (Γ₂' ▶ T)) (&-wkₖ-wk id (x & ρ')) ⟩
   wk-telescope (Γ₂' ▶ T) (there (x & ρ' & id))      ≡⟨ cong (λ ■ → wk-telescope (Γ₂' ▶ T) (there ■)) (&-id (x & ρ')) ⟩
-  wk-telescope (Γ₂' ▶ T) (there (x & ρ'))           ≡⟨⟩
+  wk-telescope (Γ₂' ▶ T) (there (x & ρ'))           ≡⟨ wk-telescope-there Γ₂' T (x & ρ') ⟩
   wk _ (wk-telescope Γ₂' (x & ρ'))                  ≡⟨⟩
   wk-telescope Γ₂' (x & ρ') ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨ cong (_⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) (ope-pres-telescope x ope) ⟩
   wk-telescope Γ₁ x ⋯ ρ' ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id    ≡⟨ ⋯-assoc (wk-telescope Γ₁ x) ρ' (wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) ⟩
   wk-telescope Γ₁ x ⋯ (ρ' ·ₖ wkₖ _ id)              ∎
 
 -- _∋*_∶_ : Ctx µ₂ → µ₁ →ᵣ µ₂ → Ctx µ₁ → Set
--- _∋*_∶_ {µ₁ = µ₁} Γ₂ ρ Γ₁ = ∀ {m} (x : µ₁ ∋ m) → wk-telescope Γ₂ (ρ _ x) ≡ wk-telescope Γ₁ x ⋯ ρ
+-- _∋*_∶_ {µ₁ = µ₁} Γ₂ ρ Γ₁ = ∀ {m} (x : µ₁ ∋ m) → wk-telescope Γ₂ (x & ρ) ≡ wk-telescope Γ₁ x ⋯ ρ
 
 -- ope-pres-telescope : ∀ {ρ : µ₁ →ᵣ µ₂} →
 --   OPE ρ Γ₁ Γ₂ →

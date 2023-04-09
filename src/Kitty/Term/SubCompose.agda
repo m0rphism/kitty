@@ -23,7 +23,7 @@ open ComposeKit ⦃ … ⦄
 open Kit ⦃ … ⦄
 open Kitty.Term.Sub.SubWithLaws 𝕊
 open Modes 𝕄
-open Sub ⦃ … ⦄
+open Sub SubWithLaws-Sub
 open Terms 𝕋
 open Traversal T
 open _⊑ₖ_ ⦃ … ⦄

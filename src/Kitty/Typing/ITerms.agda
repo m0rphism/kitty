@@ -5,9 +5,20 @@ open import Kitty.Term.Sub using (SubWithLaws)
 open import Kitty.Term.SubCompose using (SubCompose)
 open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
+open import Kitty.Typing.CtxRepr using (CtxRepr)
 
-module Kitty.Typing.ITerms {𝕄 : Modes} {𝕋 : Terms 𝕄} {ℓ} {𝕊 : SubWithLaws 𝕋 ℓ} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
-                           {𝕊C : SubCompose 𝕋 𝕊 T H} (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋) where
+module Kitty.Typing.ITerms
+  {𝕄 : Modes}
+  {𝕋 : Terms 𝕄}
+  {ℓ}
+  {𝕊 : SubWithLaws 𝕋 ℓ}
+  {T : Traversal 𝕋 𝕊}
+  {H : KitHomotopy 𝕋 𝕊 T}
+  {𝕊C : SubCompose 𝕋 𝕊 T H}
+  (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C)
+  (KT : KitType 𝕋)
+  (ℂ  : CtxRepr KT)
+  where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
@@ -22,7 +33,13 @@ open import Kitty.Term.Kit 𝕋
 open Modes 𝕄
 open Terms 𝕋
 open Kitty.Typing.Types.KitType KT
-open import Kitty.Typing.OPE C KT
+open CtxRepr ℂ
+open import Kitty.Typing.OPE C KT ℂ
+open Traversal T
+open SubWithLaws 𝕊
+open import Kitty.Term.Sub 𝕋
+open Sub SubWithLaws-Sub
+open Kit ⦃ … ⦄
 
 private
   variable
@@ -33,34 +50,12 @@ private
     Γ Γ₁ Γ₂ : Ctx µ
     x y z : µ ∋ m
 
-open Traversal T
-open SubWithLaws 𝕊
-open import Kitty.Term.Sub 𝕋
-open Sub SubWithLaws-Sub
-open Kit ⦃ … ⦄
 private instance _ = kitᵣ; _ = kitₛ
 
 _∋*_∶_ : Ctx µ₂ → µ₁ →ᵣ µ₂ → Ctx µ₁ → Set
 _∋*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ ϕ Γ₁ =
   ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ∶⊢ m→M m₁) (⊢x : Γ₁ ∋ x ∶ t)
   → Γ₂ ∋ (x & ϕ) ∶ t ⋯ ϕ
-
-_~₁_ : ∀ {ℓ₁ ℓ₂} {A : Set ℓ₁} {B : A → Set ℓ₂}
-        → (f g : (a : A) → B a) → Set (ℓ₁ ⊔ ℓ₂)
-f ~₁ g = ∀ a → f a ≡ g a
-
-_~₂_ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-        → (f g : (a : A) → (b : B a) → C a b) → Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
-f ~₂ g = ∀ a b → f a b ≡ g a b
-
-~₂-refl : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-            {f : (a : A) → (b : B a) → C a b}
-          → f ~₂ f
-~₂-refl a b = refl
-
-_~₂ᵢ_ : ∀ {ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ₁} {B : A → Set ℓ₂} {C : (a : A) → B a → Set ℓ₃}
-        → (f g : {a : A} → (b : B a) → C a b) → Set (ℓ₁ ⊔ ℓ₂ ⊔ ℓ₃)
-f ~₂ᵢ g = ∀ a b → f {a} b ≡ g {a} b
 
 record ITerms : Set₁ where
   infix   4  _⊢_∶_
@@ -70,8 +65,8 @@ record ITerms : Set₁ where
     ⊢` : ∀ {Γ : Ctx µ} {x : µ ∋ m} {t} →
          Γ ∋ x ∶ t → Γ ⊢ ` x ∶ t
 
-    ~₂-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
-      (λ m → Γ₁ {m})  ~₂ (λ m → Γ₂ {m}) →
+    ≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
+      Γ₁ ≡ᶜ Γ₂ →
       Γ₁ ⊢ e ∶ t →
       Γ₂ ⊢ e ∶ t
 

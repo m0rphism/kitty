@@ -29,8 +29,8 @@ open Terms 𝕋
 open Traversal T
 open KitHomotopy H
 open Kit ⦃ … ⦄
-open Sub ⦃ … ⦄
 open SubWithLaws 𝕊
+open Sub SubWithLaws-Sub
 open SubCompose 𝕊C
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
