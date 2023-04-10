@@ -77,23 +77,24 @@ mutual
     Clause    : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ ℂ𝕊
 
   CtxP' : List Modeᵥ → List Modeᵥ → Set
-  CtxP' µ µ' = ∀ {m} → (x : µ' ∋ m) → drop-∈ x (µ ▷▷ µ') ⊢ ↑ₜ (m→M m)
+  CtxP' µ µ' = ∀ m → (x : µ' ∋ m) →  (µ ▷▷ drop-∈ x µ') ⊢ ↑ₜ (m→M m)
 
 pattern `_ x = `[ refl ] x
-
-_▶'_ : CtxP' µ µ₁ → (µ ▷▷ µ₁) ⊢ 𝕥 → CtxP' µ (µ₁ ▷ 𝕖)
-(Γ ▶' t) (here refl) = t
-(Γ ▶' t) (there x)   = Γ x
 
 _▶▶ᵖ_ : µ ⊢ ℙ µ₁ → (µ ▷▷ µ₁) ⊢ ℙ µ₂ → µ ⊢ ℙ (µ₁ ▷▷ µ₂)
 P₁ ▶▶ᵖ (`[_]_ {m = 𝕖} () _)
 P₁ ▶▶ᵖ []ᵖ       = P₁
 _▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) rewrite sym (++-assoc µ₂ µ₁ µ) = (P₁ ▶▶ᵖ P₂) ▶ᵖ t
 
-PatTy→Ctx' : µ ⊢ ℙ µ' → CtxP' µ µ' 
-PatTy→Ctx' (`[_]_ {m = 𝕖} () x)
-PatTy→Ctx' []ᵖ = λ ()
-PatTy→Ctx' (P ▶ᵖ t) = PatTy→Ctx' P ▶' t
+module _ where
+  private
+    _▶'_ : CtxP' µ µ₁ → (µ ▷▷ µ₁) ⊢ 𝕥 → CtxP' µ (µ₁ ▷ 𝕖)
+    (Γ ▶' t) _ (here refl) = t
+    (Γ ▶' t) _ (there x)   = Γ _ x
+  PatTy→Ctx' : µ ⊢ ℙ µ' → CtxP' µ µ' 
+  PatTy→Ctx' (`[_]_ {m = 𝕖} () x)
+  PatTy→Ctx' []ᵖ = λ _ ()
+  PatTy→Ctx' (P ▶ᵖ t) = PatTy→Ctx' P ▶' t
 
 variable
   e e₁ e₂ e₃ e' e₁' e₂' : µ ⊢ 𝕖
@@ -118,7 +119,14 @@ kit-type = record { ↑ₜ = ↑ₜ }
 
 open KitType kit-type public hiding (↑ₜ)
 
-open import Kitty.Typing.OPE compose-traversal kit-type public
+open import Kitty.Typing.CtxRepr kit-type
+
+ℂ : CtxRepr
+ℂ = Functional-CtxRepr
+
+open CtxRepr ℂ public
+
+open import Kitty.Typing.OPE compose-traversal kit-type ℂ public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -126,11 +134,11 @@ variable
 
 -- Type System -----------------------------------------------------------------
 
-data Matches : µ ⊢ 𝕖 → µ ⊢ 𝕡 µ' → Set where
+data Matches : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕡 µ' → Set where
   M-` :
-    Matches e `ᵖ
+    Matches {µ₂ = µ₂} e `ᵖ
   M-tt :
-    Matches (tt {µ = µ}) ttᵖ
+    Matches {µ₂ = µ₂} (tt {µ = µ}) ttᵖ
   M-, :
     Matches e₁ p₁ →
     Matches e₂ p₂ →
@@ -142,11 +150,11 @@ data Matches : µ ⊢ 𝕖 → µ ⊢ 𝕡 µ' → Set where
     Matches e p →
     Matches (inj₂ e) (inj₂ᵖ p)
 
-data Canonical : µ ⊢ 𝕖 → µ ⊢ 𝕥 → Set where
+data Canonical : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕥 → Set where
   C-λ :
     Canonical (λx e) (t₁ `→ t₂)
   C-tt :
-    Canonical (tt {µ = µ}) 𝟙
+    Canonical (tt {µ = µ₁}) (𝟙 {µ = µ₂})
   C-, :
     Canonical e₁ t₁ →
     Canonical e₂ t₂ →
@@ -158,7 +166,7 @@ data Canonical : µ ⊢ 𝕖 → µ ⊢ 𝕥 → Set where
     Canonical e t₂ →
     Canonical (inj₂ e) (t₁ `⊎ t₂)
 
-data Matches₁ : (e : µ ⊢ 𝕖) → µ ⊢ 𝕔𝕤 → ∀ {µ'} → (p : µ ⊢ 𝕡 µ') → (µ ▷▷ µ') ⊢ 𝕖 → Matches e p → Set where
+data Matches₁ : (e : µ₂ ⊢ 𝕖) → µ ⊢ 𝕔𝕤 → ∀ {µ'} → (p : µ ⊢ 𝕡 µ') → (µ ▷▷ µ') ⊢ 𝕖 → Matches e p → Set where
   Matches-here :
     (m : Matches e p) →
     Matches₁ e (p ⇒ e' ; cs) p e' m
@@ -167,7 +175,7 @@ data Matches₁ : (e : µ ⊢ 𝕖) → µ ⊢ 𝕔𝕤 → ∀ {µ'} → (p : �
     Matches₁ e (p₁ ⇒ e₁ ; cs) p e' m
 
 Exhaustive : µ ⊢ 𝕔𝕤 → µ ⊢ 𝕥 → Set
-Exhaustive {µ} cs t = ∀ {e} → Canonical e t → ∃[ µ' ] Σ[ p ∈ µ ⊢ 𝕡 µ' ] ∃[ e' ] ∃[ m ] Matches₁ e cs p e' m
+Exhaustive {µ} cs t = ∀ {µ'} {e : µ' ⊢ 𝕖} → Canonical e t → ∃[ µ' ] Σ[ p ∈ µ ⊢ 𝕡 µ' ] ∃[ e' ] ∃[ m ] Matches₁ e cs p e' m
 
 data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
   ⊢-` : ∀ {µ} {m} {Γ : Ctx µ} {T : µ ∶⊢ m→M m} {x : µ ∋ m} →

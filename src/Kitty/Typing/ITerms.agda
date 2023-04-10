@@ -74,3 +74,38 @@ record ITerms : Set₁ where
   _⊢*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ ϕ Γ₁ =
     ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ∶⊢ m→M m₁) (⊢x : Γ₁ ∋ x ∶ t)
     → Γ₂ ⊢ (x & ϕ) ∶ t ⋯ ϕ
+
+
+open import Data.List.Properties using (++-assoc; ++-identityʳ)
+open import Kitty.Util.List
+
+~ᶜ-cong-wk-telescope : ∀ {µ m} {Γ₁ Γ₂ : Ctx µ} →
+  Γ₁ ~ᶜ Γ₂ →
+  (x : µ ∋ m) →
+  wk-telescope Γ₁ x ≡ wk-telescope Γ₂ x
+~ᶜ-cong-wk-telescope {µ} {m} {Γ₁} {Γ₂} Γ₁~Γ₂ x =
+  let sub = subst (_∶⊢ m→M m) (++-identityʳ (drop-∈ x µ)) in
+  wk-telescope Γ₁ x                ≡⟨⟩
+  wk-drop-∈ x (lookup Γ₁ x)        ≡⟨⟩
+  wk-drop-∈ x (sub (lookup' Γ₁ x)) ≡⟨ cong (λ ■ → wk-drop-∈ x (sub ■)) (Γ₁~Γ₂ _ x) ⟩
+  wk-drop-∈ x (sub (lookup' Γ₂ x)) ≡⟨⟩
+  wk-drop-∈ x (lookup Γ₂ x)        ≡⟨⟩
+  wk-telescope Γ₂ x                ∎
+
+≡ᶜ-cong-wk-telescope : {Γ₁ Γ₂ : Ctx µ} →
+  Γ₁ ≡ᶜ Γ₂ →
+  (x : µ ∋ m) →
+  wk-telescope Γ₁ x ≡ wk-telescope Γ₂ x
+≡ᶜ-cong-wk-telescope Γ₁~Γ₂ x = ~ᶜ-cong-wk-telescope (≡ᶜ→~ᶜ Γ₁~Γ₂) x
+
+~₂-cong-∋ : ∀ {µ m} {Γ₁ Γ₂ : Ctx µ} (x : µ ∋ m) {t : µ ∶⊢ m→M m} → 
+  Γ₁ ~ᶜ Γ₂ →
+  Γ₁ ∋ x ∶ t →
+  Γ₂ ∋ x ∶ t
+~₂-cong-∋ x Γ₁~Γ₂ refl = sym (~ᶜ-cong-wk-telescope Γ₁~Γ₂ x)
+
+≡ᶜ-cong-∋ : ∀ {µ m} {Γ₁ Γ₂ : Ctx µ} (x : µ ∋ m) {t : µ ∶⊢ m→M m} → 
+  Γ₁ ≡ᶜ Γ₂ →
+  Γ₁ ∋ x ∶ t →
+  Γ₂ ∋ x ∶ t
+≡ᶜ-cong-∋ x Γ₁~Γ₂ refl = sym (≡ᶜ-cong-wk-telescope Γ₁~Γ₂ x)
