@@ -165,7 +165,7 @@ record IKit
          sub (wk-telescope (Γ₁ ▶ t) (there x) ⋯ ϕ ↑ m) ∎)
         (∋wk/⊢wk _ _ _ _ (⊢ϕ x _ refl))
 
-  open CtxReprSubst 𝕊 T H
+  open CtxReprSubst 𝕊 T H public
 
   _∋↑*/⊢↑*_ : ∀ {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
     Γ₂             ∋*/⊢* ϕ       ∶ Γ₁ →

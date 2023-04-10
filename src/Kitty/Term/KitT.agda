@@ -5,7 +5,7 @@ import Kitty.Term.Sub
 module Kitty.Term.KitT {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) where
 
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
 open ≡-Reasoning
 
 open import Kitty.Term.Prelude
@@ -18,8 +18,8 @@ open Modes 𝕄
 open Terms 𝕋
 open Traversal T
 open Kit ⦃ … ⦄
-open Sub ⦃ … ⦄
 open SubWithLaws 𝕊
+open Sub SubWithLaws-Sub
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
@@ -202,3 +202,28 @@ open ~-Reasoning
   (ϕ ↑* µ) ↑ m    ~⟨ ~-cong-↑ (~-cong-↑* ϕ~ϕ') ⟩
   (ϕ' ↑* µ) ↑ m   ~⟨ ~-sym (↑*-▷ µ m ϕ') ⟩
   (ϕ' ↑* (µ ▷ m)) ~∎
+
+open import Data.List.Properties using (++-assoc)
+↑*-▷▷ :
+  ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ {µ₁ µ₂} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) µ µ' →
+  let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc µ' µ µ₁) (++-assoc µ' µ µ₂) in
+  ϕ ↑* µ ↑* µ' ~ sub (ϕ ↑* (µ ▷▷ µ'))
+↑*-▷▷ ⦃ 𝕂 ⦄ {µ₁} {µ₂} ϕ µ [] =
+  let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc [] µ µ₁) (++-assoc [] µ µ₂) in
+  ϕ ↑* µ ↑* []         ~⟨ ↑*-[] (ϕ ↑* µ) ⟩
+  ϕ ↑* (µ ▷▷ [])       ~⟨⟩
+  sub (ϕ ↑* (µ ▷▷ [])) ~∎
+↑*-▷▷ ⦃ 𝕂 ⦄ {µ₁} {µ₂} ϕ µ (µ' ▷ m') =
+  let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc (µ' ▷ m') µ µ₁) (++-assoc (µ' ▷ m') µ µ₂) in
+  let sub' = subst₂ (_–[ 𝕂 ]→_) (++-assoc µ' µ µ₁) (++-assoc µ' µ µ₂) in
+  ϕ ↑* µ ↑* (µ' ▷ m')         ~⟨ ↑*-▷ µ' m' (ϕ ↑* µ) ⟩
+  (ϕ ↑* µ ↑* µ') ↑ m'         ~⟨ ~-cong-↑ (↑*-▷▷ ϕ µ µ') ⟩
+  sub' (ϕ ↑* (µ ▷▷ µ')) ↑ m'  ~≡⟨ dist-subst₂'
+                                   (λ µ → µ ▷ m') (λ µ → µ ▷ m') (_↑ m')
+                                   (++-assoc µ' µ µ₁) (++-assoc (µ' ▷ m') µ µ₁ )
+                                   (++-assoc µ' µ µ₂) (++-assoc (µ' ▷ m') µ µ₂)
+                                   (ϕ ↑* (µ ▷▷ µ')) ⟩
+  sub (ϕ ↑* (µ ▷▷ µ') ↑ m')   ~⟨ ~-sym (~-cong-subst₂ _ _ (↑*-▷ (µ ▷▷ µ') m' ϕ)) ⟩
+  sub (ϕ ↑* ((µ ▷▷ µ') ▷ m')) ~⟨⟩
+  sub (ϕ ↑* (µ ▷▷ (µ' ▷ m'))) ~∎
+

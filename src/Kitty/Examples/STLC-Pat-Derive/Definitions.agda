@@ -6,12 +6,12 @@ open import Kitty.Util.List
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Properties using (++-assoc)
-open import Data.Product using (∃-syntax; Σ-syntax; _,_)
+open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
 
 -- Fixities --------------------------------------------------------------------
 
-infix   3  _⊢_  _↪_  _⊢_∶_
-infixr  5  λx_
+infix   3  _⊢_  _↪_  _⊢_∶_  _∈cs_
+infixr  5  λx_ _∷_
 infixr  6  _⇒_
 infixl  6  _·_
 infix   7  `_
@@ -28,15 +28,16 @@ data Modeₜ : Set where
   𝕥 : Modeₜ  -- Types
   𝕡 : List Modeᵥ → Modeₜ  -- Patterns
   ℙ : List Modeᵥ → Modeₜ  -- Pattern Types
+  𝕔 : Modeₜ  -- Clause
   𝕔𝕤 : Modeₜ  -- Clauses
-  ℂ𝕊 : Modeₜ  -- Clause Types
+  ℂ : Modeₜ  -- Clause Type
 
 -- Mapping variable modes to the term modes they represent.
 m→M : Modeᵥ → Modeₜ
 m→M 𝕖 = 𝕖
 
 ↑ₜ : Modeₜ → Modeₜ
-↑ₜ = λ { 𝕖 → 𝕥 ; (𝕡 µ) → ℙ µ ; 𝕥 → 𝕥 ; (ℙ µ) → ℙ µ ;  𝕔𝕤 → ℂ𝕊 ; ℂ𝕊 → ℂ𝕊 }
+↑ₜ = λ { 𝕖 → 𝕥 ; (𝕡 µ) → ℙ µ ; 𝕥 → 𝕥 ; (ℙ µ) → ℙ µ ; 𝕔 → ℂ ; 𝕔𝕤 → ℂ ; ℂ → ℂ }
 
 𝕄 : Modes
 𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
@@ -65,16 +66,17 @@ mutual
     inj₁ inj₂ : µ ⊢ 𝕖  →  µ ⊢ 𝕖
 
     match     : µ ⊢ 𝕖  →  µ ⊢ 𝕔𝕤  →  µ ⊢ 𝕖
+    _⇒_       : µ ⊢ 𝕡 µ'  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕔
     []        : µ ⊢ 𝕔𝕤
-    _⇒_;_     : µ ⊢ 𝕡 µ'  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕔𝕤  →  µ ⊢ 𝕔𝕤
+    _∷_       : µ ⊢ 𝕔  →  µ ⊢ 𝕔𝕤  →  µ ⊢ 𝕔𝕤
     `ᵖ        : µ ⊢ 𝕡 ([] ▷ 𝕖)
-    _,ᵖ_      : µ ⊢ 𝕡 µ₁  →  µ ⊢ 𝕡 µ₂  →  µ ⊢ 𝕡 (µ₁ ▷▷ µ₂)
+    _,ᵖ_      : µ ⊢ 𝕡 µ₁  →  (µ ▷▷ µ₁) ⊢ 𝕡 µ₂  →  µ ⊢ 𝕡 (µ₁ ▷▷ µ₂)
     inj₁ᵖ inj₂ᵖ : µ ⊢ 𝕡 µ'  →  µ ⊢ 𝕡 µ'
     ttᵖ       : µ ⊢ 𝕡 []
 
     []ᵖ       : µ ⊢ ℙ []
     _▶ᵖ_      : µ ⊢ ℙ µ₁ → (µ ▷▷ µ₁) ⊢ 𝕥 → µ ⊢ ℙ (µ₁ ▷ 𝕖)
-    Clause    : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ ℂ𝕊
+    Clause    : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ ℂ
 
   CtxP' : List Modeᵥ → List Modeᵥ → Set
   CtxP' µ µ' = ∀ m → (x : µ' ∋ m) →  (µ ▷▷ drop-∈ x µ') ⊢ ↑ₜ (m→M m)
@@ -84,7 +86,10 @@ pattern `_ x = `[ refl ] x
 _▶▶ᵖ_ : µ ⊢ ℙ µ₁ → (µ ▷▷ µ₁) ⊢ ℙ µ₂ → µ ⊢ ℙ (µ₁ ▷▷ µ₂)
 P₁ ▶▶ᵖ (`[_]_ {m = 𝕖} () _)
 P₁ ▶▶ᵖ []ᵖ       = P₁
-_▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) rewrite sym (++-assoc µ₂ µ₁ µ) = (P₁ ▶▶ᵖ P₂) ▶ᵖ t
+_▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) =
+  let sub = subst (_⊢ 𝕥) (sym (++-assoc µ₂ µ₁ µ)) in
+  (P₁ ▶▶ᵖ P₂) ▶ᵖ sub t
+-- _▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) rewrite sym (++-assoc µ₂ µ₁ µ) = (P₁ ▶▶ᵖ P₂) ▶ᵖ t
 
 module _ where
   private
@@ -101,7 +106,9 @@ variable
   t t₁ t₂ t₃ t' t₁' t₂' : µ ⊢ 𝕥
   p p₁ p₂ p₃ p' p₁' p₂' : µ ⊢ 𝕡 µ'
   P P₁ P₂ P₃ P' P₁' P₂' : µ ⊢ ℙ µ'
+  c  c'                 : µ ⊢ 𝕔
   cs cs'                : µ ⊢ 𝕔𝕤
+  C C'                  : µ ⊢ ℂ
   E E₁ E₂ E₃ E' E₁' E₂' : µ ⊢ M
 
 -- Deriving Renaming/Substitution and related lemmas.
@@ -121,12 +128,12 @@ open KitType kit-type public hiding (↑ₜ)
 
 open import Kitty.Typing.CtxRepr kit-type
 
-ℂ : CtxRepr
-ℂ = Functional-CtxRepr
+ctx-repr : CtxRepr
+ctx-repr = Functional-CtxRepr
 
-open CtxRepr ℂ public
+open CtxRepr ctx-repr public
 
-open import Kitty.Typing.OPE compose-traversal kit-type ℂ public
+open import Kitty.Typing.OPE compose-traversal kit-type ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -166,16 +173,16 @@ data Canonical : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕥 → Set where
     Canonical e t₂ →
     Canonical (inj₂ e) (t₁ `⊎ t₂)
 
-data Matches₁ : (e : µ₂ ⊢ 𝕖) → µ ⊢ 𝕔𝕤 → ∀ {µ'} → (p : µ ⊢ 𝕡 µ') → (µ ▷▷ µ') ⊢ 𝕖 → Matches e p → Set where
-  Matches-here :
-    (m : Matches e p) →
-    Matches₁ e (p ⇒ e' ; cs) p e' m
-  Matches-there : ∀ {m} →
-    Matches₁ e cs p e' m →
-    Matches₁ e (p₁ ⇒ e₁ ; cs) p e' m
+data _∈cs_ (c : µ ⊢ 𝕔) : µ ⊢ 𝕔𝕤 → Set where
+  here : ∀ {c' : µ ⊢ 𝕔} {cs : µ ⊢ 𝕔𝕤} → c ≡ c' → c ∈cs (c' ∷ cs)
+  there : ∀ {c' : µ ⊢ 𝕔} {cs : µ ⊢ 𝕔𝕤} → c ∈cs cs → c ∈cs (c' ∷ cs)
 
 Exhaustive : µ ⊢ 𝕔𝕤 → µ ⊢ 𝕥 → Set
-Exhaustive {µ} cs t = ∀ {µ'} {e : µ' ⊢ 𝕖} → Canonical e t → ∃[ µ' ] Σ[ p ∈ µ ⊢ 𝕡 µ' ] ∃[ e' ] ∃[ m ] Matches₁ e cs p e' m
+Exhaustive {µ} cs t =
+  ∀ {µ'} {e : µ' ⊢ 𝕖} →
+  Canonical e t →
+  ∃[ µ' ] Σ[ p ∈ µ ⊢ 𝕡 µ' ] ∃[ e' ]
+    (p ⇒ e') ∈cs cs × Matches e p
 
 data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
   ⊢-` : ∀ {µ} {m} {Γ : Ctx µ} {T : µ ∶⊢ m→M m} {x : µ ∋ m} →
@@ -205,18 +212,21 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ⊢ cs ∶ Clause t t' →
     Exhaustive cs t →
     Γ ⊢ match e cs ∶ t'
+  ⊢-clause : ∀ {Γ : Ctx µ} →
+    Γ ⊢ p ∶ P →
+    (Γ ▶▶ PatTy→Ctx' P) ⊢ e ∶ t' →
+    Γ ⊢ (p ⇒ e) ∶ Clause t t'
   ⊢-clause-[] :
     Γ ⊢ [] ∶ Clause t t'
   ⊢-clause-∷ : ∀ {Γ : Ctx µ} →
-    Γ ⊢ p ∶ P →
-    (Γ ▶▶ PatTy→Ctx' P) ⊢ e ∶ t' →
+    Γ ⊢ c  ∶ Clause t t' →
     Γ ⊢ cs ∶ Clause t t' →
-    Γ ⊢ (p ⇒ e ; cs) ∶ Clause t t'
+    Γ ⊢ (c ∷ cs) ∶ Clause t t'
   ⊢-ttᵖ :
     Γ ⊢ ttᵖ ∶ []ᵖ
   ⊢-`ᵖ :
     Γ ⊢ `ᵖ ∶ []ᵖ ▶ᵖ t
-  ⊢-,ᵖ : ∀ {Γ : Ctx µ} →
+  ⊢-,ᵖ : ∀ {µ µ₁ µ₂} {Γ : Ctx µ} {p₁ : µ ⊢ 𝕡 µ₁} {P₁ : µ ⊢ ℙ µ₁} {p₂ : µ ▷▷ µ₁ ⊢ 𝕡 µ₂} {P₂ : µ ▷▷ µ₁ ⊢ ℙ µ₂} →
     Γ ⊢ p₁ ∶ P₁ →
     (Γ ▶▶ PatTy→Ctx' P₁) ⊢ p₂ ∶ P₂ →
     Γ ⊢ p₁ ,ᵖ p₂ ∶ (P₁ ▶▶ᵖ P₂)
@@ -243,18 +253,19 @@ mutual
     tt      : Value (tt {µ})
     neutral : Neutral e → Value e
 
-matching-sub : ∀ {µ µ'} {e : µ ⊢ 𝕖} {p : µ ⊢ 𝕡 µ'} → Matches e p → µ' →ₛ µ
+matching-sub : ∀ {µ µ' µ''} {e : µ ⊢ 𝕖} {p : µ' ⊢ 𝕡 µ''} → Matches e p → µ'' →ₛ µ
 matching-sub {e = e} M-` = ⦅ e ⦆ₛ₀
 matching-sub M-tt        = []*
 matching-sub (M-, m₁ m₂) = matching-sub m₁ ∥ₛ matching-sub m₂
-matching-sub (M-inj₁ m) = matching-sub m
-matching-sub (M-inj₂ m) = matching-sub m
+matching-sub (M-inj₁ m)  = matching-sub m
+matching-sub (M-inj₂ m)  = matching-sub m
 
 data _↪_ : µ ⊢ M → µ ⊢ M → Set where
   β-λ : ∀ {e₂ : µ ⊢ 𝕖} →
     (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
-  β-match : ∀ {σ : µ →ₛ µ'} {m} →
-    Matches₁ e cs p e' m →
+  β-match : ∀ {σ : µ →ₛ µ'} →
+    (p ⇒ e') ∈cs cs →
+    (m : Matches e p) →
     matching-sub m ≡ σ →
     match e cs ↪ e' ⋯ₛ (idₛ ∥ₛ σ)
   ξ-λ :

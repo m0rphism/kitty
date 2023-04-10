@@ -63,6 +63,20 @@ dist-subst' :
   → f {a₂} (subst F a₁≡a₂ x) ≡ subst G b₁≡b₂ (f {a₁} x)
 dist-subst' _ _ refl refl _ = refl
 
+dist-subst₂' :
+  ∀ {ℓ ℓ' ℓ'' ℓ''' ℓ₁ ℓ₂} {A : Set ℓ} {B : Set ℓ'} {C : Set ℓ''} {D : Set ℓ'''} {a₁ a₂ : A} {c₁ c₂ : C}
+    {F : A → C → Set ℓ₁} {G : B → D → Set ℓ₂}
+  → (a→b : A → B)
+  → (c→d : C → D)
+  → (f : ∀ {a} {c} → F a c → G (a→b a) (c→d c))
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (b₁≡b₂ : a→b a₁ ≡ a→b a₂)
+  → (c₁≡c₂ : c₁ ≡ c₂)
+  → (d₁≡d₂ : c→d c₁ ≡ c→d c₂)
+  → (x : F a₁ c₁) 
+  → f {a₂} {c₂} (subst₂ F a₁≡a₂ c₁≡c₂ x) ≡ subst₂ G b₁≡b₂ d₁≡d₂ (f {a₁} {c₁} x)
+dist-subst₂' _ _ _ refl refl refl refl _ = refl
+
 comm-subst₂ :
   ∀ {ℓ₁ ℓ₂ ℓ₁' ℓ₂' ℓ₃}
     {A : Set ℓ₁} {a₁ a₂ : A}

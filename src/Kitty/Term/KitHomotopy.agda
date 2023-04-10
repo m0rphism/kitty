@@ -6,7 +6,7 @@ module Kitty.Term.KitHomotopy {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : K
 
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Level using () renaming (suc to lsuc)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
 open ≡-Reasoning
 
 open import Kitty.Term.Prelude
@@ -111,6 +111,35 @@ record KitHomotopy : Set (lsuc ℓ) where
         `/id x/t              ∎
     ; ι-∋/⊢-~ₜ[] = λ x/t → refl
     }
+
+  open import Data.List.Properties using (++-assoc)
+  ⋯-↑*-▷▷ :
+    ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ {µ₁ µ₂ M} µ µ' (t : (µ₁ ▷▷ µ ▷▷ µ') ⊢ M) (ϕ : µ₁ –[ 𝕂 ]→ µ₂)  →
+    let sub = subst (_⊢ M) (sym (++-assoc µ' µ µ₁)) in
+    let sub'⁻¹ = subst (_⊢ M) (++-assoc µ' µ µ₂) in
+    t ⋯ ϕ ↑* µ ↑* µ' ≡ sub'⁻¹ (sub t ⋯ ϕ ↑* (µ ▷▷ µ'))
+  ⋯-↑*-▷▷ ⦃ 𝕂 ⦄ ⦃ K ⦄ {µ₁} {µ₂} {M} µ µ' t ϕ =
+    let sub₁⁻¹ = subst (_⊢ M) (sym (++-assoc µ' µ µ₁)) in
+    let sub₁   = subst (_⊢ M) (++-assoc µ' µ µ₁) in
+    let sub₂   = subst (_⊢ M) (++-assoc µ' µ µ₂) in
+    let sub₂⁻¹ = subst (_⊢ M) (sym (++-assoc µ' µ µ₂)) in
+    let sub₁→  = subst (_–[ 𝕂 ]→ (µ₂ ▷▷ µ ▷▷ µ')) (++-assoc µ' µ µ₁) in
+    let sub₁⁻¹→ = subst (_–[ 𝕂 ]→ (µ₂ ▷▷ (µ ▷▷ µ'))) (sym (++-assoc µ' µ µ₁)) in
+    let sub₂→  = subst ((µ₁ ▷▷ µ ▷▷ µ') –[ 𝕂 ]→_) (++-assoc µ' µ µ₂) in
+    let sub₂⁻¹→ = subst ((µ₁ ▷▷ µ ▷▷ µ') –[ 𝕂 ]→_) (sym (++-assoc µ' µ µ₂)) in
+    let sub₁₂→ = subst₂ (_–[ 𝕂 ]→_) (++-assoc µ' µ µ₁) (++-assoc µ' µ µ₂) in
+    t ⋯ ϕ ↑* µ ↑* µ'                                              ≡⟨ ~-cong-⋯ t (↑*-▷▷ ϕ µ µ') ⟩
+    t ⋯ sub₁₂→ (ϕ ↑* (µ ▷▷ µ'))                                   ≡⟨ {!!} ⟩
+    sub₂ (sub₂⁻¹ (t ⋯ sub₁₂→ (ϕ ↑* (µ ▷▷ µ'))))                   ≡⟨ {!!} ⟩
+    sub₂ (t ⋯ sub₂⁻¹→ (sub₁₂→ (ϕ ↑* (µ ▷▷ µ'))))                  ≡⟨ {!!} ⟩
+    sub₂ (sub₁ (sub₁⁻¹ t) ⋯ sub₂⁻¹→ (sub₁₂→ (ϕ ↑* (µ ▷▷ µ'))))    ≡⟨ {!!} ⟩
+    sub₂ (sub₁⁻¹ t ⋯ sub₁⁻¹→ (sub₂⁻¹→ (sub₁₂→ (ϕ ↑* (µ ▷▷ µ'))))) ≡⟨ {!!} ⟩
+    sub₂ (sub₁⁻¹ t ⋯ ϕ ↑* (µ ▷▷ µ'))                              ∎
+
+    -- let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc µ' µ µ₁) (++-assoc µ' µ µ₂) in
+    -- let sub'⁻¹ = subst (_⊢ 𝕥) (++-assoc µ₃ µ₂ µ₁') in
+    --       t ⋯ ϕ ↑* µ₂ ↑* µ₃                ≡⟨ {!!} ⟩
+    --       sub'⁻¹ (sub t ⋯ ϕ ↑* (µ₂ ▷▷ µ₃)) ≡⟨ {!!} ⟩
 
 -- open import Axiom.Extensionality.Propositional using (Extensionality)
 
