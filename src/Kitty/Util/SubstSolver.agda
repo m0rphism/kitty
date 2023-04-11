@@ -8,11 +8,6 @@ open import Data.Product using (∃-syntax; Σ-syntax; _×_; _,_)
 
 variable ℓ ℓ' ℓ₁ ℓ₂ ℓ₃ : Level
 
-data Term ℓ : Set (lsuc ℓ) where
-  `_ : ∀ {A : Set ℓ} → (a : A) → Term ℓ
-  _·_ : Term ℓ → Term ℓ → Term ℓ
-  `subst : Term ℓ → Term ℓ → Term ℓ
-
 mutual
   data Type ℓ : Set (lsuc ℓ) where
     `_ : (A : Set ℓ) → Type ℓ
@@ -22,8 +17,13 @@ mutual
   ⟦ ` A   ⟧ = A
   ⟦ `∀ A B ⟧ = ∀ (a : ⟦ A ⟧) → ⟦ B a ⟧
 
+data Term ℓ : Set (lsuc ℓ) where
+  `_ : ∀ {A : Type ℓ} → (a : ⟦ A ⟧) → Term ℓ
+  _·_ : Term ℓ → Term ℓ → Term ℓ
+  `subst : Term ℓ → Term ℓ → Term ℓ
+
 data _⊢_∋_ {ℓ} : Term ℓ → (A : Type ℓ) → ⟦ A ⟧ → Set (lsuc ℓ) where
-  ⊢` : ∀ (A : Set ℓ) (a : A) → (` a) ⊢ ` A ∋ a
+  ⊢` : ∀ (A : Type ℓ) (a : ⟦ A ⟧) → (`_ {A = A} a) ⊢ A ∋ a
   ⊢· : ∀ {A : Type ℓ} {B : ⟦ A ⟧ → Type ℓ} {tf f ta a} {Ba fa} →
     tf ⊢ `∀ A B ∋ f →
     ta ⊢ A ∋ a →
@@ -36,7 +36,7 @@ data _⊢_∋_ {ℓ} : Term ℓ → (A : Type ℓ) → ⟦ A ⟧ → Set (lsuc �
     `subst teq tra ⊢ (R b) ∋ (subst (λ a → ⟦ R a ⟧) eq ra)
 
 normalize : Term ℓ → Term ℓ
-normalize (` a)          = ` a
+normalize (`_ {A = A} a)          = `_ {A = A} a
 normalize (t₁ · t₂)      = (normalize t₁) · (normalize t₂)
 normalize (`subst teq t) = normalize t
 
@@ -50,7 +50,7 @@ solve : ∀ {A₁ A₂ : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ : ⟦ A₁ ⟧} 
   t₂ ⊢ A₂ ∋ a₂ →
   normalize t₁ ≡ normalize t₂ →
   Σ[ eq ∈ (A₁ ≡ A₂) ] subst id (cong ⟦_⟧ eq) a₁ ≡ a₂
-solve (⊢` _ a₁) (⊢` _ a₂) refl = refl , refl
+solve (⊢` A₁ a₁) (⊢` A₂ a₂) refl = refl , refl
 solve (⊢subst {eq = refl} ⊢teq ⊢tra) ⊢t₂ norm-eq = solve ⊢tra ⊢t₂ norm-eq
 solve ⊢t₁ (⊢subst {eq = refl} ⊢teq ⊢tra) norm-eq = solve ⊢t₁ ⊢tra norm-eq
 solve (⊢· ⊢tf₁ ⊢ta₁ refl refl) (⊢· ⊢tf₂ ⊢ta₂ refl refl) norm-eq
@@ -69,7 +69,7 @@ solve' ⊢t₁ ⊢t₂ norm-eq with solve ⊢t₁ ⊢t₂ norm-eq
 ... | refl , eqa = eqa
 
 data ITerm {ℓ} : ∀ (A : Type ℓ) → (a : ⟦ A ⟧) → Set (lsuc ℓ) where
-  `_ : ∀ {A : Set ℓ} → (a : A) → ITerm (` A) a
+  `_ : ∀ {A : Type ℓ} → (a : ⟦ A ⟧) → ITerm A a
   _·_ : ∀ {A : Type ℓ} {B : ⟦ A ⟧ → Type ℓ} {f a} →
     ITerm (`∀ A B) f →
     ITerm A a →
@@ -120,8 +120,8 @@ module Example where
       (⊢` _ (+-comm n m))
       (⊢subst {A = ` ℕ} {R = λ n → ` Index n}
         (⊢` _ (+-comm m n))
-        (⊢` (Index (m + n)) i)))
-    (⊢` (Index (m + n)) i)
+        (⊢` (` Index (m + n)) i)))
+    (⊢` (` Index (m + n)) i)
     refl
 
   test₁' : ∀ m n (i : Index (m + n)) →
@@ -136,9 +136,9 @@ module Example where
   f : ∀ m n → Index (m + n) → Index (n + m)
   f m n (index _) = index _
 
-  test₂' : ∀ m n (i : Index (m + n)) →
-    f n m (subst Index (+-comm m n) i) ≡ subst Index (+-comm n m) (f m n i)
-  test₂' m n i = isolve' ({!`_!} · {!!}) {!!} {!!}
+  -- test₂' : ∀ m n (i : Index (m + n)) →
+  --   f n m (subst Index (+-comm m n) i) ≡ subst Index (+-comm n m) (f m n i)
+  -- test₂' m n i = isolve' ({!`_!} · {!!}) {!!} {!!}
 
   -- test₂ : ∀ m n p (u : Vec ℕ m) (v : Vec ℕ n) (w : Vec ℕ p) →
   --   (u ++ (v ++ w)) ≡ subst (Vec ℕ) (+-assoc m n p) ((u ++ v) ++ w)
