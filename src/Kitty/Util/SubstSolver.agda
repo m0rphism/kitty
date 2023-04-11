@@ -50,16 +50,10 @@ solve : ∀ {A₁ A₂ : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ : ⟦ A₁ ⟧} 
   t₂ ⊢ A₂ ∋ a₂ →
   normalize t₁ ≡ normalize t₂ →
   Σ[ eq ∈ (A₁ ≡ A₂) ] subst id (cong ⟦_⟧ eq) a₁ ≡ a₂
-solve {ℓ} {A₁} {A₂} {.(` a₁)} {.(` a₂)} {.a₁} {.a₂} (⊢` _ a₁) (⊢` _ a₂) refl = refl , refl
-solve {ℓ} {_} {A₂} {_} {t₂} {_} {a₂} (⊢subst {eq = refl} ⊢teq ⊢tra) ⊢t₂ norm-eq = solve ⊢tra ⊢t₂ norm-eq
-solve {ℓ} {_} {A₂} {_} {t₂} {_} {a₂} ⊢t₁ (⊢subst {eq = refl} ⊢teq ⊢tra) norm-eq = solve ⊢t₁ ⊢tra norm-eq
-solve {ℓ} {A₁} {A₂}
-      {.(_ · _)} {.(_ · _)}
-      {.(subst id (sym (cong ⟦_⟧ Ba-eq₁)) _)}
-      {.(subst id (sym (cong ⟦_⟧ Ba-eq₂)) _)}
-      (⊢· ⊢tf₁ ⊢ta₁ Ba-eq₁ fa-eq₁)
-      (⊢· ⊢tf₂ ⊢ta₂ Ba-eq₂ fa-eq₂)
-      norm-eq
+solve (⊢` _ a₁) (⊢` _ a₂) refl = refl , refl
+solve (⊢subst {eq = refl} ⊢teq ⊢tra) ⊢t₂ norm-eq = solve ⊢tra ⊢t₂ norm-eq
+solve ⊢t₁ (⊢subst {eq = refl} ⊢teq ⊢tra) norm-eq = solve ⊢t₁ ⊢tra norm-eq
+solve (⊢· ⊢tf₁ ⊢ta₁ Ba-eq₁ fa-eq₁) (⊢· ⊢tf₂ ⊢ta₂ Ba-eq₂ fa-eq₂) norm-eq
   with ·-injective norm-eq                   
 ... | norm-eq-tf , norm-eq-ta
   with solve ⊢ta₁ ⊢ta₂ norm-eq-ta
