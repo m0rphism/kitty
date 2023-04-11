@@ -133,12 +133,27 @@ module Example where
     (` i)
     refl
 
+  g : ∀ m → Index m → Index m
+  g m (index _) = index _
+
+  test₂' : ∀ m (i : Index (m + 0)) →
+    g m (subst Index (+-identityʳ m) i) ≡ subst Index (+-identityʳ m) (g (m + 0) i)
+  test₂' m i = isolve'
+    (_·_ {A = ` Index m} {B = λ _ → ` Index m}
+      ((_·_ {A = ` ℕ} {B = λ n → `∀ (` Index n) (λ _ → ` Index n)} (` g) (` m)))
+      (`subst {A = ` ℕ} (λ n → ` Index n) (+-identityʳ m) (` i)))
+    (`subst {A = ` ℕ} (λ n → ` Index n) (+-identityʳ m)
+      (_·_ {A = ` Index (m + 0)} {B = λ _ → ` Index (m + 0)}
+        ((_·_ {A = ` ℕ} {B = λ n → `∀ (` Index n) (λ _ → ` Index n)} (` g) (` (m + 0))))
+        (` i)))
+    {!refl!}
+
   f : ∀ m n → Index (m + n) → Index (n + m)
   f m n (index _) = index _
 
-  test₂' : ∀ m n (i : Index (m + n)) →
+  test₃' : ∀ m n (i : Index (m + n)) →
     f n m (subst Index (+-comm m n) i) ≡ subst Index (+-comm n m) (f m n i)
-  test₂' m n i = isolve'
+  test₃' m n i = isolve'
     (_·_ {A = ` Index (n + m)} {B = λ i → ` Index (m + n)}
       (` (f n m))
       (`subst {A = ` ℕ} (λ n → ` Index n) (+-comm m n) (` i)))
