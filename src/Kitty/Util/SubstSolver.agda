@@ -2,12 +2,9 @@ module Kitty.Util.SubstSolver where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂; module ≡-Reasoning)
 open ≡-Reasoning
-open import Kitty.Util.SubstProperties
 open import Function using (id)
 open import Level renaming (suc to lsuc; zero to 0ℓ) using (Level; _⊔_; Setω; Lift; lift; lower)
 open import Data.Product using (∃-syntax; Σ-syntax; _×_; _,_)
-open import Relation.Nullary using (¬_)
-open import Data.Empty using (⊥; ⊥-elim)
 
 variable ℓ ℓ' ℓ₁ ℓ₂ ℓ₃ : Level
 
@@ -83,28 +80,6 @@ solve' : ∀ {A : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ a₂ : ⟦ A ⟧} →
 solve' ⊢t₁ ⊢t₂ norm-eq with solve ⊢t₁ ⊢t₂ norm-eq
 ... | refl , eqa = eqa
 
--- data ITerm {ℓ} : ∀ (A : Set ℓ) → (a : A) → Set (lsuc ℓ) where
---   `_ : ∀ {A : Set ℓ} → (a : A) → ITerm A a
---   _·_ : ∀ {A : Set ℓ} {B : A → Set ℓ} {f a} →
---     ITerm (∀ (a : A) → B a) f →
---     ITerm A a →
---     ITerm (B a) (f a)
---   `subst : ∀ {A : Set ℓ} {R : A → Set ℓ} {a b ra} →
---     ITerm (R a) ra →
---     (a≡b : a ≡ b) →
---     ITerm (R b) (subst R a≡b ra)
-
--- split : ∀ {ℓ} {A : Set ℓ} {a : A} →
---   ITerm A a →
---   Σ[ t ∈ Term ℓ ] Σ[ A' ∈ Type ℓ ] Σ[ eq ∈ A ≡ ⟦ A' ⟧ ]
---     t ⊢ A' ∋ subst id eq a
--- split (`_ {A = A} a) = (` a) , ` A , refl , ⊢` A a
--- split (_·_ t₁ t₂)
---   with split t₁ | split t₂
--- ...  | tf , Af , eqf , ⊢tf | ta , Aa , eqa , ⊢ta
---   = (tf · ta) , {!!} , {!!} , ⊢· {!⊢tf!} {!!} {!!} {!!}
--- split (`subst t a≡b) = {!!}
-
 data ITerm {ℓ} : ∀ (A : Type ℓ) → (a : ⟦ A ⟧) → Set (lsuc ℓ) where
   `_ : ∀ {A : Set ℓ} → (a : A) → ITerm (` A) a
   _·_ : ∀ {A : Type ℓ} {B : ⟦ A ⟧ → Type ℓ} {f a} →
@@ -130,12 +105,12 @@ inormalize : ∀ {ℓ} {A : Type ℓ} {a} → ITerm A a → Term ℓ
 inormalize t with split t
 ... | t' , ⊢t' = normalize t'
 
-solve'' : ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} →
+isolve' : ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} →
   (t₁ : ITerm A a₁) →
   (t₂ : ITerm A a₂) →
   inormalize t₁ ≡ inormalize t₂ →
   a₁ ≡ a₂
-solve'' t₁ t₂ norm-eq with split t₁   | split t₂
+isolve' t₁ t₂ norm-eq with split t₁   | split t₂
 ...                      | t₁' , ⊢t₁' | t₂' , ⊢t₂'
                          = solve' ⊢t₁' ⊢t₂' norm-eq
 
@@ -163,7 +138,7 @@ module Example where
 
   test₁' : ∀ m n (i : Index (m + n)) →
     subst Index (+-comm n m) (subst Index (+-comm m n) i) ≡ i
-  test₁' m n i = solve''
+  test₁' m n i = isolve'
     (`subst {A = ` ℕ} (λ n → ` Index n) (+-comm n m)
       (`subst {A = ` ℕ} (λ n → ` Index n) (+-comm m n)
         (` i)))
