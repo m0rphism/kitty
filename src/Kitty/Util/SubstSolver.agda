@@ -18,15 +18,15 @@ data Term ℓ : Set (lsuc ℓ) where
 
 mutual
   data Type ℓ : Set (lsuc ℓ) where
-    `ᵗ : (A : Set ℓ) → Type ℓ
+    `_ : (A : Set ℓ) → Type ℓ
     `∀ : (A : Type ℓ) → (⟦ A ⟧ → Type ℓ) → Type ℓ
 
   ⟦_⟧ : Type ℓ → Set ℓ
-  ⟦ `ᵗ A   ⟧ = A
+  ⟦ ` A   ⟧ = A
   ⟦ `∀ A B ⟧ = ∀ (a : ⟦ A ⟧) → ⟦ B a ⟧
 
 data _⊢_∋_ {ℓ} : Term ℓ → (A : Type ℓ) → ⟦ A ⟧ → Set (lsuc ℓ) where
-  ⊢` : ∀ (A : Set ℓ) (a : A) → (` a) ⊢ `ᵗ A ∋ a
+  ⊢` : ∀ (A : Set ℓ) (a : A) → (` a) ⊢ ` A ∋ a
   ⊢· : ∀ {A : Type ℓ} {B : ⟦ A ⟧ → Type ℓ} {tf f ta a} {Ba fa} →
     tf ⊢ `∀ A B ∋ f →
     ta ⊢ A ∋ a →
@@ -34,7 +34,7 @@ data _⊢_∋_ {ℓ} : Term ℓ → (A : Type ℓ) → ⟦ A ⟧ → Set (lsuc �
     fa ≡ f a →
     (tf · ta) ⊢ Ba ∋ subst id (sym (cong ⟦_⟧ Ba-eq)) fa
   ⊢subst : ∀ {A : Type ℓ} {R : ⟦ A ⟧ → Type ℓ} {a b tra ra teq eq} →
-    teq ⊢ `ᵗ (a ≡ b) ∋ eq →
+    teq ⊢ ` (a ≡ b) ∋ eq →
     tra ⊢ (R a) ∋ ra →
     `subst teq tra ⊢ (R b) ∋ (subst (λ a → ⟦ R a ⟧) eq ra)
 
@@ -98,7 +98,7 @@ solve' ⊢t₁ ⊢t₂ norm-eq with solve ⊢t₁ ⊢t₂ norm-eq
 --   ITerm A a →
 --   Σ[ t ∈ Term ℓ ] Σ[ A' ∈ Type ℓ ] Σ[ eq ∈ A ≡ ⟦ A' ⟧ ]
 --     t ⊢ A' ∋ subst id eq a
--- split (`_ {A = A} a) = (` a) , `ᵗ A , refl , ⊢` A a
+-- split (`_ {A = A} a) = (` a) , ` A , refl , ⊢` A a
 -- split (_·_ t₁ t₂)
 --   with split t₁ | split t₂
 -- ...  | tf , Af , eqf , ⊢tf | ta , Aa , eqa , ⊢ta
@@ -106,7 +106,7 @@ solve' ⊢t₁ ⊢t₂ norm-eq with solve ⊢t₁ ⊢t₂ norm-eq
 -- split (`subst t a≡b) = {!!}
 
 data ITerm {ℓ} : ∀ (A : Type ℓ) → (a : ⟦ A ⟧) → Set (lsuc ℓ) where
-  `_ : ∀ {A : Set ℓ} → (a : A) → ITerm (`ᵗ A) a
+  `_ : ∀ {A : Set ℓ} → (a : A) → ITerm (` A) a
   _·_ : ∀ {A : Type ℓ} {B : ⟦ A ⟧ → Type ℓ} {f a} →
     ITerm (`∀ A B) f →
     ITerm A a →
@@ -153,9 +153,9 @@ module Example where
   test₁ m n i = solve'
     {t₁ = `subst (` (+-comm n m)) (`subst (` (+-comm m n)) (` i))}
     {t₂ = ` i}
-    (⊢subst {A = `ᵗ ℕ} {R = λ n → `ᵗ (Index n)}
+    (⊢subst {A = ` ℕ} {R = λ n → ` (Index n)}
       (⊢` _ (+-comm n m))
-      (⊢subst {A = `ᵗ ℕ} {R = λ n → `ᵗ (Index n)}
+      (⊢subst {A = ` ℕ} {R = λ n → ` (Index n)}
         (⊢` _ (+-comm m n))
         (⊢` (Index (m + n)) i)))
     (⊢` (Index (m + n)) i)
@@ -164,8 +164,8 @@ module Example where
   test₁' : ∀ m n (i : Index (m + n)) →
     subst Index (+-comm n m) (subst Index (+-comm m n) i) ≡ i
   test₁' m n i = solve''
-    (`subst {A = `ᵗ ℕ} (λ n → `ᵗ (Index n)) (+-comm n m)
-      (`subst {A = `ᵗ ℕ} (λ n → `ᵗ (Index n)) (+-comm m n)
+    (`subst {A = ` ℕ} (λ n → ` (Index n)) (+-comm n m)
+      (`subst {A = ` ℕ} (λ n → ` (Index n)) (+-comm m n)
         (` i)))
     (` i)
     refl
