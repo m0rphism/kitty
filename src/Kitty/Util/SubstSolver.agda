@@ -147,6 +147,11 @@ module Example where
         ((_·_ {A = ` ℕ} {B = λ n → `∀ (` Index n) (λ _ → ` Index n)} (` g) (` (m + 0))))
         (` i)))
     {!refl!}
+  -- before removing substs, we need to pull them to the outside.
+  -- this function returns a list of all substs and the term without substs.
+  -- in the _·_ case the substs from call on t₂ are given to the call on t₁.
+  -- if an argument matches the input subst rhs it is replaced by the lhs.
+  -- do we need the subst's R to be more precise where to apply the eq?
 
   f : ∀ m n → Index (m + n) → Index (n + m)
   f m n (index _) = index _
