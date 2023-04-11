@@ -53,16 +53,12 @@ solve : ∀ {A₁ A₂ : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ : ⟦ A₁ ⟧} 
 solve (⊢` _ a₁) (⊢` _ a₂) refl = refl , refl
 solve (⊢subst {eq = refl} ⊢teq ⊢tra) ⊢t₂ norm-eq = solve ⊢tra ⊢t₂ norm-eq
 solve ⊢t₁ (⊢subst {eq = refl} ⊢teq ⊢tra) norm-eq = solve ⊢t₁ ⊢tra norm-eq
-solve (⊢· ⊢tf₁ ⊢ta₁ Ba-eq₁ fa-eq₁) (⊢· ⊢tf₂ ⊢ta₂ Ba-eq₂ fa-eq₂) norm-eq
+solve (⊢· ⊢tf₁ ⊢ta₁ refl refl) (⊢· ⊢tf₂ ⊢ta₂ refl refl) norm-eq
  with ·-injective norm-eq                   
 ... | norm-eq-tf , norm-eq-ta
- with solve ⊢ta₁ ⊢ta₂ norm-eq-ta
-... | refl , refl
- with solve ⊢tf₁ ⊢tf₂ norm-eq-tf
-... | refl , refl
- with Ba-eq₂ | fa-eq₂ | Ba-eq₁ | fa-eq₁
-... | refl   | refl   | refl   | refl
-  =  refl , refl
+ with solve ⊢ta₁ ⊢ta₂ norm-eq-ta | solve ⊢tf₁ ⊢tf₂ norm-eq-tf
+... | refl , refl                | refl , refl
+ = refl , refl
 
 solve' : ∀ {A : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ a₂ : ⟦ A ⟧} →
   t₁ ⊢ A ∋ a₁ →
