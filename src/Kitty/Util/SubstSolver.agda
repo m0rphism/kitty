@@ -19,18 +19,18 @@ mutual
   data Type ℓ : Set (lsuc ℓ) where
     `_ : (A : Set ℓ) → Type ℓ
     `∀ : (A : Type ℓ) → (⟦ A ⟧ → Type ℓ) → Type ℓ
-    `≡ : (A : Type ℓ) → (a₁ a₂ : ⟦ A ⟧) → Type ℓ
+    -- `≡ : (A : Type ℓ) → (a₁ a₂ : ⟦ A ⟧) → Type ℓ
 
   ⟦_⟧ : Type ℓ → Set ℓ
   ⟦ ` A   ⟧      = A
   ⟦ `∀ A B ⟧     = ∀ (a : ⟦ A ⟧) → ⟦ B a ⟧
-  ⟦ `≡ A a₁ a₂ ⟧ = a₁ ≡ a₂
+  -- ⟦ `≡ A a₁ a₂ ⟧ = a₁ ≡ a₂
 
 data Term ℓ : Set (lsuc ℓ) where
-  `_#_ : ∀ {A : Type ℓ} → (a : ⟦ A ⟧) → (i : ℕ) → Term ℓ
+  `_∋_#_ : ∀ (A : Type ℓ) → (a : ⟦ A ⟧) → (i : ℕ) → Term ℓ
   _·_ : (t₁ t₂ : Term ℓ) → Term ℓ
   `subst : (t₁ t₂ t≡ t : Term ℓ) → Term ℓ
-  `eq : Term ℓ → Term ℓ → Term ℓ
+  -- `eq : Term ℓ → Term ℓ → Term ℓ
 
 -- Subterm Relation
 -- TODO: Derive for Kitty Terms!
@@ -43,23 +43,29 @@ data _≤ₜ_ {ℓ} (t' : Term ℓ) : (t : Term ℓ) → Set ℓ where
   ≤-·₂ : ∀ {t₁ t₂ : Term ℓ} →
     t' ≤ₜ t₂ →
     t' ≤ₜ (t₁ · t₂)
-  ≤-subst₁ : ∀ {teq t : Term ℓ} →
-    t' ≤ₜ teq →
-    t' ≤ₜ (`subst teq t)
-  ≤-subst₂ : ∀ {teq t : Term ℓ} →
-    t' ≤ₜ t →
-    t' ≤ₜ (`subst teq t)
-  ≤-eq₁ : ∀ {t₁ t₂ : Term ℓ} →
+  ≤-subst₁ : ∀ {t₁ t₂ t≡ t : Term ℓ} →
     t' ≤ₜ t₁ →
-    t' ≤ₜ (`eq t₁ t₂)
-  ≤-eq₂ : ∀ {t₁ t₂ : Term ℓ} →
+    t' ≤ₜ (`subst t₁ t₂ t≡ t)
+  ≤-subst₂ : ∀ {t₁ t₂ t≡ t : Term ℓ} →
     t' ≤ₜ t₂ →
-    t' ≤ₜ (`eq t₁ t₂)
+    t' ≤ₜ (`subst t₁ t₂ t≡ t)
+  ≤-subst₃ : ∀ {t₁ t₂ t≡ t : Term ℓ} →
+    t' ≤ₜ t≡ →
+    t' ≤ₜ (`subst t₁ t₂ t≡ t)
+  ≤-subst₄ : ∀ {t₁ t₂ t≡ t : Term ℓ} →
+    t' ≤ₜ t →
+    t' ≤ₜ (`subst t₁ t₂ t≡ t)
+  -- ≤-eq₁ : ∀ {t₁ t₂ : Term ℓ} →
+  --   t' ≤ₜ t₁ →
+  --   t' ≤ₜ (`eq t₁ t₂)
+  -- ≤-eq₂ : ∀ {t₁ t₂ : Term ℓ} →
+  --   t' ≤ₜ t₂ →
+  --   t' ≤ₜ (`eq t₁ t₂)
 
 RespId : Term ℓ → Set _
 RespId {ℓ} t = ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} {i₁ i₂ : ℕ} →
-  (`_#_ {A = A} a₁ i₁) ≤ₜ t →
-  (`_#_ {A = A} a₂ i₂) ≤ₜ t →
+  (` A ∋ a₁ # i₁) ≤ₜ t →
+  (` A ∋ a₂ # i₂) ≤ₜ t →
   i₁ ≡ i₂ →
   a₁ ≡ a₂
 
@@ -69,31 +75,36 @@ data _≤ₜ[_,_] {ℓ} (t' t₁ t₂ : Term ℓ) : Set ℓ where
 
 RespId' : Term ℓ → Term ℓ → Set _
 RespId' {ℓ} t₁ t₂ = ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} {i₁ i₂ : ℕ} →
-  (`_#_ {A = A} a₁ i₁) ≤ₜ[ t₁ , t₂ ] →
-  (`_#_ {A = A} a₂ i₂) ≤ₜ[ t₁ , t₂ ] →
+  (` A ∋ a₁ # i₁) ≤ₜ[ t₁ , t₂ ] →
+  (` A ∋ a₂ # i₂) ≤ₜ[ t₁ , t₂ ] →
   i₁ ≡ i₂ →
   a₁ ≡ a₂
 
 lookup : ∀ {ℓ} (i : ℕ) (t : Term ℓ) →
-  Maybe (Σ[ A ∈ Type ℓ ] Σ[ a ∈ ⟦ A ⟧ ] (`_#_ {A = A} a i) ≤ₜ t)
-lookup i (`_#_ {A = A} a j) with i ≟ j
+  Maybe (Σ[ A ∈ Type ℓ ] Σ[ a ∈ ⟦ A ⟧ ] (` A ∋ a # i) ≤ₜ t)
+lookup i (` A ∋ a # j) with i ≟ j
 ...                         | yes refl = some (A , a , ≤-refl)
 ...                         | no neq = none
 lookup i (t₁ · t₂)          with lookup i t₁   | lookup i t₂
 ...                         | some (A , a , ≤) | _                = some (A , a , ≤-·₁ ≤)
 ...                         | _                | some (A , a , ≤) = some (A , a , ≤-·₂ ≤)
 ...                         | _                | _                = none
-lookup i (`subst t₁ t₂)     with lookup i t₁   | lookup i t₂
-...                         | some (A , a , ≤) | _                = some (A , a , ≤-subst₁ ≤)
-...                         | _                | some (A , a , ≤) = some (A , a , ≤-subst₂ ≤)
-...                         | _                | _                = none
-lookup i (`eq t₁ t₂)        with lookup i t₁   | lookup i t₂
-...                         | some (A , a , ≤) | _                = some (A , a , ≤-eq₁ ≤)
-...                         | _                | some (A , a , ≤) = some (A , a , ≤-eq₂ ≤)
-...                         | _                | _                = none
+lookup i (`subst t₁ t₂ t₃ t₄)
+ with lookup i t₁
+... | some (A , a , ≤) = some (A , a , ≤-subst₁ ≤)
+... | none
+ with lookup i t₂
+... | some (A , a , ≤) = some (A , a , ≤-subst₂ ≤)
+... | none
+ with lookup i t₃
+... | some (A , a , ≤) = some (A , a , ≤-subst₃ ≤)
+... | none
+ with lookup i t₄
+... | some (A , a , ≤) = some (A , a , ≤-subst₄ ≤)
+... | none             = none
 
 lookup₂ : ∀ {ℓ} (i : ℕ) (t₁ t₂ : Term ℓ) →
-  Maybe (Σ[ A ∈ Type ℓ ] Σ[ a ∈ ⟦ A ⟧ ] (`_#_ {A = A} a i) ≤ₜ[ t₁ , t₂ ])
+  Maybe (Σ[ A ∈ Type ℓ ] Σ[ a ∈ ⟦ A ⟧ ] (` A ∋ a # i) ≤ₜ[ t₁ , t₂ ])
 lookup₂ i t₁ t₂ with lookup i t₁      | lookup i t₂
 ...                | some (A , a , ≤) | _                = some (A , a , left ≤)
 ...                | _                | some (A , a , ≤) = some (A , a , right ≤)
@@ -113,8 +124,8 @@ RespId'' {ℓ} t₁ t₂ = ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} {i₁ i₂
   a₁ ≡ a₂
 
 ≤→lookup : ∀ {t : Term ℓ} {A : Type ℓ} {a : ⟦ A ⟧} {i : ℕ} →
-  `_#_ {A = A} a i ≤ₜ t →
-  Σ[ ≤ ∈ `_#_ {A = A} a i ≤ₜ t ] lookup i t ≡ some (A , a , ≤)
+  (` A ∋ a # i) ≤ₜ t →
+  Σ[ ≤ ∈ (` A ∋ a # i) ≤ₜ t ] lookup i t ≡ some (A , a , ≤)
   
 ≤→lookup {i = i} ≤-refl with i ≟ i
 ...                        | yes refl = ≤-refl , refl
@@ -126,8 +137,8 @@ RespId'' {ℓ} t₁ t₂ = ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} {i₁ i₂
 ... | some (A , a , ≤') | ≤'' , eq rewrite eq = {!≤-·₁ ≤'!} , {!refl!}
 ≤→lookup (≤-subst₁ ≤) = {!!}
 ≤→lookup (≤-subst₂ ≤) = {!!}
-≤→lookup (≤-eq₁ ≤)    = {!!}
-≤→lookup (≤-eq₂ ≤)    = {!!}
+≤→lookup (≤-subst₃ ≤) = {!!}
+≤→lookup (≤-subst₄ ≤) = {!!}
 
 RespId''→' : {t₁ t₂ : Term ℓ} → RespId'' t₁ t₂ → RespId' t₁ t₂ 
 RespId''→' R {i₁ = i₁} {i₂} le1 le2 i₁≡i₂ = {!!}
@@ -141,8 +152,8 @@ RespId''→' R {i₁ = i₁} {i₂} le1 le2 i₁≡i₂ = {!!}
 ≤ₜ-trans le1 (≤-·₂ le2)     = ≤-·₂ (≤ₜ-trans le1 le2)
 ≤ₜ-trans le1 (≤-subst₁ le2) = ≤-subst₁ (≤ₜ-trans le1 le2)
 ≤ₜ-trans le1 (≤-subst₂ le2) = ≤-subst₂ (≤ₜ-trans le1 le2)
-≤ₜ-trans le1 (≤-eq₁ le2)    = ≤-eq₁ (≤ₜ-trans le1 le2)
-≤ₜ-trans le1 (≤-eq₂ le2)    = ≤-eq₂ (≤ₜ-trans le1 le2)
+≤ₜ-trans le1 (≤-subst₃ le2) = ≤-subst₃ (≤ₜ-trans le1 le2)
+≤ₜ-trans le1 (≤-subst₄ le2) = ≤-subst₄ (≤ₜ-trans le1 le2)
 
 ≤ₜ-trans' : ∀ {ℓ} {t₁ t₂₁ t₂₂ t₃₁ t₃₂ : Term ℓ} →
   t₁ ≤ₜ[ t₂₁ , t₂₂ ] →
@@ -182,21 +193,19 @@ dec-eq' R t₁< t₂< = {!t₁<!}
 ≤ₜ-pres-RespId' le1 le1' R le2 le2' i₁≡i₂ = R (≤ₜ-trans' le2 le1 le1') (≤ₜ-trans' le2' le1 le1') i₁≡i₂
 
 data _⊢_∋_ {ℓ} : Term ℓ → (A : Type ℓ) → ⟦ A ⟧ → Set (lsuc ℓ) where
-  ⊢` : ∀ {i} (A : Type ℓ) (a : ⟦ A ⟧) → (`_#_ {A = A} a i) ⊢ A ∋ a
+  ⊢` : ∀ {i} (A : Type ℓ) (a : ⟦ A ⟧) → (` A ∋ a # i) ⊢ A ∋ a
   ⊢· : ∀ {A : Type ℓ} {B : ⟦ A ⟧ → Type ℓ} {tf f ta a} {Ba fa} →
     tf ⊢ `∀ A B ∋ f →
     ta ⊢ A ∋ a →
     (Ba-eq : Ba ≡ B a) →
     fa ≡ f a →
     (tf · ta) ⊢ Ba ∋ subst id (sym (cong ⟦_⟧ Ba-eq)) fa
-  ⊢subst : ∀ {A : Type ℓ} {R : ⟦ A ⟧ → Type ℓ} {a b tra ra teq eq} →
-    teq ⊢ (`≡ A a b) ∋ eq →
+  ⊢subst : ∀ {A : Type ℓ} {R : ⟦ A ⟧ → Type ℓ} {a b ta tb tra ra teq eq} →
+    ta  ⊢ A ∋ a →
+    tb  ⊢ A ∋ b →
+    teq ⊢ (` (a ≡ b)) ∋ eq →
     tra ⊢ (R a) ∋ ra →
-    `subst teq tra ⊢ (R b) ∋ (subst (λ a → ⟦ R a ⟧) eq ra)
-  ⊢eq : ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} {t₁ t₂ : Term ℓ} {eq : a₁ ≡ a₂} →
-    t₁ ⊢ A ∋ a₁ →
-    t₂ ⊢ A ∋ a₂ →
-    `eq t₁ t₂ ⊢ (`≡ A a₁ a₂) ∋ eq  
+    `subst ta tb teq tra ⊢ (R b) ∋ (subst (λ a → ⟦ R a ⟧) eq ra)
 
 open import Data.List
 -- open import Data.List.Membership.Propositional
@@ -249,7 +258,7 @@ pullout : ∀ {t₁} {t₂} {A : Type ℓ} {a : ⟦ A ⟧} →
   List (Eq' t₁ t₂) →
   RespId' t₁ t₂ →
   List (Eq' t₁ t₂) × Term ℓ
-pullout t@(`_#_ {A = A} a i) ⊢t le eqs R with lookup-eqs t le R eqs
+pullout t@(` A ∋ a # i) ⊢t le eqs R with lookup-eqs t le R eqs
 ... | some t₂ = [] , t₂
 ... | none    = [] , t
   -- TODO: we probably need to apply all matching eqs, since we're pulling out multiple subs
@@ -259,30 +268,78 @@ pullout (t₁ · t₂) (⊢· ⊢t₁ ⊢t₂ eq₁ eq₂) le eqs R
  with pullout t₁ ⊢t₁ (≤ₜ-trans' (left (≤-·₁ ≤-refl)) le le) (eqs' ++ eqs) R
 ... | eqs'' , t₁'
  = eqs' ++ eqs'' , (t₁' · t₂')
-pullout (`subst t₁ t₂) (⊢subst ⊢t₁ ⊢t₂) le eqs R
- with pullout t₂ ⊢t₂ (≤ₜ-trans' (left (≤-subst₂ ≤-refl)) le le) eqs R
+pullout (`subst ta tb t₁ t₂) (⊢subst ⊢ta ⊢tb ⊢t₁ ⊢t₂) le eqs R
+ with pullout t₂ ⊢t₂ (≤ₜ-trans' (left (≤-subst₄ ≤-refl)) le le) eqs R
 ... | eqs' , t₂'
- = eq' {!!} {!!} {!!} {!!} {!!} {!!} ∷ eqs' , t₂'
-pullout (`eq t₁ t₂) ⊢t le eqs R = [] , `eq t₁ t₂ -- TODO: is this correct?
+ = eq' ta tb t₁
+     (≤ₜ-trans' (left (≤-subst₁ ≤-refl)) le le)
+     (≤ₜ-trans' (left (≤-subst₂ ≤-refl)) le le)
+     (≤ₜ-trans' (left (≤-subst₃ ≤-refl)) le le)
+   ∷ eqs' , t₂'
+
+-- pullout-irrelevant : ∀ {t₁ t₂ t₁' t₂'} {A : Type ℓ} {a : ⟦ A ⟧} →
+--   (t : Term ℓ) →
+--   (⊢t : t ⊢ A ∋ a) →
+--   (≤₁ : t ≤ₜ[ t₁ , t₂ ]) →
+--   (≤₂ : t ≤ₜ[ t₁' , t₂' ]) →
+--   (eqs : List Eq' →
+--   (eqs≤₁ : Eqs≤ eqs t₁ t₂) →
+--   (eqs≤₂ : Eqs≤ eqs t₁' t₂') →
+--   (R₁ : RespId' t₁ t₂) →
+--   (R₂ : RespId' t₁' t₂') →
+--   pullout t ⊢t ≤₁ eqs R₁ ≡ pullout t ⊢t ≤₂ eqs R₂
+-- pullout-irrelevant = ?
+
+normalize' : ∀ {t} {t₁} {t₂} {A : Type ℓ} {a : ⟦ A ⟧} →
+  t ⊢ A ∋ a →
+  t ≤ₜ[ t₁ , t₂ ] →
+  RespId' t₁ t₂ →
+  Term ℓ
+normalize' {t = t} ⊢t le R = proj₂ (pullout t ⊢t le [] R)
+
+normalize'-R₂ : ∀ {t} {t₁} {t₂} {t₂'} {A : Type ℓ} {a : ⟦ A ⟧} →
+  (⊢t : t ⊢ A ∋ a) →
+  (≤ : t ≤ₜ t₁) →
+  (R : RespId' t₁ t₂) →
+  (R' : RespId' t₁ t₂') →
+  normalize' ⊢t (left ≤) R ≡ normalize' ⊢t (left ≤) R'
+normalize'-R₂ = {!!}
+
 
 normalize : Term ℓ → Term ℓ
-normalize (`_#_ {A = A} a i) = `_#_ {A = A} a i
-normalize (t₁ · t₂)          = (normalize t₁) · (normalize t₂)
-normalize (`subst teq t)     = normalize t
-normalize (`eq t₁ t₂)        = `eq (normalize t₁) (normalize t₂)
+normalize (` A ∋ a # i)        = ` A ∋ a # i
+normalize (t₁ · t₂)            = (normalize t₁) · (normalize t₂)
+normalize (`subst ta tb teq t) = normalize t
 
 ·-injective : ∀ {tf₁ ta₁ tf₂ ta₂ : Term ℓ} →
   (tf₁ · ta₁) ≡ (tf₂ · ta₂) →
   (tf₁ ≡ tf₂) × (ta₁ ≡ ta₂)
 ·-injective refl = refl , refl
 
-`eq-injective : ∀ {ta₁ ta₂ tb₁ tb₂ : Term ℓ} →
-  (`eq ta₁ ta₂) ≡ (`eq tb₁ tb₂) →
-  (ta₁ ≡ tb₁) × (ta₂ ≡ tb₂)
-`eq-injective refl = refl , refl
-
 ≡-irrelevant : ∀ {ℓ} {A : Set ℓ} {a b : A} (p q : a ≡ b) → p ≡ q
 ≡-irrelevant refl refl = refl
+
+solven : ∀ {A₁ A₂ : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ : ⟦ A₁ ⟧} {a₂ : ⟦ A₂ ⟧} →
+  (R : RespId' t₁ t₂) →
+  (⊢t₁ : t₁ ⊢ A₁ ∋ a₁) →
+  (⊢t₂ : t₂ ⊢ A₂ ∋ a₂) →
+  normalize' ⊢t₁ (left ≤-refl) R ≡ normalize' ⊢t₂ (right ≤-refl) R →
+  Σ[ eq ∈ (A₁ ≡ A₂) ] subst id (cong ⟦_⟧ eq) a₁ ≡ a₂
+solven R (⊢` A₁ a₁) (⊢` A₂ a₂) refl = refl , refl
+solven R (⊢· ⊢tf₁ ⊢ta₁ Ba-eq₁ fa-eq₁) (⊢· ⊢tf₂ ⊢ta₂ Ba-eq₂ fa-eq₂) norm-eq = {!!}
+solven R ⊢t₁ (⊢subst {R = R''} {eq = refl} ⊢ta ⊢tb ⊢t≡ ⊢t₂) norm-eq =
+  solven
+    (≤ₜ-pres-RespId' (left ≤-refl) (right (≤-subst₄ ≤-refl)) R)
+    ⊢t₁ ⊢t₂
+    (let R' = (≤ₜ-pres-RespId' (left ≤-refl) (right (≤-subst₄ ≤-refl)) R) in
+     normalize' ⊢t₁ (left ≤-refl) R'                      ≡⟨ normalize'-R₂ ⊢t₁ ≤-refl R' R ⟩
+     normalize' ⊢t₁ (left ≤-refl) R                       ≡⟨ norm-eq ⟩
+     normalize' (⊢subst {R = R''} ⊢ta ⊢tb ⊢t≡ ⊢t₂) (right ≤-refl) R ≡⟨⟩
+     proj₂ (pullout _ (⊢subst {R = R''} ⊢ta ⊢tb ⊢t≡ ⊢t₂) (right ≤-refl) [] R) ≡⟨⟩
+     proj₂ (pullout _ ⊢t₂ (right (≤-subst₄ ≤-refl)) [] R) ≡⟨ {!!} ⟩
+     proj₂ (pullout _ ⊢t₂ (right ≤-refl) [] R')           ≡⟨⟩
+     normalize' ⊢t₂ (right ≤-refl) R'                     ∎)
+solven R (⊢subst ⊢ta ⊢tb ⊢t≡ ⊢t₁) ⊢t₂ norm-eq = {!!}
 
 solve : ∀ {A₁ A₂ : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ : ⟦ A₁ ⟧} {a₂ : ⟦ A₂ ⟧} →
   RespId' t₁ t₂ →
@@ -290,19 +347,11 @@ solve : ∀ {A₁ A₂ : Type ℓ} {t₁ t₂ : Term ℓ} {a₁ : ⟦ A₁ ⟧} 
   t₂ ⊢ A₂ ∋ a₂ →
   normalize t₁ ≡ normalize t₂ →
   Σ[ eq ∈ (A₁ ≡ A₂) ] subst id (cong ⟦_⟧ eq) a₁ ≡ a₂
-solve R (⊢eq ⊢a₁ ⊢a₂) (⊢eq ⊢b₁ ⊢b₂) norm-eq
- with `eq-injective norm-eq                   
-... | norm-eq₁ , norm-eq₂
- with solve (≤ₜ-pres-RespId' (left (≤-eq₁ ≤-refl)) (right (≤-eq₁ ≤-refl)) R) ⊢a₁ ⊢b₁ norm-eq₁
-... | refl , refl
- with solve (≤ₜ-pres-RespId' (left (≤-eq₂ ≤-refl)) (right (≤-eq₂ ≤-refl)) R) ⊢a₂ ⊢b₂ norm-eq₂
-... | refl , refl
- = refl , ≡-irrelevant _ _
 solve R (⊢` A₁ a₁) (⊢` A₂ a₂) refl = refl , refl
-solve R (⊢subst {eq = refl} ⊢teq ⊢tra) ⊢t₂ norm-eq
- = solve (≤ₜ-pres-RespId' (left (≤-subst₂ ≤-refl)) (right ≤-refl) R) ⊢tra ⊢t₂ norm-eq
-solve R ⊢t₁ (⊢subst {eq = refl} ⊢teq ⊢tra) norm-eq
- = solve (≤ₜ-pres-RespId' (left ≤-refl) (right (≤-subst₂ ≤-refl)) R) ⊢t₁ ⊢tra norm-eq
+solve R (⊢subst {eq = refl} ⊢ta ⊢tb ⊢teq ⊢tra) ⊢t₂ norm-eq
+ = solve (≤ₜ-pres-RespId' (left (≤-subst₄ ≤-refl)) (right ≤-refl) R) ⊢tra ⊢t₂ norm-eq
+solve R ⊢t₁ (⊢subst {eq = refl} ⊢ta ⊢tb ⊢teq ⊢tra) norm-eq
+ = solve (≤ₜ-pres-RespId' (left ≤-refl) (right (≤-subst₄ ≤-refl)) R) ⊢t₁ ⊢tra norm-eq
 solve R (⊢· ⊢tf₁ ⊢ta₁ refl refl) (⊢· ⊢tf₂ ⊢ta₂ refl refl) norm-eq
  with ·-injective norm-eq                   
 ... | norm-eq-tf , norm-eq-ta
@@ -322,33 +371,30 @@ solve' R ⊢t₁ ⊢t₂ norm-eq with solve R ⊢t₁ ⊢t₂ norm-eq
 ... | refl , eqa = eqa
 
 data ITerm {ℓ} : ∀ (A : Type ℓ) → (a : ⟦ A ⟧) → Set (lsuc ℓ) where
-  `_#_ : ∀ {A : Type ℓ} → (a : ⟦ A ⟧) → ℕ → ITerm A a
+  `_∋_#_ : ∀ (A : Type ℓ) → (a : ⟦ A ⟧) → ℕ → ITerm A a
   _·_ : ∀ {A : Type ℓ} {B : ⟦ A ⟧ → Type ℓ} {f a} →
     ITerm (`∀ A B) f →
     ITerm A a →
     ITerm (B a) (f a)
   `subst : ∀ {A : Type ℓ} (R : ⟦ A ⟧ → Type ℓ) {a b ra} {a≡b : a ≡ b} →
-    ITerm (`≡ A a b) a≡b →
+    ITerm A a →
+    ITerm A b →
+    ITerm (` (a ≡ b)) a≡b →
     ITerm (R a) ra →
     ITerm (R b) (subst (λ a → ⟦ R a ⟧) a≡b ra)
-  `eq : ∀ {A : Type ℓ} {a₁ a₂ : ⟦ A ⟧} {eq : a₁ ≡ a₂} →
-    ITerm A a₁ →
-    ITerm A a₂ →
-    ITerm (`≡ A a₁ a₂) eq
+
+pattern `_#_ a i = ` _ ∋ a # i
 
 split : ∀ {ℓ} {A : Type ℓ} {a : ⟦ A ⟧} →
   ITerm A a →
   Σ[ t ∈ Term ℓ ]
     t ⊢ A ∋ a
-split (`_#_ {A = A} a i)                     = (` a # i) , (⊢` A a)
+split (` A ∋ a # i)                     = (` A ∋ a # i) , (⊢` A a)
 split (t₁ · t₂) with split t₁ | split t₂
 ...                | tf , ⊢tf | ta , ⊢ta = (tf · ta) , (⊢· ⊢tf ⊢ta refl refl)
-split (`subst {A = A} R a≡b t) with split a≡b | split t
-...                               | a≡b' , ⊢a≡b' | t' , ⊢t'
-                                  = (`subst a≡b' t') , (⊢subst {A = A} {R = R} ⊢a≡b' ⊢t')
-split (`eq {A = A} a₁ a₂) with split a₁ | split a₂
-...                          | a₁' , ⊢a₁' | a₂' , ⊢a₂'
-                             = `eq a₁' a₂' , ⊢eq ⊢a₁' ⊢a₂'
+split (`subst {A = A} R a b a≡b t) with split a | split b | split a≡b | split t
+...                                   | a' , ⊢a' | b' , ⊢b' | a≡b' , ⊢a≡b' | t' , ⊢t'
+                                      = (`subst a' b' a≡b' t') , (⊢subst {A = A} {R = R} ⊢a' ⊢b' ⊢a≡b' ⊢t')
 
 split₁ : ∀ {ℓ} {A : Type ℓ} {a : ⟦ A ⟧} →
   ITerm A a →
@@ -377,21 +423,28 @@ module Example where
   test₁ : ∀ m n (i : Index (m + n)) →
     subst Index (+-comm n m) (subst Index (+-comm m n) i) ≡ i
   test₁ m n i = solve'
-    {t₁ = `subst (` (+-comm n m) # 0) (`subst (` (+-comm m n) # 1) (` i # 2))}
+    {t₁ = `subst (` (` ℕ) ∋ (n + m) # 3) (` (` ℕ) ∋ (m + n) # 4)
+            (` (+-comm n m) # 0)
+            (`subst (` (` ℕ) ∋ (m + n) # 4) (` (` ℕ) ∋ (n + m) # 3)
+              (` (+-comm m n) # 1)
+              (` i # 2))}
     {t₂ = ` i # 2}
     (λ where
-      (left (≤-subst₁ ≤-refl)) (left (≤-subst₁ ≤-refl)) refl                       → refl
-      (left (≤-subst₁ ≤-refl)) (left (≤-subst₂ (≤-subst₁ ()))) refl
-      (left (≤-subst₁ ≤-refl)) (left (≤-subst₂ (≤-subst₂ ()))) refl
-      (left (≤-subst₂ (≤-subst₁ ≤-refl))) (left (≤-subst₂ (≤-subst₁ ≤-refl))) refl → refl
-      (left (≤-subst₂ (≤-subst₂ ≤-refl))) (left (≤-subst₂ (≤-subst₂ ≤-refl))) refl → refl
-      (left (≤-subst₂ (≤-subst₂ ≤-refl))) (right ≤-refl) refl                      → refl
-      (right ≤-refl) (left (≤-subst₂ (≤-subst₂ ≤-refl))) refl                      → refl
-      (right ≤-refl) (right ≤-refl) refl                                           → refl
+      x y → {!x y!}
+      -- (left (≤-subst₁ ≤-refl)) (left (≤-subst₁ ≤-refl)) refl                       → refl
+      -- (left (≤-subst₁ ≤-refl)) (left (≤-subst₂ (≤-subst₁ ()))) refl
+      -- (left (≤-subst₁ ≤-refl)) (left (≤-subst₂ (≤-subst₂ ()))) refl
+      -- (left (≤-subst₂ (≤-subst₁ ≤-refl))) (left (≤-subst₂ (≤-subst₁ ≤-refl))) refl → refl
+      -- (left (≤-subst₂ (≤-subst₂ ≤-refl))) (left (≤-subst₂ (≤-subst₂ ≤-refl))) refl → refl
+      -- (left (≤-subst₂ (≤-subst₂ ≤-refl))) (right ≤-refl) refl                      → refl
+      -- (right ≤-refl) (left (≤-subst₂ (≤-subst₂ ≤-refl))) refl                      → refl
+      -- (right ≤-refl) (right ≤-refl) refl                                           → refl
     )
     (⊢subst {A = ` ℕ} {R = λ n → ` Index n}
+      (⊢` _ (n + m)) (⊢` _ (m + n))
       (⊢` _ (+-comm n m))
       (⊢subst {A = ` ℕ} {R = λ n → ` Index n}
+        (⊢` _ (m + n)) (⊢` _ (n + m))
         (⊢` _ (+-comm m n))
         (⊢` (` Index (m + n)) i)))
     (⊢` (` Index (m + n)) i)
