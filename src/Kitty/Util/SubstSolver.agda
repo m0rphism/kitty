@@ -136,9 +136,16 @@ module Example where
   f : ∀ m n → Index (m + n) → Index (n + m)
   f m n (index _) = index _
 
-  -- test₂' : ∀ m n (i : Index (m + n)) →
-  --   f n m (subst Index (+-comm m n) i) ≡ subst Index (+-comm n m) (f m n i)
-  -- test₂' m n i = isolve' ({!`_!} · {!!}) {!!} {!!}
+  test₂' : ∀ m n (i : Index (m + n)) →
+    f n m (subst Index (+-comm m n) i) ≡ subst Index (+-comm n m) (f m n i)
+  test₂' m n i = isolve'
+    (_·_ {A = ` Index (n + m)} {B = λ i → ` Index (m + n)}
+      (` (f n m))
+      (`subst {A = ` ℕ} (λ n → ` Index n) (+-comm m n) (` i)))
+    (`subst {A = ` ℕ} (λ n → ` Index n) (+-comm n m)
+      (_·_ {A = ` Index (m + n)} {B = λ i → ` Index (n + m)}
+        (` (f m n)) (` i)))
+    {!!}
 
   -- test₂ : ∀ m n p (u : Vec ℕ m) (v : Vec ℕ n) (w : Vec ℕ p) →
   --   (u ++ (v ++ w)) ≡ subst (Vec ℕ) (+-assoc m n p) ((u ++ v) ++ w)
