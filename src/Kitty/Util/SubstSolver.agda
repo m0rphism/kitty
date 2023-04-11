@@ -153,9 +153,9 @@ module Example where
   test₁ m n i = solve'
     {t₁ = `subst (` (+-comm n m)) (`subst (` (+-comm m n)) (` i))}
     {t₂ = ` i}
-    (⊢subst {A = ` ℕ} {R = λ n → ` (Index n)}
+    (⊢subst {A = ` ℕ} {R = λ n → ` Index n}
       (⊢` _ (+-comm n m))
-      (⊢subst {A = ` ℕ} {R = λ n → ` (Index n)}
+      (⊢subst {A = ` ℕ} {R = λ n → ` Index n}
         (⊢` _ (+-comm m n))
         (⊢` (Index (m + n)) i)))
     (⊢` (Index (m + n)) i)
@@ -164,8 +164,8 @@ module Example where
   test₁' : ∀ m n (i : Index (m + n)) →
     subst Index (+-comm n m) (subst Index (+-comm m n) i) ≡ i
   test₁' m n i = solve''
-    (`subst {A = ` ℕ} (λ n → ` (Index n)) (+-comm n m)
-      (`subst {A = ` ℕ} (λ n → ` (Index n)) (+-comm m n)
+    (`subst {A = ` ℕ} (λ n → ` Index n) (+-comm n m)
+      (`subst {A = ` ℕ} (λ n → ` Index n) (+-comm m n)
         (` i)))
     (` i)
     refl
