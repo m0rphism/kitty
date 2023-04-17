@@ -231,7 +231,7 @@ subject-reduction :
   Γ ⊢ e' ∶ t
 subject-reduction (⊢-· {t₂ = t₂} (⊢-λ ⊢e₁) ⊢e₂) β-λ                   = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ t₂ _) (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆)
 subject-reduction (⊢-match ⊢e ⊢cs ex)           (β-match c∈cs m refl) with ⊢cs→⊢c c∈cs ⊢cs
-...                                                                   | ⊢-clause ⊢p ⊢e = {!!}
+...                                                                   | ⊢-clause ⊢p ⊢e' = {!⊢e' ⊢⋯ₛ ?!}
 subject-reduction (⊢-λ ⊢e)                      (ξ-λ e↪e')            = ⊢-λ (subject-reduction ⊢e e↪e')
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₁ e₁↪e₁')         = ⊢-· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₂ e₂↪e₂')         = ⊢-· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
