@@ -40,6 +40,17 @@ dist-subst :
   → f {a₂} (subst F a₁≡a₂ x) ≡ subst G a₁≡a₂ (f {a₁} x)
 dist-subst _ refl _ = refl
 
+dist-subst-arg :
+  ∀ {ℓ ℓ₁ ℓ₂ ℓ₃} {A : Set ℓ} {a₁ a₂ : A}
+    {F : A → Set ℓ₁} {G : A → Set ℓ₂} {H : Set ℓ₃}
+  → (f : ∀ {a} → (x : F a) → G a → H)
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (a₂≡a₁ : a₂ ≡ a₁)
+  → (x : F a₁) 
+  → (y : G a₂) 
+  → f (subst F a₁≡a₂ x) y ≡ f x (subst G a₂≡a₁ y)
+dist-subst-arg _ refl refl _ _ = refl
+
 dist-subst₂ :
   ∀ {ℓ₁ ℓ₂ ℓ₃ ℓ₄}
     {A : Set ℓ₁} {a₁ a₂ : A}
@@ -124,3 +135,25 @@ subst-merge :
   → (x : F a₁)
   → subst F a₂≡a₃ (subst F a₁≡a₂ x) ≡ subst F (trans a₁≡a₂ a₂≡a₃) x
 subst-merge F refl refl x = refl
+
+subst₂₁ :
+  ∀ {ℓ₁ ℓ₂ ℓ₃}
+    {A : Set ℓ₁} {a₁ a₂ : A}
+    {B : Set ℓ₂} {b₁ b₂ : B}
+  → (F : A → B → Set ℓ₃)
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (b₁≡b₂ : b₁ ≡ b₂)
+  → (x : F a₁ b₁) 
+  → subst₂ F a₁≡a₂ b₁≡b₂ x ≡ subst (F a₂) b₁≡b₂ (subst (λ a → F a b₁) a₁≡a₂ x)
+subst₂₁ _ refl refl _ = refl
+
+subst₁₂ :
+  ∀ {ℓ₁ ℓ₂ ℓ₃}
+    {A : Set ℓ₁} {a₁ a₂ : A}
+    {B : Set ℓ₂} {b₁ b₂ : B}
+  → (F : A → B → Set ℓ₃)
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (b₁≡b₂ : b₁ ≡ b₂)
+  → (x : F a₁ b₁) 
+  → subst₂ F a₁≡a₂ b₁≡b₂ x ≡ subst (λ a → F a b₂) a₁≡a₂ (subst (F a₁) b₁≡b₂ x)
+subst₁₂ _ refl refl _ = refl
