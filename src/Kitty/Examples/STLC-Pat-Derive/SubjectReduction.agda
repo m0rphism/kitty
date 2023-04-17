@@ -1,7 +1,7 @@
 module Kitty.Examples.STLC-Pat-Derive.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; subst₂; module ≡-Reasoning)
-open import Data.Product using (∃-syntax; Σ-syntax; _,_)
+open import Data.Product using (∃-syntax; Σ-syntax; _×_; _,_)
 open ≡-Reasoning
 open import Kitty.Examples.STLC-Pat-Derive.Definitions
 open import Function using () renaming (_∋_ to _by_)
@@ -140,45 +140,81 @@ mutual
     (PatTy→Ctx' (P₁ ⋯ ϕ) ▶' (P₂ ⋯ (ϕ ↑*' _))) m x         ≡⟨⟩
     (PatTy→Ctx' ((P₁ ▶ᵖ P₂) ⋯ ϕ)) m x                     ∎
 
+  -- Can⋯' :
+  --   ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+  --     ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
+  --     ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
+  --     ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
+  --     {e : µ ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) →
+  --   Canonical e t →
+  --   Canonical e (t ⋯ ϕ)
+  -- Can⋯' ϕ C-λ             = C-λ
+  -- Can⋯' ϕ C-tt            = C-tt
+  -- Can⋯' ϕ (C-, can₁ can₂) = C-, (Can⋯' ϕ can₁) (Can⋯' ϕ can₂)
+  -- Can⋯' ϕ (C-inj₁ can)    = C-inj₁ (Can⋯' ϕ can)
+  -- Can⋯' ϕ (C-inj₂ can)    = C-inj₂ (Can⋯' ϕ can)
+
   Can⋯ :
     ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
       ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
       ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
       ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-      {e : µ₁ ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
+      {e : µ ⊢ 𝕖} {t : µ₁ ⊢ 𝕥} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
     Canonical e (t ⋯ ϕ) →
     Canonical e t
-  Can⋯ {µ₁} {µ₂} {e = e}         {`[_]_ {m = 𝕖} () x} {ϕ} can
-  Can⋯ {µ₁} {µ₂} {e = .(λx _)}   {t₁ `→ t₂} {ϕ} C-λ             = C-λ
-  Can⋯ {µ₁} {µ₂} {e = .tt}       {𝟙}        {ϕ} C-tt            = C-tt
-  Can⋯ {µ₁} {µ₂} {e = .(_ , _)}  {t₁ `× t₂} {ϕ} (C-, can₁ can₂) = C-, (Can⋯ can₁) (Can⋯ can₂)
-  Can⋯ {µ₁} {µ₂} {e = .(inj₁ _)} {t₁ `⊎ t₂} {ϕ} (C-inj₁ can)    = C-inj₁ (Can⋯ can)
-  Can⋯ {µ₁} {µ₂} {e = .(inj₂ _)} {t₁ `⊎ t₂} {ϕ} (C-inj₂ can)    = C-inj₂ (Can⋯ can)
+  Can⋯ {e = e}         {`[_]_ {m = 𝕖} () x} {ϕ} can
+  Can⋯ {e = .(λx _)}   {t₁ `→ t₂} {ϕ} C-λ             = C-λ
+  Can⋯ {e = .tt}       {𝟙}        {ϕ} C-tt            = C-tt
+  Can⋯ {e = .(_ , _)}  {t₁ `× t₂} {ϕ} (C-, can₁ can₂) = C-, (Can⋯ can₁) (Can⋯ can₂)
+  Can⋯ {e = .(inj₁ _)} {t₁ `⊎ t₂} {ϕ} (C-inj₁ can)    = C-inj₁ (Can⋯ can)
+  Can⋯ {e = .(inj₂ _)} {t₁ `⊎ t₂} {ϕ} (C-inj₂ can)    = C-inj₂ (Can⋯ can)
 
-  -- Matches⋯ :
+  Matches⋯ :
+    ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+      ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
+      ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
+      ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
+      {e : µ₁ ⊢ 𝕖} {p : µ₂ ⊢ 𝕡 µ'} (ϕ : µ₂ –[ 𝕂 ]→ µ₃) →
+    Matches e p →
+    Matches e (p ⋯ ϕ)
+  Matches⋯ ϕ M-`         = M-`
+  Matches⋯ ϕ M-tt        = M-tt
+  Matches⋯ ϕ (M-, m₁ m₂) = M-, (Matches⋯ ϕ m₁) (Matches⋯ (ϕ ↑*' _) m₂)
+  Matches⋯ ϕ (M-inj₁ m)  = M-inj₁ (Matches⋯ ϕ m)
+  Matches⋯ ϕ (M-inj₂ m)  = M-inj₂ (Matches⋯ ϕ m)
+
+  -- ∈cs-⋯ :
   --   ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
   --     ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
   --     ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
   --     ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-  --     {e : µ₁ ⊢ 𝕖} {cs : µ₂ ⊢ 𝕔𝕤} (p : µ₂ ⊢ 𝕡 µ') {e' : (µ₂ ▷▷ µ') ⊢ 𝕖} {M : Matches e p} {ϕ : µ₂ –[ 𝕂 ]→ µ₃} →
-  --   Matches₁ e cs p e' M →
-  --   ∃[ M' ] Matches₁ e (cs ⋯ ϕ) (p ⋯ ϕ) (e' ⋯ ϕ) M'
-  -- Matches⋯ = ?
+  --   {p : µ₁ ⊢ 𝕡 µ'} {e : µ₁ ▷▷ µ' ⊢ 𝕖} {cs : µ₁ ⊢ 𝕔𝕤} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) →
+  --   (p ⇒ e) ∈cs cs →
+  --   ((p ⋯ ϕ) ⇒ (e ⋯ ϕ ↑* µ')) ∈cs (cs ⋯ ϕ)
+  -- ∈cs-⋯ = {!!}
+
+  ∈cs-⋯ :
+    ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+      ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
+      ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
+      ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
+    {c : µ₁ ⊢ 𝕔} {cs : µ₁ ⊢ 𝕔𝕤} (ϕ : µ₁ –[ 𝕂 ]→ µ₂) →
+    c ∈cs cs →
+    (c ⋯ ϕ) ∈cs (cs ⋯ ϕ)
+  ∈cs-⋯ ϕ (here refl) = here refl
+  ∈cs-⋯ ϕ (there x) = there (∈cs-⋯ ϕ x)
 
   Ex⋯ :
-    ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+      ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
       ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
       ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
       ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
       {cs : µ₁ ⊢ 𝕔𝕤} {t : µ₁ ⊢ 𝕥} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
     Exhaustive cs t →
     Exhaustive (cs ⋯ ϕ) (t ⋯ ϕ)
-  -- Ex⋯ {cs = cs} {t} {ϕ} ex can = {!ex (Can⋯ can)!}
-  Ex⋯ {cs = cs} {`[_]_ {m = 𝕖} () x₁} {ϕ} ex can
-  Ex⋯ {cs = cs} {t₁ `→ t₂} {ϕ} ex (C-λ {e = e}) = {!ex (C-λ {e = e})!}
-  Ex⋯ {cs = cs} {𝟙}        {ϕ} ex can = {!!}
-  Ex⋯ {cs = cs} {t₁ `× t₂} {ϕ} ex can = {!!}
-  Ex⋯ {cs = cs} {t₁ `⊎ t₂} {ϕ} ex can = {!!}
+  Ex⋯ {cs = cs} {t} {ϕ} ex {e = e} can with ex (Can⋯ {e = e} {t = t} {ϕ = ϕ} can)
+  ... | µ'' , p , e' , c∈cs , m =
+    µ'' , p ⋯ ϕ , e' ⋯ (ϕ ↑*' µ'') , c⋯ϕ∈cs⋯ϕ , Matches⋯ ϕ m
 
 -- open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
