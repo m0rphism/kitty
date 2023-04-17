@@ -218,12 +218,20 @@ mutual
 
 open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
+⊢cs→⊢c : ∀ {c : µ ⊢ 𝕔} {cs : µ ⊢ 𝕔𝕤} {t₁ t₂ : µ ⊢ 𝕥} →
+  c ∈cs cs →
+  Γ ⊢ cs ∶ Clause t₁ t₂ →
+  Γ ⊢ c  ∶ Clause t₁ t₂
+⊢cs→⊢c (here refl) (⊢-clause-∷ ⊢c ⊢cs) = ⊢c
+⊢cs→⊢c (there x)   (⊢-clause-∷ ⊢c ⊢cs) = ⊢cs→⊢c x ⊢cs
+
 subject-reduction :
   Γ ⊢ e ∶ t →
   e ↪ e' →
   Γ ⊢ e' ∶ t
 subject-reduction (⊢-· {t₂ = t₂} (⊢-λ ⊢e₁) ⊢e₂) β-λ                   = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ t₂ _) (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆)
-subject-reduction (⊢-match ⊢e ⊢cs ex)           (β-match c∈cs m refl) = {!!}
+subject-reduction (⊢-match ⊢e ⊢cs ex)           (β-match c∈cs m refl) with ⊢cs→⊢c c∈cs ⊢cs
+...                                                                   | ⊢-clause ⊢p ⊢e = {!!}
 subject-reduction (⊢-λ ⊢e)                      (ξ-λ e↪e')            = ⊢-λ (subject-reduction ⊢e e↪e')
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₁ e₁↪e₁')         = ⊢-· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₂ e₂↪e₂')         = ⊢-· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
