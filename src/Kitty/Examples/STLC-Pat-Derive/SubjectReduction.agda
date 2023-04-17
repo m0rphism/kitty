@@ -142,20 +142,6 @@ mutual
     (PatTy→Ctx' P₁ ⋯Ctx' ϕ ▶' (P₂ ⋯ (ϕ ↑*' _))) m x       ≡⟨ ≡ᶜ-cong-▶' {t₁ = P₂ ⋯ (ϕ ↑*' _)} (PatTy→Ctx'-⋯ P₁ ϕ) refl m x ⟩
     (PatTy→Ctx' (P₁ ⋯ ϕ) ▶' (P₂ ⋯ (ϕ ↑*' _))) m x         ≡⟨⟩
     (PatTy→Ctx' ((P₁ ▶ᵖ P₂) ⋯ ϕ)) m x                     ∎
-    
-
--- Goal: ((PatTy→Ctx' P₁
---         Kitty.Examples.STLC-Pat-Derive.Definitions._.▶' P₂)
---        ⋯Ctx' ϕ)
---       m x
---       ≡
---       (PatTy→Ctx' (Kitty.Examples.STLC-Pat-Derive.Definitions.⋯ P₁ ϕ)
---        Kitty.Examples.STLC-Pat-Derive.Definitions._.▶'
---        Kitty.Examples.STLC-Pat-Derive.Definitions.⋯ P₂
---        ((Kitty.Examples.STLC-Pat-Derive.Definitions.terms
---          Kitty.Term.MultiSub.↑*' ϕ)
---         µ₃))
---       m x
 
   Can⋯ :
     ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
