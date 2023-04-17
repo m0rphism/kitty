@@ -214,7 +214,7 @@ mutual
     Exhaustive (cs ⋯ ϕ) (t ⋯ ϕ)
   Ex⋯ {cs = cs} {t} {ϕ} ex {e = e} can with ex (Can⋯ {e = e} {t = t} {ϕ = ϕ} can)
   ... | µ'' , p , e' , c∈cs , m =
-    µ'' , p ⋯ ϕ , e' ⋯ (ϕ ↑*' µ'') , c⋯ϕ∈cs⋯ϕ , Matches⋯ ϕ m
+    µ'' , p ⋯ ϕ , e' ⋯ (ϕ ↑*' µ'') , ∈cs-⋯ ϕ c∈cs , Matches⋯ ϕ m
 
 -- open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
