@@ -91,16 +91,6 @@ _▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) =
   (P₁ ▶▶ᵖ P₂) ▶ᵖ sub t
 -- _▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) rewrite sym (++-assoc µ₂ µ₁ µ) = (P₁ ▶▶ᵖ P₂) ▶ᵖ t
 
-module _ where
-  private
-    _▶'_ : CtxP' µ µ₁ → (µ ▷▷ µ₁) ⊢ 𝕥 → CtxP' µ (µ₁ ▷ 𝕖)
-    (Γ ▶' t) _ (here refl) = t
-    (Γ ▶' t) _ (there x)   = Γ _ x
-  PatTy→Ctx' : µ ⊢ ℙ µ' → CtxP' µ µ' 
-  PatTy→Ctx' (`[_]_ {m = 𝕖} () x)
-  PatTy→Ctx' []ᵖ = λ _ ()
-  PatTy→Ctx' (P ▶ᵖ t) = PatTy→Ctx' P ▶' t
-
 variable
   e e₁ e₂ e₃ e' e₁' e₂' : µ ⊢ 𝕖
   t t₁ t₂ t₃ t' t₁' t₂' : µ ⊢ 𝕥
@@ -138,6 +128,11 @@ open import Kitty.Typing.OPE compose-traversal kit-type ctx-repr public
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
   T T₁ T₂ T' T₁' T₂' : µ ∶⊢ M
+
+PatTy→Ctx' : µ ⊢ ℙ µ' → CtxP' µ µ' 
+PatTy→Ctx' (`[_]_ {m = 𝕖} () x)
+PatTy→Ctx' []ᵖ = λ _ ()
+PatTy→Ctx' (P ▶ᵖ t) = PatTy→Ctx' P ▶' t
 
 -- Type System -----------------------------------------------------------------
 

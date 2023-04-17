@@ -74,7 +74,7 @@ mutual
     Γ₂ ⊢ ((p₁ ⋯ ϕ) ,ᵖ (p₂ ⋯ ϕ ↑* µ₃)) ∶ ((P₁ ⋯ ϕ) ▶▶ᵖ (P₂ ⋯ ϕ ↑* µ₃))
       by ⊢-,ᵖ (⊢p₁ ⊢⋯ ⊢ϕ)
               (⊢p₂ ⊢⋯ subst (_∋*/⊢* (ϕ ↑* µ₃) ∶ (Γ₁ ▶▶ PatTy→Ctx' P₁))
-                            ((Γ₂ ▶▶ (PatTy→Ctx' P₁ ⋯Ctx' ϕ)) ≡⟨ cong (Γ₂ ▶▶_) (PatTy→Ctx'-⋯ P₁ ϕ) ⟩
+                            ((Γ₂ ▶▶ (PatTy→Ctx' P₁ ⋯Ctx' ϕ)) ≡⟨ cong (Γ₂ ▶▶_) {!PatTy→Ctx'-⋯ P₁ ϕ!} ⟩
                              (Γ₂ ▶▶ (PatTy→Ctx' (P₁ ⋯ ϕ)))   ∎)
                             (⊢ϕ ∋↑*/⊢↑* PatTy→Ctx' P₁))
     )
@@ -120,14 +120,42 @@ mutual
     ((P₁ ▶▶ᵖ P₂) ▶ᵖ sub t) ⋯ ϕ                                   ≡⟨⟩
     (P₁ ▶▶ᵖ (P₂ ▶ᵖ t)) ⋯ ϕ                                       ∎
 
+  open import Kitty.Util.List
+  open import Data.List.Relation.Unary.Any using (here; there)
   PatTy→Ctx'-⋯ :
     ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
       ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
       ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
       ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
       {µ₁ µ₂ µ'} (P : µ₁ ⊢ ℙ µ') (ϕ : µ₁ –[ 𝕂 ]→ µ₂) →
-    (PatTy→Ctx' P) ⋯Ctx' ϕ ≡ PatTy→Ctx' (P ⋯ ϕ)
-  PatTy→Ctx'-⋯ = {!!}
+    (PatTy→Ctx' P) ⋯Ctx' ϕ ≡ᶜ PatTy→Ctx' (P ⋯ ϕ)
+  PatTy→Ctx'-⋯ (`[_]_ {m = 𝕖} () _) ϕ
+  PatTy→Ctx'-⋯ []ᵖ        ϕ _ ()
+  PatTy→Ctx'-⋯ {µ' = µ' ▷ m'} (P₁ ▶ᵖ P₂) ϕ m x@(here refl) =
+    (PatTy→Ctx' (P₁ ▶ᵖ P₂) ⋯Ctx' ϕ) m x ≡⟨⟩
+    P₂ ⋯ (ϕ ↑* µ')                      ≡⟨ ~-cong-⋯ P₂ (~-sym (↑*'~↑* µ')) ⟩
+    P₂ ⋯ (ϕ ↑*' µ')                     ≡⟨ refl ⟩
+    (PatTy→Ctx' ((P₁ ▶ᵖ P₂) ⋯ ϕ)) m x   ∎
+  PatTy→Ctx'-⋯ {µ' = µ' ▷ m'} (P₁ ▶ᵖ P₂) ϕ m x@(there y) =
+    (PatTy→Ctx' (P₁ ▶ᵖ P₂) ⋯Ctx' ϕ) m x                   ≡⟨⟩
+    PatTy→Ctx' P₁ m y ⋯ (ϕ ↑* drop-∈ x (µ' ▷ m'))         ≡⟨⟩
+    (PatTy→Ctx' P₁ ⋯Ctx' ϕ ▶' (P₂ ⋯ (ϕ ↑*' _))) m x       ≡⟨ ≡ᶜ-cong-▶' {t₁ = P₂ ⋯ (ϕ ↑*' _)} (PatTy→Ctx'-⋯ P₁ ϕ) refl m x ⟩
+    (PatTy→Ctx' (P₁ ⋯ ϕ) ▶' (P₂ ⋯ (ϕ ↑*' _))) m x         ≡⟨⟩
+    (PatTy→Ctx' ((P₁ ▶ᵖ P₂) ⋯ ϕ)) m x                     ∎
+    
+
+-- Goal: ((PatTy→Ctx' P₁
+--         Kitty.Examples.STLC-Pat-Derive.Definitions._.▶' P₂)
+--        ⋯Ctx' ϕ)
+--       m x
+--       ≡
+--       (PatTy→Ctx' (Kitty.Examples.STLC-Pat-Derive.Definitions.⋯ P₁ ϕ)
+--        Kitty.Examples.STLC-Pat-Derive.Definitions._.▶'
+--        Kitty.Examples.STLC-Pat-Derive.Definitions.⋯ P₂
+--        ((Kitty.Examples.STLC-Pat-Derive.Definitions.terms
+--          Kitty.Term.MultiSub.↑*' ϕ)
+--         µ₃))
+--       m x
 
   Can⋯ :
     ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
