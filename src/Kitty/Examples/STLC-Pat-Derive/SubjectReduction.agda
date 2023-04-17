@@ -53,7 +53,7 @@ mutual
   ⊢-inj₁ ⊢e            ⊢⋯ ⊢ϕ = ⊢-inj₁ (⊢e ⊢⋯ ⊢ϕ)
   ⊢-inj₂ ⊢e            ⊢⋯ ⊢ϕ = ⊢-inj₂ (⊢e ⊢⋯ ⊢ϕ)
   ⊢-match ⊢e₁ ⊢cs ex   ⊢⋯ ⊢ϕ = ⊢-match (⊢e₁ ⊢⋯ ⊢ϕ) (⊢cs ⊢⋯ ⊢ϕ) (Ex⋯ ex)
-  ⊢-clause ⊢p ⊢e       ⊢⋯ ⊢ϕ = ⊢-clause (⊢p ⊢⋯ ⊢ϕ) (⊢e ⊢⋯ (⊢ϕ ∋↑*/⊢↑* _))
+  ⊢-clause ⊢p ⊢e       ⊢⋯ ⊢ϕ = ⊢-clause (⊢p ⊢⋯ ⊢ϕ) {!⊢e ⊢⋯ (⊢ϕ ∋↑*/⊢↑* _)!}
   ⊢-clause-[]          ⊢⋯ ⊢ϕ = ⊢-clause-[]
   ⊢-clause-∷ ⊢c ⊢cs    ⊢⋯ ⊢ϕ = ⊢-clause-∷ (⊢c ⊢⋯ ⊢ϕ) (⊢cs ⊢⋯ ⊢ϕ)
   ⊢-ttᵖ                ⊢⋯ ⊢ϕ = ⊢-ttᵖ

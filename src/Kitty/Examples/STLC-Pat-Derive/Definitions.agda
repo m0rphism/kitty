@@ -207,9 +207,9 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ⊢ cs ∶ Clause t t' →
     Exhaustive cs t →
     Γ ⊢ match e cs ∶ t'
-  ⊢-clause : ∀ {Γ : Ctx µ} →
+  ⊢-clause : ∀ {Γ : Ctx µ} {p : µ ⊢ 𝕡 µ'} {t' : µ ⊢ 𝕥} →
     Γ ⊢ p ∶ P →
-    (Γ ▶▶ PatTy→Ctx' P) ⊢ e ∶ t' →
+    (Γ ▶▶ PatTy→Ctx' P) ⊢ e ∶ wk* µ' t' →
     Γ ⊢ (p ⇒ e) ∶ Clause t t'
   ⊢-clause-[] :
     Γ ⊢ [] ∶ Clause t t'
