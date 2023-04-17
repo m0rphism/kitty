@@ -97,6 +97,8 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
   kit-homotopy : KitHomotopy
   kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
+  open KitHomotopy kit-homotopy public hiding (~-cong-⋯)
+
   open import Kitty.Term.ComposeKit 𝕋 S kit-traversal kit-homotopy public
   open import Kitty.Term.SubCompose 𝕋 S kit-traversal kit-homotopy public
 
