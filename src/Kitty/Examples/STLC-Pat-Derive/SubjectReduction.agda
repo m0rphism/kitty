@@ -73,10 +73,7 @@ mutual
         (
     Γ₂ ⊢ ((p₁ ⋯ ϕ) ,ᵖ (p₂ ⋯ ϕ ↑* µ₃)) ∶ ((P₁ ⋯ ϕ) ▶▶ᵖ (P₂ ⋯ ϕ ↑* µ₃))
       by ⊢-,ᵖ (⊢p₁ ⊢⋯ ⊢ϕ)
-              (⊢p₂ ⊢⋯ subst (_∋*/⊢* (ϕ ↑* µ₃) ∶ (Γ₁ ▶▶ PatTy→Ctx' P₁))
-                            ((Γ₂ ▶▶ (PatTy→Ctx' P₁ ⋯Ctx' ϕ)) ≡⟨ cong (Γ₂ ▶▶_) {!PatTy→Ctx'-⋯ P₁ ϕ!} ⟩
-                             (Γ₂ ▶▶ (PatTy→Ctx' (P₁ ⋯ ϕ)))   ∎)
-                            (⊢ϕ ∋↑*/⊢↑* PatTy→Ctx' P₁))
+              (⊢p₂ ⊢⋯ ≡ᶜ-cong-∋*/⊢* (≡ᶜ-cong-▶▶ (≡ᶜ-refl {Γ = Γ₂}) (PatTy→Ctx'-⋯ P₁ ϕ)) (⊢ϕ ∋↑*/⊢↑* PatTy→Ctx' P₁))
     )
   ⊢-inj₁ᵖ ⊢p           ⊢⋯ ⊢ϕ = ⊢-inj₁ᵖ (⊢p ⊢⋯ ⊢ϕ)
   ⊢-inj₂ᵖ ⊢p           ⊢⋯ ⊢ϕ = ⊢-inj₂ᵖ (⊢p ⊢⋯ ⊢ϕ)
