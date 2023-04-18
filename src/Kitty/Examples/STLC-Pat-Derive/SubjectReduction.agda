@@ -53,7 +53,17 @@ mutual
   ⊢-inj₁ ⊢e            ⊢⋯ ⊢ϕ = ⊢-inj₁ (⊢e ⊢⋯ ⊢ϕ)
   ⊢-inj₂ ⊢e            ⊢⋯ ⊢ϕ = ⊢-inj₂ (⊢e ⊢⋯ ⊢ϕ)
   ⊢-match ⊢e₁ ⊢cs ex   ⊢⋯ ⊢ϕ = ⊢-match (⊢e₁ ⊢⋯ ⊢ϕ) (⊢cs ⊢⋯ ⊢ϕ) (Ex⋯ ex)
-  ⊢-clause ⊢p ⊢e       ⊢⋯ ⊢ϕ = ⊢-clause (⊢p ⊢⋯ ⊢ϕ) {!⊢e ⊢⋯ (⊢ϕ ∋↑*/⊢↑* _)!}
+  _⊢⋯_ {Γ₂ = Γ₂} {ϕ = ϕ} (⊢-clause {µ' = µ'} {P = P} {e = e} {t' = t'} ⊢p ⊢e) ⊢ϕ =
+    ⊢-clause (⊢p ⊢⋯ ⊢ϕ)
+      (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶▶ (≡ᶜ-refl {Γ = Γ₂}) (PatTy→Ctx'-⋯ P (ϕ ↑* _)))
+        (subst₂ ((Γ₂ ▶▶ (PatTy→Ctx' P ⋯Ctx' ϕ)) ⊢_∶_)
+          (e ⋯ ϕ ↑* µ' ≡⟨ ~-cong-⋯ e (~-sym {f = ϕ ↑*' µ'} {g = ϕ ↑* µ'} (↑*'~↑* µ')) ⟩
+            e ⋯ ϕ ↑*' µ' ∎)
+          (wk* µ' t' ⋯ ϕ ↑* µ'        ≡⟨ cong (_⋯ ϕ ↑* µ') (wk*-wkₖ* t' µ') ⟩
+           t' ⋯ᵣ wkₖ* µ' id ⋯ ϕ ↑* µ' ≡⟨ dist-↑*-f t' ϕ ⟩
+           t' ⋯ ϕ ⋯ᵣ wkₖ* µ' id       ≡⟨ sym (wk*-wkₖ* (t' ⋯ ϕ) µ') ⟩
+           wk* µ' (t' ⋯ ϕ)            ∎)
+          (⊢e ⊢⋯ (⊢ϕ ∋↑*/⊢↑* _))))
   ⊢-clause-[]          ⊢⋯ ⊢ϕ = ⊢-clause-[]
   ⊢-clause-∷ ⊢c ⊢cs    ⊢⋯ ⊢ϕ = ⊢-clause-∷ (⊢c ⊢⋯ ⊢ϕ) (⊢cs ⊢⋯ ⊢ϕ)
   ⊢-ttᵖ                ⊢⋯ ⊢ϕ = ⊢-ttᵖ

@@ -76,6 +76,23 @@ record ComposeTraversal : Set (lsuc ℓ) where
   --      e ⋯ (g ∘ₖ f) ↑ _         ∎)
   --   ComposeTraversal.⋯-assoc kit-assoc (e₁ · e₂) f g = cong₂ _·_ (⋯-assoc e₁ f g) (⋯-assoc e₂ f g)
 
+  wk*-wkₖ* : 
+      ∀ (t : µ ⊢ M) µ' →
+      wk* µ' t ≡ t ⋯ᵣ wkₖ* µ' id
+  wk*-wkₖ* {µ} {M} t [] =
+    wk* [] t        ≡⟨⟩
+    t               ≡⟨ sym (⋯-id t) ⟩
+    t ⋯ᵣ id         ≡⟨ ~-cong-⋯ t (~-sym (wkₖ*-[] id)) ⟩
+    t ⋯ᵣ wkₖ* [] id ∎
+  wk*-wkₖ* {µ} {M} t (µ' ▷ m') =
+    wk* (µ' ▷ m') t                ≡⟨⟩
+    wk m' (wk* µ' t)               ≡⟨ cong (wk m') (wk*-wkₖ* t µ') ⟩
+    wk m' (t ⋯ᵣ wkₖ* µ' id)        ≡⟨⟩
+    t ⋯ᵣ wkₖ* µ' id ⋯ᵣ wkₖ m' id   ≡⟨ ⋯-assoc t (wkₖ* µ' id) (wkₖ m' id) ⟩
+    t ⋯ᵣ (wkₖ* µ' id ·ₖ wkₖ m' id) ≡⟨ ~-cong-⋯ t (~-sym (wk-ϕ-id (wkₖ* µ' id))) ⟩
+    t ⋯ᵣ wkₖ m' (wkₖ* µ' id)       ≡⟨ ~-cong-⋯ t (~-sym (wkₖ*-▷ µ' m' id)) ⟩
+    t ⋯ᵣ wkₖ* (µ' ▷ m') id         ∎
+
   dist-↑-f :
     ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
       ⦃ C₁ : ComposeKit 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ ⦄
