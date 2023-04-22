@@ -273,14 +273,56 @@ record IKit
   --   lookup (Γ ▶ t) (here refl) ≡ t
   private instance _ = kitᵣ
   open import Data.List.Properties using (++-identityʳ)
-  lookup-▶▶-here : ∀ {µ₁ µ₂ µ₃} (Γ₁ : Ctx' µ₁ µ₂) (Γ₂ : Ctx' (µ₁ ▷▷ µ₂) µ₃) {m} (x : µ₃ ∋ m) →
-    let sub = subst₂ (_→ᵣ_) (++-identityʳ µ₃) (cong  (_▷▷ µ₃) (++-identityʳ µ₂)) in
-    let x' = µ₂ ▷▷ µ₃ ∋ m by x & sub (wkₖ* µ₂ (idᵣ {µ = []}) ↑* µ₃ ) in
-    {!!} ≡ lookup' Γ₂ x
-    -- (x₁ : µ₂ ▷▷ µ₃ ∋ m₁)
-    -- {!lookup' (Γ₁ ▶▶' Γ₂) (x & wkₖ µ₂ x)!} ≡ lookup' Γ₂ x
-    -- lookup (Γ₁ ▶▶' Γ₂) (here refl) ≡ t
-  lookup-▶▶-here = {!!}
+  -- lookup-▶▶-r : ∀ {µ₁ µ₂ µ₃} (Γ₁ : Ctx' µ₁ µ₂) (Γ₂ : Ctx' (µ₁ ▷▷ µ₂) µ₃) {m} (x : µ₃ ∋ m) →
+  --   let sub = subst₂ (_→ᵣ_) (++-identityʳ µ₃) (cong  (_▷▷ µ₃) (++-identityʳ µ₂)) in
+  --   let x' = µ₂ ▷▷ µ₃ ∋ m by x & sub (wkₖ* µ₂ (idᵣ {µ = []}) ↑* µ₃ ) in
+  --   {!!} ≡ lookup' Γ₂ x
+  --   -- (x₁ : µ₂ ▷▷ µ₃ ∋ m₁)
+  --   -- {!lookup' (Γ₁ ▶▶' Γ₂) (x & wkₖ µ₂ x)!} ≡ lookup' Γ₂ x
+  --   -- lookup (Γ₁ ▶▶' Γ₂) (here refl) ≡ t
+  -- lookup-▶▶-r = {!!}
+
+  -- lookup-▶▶'-here : ∀ {µ₁ µ₂ µ₃ m₃} (Γ₁ : Ctx' µ₁ µ₂) (Γ₂ : Ctx' (µ₁ ▷▷ µ₂) (µ₃ ▷ m₃)) →
+  --   -- let sub = subst₂ (_→ᵣ_) (++-identityʳ µ₃) (cong  (_▷▷ µ₃) (++-identityʳ µ₂)) in
+  --   {!lookup' (Γ₁ ▶▶' Γ₂) (here refl)!} ≡ lookup' Γ₂ (here refl)
+  -- lookup-▶▶'-here = {!!}
+
+  open import Kitty.Util.List
+  -- lookup-▶▶-here : ∀ {µ₂ µ₃ m₃} (Γ₁ : Ctx µ₂) (Γ₂ : Ctx' µ₂ (µ₃ ▷ m₃)) →
+  --   let x = (µ₃ ▷ m₃) ∋ m₃  by  here refl in -- aid implicit resolution below...
+  --   let sub = subst (_∶⊢ m→M m₃)
+  --         ([] ▷▷ drop-∈ x (µ₂ ▷▷ (µ₃ ▷ m₃)) ≡⟨ cong ([] ▷▷_) (drop-∈-▷▷ x) ⟩
+  --          [] ▷▷ (µ₂ ▷▷ drop-∈ x (µ₃ ▷ m₃)) ≡⟨ ++-identityʳ (µ₂ ▷▷ drop-∈ x (µ₃ ▷ m₃)) ⟩
+  --          µ₂ ▷▷ drop-∈ x (µ₃ ▷ m₃)         ∎) in
+  --   sub (lookup' (Γ₁ ▶▶ Γ₂) (here refl)) ≡ lookup' Γ₂ (here refl)
+  -- lookup-▶▶-here = {!!}
+
+  open import Data.List.Properties using (++-assoc)
+  lookup-▶▶-here : ∀ {µ₂ µ₃ m₃} (Γ₁ : Ctx µ₂) (Γ₂ : Ctx' µ₂ (µ₃ ▷ m₃)) →
+    lookup (Γ₁ ▶▶ Γ₂) (here refl) ≡ lookup' Γ₂ (here refl)
+  lookup-▶▶-here {µ₂} {µ₃} {m₃} Γ₁ Γ₂ =
+    let sub = subst (_∶⊢ m→M m₃) (++-identityʳ (µ₃ Data.List.++ µ₂)) in
+    let sub' = subst (λ ■ → Ctx' ■ (µ₃ ▷ m₃)) (sym (++-identityʳ µ₂)) in
+    let sub'x = subst (_∶⊢ m→M m₃) (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂))) in
+    let sub'' = subst (_∶⊢ m→M m₃) (sym (++-assoc µ₃ µ₂ [])) in
+    lookup (Γ₁ ▶▶ Γ₂) (here refl)              ≡⟨⟩
+    sub (lookup' (Γ₁ ▶▶' sub' Γ₂) (here refl)) ≡⟨⟩
+    sub (lookup' ((Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ)) ▶' sub'' (lookup' (sub' Γ₂) (here refl))) (here refl))
+                                               ≡⟨ cong sub (lookup-▶'-here (Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ))
+                                                                           (sub'' (lookup' (sub' Γ₂) (here refl)))) ⟩
+    sub (sub'' (lookup' (sub' Γ₂) (here refl))) ≡⟨
+      {!!}
+      -- -- {!(lookup' (sub' Γ₂) (here refl))!} -- ([] ▷▷ µ₂) ▷▷ drop-∈ (here refl) (µ₃ ▷ m₃)
+      -- dist-subst'
+      --   {G = λ ■ → ([] ▷▷ ■) ▷▷ drop-∈ (here refl) (µ₃ ▷ m₃) ∶⊢ m→M m₃}
+      --   (_▷▷ µ₃)
+      --   (λ {µ} (Γ : Ctx' µ (µ₃ ▷ m₃)) → lookup' Γ (here refl))
+      --   (sym (++-identityʳ µ₂))
+      --   (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂)))
+      --   Γ₂
+        ⟩
+    sub (sub'' (sub'x (lookup' Γ₂ (here refl)))) ≡⟨ {!!} ⟩
+    lookup' Γ₂ (here refl)                     ∎
 
   _⊢∥_ : ∀ {µ µ₁ µ₂} {Γ : Ctx µ} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ₁ : µ₁ –[ 𝕂 ]→ µ} {ϕ₂ : µ₂ –[ 𝕂 ]→ µ} →
     Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
@@ -293,11 +335,14 @@ record IKit
            (⊢ϕ₁ x t ∋x)
   _⊢∥_ {µ} {µ₁} {µ₂ ▷ m₂} {Γ} {Γ₁} {Γ₂} {ϕ₁} {ϕ₂} ⊢ϕ₁ ⊢ϕ₂ {.m₂} x@(here refl) t ∋x@refl =
     let sub = subst (_∶⊢_ µ) (sym (id/m→M/id m₂)) in
+    let sub' = subst (([] ▷▷ µ₂) →ᵣ_) (cong (_▷▷ µ₂) (++-identityʳ µ₁)) in
     Γ ∋/⊢ here refl & ϕ₁ ∥ ϕ₂ ∶ sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (here refl) ⋯ ϕ₁ ∥ ϕ₂)
       by subst₂ (λ ■₁ ■₂ → Γ ∋/⊢ ■₁ ∶ sub ■₂)
            (sym (&-∥-here ϕ₁ ϕ₂))
            (wk-telescope Γ₂ (here refl) ⋯ ϕ₂                           ≡⟨⟩
             wkₛ _ (lookup Γ₂ (here refl)) ⋯ ϕ₂                         ≡⟨ {!Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂!} ⟩
+            wkₛ _ (lookup' Γ₂ (here refl) ⋯ᵣ sub' (wkₖ* µ₁ (id {µ = []}) ↑* drop-∈ x (µ₂ ▷ m₂))) ⋯ ϕ₁ ∥ ϕ₂ ≡⟨ {!!} ⟩
+            wkₛ _ (lookup' (wk*-Ctx µ₁ Γ₂) (here refl)) ⋯ ϕ₁ ∥ ϕ₂      ≡⟨ {!!} ⟩
             wkₛ _ (lookup (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (here refl)) ⋯ ϕ₁ ∥ ϕ₂ ≡⟨⟩
             wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (here refl) ⋯ ϕ₁ ∥ ϕ₂   ∎)
            (
