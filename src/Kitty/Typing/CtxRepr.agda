@@ -415,6 +415,16 @@ record CtxRepr : Set₁ where
     open KitHomotopy 𝕊 T H
     open import Kitty.Term.KitT 𝕋 𝕊 T
 
+    wk*-Ctx' : ∀ {µ₁ µ₂} µ₁' → Ctx' µ₁ µ₂ → Ctx' (µ₁ ▷▷ µ₁') µ₂
+    wk*-Ctx' {µ₁} {µ₂} µ₁' Γ =
+      map-Ctx' (λ mx x t → t ⋯ᵣ ((wkₖ* µ₁' (id {µ = µ₁})) ↑* drop-∈ x µ₂)) Γ
+      where instance _ = kitᵣ
+
+    wk*-Ctx : ∀ {µ₂} µ₁ → Ctx µ₂ → Ctx' µ₁ µ₂
+    wk*-Ctx {µ₂} µ₁ Γ =
+      let sub = subst (λ ■ → Ctx' ■ µ₂) (++-identityʳ µ₁) in
+      sub (wk*-Ctx' µ₁ Γ)
+
     infixl  5  _⋯Ctx'_
     _⋯Ctx'_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂ µ'} → Ctx' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx' µ₂ µ'
     _⋯Ctx'_ ⦃ 𝕂 ⦄ {µ' = µ'} Γ ϕ = map-Ctx' (λ _ x t → t ⋯ (ϕ ↑* drop-∈ x µ')) Γ

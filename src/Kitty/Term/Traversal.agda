@@ -134,8 +134,8 @@ record Traversal : Set (lsuc ℓ) where
   infixl   5   _⋯ᵣ_  _⋯ₛ_ _⋯[_]_
   infixl   9  _∥ᵣ_  _∥ₛ_
 
-  open Kit kitᵣ using () renaming (wk to wkᵣ) public
-  open Kit kitₛ using () renaming (wk to wkₛ) public
+  open Kit kitᵣ using () renaming (wk to wkᵣ; wk* to wk*ᵣ) public
+  open Kit kitₛ using () renaming (wk to wkₛ; wk* to wk*ₛ) public
 
   -- Substitution / Renaming
 
