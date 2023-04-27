@@ -255,6 +255,7 @@ record SubCompose : Set (lsuc ℓ) where
       x & sub₁₂ ϕ ≡ sub₂ (sub₁⁻¹ x & ϕ)
     dist-subst-sub refl refl x ϕ = refl
 
+    -- NOTE: the &/⋯[ C ] can be replaced by &.
     wk*-∥₁ :
       ∀ ⦃ 𝕂 ⦄ {µ₁ µ₂ µ} (ϕ₁ : µ₁ –[ 𝕂 ]→ µ) (ϕ₂ : µ₂ –[ 𝕂 ]→ µ) →
       let sub = subst₂ (_→ᵣ_) (++-identityʳ µ₂) (cong (_▷▷ µ₂) (++-identityʳ µ₁)) in
