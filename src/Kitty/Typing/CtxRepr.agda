@@ -126,6 +126,32 @@ record CtxRepr : Set₁ where
     map-Ctx' f ∅' ≡ᶜ ∅'
   map-Ctx'-∅' f = ~ᶜ→≡ᶜ (map-Ctx'-∅'-~ f)
 
+  _↓ᶠ : 
+    ∀ {µ₁ µ₁' µ₂ m₂} →
+    Ctx'-Map µ₁ µ₁' (µ₂ ▷ m₂) →
+    Ctx'-Map µ₁ µ₁' µ₂
+  (f ↓ᶠ) m x t = f m (there x) t
+
+  map-Ctx'-↓-~ :
+    ∀ {µ₁ µ₁' µ₂ m₂}
+    (Γ : Ctx' µ₁ (µ₂ ▷ m₂))
+    (f : Ctx'-Map µ₁ µ₁' (µ₂ ▷ m₂)) →
+    map-Ctx' (f ↓ᶠ) (Γ ↓ᶜ) ~ᶜ (map-Ctx' f Γ) ↓ᶜ
+  map-Ctx'-↓-~ {µ₁} {µ₁'} {µ₂} {m₂} Γ f m x =
+    lookup' (map-Ctx' (f ↓ᶠ) (Γ ↓ᶜ)) x  ≡⟨ lookup-map-Ctx' (f ↓ᶠ) (Γ ↓ᶜ) x ⟩
+    (f ↓ᶠ) m x (lookup' (Γ ↓ᶜ) x)       ≡⟨⟩
+    f m (there x) (lookup' (Γ ↓ᶜ) x)    ≡⟨ cong (f m (there x)) (lookup'-↓ᶜ Γ x) ⟩
+    f m (there x) (lookup' Γ (there x)) ≡⟨ sym (lookup-map-Ctx' f Γ (there x)) ⟩
+    lookup' (map-Ctx' f Γ) (there x)    ≡⟨ sym (lookup'-↓ᶜ (map-Ctx' f Γ) x) ⟩
+    lookup' (map-Ctx' f Γ ↓ᶜ) x         ∎
+
+  map-Ctx'-↓ :
+    ∀ {µ₁ µ₁' µ₂ m₂}
+    (Γ : Ctx' µ₁ (µ₂ ▷ m₂))
+    (f : Ctx'-Map µ₁ µ₁' (µ₂ ▷ m₂)) →
+    map-Ctx' (f ↓ᶠ) (Γ ↓ᶜ) ≡ᶜ (map-Ctx' f Γ) ↓ᶜ
+  map-Ctx'-↓ Γ f = ~ᶜ→≡ᶜ (map-Ctx'-↓-~ Γ f)
+
   data Invert-Ctx' {µ₁} : ∀ {µ₂} → Ctx' µ₁ µ₂ → Set where
     Ctx'-∅' :
       {Γ : Ctx' µ₁ []} →
@@ -210,6 +236,13 @@ record CtxRepr : Set₁ where
 
   lookup : ∀ {µ} → Ctx' [] µ → ∀ {m} → (x : µ ∋ m) → drop-∈ x µ ∶⊢ m→M m
   lookup {µ} Γ {m} x = subst (_∶⊢ m→M m) (++-identityʳ (drop-∈ x µ)) (lookup' Γ x)
+
+  cong-lookup : ∀ {µ} {Γ₁ : Ctx µ} {Γ₂ : Ctx µ} {m} {x : µ ∋ m} →
+    lookup' Γ₁ x ≡ lookup' Γ₂ x → 
+    lookup Γ₁ x ≡ lookup Γ₂ x
+  cong-lookup {µ} {Γ₁} {Γ₂} {m} {x} eq =
+    let sub = subst (_∶⊢ m→M m) (++-identityʳ (drop-∈ x µ)) in
+    cong sub eq
 
   lookup-▶-here : ∀ {µ} (Γ : Ctx µ) {m} (t : µ ∶⊢ m→M m) →
     lookup (Γ ▶ t) (here refl) ≡ t
@@ -433,6 +466,31 @@ record CtxRepr : Set₁ where
     wk*-Ctx {µ₂} µ₁ Γ =
       let sub = subst (λ ■ → Ctx' ■ µ₂) (++-identityʳ µ₁) in
       sub (wk*-Ctx' µ₁ Γ)
+
+    wk*-Ctx'-↓ :
+      ∀ {µ₁ µ₁' µ₂ m₂}
+        (Γ : Ctx' µ₁ (µ₂ ▷ m₂)) →
+      wk*-Ctx' µ₁' (Γ ↓ᶜ) ≡ᶜ (wk*-Ctx' µ₁' Γ) ↓ᶜ
+    wk*-Ctx'-↓ {µ₁} {µ₁'} {µ₂} {m₂} Γ = map-Ctx'-↓ Γ _
+
+    wk*-Ctx-↓-~ :
+      ∀ {µ₁' µ₂ m₂}
+        (Γ : Ctx (µ₂ ▷ m₂)) →
+      wk*-Ctx µ₁' (Γ ↓ᶜ) ~ᶜ (wk*-Ctx µ₁' Γ) ↓ᶜ
+    wk*-Ctx-↓-~ {µ₁'} {µ₂} {m₂} Γ m x =
+      let sub₁ = subst (λ ■ → Ctx' ■ µ₂) (++-identityʳ µ₁') in
+      let sub₂ = subst (λ ■ → Ctx' ■ (µ₂ ▷ m₂)) (++-identityʳ µ₁') in
+      lookup' (wk*-Ctx µ₁' (Γ ↓ᶜ)) x ≡⟨⟩
+      lookup' (sub₁ (wk*-Ctx' µ₁' (Γ ↓ᶜ))) x ≡⟨ ~-cong-subst (≡ᶜ→~ᶜ (wk*-Ctx'-↓ Γ)) (++-identityʳ µ₁') _ x ⟩
+      lookup' (sub₁ ((wk*-Ctx' µ₁' Γ) ↓ᶜ)) x ≡⟨ cong (λ ■ → lookup' ■ x) (sym (dist-subst _↓ᶜ (++-identityʳ µ₁') _)) ⟩
+      lookup' (sub₂ (wk*-Ctx' µ₁' Γ) ↓ᶜ) x ≡⟨⟩
+      lookup' (wk*-Ctx µ₁' Γ ↓ᶜ) x   ∎
+
+    wk*-Ctx-↓ :
+      ∀ {µ₁' µ₂ m₂}
+        (Γ : Ctx (µ₂ ▷ m₂)) →
+      wk*-Ctx µ₁' (Γ ↓ᶜ) ≡ᶜ (wk*-Ctx µ₁' Γ) ↓ᶜ
+    wk*-Ctx-↓ Γ = ~ᶜ→≡ᶜ (wk*-Ctx-↓-~ Γ)
 
     infixl  5  _⋯Ctx'_
     _⋯Ctx'_ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂ µ'} → Ctx' µ₁ µ' → µ₁ –[ 𝕂 ]→ µ₂ → Ctx' µ₂ µ'

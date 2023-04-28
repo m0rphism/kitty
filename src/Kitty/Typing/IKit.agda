@@ -426,7 +426,8 @@ record IKit
                 (sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓))
                    ≡⟨ cong (λ ■ → sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ■)) {!!} ⟩
                  sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ (ϕ₁ ∥ ϕ₂) ↓)
-                   ≡⟨ cong (λ ■ → sub (wk-telescope ■ x ⋯ ((ϕ₁ ∥ ϕ₂) ↓))) {!!} ⟩
+                   ≡⟨ cong (λ ■ → sub (■ ⋯ ((ϕ₁ ∥ ϕ₂) ↓))) (cong (wk-drop-∈ x) (cong-lookup
+                        (≡ᶜ→~ᶜ (≡ᶜ-cong-▶▶ (≡ᶜ-refl {Γ = Γ₁}) (wk*-Ctx-↓ Γ₂)) _ x))) ⟩
                  sub (wk-telescope (Γ₁ ▶▶ (wk*-Ctx µ₁ Γ₂ ↓ᶜ)) x ⋯ (ϕ₁ ∥ ϕ₂) ↓)
                    ≡⟨ cong (λ ■ → sub (wk-telescope ■ x ⋯ ((ϕ₁ ∥ ϕ₂) ↓))) {!!} ⟩
                  sub (wk-telescope ((Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) ↓ᶜ) x ⋯ (ϕ₁ ∥ ϕ₂) ↓)
