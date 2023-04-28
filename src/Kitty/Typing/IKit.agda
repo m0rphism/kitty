@@ -421,9 +421,10 @@ record IKit
     Γ ∋/⊢ there x & ϕ₁ ∥ ϕ₂ ∶ sub (t ⋯ ϕ₁ ∥ ϕ₂)
       by subst₂ (Γ ∋/⊢_∶_)
                 (x & ϕ₁ ∥ (ϕ₂ ↓)   ≡⟨ {!!} ⟩
-                 x & (ϕ₁ ∥ ϕ₂) ↓   ≡⟨ &-↓ (ϕ₁ ∥ ϕ₂) {!x!} ⟩
+                 x & (ϕ₁ ∥ ϕ₂) ↓   ≡⟨ &-↓ (ϕ₁ ∥ ϕ₂) x ⟩
                  there x & ϕ₁ ∥ ϕ₂ ∎)
                 (sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓)) ≡⟨ {!!} ⟩
+                 sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (there x) ⋯ ϕ₁ ∥ ϕ₂)  ≡⟨ cong (λ ■ → sub (■ ⋯ ϕ₁ ∥ ϕ₂)) ∋x ⟩
                  sub (t ⋯ ϕ₁ ∥ ϕ₂)                                             ∎)
                 (
     Γ ∋/⊢ x & ϕ₁ ∥ (ϕ₂ ↓) ∶ sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓))
