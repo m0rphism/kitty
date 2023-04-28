@@ -55,7 +55,7 @@ record CtxRepr : Set₁ where
 
     _↓ᶜ : ∀ {µ₁ µ₂ m} → Ctx' µ₁ (µ₂ ▷ m) → Ctx' µ₁ µ₂
       
-    lookup-↓ᶜ : ∀ {µ₁ µ₂ m₂} (Γ : Ctx' µ₁ (µ₂ ▷ m₂)) {m} (x : µ₂ ∋ m) →
+    lookup'-↓ᶜ : ∀ {µ₁ µ₂ m₂} (Γ : Ctx' µ₁ (µ₂ ▷ m₂)) {m} (x : µ₂ ∋ m) →
       lookup' (Γ ↓ᶜ) x ≡ lookup' Γ (there x)
 
     -- TODO: unnecessary
@@ -230,6 +230,15 @@ record CtxRepr : Set₁ where
     sub (lookup' (Γ ▶' sub⁻¹ t) (there x)) ≡⟨ cong sub (lookup-▶'-there Γ (sub⁻¹ t) x) ⟩
     sub (lookup' Γ x)                      ≡⟨⟩
     lookup Γ x                             ∎
+
+  lookup-↓ᶜ : ∀ {µ₂ m₂} (Γ : Ctx (µ₂ ▷ m₂)) {m} (x : µ₂ ∋ m) →
+    lookup (Γ ↓ᶜ) x ≡ lookup Γ (there x)
+  lookup-↓ᶜ {µ₂} {m₂} Γ {m} x =
+    let sub = subst (_∶⊢ m→M m) (++-identityʳ (drop-∈ x µ₂)) in
+    lookup (Γ ↓ᶜ) x           ≡⟨⟩
+    sub (lookup' (Γ ↓ᶜ) x)    ≡⟨ cong sub (lookup'-↓ᶜ Γ x) ⟩
+    sub (lookup' Γ (there x)) ≡⟨⟩
+    lookup Γ (there x)        ∎
     
   ~ᶜ-refl : ∀ {µ₁ µ₂} {Γ : Ctx' µ₁ µ₂} → Γ ~ᶜ Γ 
   ~ᶜ-refl = λ m x → refl
@@ -254,9 +263,9 @@ record CtxRepr : Set₁ where
     → Γ₁' ~ᶜ Γ₂'
     → Γ₁' ↓ᶜ ~ᶜ Γ₂' ↓ᶜ
   ~-cong-↓ᶜ {µ} {µ'} {m'} {Γ₁'} {Γ₂'} Γ₁'~Γ₂' m x =
-    lookup' (Γ₁' ↓ᶜ) x    ≡⟨ lookup-↓ᶜ Γ₁' x ⟩
+    lookup' (Γ₁' ↓ᶜ) x    ≡⟨ lookup'-↓ᶜ Γ₁' x ⟩
     lookup' Γ₁' (there x) ≡⟨ Γ₁'~Γ₂' _ (there x) ⟩
-    lookup' Γ₂' (there x) ≡⟨ sym (lookup-↓ᶜ Γ₂' x) ⟩
+    lookup' Γ₂' (there x) ≡⟨ sym (lookup'-↓ᶜ Γ₂' x) ⟩
     lookup' (Γ₂' ↓ᶜ) x    ∎
 
   ≡ᶜ-cong-↓ᶜ :
@@ -391,9 +400,9 @@ record CtxRepr : Set₁ where
     map-Ctx' (λ _ x → f _ (there x)) (Γ' ↓ᶜ) ~ᶜ (map-Ctx' f Γ') ↓ᶜ
   dist-↓ᶜ-map {µ₁'} {µ₁} {µ₂} {m₂} f Γ' m x =
     lookup' (map-Ctx' (λ _ x → f _ (there x)) (Γ' ↓ᶜ)) x ≡⟨ lookup-map-Ctx' _ (Γ' ↓ᶜ) x ⟩
-    f _ (there x) (lookup' (Γ' ↓ᶜ) x)                    ≡⟨ cong (f _ (there x)) (lookup-↓ᶜ Γ' x) ⟩
+    f _ (there x) (lookup' (Γ' ↓ᶜ) x)                    ≡⟨ cong (f _ (there x)) (lookup'-↓ᶜ Γ' x) ⟩
     f _ (there x) (lookup' Γ' (there x))                 ≡⟨ sym (lookup-map-Ctx' f Γ' (there x)) ⟩
-    lookup' (map-Ctx' f Γ') (there x)                    ≡⟨ sym (lookup-↓ᶜ _ x) ⟩
+    lookup' (map-Ctx' f Γ') (there x)                    ≡⟨ sym (lookup'-↓ᶜ _ x) ⟩
     lookup' (map-Ctx' f Γ' ↓ᶜ) x                         ∎
 
 
@@ -499,7 +508,7 @@ module FunctionalCtx where
     ; ≡ᶜ→~ᶜ           = λ Γ₁≡Γ₂ → Γ₁≡Γ₂
     ; ~ᶜ→≡ᶜ           = λ Γ₁≡Γ₂ → Γ₁≡Γ₂
     ; _↓ᶜ             = _↓ᶜ
-    ; lookup-↓ᶜ       = λ Γ x → refl
+    ; lookup'-↓ᶜ      = λ Γ x → refl
     ; ↓ᶜ-▶'           = λ Γ t m x → refl
     ; map-Ctx'        = map-Ctx'
     }
@@ -561,7 +570,7 @@ module ListCtx where
     ; ≡ᶜ→~ᶜ           = λ { refl m x → refl }
     ; ~ᶜ→≡ᶜ           = ~ᶜ→≡ᶜ
     ; _↓ᶜ             = _↓ᶜ
-    ; lookup-↓ᶜ       = λ { (Γ ▶' t) x → refl }
+    ; lookup'-↓ᶜ      = λ { (Γ ▶' t) x → refl }
     ; ↓ᶜ-▶'           = λ Γ t → refl
     ; map-Ctx'        = map-Ctx'
     }

@@ -423,7 +423,21 @@ record IKit
                 (x & ϕ₁ ∥ (ϕ₂ ↓)   ≡⟨ {!!} ⟩
                  x & (ϕ₁ ∥ ϕ₂) ↓   ≡⟨ &-↓ (ϕ₁ ∥ ϕ₂) x ⟩
                  there x & ϕ₁ ∥ ϕ₂ ∎)
-                (sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓)) ≡⟨ {!!} ⟩
+                (sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓))
+                   ≡⟨ cong (λ ■ → sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ■)) {!!} ⟩
+                 sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ (ϕ₁ ∥ ϕ₂) ↓)
+                   ≡⟨ cong (λ ■ → sub (wk-telescope ■ x ⋯ ((ϕ₁ ∥ ϕ₂) ↓))) {!!} ⟩
+                 sub (wk-telescope (Γ₁ ▶▶ (wk*-Ctx µ₁ Γ₂ ↓ᶜ)) x ⋯ (ϕ₁ ∥ ϕ₂) ↓)
+                   ≡⟨ cong (λ ■ → sub (wk-telescope ■ x ⋯ ((ϕ₁ ∥ ϕ₂) ↓))) {!!} ⟩
+                 sub (wk-telescope ((Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) ↓ᶜ) x ⋯ (ϕ₁ ∥ ϕ₂) ↓)
+                   ≡⟨ cong sub (~-cong-⋯ _ (~-sym (wk-↓ (ϕ₁ ∥ ϕ₂)))) ⟩
+                 sub (wk-telescope ((Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) ↓ᶜ) x ⋯ wkₖ _ idᵣ ·ₖ (ϕ₁ ∥ ϕ₂))
+                   ≡⟨ cong sub (sym (⋯-assoc _ (wkₖ _ idᵣ) (ϕ₁ ∥ ϕ₂))) ⟩
+                 sub (wk-telescope ((Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) ↓ᶜ) x ⋯ wkₖ _ idᵣ ⋯ ϕ₁ ∥ ϕ₂)
+                   ≡⟨⟩
+                 sub (wkₛ _ (wk-telescope ((Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) ↓ᶜ) x) ⋯ ϕ₁ ∥ ϕ₂)
+                   ≡⟨ cong (λ ■ → sub (■ ⋯ ϕ₁ ∥ ϕ₂))
+                         (sym (wk-telescope-there' (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) x)) ⟩
                  sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (there x) ⋯ ϕ₁ ∥ ϕ₂)  ∎)
                 (
     Γ ∋/⊢ x & ϕ₁ ∥ (ϕ₂ ↓) ∶ sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓))

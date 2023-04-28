@@ -103,6 +103,14 @@ wk-telescope-there {µ} {m} {mx} Γ T x =
   wk _ (wk-drop-∈ x (lookup Γ x))               ≡⟨⟩
   wk _ (wk-telescope Γ x)                       ∎
 
+wk-telescope-there' : ∀ {µ m mx} (Γ : Ctx (µ ▷ m)) (x : µ ∋ mx) →
+  wk-telescope Γ (there x) ≡ wk _ (wk-telescope (Γ ↓ᶜ) x)
+wk-telescope-there' {µ} {m} {mx} Γ x =
+  wk-telescope Γ (there x)                ≡⟨⟩
+  wk _ (wk-drop-∈ x (lookup Γ (there x))) ≡⟨ cong (λ ■ → wk _ (wk-drop-∈ x ■)) (sym (lookup-↓ᶜ Γ x)) ⟩
+  wk _ (wk-drop-∈ x (lookup (Γ ↓ᶜ) x))    ≡⟨⟩
+  wk _ (wk-telescope (Γ ↓ᶜ) x)            ∎
+
 -- Order Preserving Embeddings for Contexts. Required by wk-⊢', where we can't
 -- just say Γ₂ ≡ Γ₁ ⋯* ρ because weakenings in ρ require us to fill the gaps
 -- between the weakened Γ₁ types with new Γ₂ types (the `T` in the `ope-drop`
