@@ -416,16 +416,15 @@ record IKit
            (
     Γ ∋/⊢ here refl & ϕ₂ ∶ sub (wk-telescope Γ₂ (here refl) ⋯ ϕ₂)
       by ⊢ϕ₂ (here refl) (wk-telescope Γ₂ (here refl)) refl)
-  _⊢∥_ {µ} {µ₁} {µ₂ ▷ m₂} {Γ} {Γ₁} {Γ₂} {ϕ₁} {ϕ₂} ⊢ϕ₁ ⊢ϕ₂ {mx} (there x) t ∋x =
+  _⊢∥_ {µ} {µ₁} {µ₂ ▷ m₂} {Γ} {Γ₁} {Γ₂} {ϕ₁} {ϕ₂} ⊢ϕ₁ ⊢ϕ₂ {mx} (there x) t ∋x@refl =
     let sub = subst (_∶⊢_ µ) (sym (id/m→M/id mx)) in
-    Γ ∋/⊢ there x & ϕ₁ ∥ ϕ₂ ∶ sub (t ⋯ ϕ₁ ∥ ϕ₂)
+    Γ ∋/⊢ there x & ϕ₁ ∥ ϕ₂ ∶ sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (there x) ⋯ ϕ₁ ∥ ϕ₂)
       by subst₂ (Γ ∋/⊢_∶_)
                 (x & ϕ₁ ∥ (ϕ₂ ↓)   ≡⟨ {!!} ⟩
                  x & (ϕ₁ ∥ ϕ₂) ↓   ≡⟨ &-↓ (ϕ₁ ∥ ϕ₂) x ⟩
                  there x & ϕ₁ ∥ ϕ₂ ∎)
                 (sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓)) ≡⟨ {!!} ⟩
-                 sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (there x) ⋯ ϕ₁ ∥ ϕ₂)  ≡⟨ cong (λ ■ → sub (■ ⋯ ϕ₁ ∥ ϕ₂)) ∋x ⟩
-                 sub (t ⋯ ϕ₁ ∥ ϕ₂)                                             ∎)
+                 sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (there x) ⋯ ϕ₁ ∥ ϕ₂)  ∎)
                 (
     Γ ∋/⊢ x & ϕ₁ ∥ (ϕ₂ ↓) ∶ sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓))
       by (⊢ϕ₁ ⊢∥ (⊢ϕ₂ ⊢↓)) x _ refl
