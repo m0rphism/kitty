@@ -40,23 +40,6 @@ record Traversal : Set (lsuc ℓ) where
     ⋯-id : ∀ ⦃ 𝕂 : Kit ⦄ {µ} {M} (t : µ ⊢ M)
             → t ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ t
 
-  ~-ι-→ : ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄ ⦃ 𝕂₁⊑𝕂₂ : 𝕂₁ ⊑ₖ 𝕂₂ ⦄ (ϕ : µ₁ –[ 𝕂₁ ]→ µ₂)
-          → ϕ ~ ι-→ ϕ
-  ~-ι-→ {µ₁} {µ₂} ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ 𝕂₁⊑𝕂₂ ⦄ ϕ m x =
-    let sub = subst (µ₂ ∋/⊢_) (ι-id/m→M m ) in
-    `/id (x & ϕ)               ≡⟨ sym (ι-∋/⊢-~ₜ (x & ϕ)) ⟩
-    `/id (sub (ι-∋/⊢ (x & ϕ))) ≡⟨ cong `/id (sym (ι-ap-→ ⦃ 𝕂₁⊑𝕂₂ = 𝕂₁⊑𝕂₂ ⦄ ϕ x)) ⟩
-    `/id (x & ι-→ ϕ)           ∎
-
-  ⋯-var' : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
-           → let sub = subst (µ₂ ⊢_) (id/m→M/id m) in
-             (` x) ⋯ ϕ ≡ sub (`/id' ⦃ 𝕂 ⦄ (x & ϕ))
-  ⋯-var' ⦃ 𝕂 ⦄ {µ₁} {µ₂} {m} x ϕ =
-    let sub = subst (µ₂ ⊢_) (id/m→M/id m) in
-    (` x) ⋯ ϕ                 ≡⟨ ⋯-var x ϕ ⟩
-    `/id (x & ϕ)              ≡⟨ `/id≡`/id' (x & ϕ) ⟩
-    sub (`/id' ⦃ 𝕂 ⦄ (x & ϕ)) ∎
-
   kitₛ : Kit
   Kit.VarMode/TermMode kitₛ = TermMode
   Kit._∋/⊢_            kitₛ = _⊢_
@@ -65,10 +48,7 @@ record Traversal : Set (lsuc ℓ) where
   Kit.id/m→M/id        kitₛ = λ m → refl
   Kit.id/`             kitₛ = `_
   Kit.`/id             kitₛ = λ t → t
-  Kit.`/id'            kitₛ = λ t → t
   Kit.id/`/id          kitₛ = λ x → refl
-  Kit.id/`/id'         kitₛ = λ x → refl
-  Kit.`/id≡`/id'       kitₛ = λ t → refl
   Kit.wk               kitₛ = λ M t → t ⋯ wkₖ _ id
   Kit.wk-id/`          kitₛ = λ m x →
     (` x) ⋯ wkₖ m id     ≡⟨ ⋯-var x (wkₖ m id) ⟩
@@ -79,7 +59,6 @@ record Traversal : Set (lsuc ℓ) where
   Kit.kit-tag          kitₛ = K-Sub
   Kit.id/`-injective   kitₛ = λ eq → `-injective eq
   Kit.`/id-injective   kitₛ = λ eq → eq
-  Kit.`/id'-injective  kitₛ = λ eq → eq
 
   private instance _ = kitₛ
 
@@ -91,17 +70,13 @@ record Traversal : Set (lsuc ℓ) where
     ; ι-∋/⊢    = `_
     ; ι-id/`   = λ x → refl
     ; ι-`/id   = λ x/t → refl
-    ; ι-`/id'  = λ x/t → refl
-    ; ι-wk     = λ {m'} {m} {µ} {m} x →
+    ; ι-wk     = λ {m'} {m} {µ} x →
         ` Kit.wk kitᵣ _ x   ≡⟨⟩
         ` there x           ≡⟨ cong (λ ■ → ` there ■) (sym (&-id x)) ⟩
         ` there (x & id)    ≡⟨ cong `_ (sym (&-wkₖ-wk id x)) ⟩
         ` (x & wkₖ _ id)    ≡⟨ sym (⋯-var ⦃ kitᵣ ⦄ x (wkₖ _ id)) ⟩
         (` x) ⋯ wkₖ _ id    ≡⟨⟩
         Kit.wk kitₛ _ (` x) ∎
-    ; ι-∋/⊢-id = λ ()
-    ; ι-∋/⊢-~ₜ = λ x/t → refl
-    ; ι-∋/⊢-~ₜ[] = λ x/t → refl
     }
 
   ⊑ₖ-⊥ : ∀ ⦃ 𝕂 : Kit ⦄ → kitᵣ ⊑ₖ 𝕂
@@ -112,23 +87,7 @@ record Traversal : Set (lsuc ℓ) where
     ; ι-∋/⊢    = Kit.id/` 𝕂
     ; ι-id/`   = λ x → refl
     ; ι-`/id   = λ x → sym (Kit.id/`/id 𝕂 x)
-    ; ι-`/id'  = λ {µ} {m/M} x →
-        let sub = subst (_⊢_ µ) (sym (sym (Kit.id/m→M/id 𝕂 m/M))) in
-        let sub' = subst (_⊢_ µ) (Kit.id/m→M/id 𝕂 m/M) in
-        Kit.`/id' kitᵣ x                  ≡⟨⟩
-        ` x                               ≡⟨ sym (subst-sym (Kit.id/m→M/id 𝕂 m/M) _ (` x)
-                                                            (Kit.id/`/id' 𝕂 x)) ⟩
-        sub' (Kit.`/id' 𝕂 (Kit.id/` 𝕂 x)) ≡⟨ subst-irrelevant (Kit.id/m→M/id 𝕂 m/M) _ _ ⟩
-        sub (Kit.`/id' 𝕂 (Kit.id/` 𝕂 x))  ∎
     ; ι-wk     = λ x → sym (wk-id/` _ x)
-    ; ι-∋/⊢-id = λ { refl x/t → refl }
-    ; ι-∋/⊢-~ₜ = id/`/id
-    ; ι-∋/⊢-~ₜ[] = λ {µ} {m/M} x →
-        let sub = subst (_⊢_ µ) (sym (sym (id/m→M/id m/M))) in
-        let sub' = subst (_⊢_ µ) (id/m→M/id m/M) in
-        sub (`/id' ⦃ 𝕂 ⦄ (id/` x))  ≡⟨ subst-irrelevant (sym (sym (id/m→M/id m/M))) (id/m→M/id m/M) (`/id' ⦃ 𝕂 ⦄ (id/` x)) ⟩
-        sub' (`/id' ⦃ 𝕂 ⦄ (id/` x)) ≡⟨ subst-sym (id/m→M/id m/M) (`/id' ⦃ 𝕂 ⦄ (id/` x)) (` x) (id/`/id' x) ⟩
-        Kit.`/id' kitᵣ x            ∎
     }
 
   infixl   5   _⋯ᵣ_  _⋯ₛ_ _⋯[_]_

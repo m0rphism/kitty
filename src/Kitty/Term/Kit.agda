@@ -36,17 +36,10 @@ record Kit : Set₁ where
 
     id/`             : ∀ {m} → µ ∋ m → µ ∋/⊢ id/m→M m
     `/id             : ∀ {m} → µ ∋/⊢ id/m→M m → µ ⊢ m→M m
-    `/id'            : ∀ {m} → µ ∋/⊢ m → µ ⊢ m→M/id m -- For IKit Experiment
     id/`/id          : ∀ (x : µ ∋ m) → `/id (id/` x) ≡ ` x
-    id/`/id'         : ∀ (x : µ ∋ m) → let sub = subst (µ ⊢_) (sym (id/m→M/id m)) in
-                             `/id' (id/` x) ≡ sub (` x) -- For Compose Experiment
-    `/id≡`/id'       : ∀ {m} (x/t : µ ∋/⊢ id/m→M m)
-                       → let sub = subst (µ ⊢_) (id/m→M/id m) in
-                         `/id x/t ≡ sub (`/id' x/t)
 
     id/`-injective  : ∀ {µ m} {x₁ x₂ : µ ∋ m} → id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
     `/id-injective  : ∀ {µ m} {x/t₁ x/t₂ : µ ∋/⊢ id/m→M m} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
-    `/id'-injective : ∀ {µ m/M} {x/t₁ x/t₂ : µ ∋/⊢ m/M} → `/id' x/t₁ ≡ `/id' x/t₂ → x/t₁ ≡ x/t₂
 
     wk               : ∀ m' {m/M} → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
     wk-id/`          : ∀ m' (x : µ ∋ m) → wk m' (id/` x) ≡ id/` (there x)
@@ -75,15 +68,11 @@ Kit.m→M/id           kitᵣ = m→M
 Kit.id/m→M/id        kitᵣ = λ m → refl
 Kit.id/`             kitᵣ = λ x → x
 Kit.`/id             kitᵣ = `_
-Kit.`/id'            kitᵣ = `_
 Kit.id/`/id          kitᵣ = λ x → refl
-Kit.id/`/id'         kitᵣ = λ x → refl
-Kit.`/id≡`/id'       kitᵣ = λ x → refl
 Kit.wk               kitᵣ = λ _ x → there x
 Kit.wk-id/`          kitᵣ = λ _ x → refl
 Kit.kit-tag          kitᵣ = K-Ren
 Kit.id/`-injective   kitᵣ = λ eq → eq
 Kit.`/id-injective   kitᵣ = λ eq → `-injective eq
-Kit.`/id'-injective  kitᵣ = λ eq → `-injective eq
 
 open Kit ⦃ … ⦄
