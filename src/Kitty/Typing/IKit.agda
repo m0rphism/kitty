@@ -491,8 +491,10 @@ record ITraversal : Set (lsuc ℓ) where
         by (∋wk/⊢wk Γ t' x₁ t₁ ⊢x₁))
     IKit.≡ᶜ-cong-∋/⊢ ikitₛ = λ x → ≡ᶜ-cong-⊢
 
-  open IKit ikitᵣ public using () renaming (∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
-  open IKit ikitₛ public using () renaming (∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
+  open IKit ikitᵣ public using () renaming
+    (∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ; _⊢↓ to ⊢↓ᵣ; _⊢∥_ to _⊢∥ᵣ_)
+  open IKit ikitₛ public using () renaming
+    (∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ; _⊢↓ to ⊢↓ₛ; _⊢∥_ to _⊢∥ₛ_)
 
   -- Renaming preserves typing
 

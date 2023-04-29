@@ -240,8 +240,14 @@ subject-reduction :
   e ↪ e' →
   Γ ⊢ e' ∶ t
 subject-reduction (⊢-· {t₂ = t₂} (⊢-λ ⊢e₁) ⊢e₂) β-λ                   = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ t₂ _) (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆)
-subject-reduction (⊢-match ⊢e ⊢cs ex)           (β-match c∈cs m refl) with ⊢cs→⊢c c∈cs ⊢cs
-...                                                                   | ⊢-clause ⊢p ⊢e' = {!⊢e' ⊢⋯ₛ ?!}
+subject-reduction {Γ = Γ} (⊢-match ⊢e ⊢cs ex)           (β-match c∈cs m refl) with ⊢cs→⊢c c∈cs ⊢cs
+...                                                                   | ⊢-clause ⊢p ⊢e'
+                                                                      -- = {!⊢e' ⊢⋯ₛ (⊢id ⊢∥ₛ {!!})!}
+                                                                      = subst₂ (Γ ⊢_∶_) refl {!!} (⊢e' ⊢⋯ₛ ({!⊢idₛ ⊢∥ₛ ?!}))
+-- Goal: (Γ ⊢* (idₛ ∥ (matching-sub m)) ∶ Γ ▶▶ PatTy→Ctx' P
+-- Have: (Γ ⊢* idₛ ∥ _ϕ₂)               ∶ Γ ▶▶ wk*-Ctx _µ _Γ₂
+                                                                      -- = subst₂ (_ ⊢_∶_) {!!} {!!}
+                                                                      --          (⊢e' ⊢⋯ₛ ({!⊢id!} ⊢∥ₛ {!!}))
 subject-reduction (⊢-λ ⊢e)                      (ξ-λ e↪e')            = ⊢-λ (subject-reduction ⊢e e↪e')
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₁ e₁↪e₁')         = ⊢-· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₂ e₂↪e₂')         = ⊢-· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
