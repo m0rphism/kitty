@@ -26,11 +26,13 @@ open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂; module ≡-Reasoning)
 open ≡-Reasoning
 open import Data.List using (List; []; _∷_; drop)
+open import Data.List.Properties using (++-identityʳ; ++-assoc)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Nat using (ℕ; zero; suc)
 open import Kitty.Term.Prelude
 open import Kitty.Util.SubstProperties
+open import Kitty.Util.List
 
 open Modes 𝕄
 open Terms 𝕋
@@ -260,77 +262,6 @@ record IKit
          (
     Γ ∋/⊢ id/` x ∶ sub (wk-telescope Γ x)
       by ∋/⊢∶-lookup x)
-
-  -- ∋*/⊢*-wk : ∀ {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
-  --   Γ₂             ∋*/⊢* ϕ       ∶ Γ₁ →
-  --   ∀ {µ'} (Γ' : Ctx' µ₁ µ') →
-  --   (Γ₂ ▶▶ (Γ' ⋯Ctx' ϕ)) ∋*/⊢* (ϕ ↑* µ') ∶ (Γ₁ ▶▶ Γ')
-  -- ∋*/⊢*-wk {µ₁} {µ₂} {Γ₁} {Γ₂} {ϕ} ⊢ϕ {[]}      Γ' {m} x t ∋x = ?
-
-  -- lookup-▶-here : ∀ {µ} (Γ : Ctx µ) {m} (t : µ ∶⊢ m→M m) →
-  --   lookup (Γ ▶ t) (here refl) ≡ t
-  private instance _ = kitᵣ
-  open import Data.List.Properties using (++-identityʳ)
-  -- lookup-▶▶-r : ∀ {µ₁ µ₂ µ₃} (Γ₁ : Ctx' µ₁ µ₂) (Γ₂ : Ctx' (µ₁ ▷▷ µ₂) µ₃) {m} (x : µ₃ ∋ m) →
-  --   let sub = subst₂ (_→ᵣ_) (++-identityʳ µ₃) (cong  (_▷▷ µ₃) (++-identityʳ µ₂)) in
-  --   let x' = µ₂ ▷▷ µ₃ ∋ m by x & sub (wkₖ* µ₂ (idᵣ {µ = []}) ↑* µ₃ ) in
-  --   {!!} ≡ lookup' Γ₂ x
-  --   -- (x₁ : µ₂ ▷▷ µ₃ ∋ m₁)
-  --   -- {!lookup' (Γ₁ ▶▶' Γ₂) (x & wkₖ µ₂ x)!} ≡ lookup' Γ₂ x
-  --   -- lookup (Γ₁ ▶▶' Γ₂) (here refl) ≡ t
-  -- lookup-▶▶-r = {!!}
-
-  -- lookup-▶▶'-here : ∀ {µ₁ µ₂ µ₃ m₃} (Γ₁ : Ctx' µ₁ µ₂) (Γ₂ : Ctx' (µ₁ ▷▷ µ₂) (µ₃ ▷ m₃)) →
-  --   -- let sub = subst₂ (_→ᵣ_) (++-identityʳ µ₃) (cong  (_▷▷ µ₃) (++-identityʳ µ₂)) in
-  --   {!lookup' (Γ₁ ▶▶' Γ₂) (here refl)!} ≡ lookup' Γ₂ (here refl)
-  -- lookup-▶▶'-here = {!!}
-
-  open import Kitty.Util.List
-  -- lookup-▶▶-here : ∀ {µ₂ µ₃ m₃} (Γ₁ : Ctx µ₂) (Γ₂ : Ctx' µ₂ (µ₃ ▷ m₃)) →
-  --   let x = (µ₃ ▷ m₃) ∋ m₃  by  here refl in -- aid implicit resolution below...
-  --   let sub = subst (_∶⊢ m→M m₃)
-  --         ([] ▷▷ drop-∈ x (µ₂ ▷▷ (µ₃ ▷ m₃)) ≡⟨ cong ([] ▷▷_) (drop-∈-▷▷ x) ⟩
-  --          [] ▷▷ (µ₂ ▷▷ drop-∈ x (µ₃ ▷ m₃)) ≡⟨ ++-identityʳ (µ₂ ▷▷ drop-∈ x (µ₃ ▷ m₃)) ⟩
-  --          µ₂ ▷▷ drop-∈ x (µ₃ ▷ m₃)         ∎) in
-  --   sub (lookup' (Γ₁ ▶▶ Γ₂) (here refl)) ≡ lookup' Γ₂ (here refl)
-  -- lookup-▶▶-here = {!!}
-
-  open import Data.List.Properties using (++-assoc)
-  lookup-▶▶-here : ∀ {µ₂ µ₃ m₃} (Γ₁ : Ctx µ₂) (Γ₂ : Ctx' µ₂ (µ₃ ▷ m₃)) →
-    lookup (Γ₁ ▶▶ Γ₂) (here refl) ≡ lookup' Γ₂ (here refl)
-  lookup-▶▶-here {µ₂} {µ₃} {m₃} Γ₁ Γ₂ =
-    let sub = subst (_∶⊢ m→M m₃) (++-identityʳ (µ₂ ▷▷ µ₃)) in
-    let sub' = subst (λ ■ → Ctx' ■ (µ₃ ▷ m₃)) (sym (++-identityʳ µ₂)) in
-    let sub'x = subst (_∶⊢ m→M m₃) (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂))) in
-    let sub'' = subst (_∶⊢ m→M m₃) (sym (++-assoc µ₃ µ₂ [])) in
-    lookup (Γ₁ ▶▶ Γ₂) (here refl)              ≡⟨⟩
-    sub (lookup' (Γ₁ ▶▶' sub' Γ₂) (here refl)) ≡⟨⟩
-    sub (lookup' ((Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ)) ▶' sub'' (lookup' (sub' Γ₂) (here refl))) (here refl))
-                                               ≡⟨ cong sub (lookup-▶'-here (Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ))
-                                                                           (sub'' (lookup' (sub' Γ₂) (here refl)))) ⟩
-    sub (sub'' (lookup' (sub' Γ₂) (here refl)))
-      ≡⟨ cong (λ ■ → sub (sub'' ■))
-              (dist-subst' (λ µ → µ ▷▷ µ₃)
-                           ((λ {µ} (Γ : Ctx' µ (µ₃ ▷ m₃)) → lookup' Γ (here refl) ))
-                           (sym (++-identityʳ µ₂)) (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂))) Γ₂) ⟩
-    sub (sub'' (sub'x (lookup' Γ₂ (here refl))))
-      ≡⟨ elim-subst₃ (_∶⊢ m→M m₃)
-                     (++-identityʳ (µ₂ ▷▷ µ₃))
-                     (sym (++-assoc µ₃ µ₂ []))
-                     (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂)))
-                     _ ⟩
-    lookup' Γ₂ (here refl)                     ∎
-
-  dist-subst-sub' : ∀ ⦃ 𝕂 ⦄ {µ₁ µ₁' µ₂ µ₂' M} →
-    (p : µ₁ ≡ µ₁') →
-    (q : µ₂ ≡ µ₂') →
-    (t : µ₁' ⊢ M) →
-    (ϕ : µ₁ –[ 𝕂 ]→ µ₂) →
-    let sub₁₂ = subst₂ (_–[ 𝕂 ]→_) p q in
-    let sub₁⁻¹ = subst (_⊢ M) (sym p) in
-    let sub₂ = subst (_⊢ M) q in
-    t ⋯ sub₁₂ ϕ ≡ sub₂ (sub₁⁻¹ t ⋯ ϕ)
-  dist-subst-sub' refl refl x ϕ = refl
 
   _⊢↓ : ∀ {µ₁ µ₂ m₁} {Γ₁ : Ctx (µ₁ ▷ m₁)} {Γ₂ : Ctx µ₂} {ϕ : (µ₁ ▷ m₁) –[ 𝕂 ]→ µ₂} →
     Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →

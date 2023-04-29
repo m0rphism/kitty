@@ -248,6 +248,17 @@ record SubCompose : Set (lsuc ℓ) where
       x & sub₁₂ ϕ ≡ sub₂ (sub₁⁻¹ x & ϕ)
     dist-subst-sub refl refl x ϕ = refl
 
+    dist-subst-sub' : ∀ ⦃ 𝕂 ⦄ {µ₁ µ₁' µ₂ µ₂' M} →
+      (p : µ₁ ≡ µ₁') →
+      (q : µ₂ ≡ µ₂') →
+      (t : µ₁' ⊢ M) →
+      (ϕ : µ₁ –[ 𝕂 ]→ µ₂) →
+      let sub₁₂ = subst₂ (_–[ 𝕂 ]→_) p q in
+      let sub₁⁻¹ = subst (_⊢ M) (sym p) in
+      let sub₂ = subst (_⊢ M) q in
+      t ⋯ sub₁₂ ϕ ≡ sub₂ (sub₁⁻¹ t ⋯ ϕ)
+    dist-subst-sub' refl refl x ϕ = refl
+
     -- NOTE: the &/⋯[ C ] can be replaced by &.
     wk*-∥₁ :
       ∀ ⦃ 𝕂 ⦄ {µ₁ µ₂ µ} (ϕ₁ : µ₁ –[ 𝕂 ]→ µ) (ϕ₂ : µ₂ –[ 𝕂 ]→ µ) →

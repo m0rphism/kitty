@@ -470,6 +470,30 @@ record CtxRepr : Set₁ where
     lookup' (map-Ctx' f Γ') (there x)                    ≡⟨ sym (lookup'-↓ᶜ _ x) ⟩
     lookup' (map-Ctx' f Γ' ↓ᶜ) x                         ∎
 
+  lookup-▶▶-here : ∀ {µ₂ µ₃ m₃} (Γ₁ : Ctx µ₂) (Γ₂ : Ctx' µ₂ (µ₃ ▷ m₃)) →
+    lookup (Γ₁ ▶▶ Γ₂) (here refl) ≡ lookup' Γ₂ (here refl)
+  lookup-▶▶-here {µ₂} {µ₃} {m₃} Γ₁ Γ₂ =
+    let sub = subst (_∶⊢ m→M m₃) (++-identityʳ (µ₂ ▷▷ µ₃)) in
+    let sub' = subst (λ ■ → Ctx' ■ (µ₃ ▷ m₃)) (sym (++-identityʳ µ₂)) in
+    let sub'x = subst (_∶⊢ m→M m₃) (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂))) in
+    let sub'' = subst (_∶⊢ m→M m₃) (sym (++-assoc µ₃ µ₂ [])) in
+    lookup (Γ₁ ▶▶ Γ₂) (here refl)              ≡⟨⟩
+    sub (lookup' (Γ₁ ▶▶' sub' Γ₂) (here refl)) ≡⟨⟩
+    sub (lookup' ((Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ)) ▶' sub'' (lookup' (sub' Γ₂) (here refl))) (here refl))
+                                               ≡⟨ cong sub (lookup-▶'-here (Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ))
+                                                                           (sub'' (lookup' (sub' Γ₂) (here refl)))) ⟩
+    sub (sub'' (lookup' (sub' Γ₂) (here refl)))
+      ≡⟨ cong (λ ■ → sub (sub'' ■))
+              (dist-subst' (λ µ → µ ▷▷ µ₃)
+                           ((λ {µ} (Γ : Ctx' µ (µ₃ ▷ m₃)) → lookup' Γ (here refl) ))
+                           (sym (++-identityʳ µ₂)) (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂))) Γ₂) ⟩
+    sub (sub'' (sub'x (lookup' Γ₂ (here refl))))
+      ≡⟨ elim-subst₃ (_∶⊢ m→M m₃)
+                     (++-identityʳ (µ₂ ▷▷ µ₃))
+                     (sym (++-assoc µ₃ µ₂ []))
+                     (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂)))
+                     _ ⟩
+    lookup' Γ₂ (here refl)                     ∎
 
   -- lookup-wk : ∀ {µ} → Ctx' [] µ → ∀ {m} → (x : µ ∋ m) → µ ∶⊢ m→M m
 
