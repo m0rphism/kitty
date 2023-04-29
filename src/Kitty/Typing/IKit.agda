@@ -420,11 +420,11 @@ record IKit
     let sub = subst (_∶⊢_ µ) (sym (id/m→M/id mx)) in
     Γ ∋/⊢ there x & ϕ₁ ∥ ϕ₂ ∶ sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (there x) ⋯ ϕ₁ ∥ ϕ₂)
       by subst₂ (Γ ∋/⊢_∶_)
-                (x & ϕ₁ ∥ (ϕ₂ ↓)   ≡⟨ {!!} ⟩
+                (x & ϕ₁ ∥ (ϕ₂ ↓)   ≡⟨ sym (~→~' (∥-↓ ϕ₁ ϕ₂) _ x) ⟩
                  x & (ϕ₁ ∥ ϕ₂) ↓   ≡⟨ &-↓ (ϕ₁ ∥ ϕ₂) x ⟩
                  there x & ϕ₁ ∥ ϕ₂ ∎)
                 (sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓))
-                   ≡⟨ cong (λ ■ → sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ■)) {!!} ⟩
+                   ≡⟨ cong sub (~-cong-⋯ _ (~-sym (∥-↓ ϕ₁ ϕ₂))) ⟩
                  sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ (ϕ₁ ∥ ϕ₂) ↓)
                    ≡⟨ cong (λ ■ → sub (■ ⋯ ((ϕ₁ ∥ ϕ₂) ↓))) (cong (wk-drop-∈ x) (cong-lookup
                         (≡ᶜ→~ᶜ (≡ᶜ-cong-▶▶ (≡ᶜ-refl {Γ = Γ₁}) (wk*-Ctx-↓ Γ₂)) _ x))) ⟩
