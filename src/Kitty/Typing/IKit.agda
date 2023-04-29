@@ -439,7 +439,7 @@ record IKit
                    ≡⟨⟩
                  sub (wkₛ _ (wk-telescope ((Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) ↓ᶜ) x) ⋯ ϕ₁ ∥ ϕ₂)
                    ≡⟨ cong (λ ■ → sub (■ ⋯ ϕ₁ ∥ ϕ₂))
-                         (sym (wk-telescope-there' (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) x)) ⟩
+                        (sym (wk-telescope-there' (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) x)) ⟩
                  sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ Γ₂) (there x) ⋯ ϕ₁ ∥ ϕ₂)  ∎)
                 (
     Γ ∋/⊢ x & ϕ₁ ∥ (ϕ₂ ↓) ∶ sub (wk-telescope (Γ₁ ▶▶ wk*-Ctx µ₁ (Γ₂ ↓ᶜ)) x ⋯ ϕ₁ ∥ (ϕ₂ ↓))

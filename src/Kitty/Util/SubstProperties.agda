@@ -88,6 +88,17 @@ dist-subst₂' :
   → f {a₂} {c₂} (subst₂ F a₁≡a₂ c₁≡c₂ x) ≡ subst₂ G b₁≡b₂ d₁≡d₂ (f {a₁} {c₁} x)
 dist-subst₂' _ _ _ refl refl refl refl _ = refl
 
+comm-subst :
+  ∀ {ℓ₁ ℓ₁' ℓ₃}
+    {A : Set ℓ₁} {a₁ a₂ : A}
+    {A' : Set ℓ₁'}
+    {F : A' → Set ℓ₃}
+  → (f : A → A')
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (x : F (f a₁)) 
+  → subst (λ a → F (f a)) a₁≡a₂ x ≡ subst F (cong f a₁≡a₂) x
+comm-subst f refl x = refl
+
 comm-subst₂ :
   ∀ {ℓ₁ ℓ₂ ℓ₁' ℓ₂' ℓ₃}
     {A : Set ℓ₁} {a₁ a₂ : A}
