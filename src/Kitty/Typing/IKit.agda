@@ -299,7 +299,7 @@ record IKit
   lookup-▶▶-here : ∀ {µ₂ µ₃ m₃} (Γ₁ : Ctx µ₂) (Γ₂ : Ctx' µ₂ (µ₃ ▷ m₃)) →
     lookup (Γ₁ ▶▶ Γ₂) (here refl) ≡ lookup' Γ₂ (here refl)
   lookup-▶▶-here {µ₂} {µ₃} {m₃} Γ₁ Γ₂ =
-    let sub = subst (_∶⊢ m→M m₃) (++-identityʳ (µ₃ Data.List.++ µ₂)) in
+    let sub = subst (_∶⊢ m→M m₃) (++-identityʳ (µ₂ ▷▷ µ₃)) in
     let sub' = subst (λ ■ → Ctx' ■ (µ₃ ▷ m₃)) (sym (++-identityʳ µ₂)) in
     let sub'x = subst (_∶⊢ m→M m₃) (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂))) in
     let sub'' = subst (_∶⊢ m→M m₃) (sym (++-assoc µ₃ µ₂ [])) in
@@ -308,29 +308,18 @@ record IKit
     sub (lookup' ((Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ)) ▶' sub'' (lookup' (sub' Γ₂) (here refl))) (here refl))
                                                ≡⟨ cong sub (lookup-▶'-here (Γ₁ ▶▶' (sub' Γ₂ ↓ᶜ))
                                                                            (sub'' (lookup' (sub' Γ₂) (here refl)))) ⟩
-    sub (sub'' (lookup' (sub' Γ₂) (here refl))) ≡⟨
-      {!!}
-      -- -- {!(lookup' (sub' Γ₂) (here refl))!} -- ([] ▷▷ µ₂) ▷▷ drop-∈ (here refl) (µ₃ ▷ m₃)
-      -- dist-subst'
-      --   {G = λ ■ → ([] ▷▷ ■) ▷▷ drop-∈ (here refl) (µ₃ ▷ m₃) ∶⊢ m→M m₃}
-      --   (_▷▷ µ₃)
-      --   (λ {µ} (Γ : Ctx' µ (µ₃ ▷ m₃)) → lookup' Γ (here refl))
-      --   (sym (++-identityʳ µ₂))
-      --   (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂)))
-      --   Γ₂
-        ⟩
-    sub (sub'' (sub'x (lookup' Γ₂ (here refl)))) ≡⟨ {!!} ⟩
+    sub (sub'' (lookup' (sub' Γ₂) (here refl)))
+      ≡⟨ cong (λ ■ → sub (sub'' ■))
+              (dist-subst' (λ µ → µ ▷▷ µ₃)
+                           ((λ {µ} (Γ : Ctx' µ (µ₃ ▷ m₃)) → lookup' Γ (here refl) ))
+                           (sym (++-identityʳ µ₂)) (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂))) Γ₂) ⟩
+    sub (sub'' (sub'x (lookup' Γ₂ (here refl))))
+      ≡⟨ elim-subst₃ (_∶⊢ m→M m₃)
+                     (++-identityʳ (µ₂ ▷▷ µ₃))
+                     (sym (++-assoc µ₃ µ₂ []))
+                     (cong (_▷▷ µ₃) (sym (++-identityʳ µ₂)))
+                     _ ⟩
     lookup' Γ₂ (here refl)                     ∎
-
-    -- wk*-Ctx' : ∀ {µ₁ µ₂} µ₁' → Ctx' µ₁ µ₂ → Ctx' (µ₁ ▷▷ µ₁') µ₂
-    -- wk*-Ctx' {µ₁} {µ₂} µ₁' Γ =
-    --   map-Ctx' (λ mx x t → t ⋯ᵣ ((wkₖ* µ₁' (id {µ = µ₁})) ↑* drop-∈ x µ₂)) Γ
-    --   where instance _ = kitᵣ
-
-    -- wk*-Ctx : ∀ {µ₂} µ₁ → Ctx µ₂ → Ctx' µ₁ µ₂
-    -- wk*-Ctx {µ₂} µ₁ Γ =
-    --   let sub = subst (λ ■ → Ctx' ■ µ₂) (++-identityʳ µ₁) in
-    --   sub (wk*-Ctx' µ₁ Γ)
 
   dist-subst-sub' : ∀ ⦃ 𝕂 ⦄ {µ₁ µ₁' µ₂ µ₂' M} →
     (p : µ₁ ≡ µ₁') →

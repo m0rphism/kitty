@@ -138,6 +138,26 @@ cancel-subst₂ :
   → subst F a₁≡a₂ (subst F (sym a₁≡a₂) x) ≡ x
 cancel-subst₂ _ refl _ = refl
 
+-- TODO: Should replace all cancel-subst
+elim-subst :
+  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ : A}
+  → (F : A → Set ℓ₁)
+  → (a₂≡a₁ : a₂ ≡ a₁)
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (x : F a₁)
+  → subst F a₂≡a₁ (subst F a₁≡a₂ x) ≡ x
+elim-subst _ refl refl _ = refl
+
+elim-subst₃ :
+  ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ a₃ : A}
+  → (F : A → Set ℓ₁)
+  → (a₃≡a₁ : a₃ ≡ a₁)
+  → (a₂≡a₃ : a₂ ≡ a₃)
+  → (a₁≡a₂ : a₁ ≡ a₂)
+  → (x : F a₁)
+  → subst F a₃≡a₁ (subst F a₂≡a₃ (subst F a₁≡a₂ x)) ≡ x
+elim-subst₃ _ refl refl refl _ = refl
+
 subst-merge :
   ∀ {ℓ ℓ₁} {A : Set ℓ} {a₁ a₂ a₃ : A}
   → (F : A → Set ℓ₁)
