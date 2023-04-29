@@ -399,7 +399,7 @@ record IKit
                   (cong (_▷▷ (µ₂ ▷ m₂)) (++-identityʳ µ₁))
                   _)) ⟩
             wkₛ _ (sub₂₂' (lookup' Γ₂ (here refl) ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* µ₂)) ⋯ (ϕ₁ ∥ ϕ₂)
-              ≡⟨ cong (λ ■ → wkₛ _ ■ ⋯ ϕ₁ ∥ ϕ₂) {!!} ⟩
+              ≡⟨ cong (λ ■ → wkₛ _ ■ ⋯ ϕ₁ ∥ ϕ₂) (sym (comm-subst (_▷▷ µ₂) (++-identityʳ µ₁) _)) ⟩
             wkₛ _ (sub''x (lookup' Γ₂ (here refl) ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* µ₂)) ⋯ (ϕ₁ ∥ ϕ₂)
                                                                        ≡⟨⟩
             wkₛ _ (sub''x (lookup' Γ₂ (here refl) ⋯ᵣ ((wkₖ* µ₁ (id {µ = []})) ↑* drop-∈ x (µ₂ ▷ m₂)))) ⋯ ϕ₁ ∥ ϕ₂
