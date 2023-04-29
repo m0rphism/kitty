@@ -387,7 +387,14 @@ record IKit
               ≡⟨ cong
                    (λ ■ → sub₂₂ (■ ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* (µ₂ ▷ m₂)) ⋯ ϕ₁ ∥ ϕ₂)
                    (sym (dist-subst' (λ µ → µ ▷ m₂) (wkₛ m₂) (sym (++-identityʳ µ₂)) (sym (++-identityʳ (µ₂ ▷ m₂))) _)) ⟩
-            sub₂₂ (wkₛ _ (sub₂₁' (lookup Γ₂ (here refl))) ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* (µ₂ ▷ m₂)) ⋯ (ϕ₁ ∥ ϕ₂) ≡⟨ {!↑-wk!} ⟩
+            sub₂₂ (wkₛ _ (sub₂₁' (lookup Γ₂ (here refl))) ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* (µ₂ ▷ m₂)) ⋯ (ϕ₁ ∥ ϕ₂)
+              ≡⟨ cong (λ ■ → sub₂₂ ■ ⋯ ϕ₁ ∥ ϕ₂) (~-cong-⋯ (wkₛ _ _) (↑*-▷ µ₂ m₂ (wkₖ* µ₁ (id {µ = []})))) ⟩
+            sub₂₂ (wkₛ _ (sub₂₁' (lookup Γ₂ (here refl))) ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* µ₂ ↑ m₂) ⋯ (ϕ₁ ∥ ϕ₂)
+              ≡⟨ cong (λ ■ → sub₂₂ ■ ⋯ ϕ₁ ∥ ϕ₂) (⋯-assoc _ (wkₖ m₂ idᵣ) (wkₖ* µ₁ (id {µ = []}) ↑* µ₂ ↑ m₂)) ⟩
+            sub₂₂ (sub₂₁' (lookup Γ₂ (here refl)) ⋯ wkₖ m₂ idᵣ ·ₖ wkₖ* µ₁ idᵣ ↑* µ₂ ↑ m₂) ⋯ (ϕ₁ ∥ ϕ₂)
+              ≡⟨ cong (λ ■ → sub₂₂ ■ ⋯ ϕ₁ ∥ ϕ₂) (~-cong-⋯ _ (~-sym (↑-wk (wkₖ* µ₁ idᵣ ↑* µ₂) m₂))) ⟩
+            sub₂₂ (sub₂₁' (lookup Γ₂ (here refl)) ⋯ wkₖ* µ₁ idᵣ ↑* µ₂ ·ₖ wkₖ m₂ idᵣ) ⋯ (ϕ₁ ∥ ϕ₂)
+              ≡⟨ cong (λ ■ → sub₂₂ ■ ⋯ ϕ₁ ∥ ϕ₂) (sym (⋯-assoc _ (wkₖ* µ₁ idᵣ ↑* µ₂) (wkₖ m₂ idᵣ))) ⟩
             sub₂₂ (wkₛ _ (sub₂₁' (lookup Γ₂ (here refl)) ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* µ₂)) ⋯ (ϕ₁ ∥ ϕ₂) ≡⟨⟩
             sub₂₂ (wkₛ _ (sub₂₁' (sub₂₁'⁻¹ (lookup' Γ₂ (here refl))) ⋯ᵣ wkₖ* µ₁ (id {µ = []}) ↑* µ₂)) ⋯ (ϕ₁ ∥ ϕ₂)
               ≡⟨ cong
