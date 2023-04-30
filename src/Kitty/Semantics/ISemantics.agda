@@ -6,9 +6,10 @@ open import Kitty.Term.SubCompose using (SubCompose)
 open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
 open import Kitty.Typing.Types using (KitType)
 open import Kitty.Typing.ITerms using (ITerms)
+open import Kitty.Typing.CtxRepr using (CtxRepr)
 
 module Kitty.Semantics.ISemantics {𝕄 : Modes} {𝕋 : Terms 𝕄} {ℓ} {𝕊 : SubWithLaws 𝕋 ℓ} {T : Traversal 𝕋 𝕊} {H : KitHomotopy 𝕋 𝕊 T}
-                         {𝕊C : SubCompose 𝕋 𝕊 T H} (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋)
+                         {𝕊C : SubCompose 𝕋 𝕊 T H} (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C) (KT : KitType 𝕋) (ℂ  : CtxRepr KT)
                          where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
@@ -35,7 +36,8 @@ open import Kitty.Term.KitT 𝕋 𝕊 T
 open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
 open Kitty.Term.ComposeTraversal.ComposeTraversal C
 open Kitty.Typing.Types.KitType KT
-open import Kitty.Typing.OPE C KT
+open CtxRepr ℂ
+open import Kitty.Typing.OPE C KT ℂ
 
 open ~-Reasoning
 
@@ -238,7 +240,7 @@ record Semantics : Set₁ where
               , (λ x → subst (x & σ' ↪*_) (sym (&-to-ϕ _ x)) (proj₂ (proj₂ (≣→Σ (σ≣σ' x)))))
 
   _≣*_ : ∀ {µ} (Γ₁ Γ₂ : Ctx µ) → Set
-  Γ₁ ≣* Γ₂ = ∀ {m} (x : _ ∋ m) → Γ₁ x ≣ Γ₂ x
+  Γ₁ ≣* Γ₂ = ∀ {m} (x : _ ∋ m) → lookup Γ₁ x ≣ lookup Γ₂ x
 
   ≣*-refl : ∀ {µ} {Γ : Ctx µ} →
     Γ ≣* Γ
@@ -248,8 +250,8 @@ record Semantics : Set₁ where
     Γ₁ ≣* Γ₂ →
     t₁ ≣ t₂ →
     (Γ₁ ▶ t₁) ≣* (Γ₂ ▶ t₂)
-  ≣*-ext Γ₁≣Γ₂ t₁≣t₂ (here refl) = t₁≣t₂
-  ≣*-ext Γ₁≣Γ₂ t₁≣t₂ (there x)   = Γ₁≣Γ₂ x
+  ≣*-ext Γ₁≣Γ₂ t₁≣t₂ (here refl) = subst₂ _≣_ (sym (lookup-▶-here _ _)) (sym (lookup-▶-here _ _)) t₁≣t₂
+  ≣*-ext Γ₁≣Γ₂ t₁≣t₂ (there x)   = subst₂ _≣_ (sym (lookup-▶-there _ _ _)) (sym (lookup-▶-there _ _ _)) (Γ₁≣Γ₂ x)
 
   ≣*-↑ : ∀ {µ} {Γ₁ Γ₂ : Ctx µ} {m} {t : µ ∶⊢ m→M m} →
     Γ₁ ≣* Γ₂ →
@@ -596,12 +598,19 @@ record SemTraversal {Sem : Semantics} (RSem : ReflexiveSemantics Sem) : Set (lsu
   ≣-wk = map-≣ ↪-wk
 
   ≣*-wk-telescope :
-    Γ₁ x ≣ Γ₂ x →
+    lookup Γ₁ x ≣ lookup Γ₂ x →
     wk-telescope Γ₁ x ≣ wk-telescope Γ₂ x
   ≣*-wk-telescope {x = here refl} eq = ≣-wk eq
-  ≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq = ≣-wk (≣*-wk-telescope {Γ₁ = λ x → Γ₁ (there x)}
-                                                                                {Γ₂ = λ x → Γ₂ (there x)}
-                                                                                eq)
+  ≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq =
+    subst₂ _≣_
+      (sym (wk-telescope-there' Γ₁ x))
+      (sym (wk-telescope-there' Γ₂ x))
+      (≣-wk (≣*-wk-telescope {Γ₁ = Γ₁ ↓ᶜ} {Γ₂ = Γ₂ ↓ᶜ}
+        (subst₂ _≣_
+          (sym (lookup-↓ᶜ Γ₁ x))
+          (sym (lookup-↓ᶜ Γ₂ x))
+          eq)))
+    -- ≣-wk (≣*-wk-telescope {Γ₁ = λ x → Γ₁ (there x)} {Γ₂ = λ x → Γ₂ (there x)} eq)
 
   ↪ₚσ-⋯-⦅⦆ : ∀ {µ M m} {t₁ t₁' : (µ ▷ m) ⊢ M}  {t₂ t₂' : µ ⊢ m→M m} →
     t₁ ↪ t₁' →
@@ -702,8 +711,8 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
       → t ↪* t'
       → t ⋯ ϕ ↪* t' ⋯ ϕ
     ↪-⋯₁ {t = t} {t' = t'} {ϕ = ϕ} t↪*t' =
-      subst₂ (_↪*_) (~-cong-⋯ t  (ι-~-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑ₖ-⊤ ⦄ ϕ))
-                    (~-cong-⋯ t' (ι-~-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑ₖ-⊤ ⦄ ϕ))
+      subst₂ (_↪*_) (~-cong-⋯ t  (~-ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑ₖ-⊤ ⦄ ϕ))
+                    (~-cong-⋯ t' (~-ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑ₖ-⊤ ⦄ ϕ))
                     (↪-⋯₁' ⦃ SK = semkitₛ ⦄
                           {ϕ = ι-→ ⦃ 𝕂₁⊑𝕂₂ = ⊑ₖ-⊤ ⦄ ϕ}
                           t↪*t')
@@ -741,12 +750,18 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
     ≣-wk (mk-≣ t t₁↪*t t₂↪*t) = mk-≣ (wkₛ _ t) (↪*-wk t₁↪*t) (↪*-wk t₂↪*t)
 
     ≣*-wk-telescope :
-      Γ₁ x ≣ Γ₂ x →
+      lookup Γ₁ x ≣ lookup Γ₂ x →
       wk-telescope Γ₁ x ≣ wk-telescope Γ₂ x
     ≣*-wk-telescope {x = here refl} eq = ≣-wk eq
-    ≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq = ≣-wk (≣*-wk-telescope {Γ₁ = λ x → Γ₁ (there x)}
-                                                                                  {Γ₂ = λ x → Γ₂ (there x)}
-                                                                                  eq)
+    ≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq =
+      subst₂ _≣_
+        (sym (wk-telescope-there' Γ₁ x))
+        (sym (wk-telescope-there' Γ₂ x))
+        (≣-wk (≣*-wk-telescope {Γ₁ = Γ₁ ↓ᶜ} {Γ₂ = Γ₂ ↓ᶜ}
+          (subst₂ _≣_
+            (sym (lookup-↓ᶜ Γ₁ x))
+            (sym (lookup-↓ᶜ Γ₂ x))
+            eq)))
 
     -- ↪-⋯ :
     --   ∀ ⦃ 𝕂 : Kit ⦄

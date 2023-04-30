@@ -243,8 +243,14 @@ open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
   (m : Matches e p) →
   Γ ⊢ e ∶ t →
   Γ ⊢ p ∶ P →
-  Γ ⊢* matching-sub m ∶ {!Γ ▶▶ PatTy→Ctx' P!}
-⊢matching-sub = ?
+  Γ ⊢* matching-sub m ∶ PatTy→Ctx' P via idₛ
+  -- Γ ⊢* matching-sub m ∶ {!Γ ▶▶ PatTy→Ctx' P!}
+⊢matching-sub M-`         ⊢e ⊢p x _ refl = {!!}
+   -- Goal : Γ ⊢ x & ⦅ e ⦆ₛ₀ ∶ wk-telescope' (PatTy→Ctx' P) x ⋯ idₛ ,ₖ e
+⊢matching-sub M-tt        ⊢e ⊢p x _ refl = {!!}
+⊢matching-sub (M-, m₁ m₂) ⊢e ⊢p x _ refl = {!!}
+⊢matching-sub (M-inj₁ m)  ⊢e ⊢p x _ refl = {!!}
+⊢matching-sub (M-inj₂ m)  ⊢e ⊢p x _ refl = {!!}
 
 subject-reduction :
   Γ ⊢ e ∶ t →
