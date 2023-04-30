@@ -5,14 +5,18 @@ open ≡-Reasoning
 open import Kitty.Examples.LambdaPi-Derive-Sem.Definitions
 open import Kitty.Util.Closures
 
--- TODO
-postulate 
-  ≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
-    Γ₁ ≡ᶜ Γ₂ →
-    Γ₁ ⊢ e ∶ t →
-    Γ₂ ⊢ e ∶ t
-
 open import Kitty.Typing.ITerms compose-traversal kit-type ctx-repr
+
+≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
+  Γ₁ ≡ᶜ Γ₂ →
+  Γ₁ ⊢ e ∶ t →
+  Γ₂ ⊢ e ∶ t
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢` {x = x} ∋x) = ⊢` (≡ᶜ-cong-∋ x Γ₁≡Γ₂ ∋x)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢λ ⊢e₁ ⊢e₂)    = ⊢λ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶ Γ₁≡Γ₂ refl) ⊢e₂)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢∀ ⊢e₁ ⊢e₂)    = ⊢∀ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶ Γ₁≡Γ₂ refl) ⊢e₂)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢· ⊢e₁ ⊢e₂)    = ⊢· (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₂)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢★              = ⊢★
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢≣ eq ⊢e)      = ⊢≣ eq (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e)
 
 iterms : ITerms
 iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` ; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
