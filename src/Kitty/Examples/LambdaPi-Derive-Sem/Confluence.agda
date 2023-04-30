@@ -4,7 +4,20 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst
 open ≡-Reasoning
 open import Kitty.Examples.LambdaPi-Derive-Sem.Definitions
 open import Kitty.Util.Closures
-open import Kitty.Typing.IKit compose-traversal kit-type record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
+
+-- TODO
+postulate 
+  ≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
+    Γ₁ ≡ᶜ Γ₂ →
+    Γ₁ ⊢ e ∶ t →
+    Γ₂ ⊢ e ∶ t
+
+open import Kitty.Typing.ITerms compose-traversal kit-type ctx-repr
+
+iterms : ITerms
+iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` ; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+
+open import Kitty.Typing.IKit compose-traversal kit-type ctx-repr iterms
 open IKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -64,7 +77,7 @@ data _↪ₚ_ : µ ⊢ M → µ ⊢ M → Set where
 ↪ₚ-refl {t = t₁ · t₂}      = ξ-· ↪ₚ-refl ↪ₚ-refl
 ↪ₚ-refl {t = ★}            = ξ-★
 
-open import Kitty.Semantics.ISemantics compose-traversal kit-type
+open import Kitty.Semantics.ISemantics compose-traversal kit-type ctx-repr
 
 semanticsₚ : Semantics
 semanticsₚ = record { _↪_ = _↪ₚ_ }

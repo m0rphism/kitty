@@ -65,7 +65,14 @@ kit-type = record { ↑ₜ = λ { m → m } }
 
 open KitType kit-type public
 
-open import Kitty.Typing.OPE compose-traversal kit-type public
+open import Kitty.Typing.CtxRepr kit-type
+
+ctx-repr : CtxRepr
+ctx-repr = Functional-CtxRepr
+
+open CtxRepr ctx-repr public
+
+open import Kitty.Typing.OPE compose-traversal kit-type ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -108,7 +115,7 @@ data _↪_ : µ ⊢ M → µ ⊢ M → Set where
     e₂ ↪ e₂' →
     e₁ · e₂ ↪ e₁ · e₂'
 
-open import Kitty.Semantics.ISemantics compose-traversal kit-type
+open import Kitty.Semantics.ISemantics compose-traversal kit-type ctx-repr
 
 semantics : Semantics
 semantics = record { _↪_ = _↪_ }
