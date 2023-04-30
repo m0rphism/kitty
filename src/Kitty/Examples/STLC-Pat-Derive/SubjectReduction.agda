@@ -30,8 +30,12 @@ open import Kitty.Typing.ITerms compose-traversal kit-type ctx-repr
 ≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢-inj₁ᵖ ⊢p)                   = ⊢-inj₁ᵖ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢p)
 ≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢-inj₂ᵖ ⊢p)                   = ⊢-inj₂ᵖ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢p)
 
-open import Kitty.Typing.IKit compose-traversal kit-type ctx-repr
-  record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢-`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+iterms : ITerms
+iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢-`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+open ITerms iterms using (_⊢*_∶_)
+
+open import Kitty.Typing.IKit compose-traversal kit-type ctx-repr iterms
+  
 open IKit ⦃ … ⦄
 
 open import Kitty.Term.MultiSub terms using (_↑*'_; ↑*'~↑*)
@@ -234,6 +238,13 @@ open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
   Γ ⊢ c  ∶ Clause t₁ t₂
 ⊢cs→⊢c (here refl) (⊢-clause-∷ ⊢c ⊢cs) = ⊢c
 ⊢cs→⊢c (there x)   (⊢-clause-∷ ⊢c ⊢cs) = ⊢cs→⊢c x ⊢cs
+
+⊢matching-sub : ∀ {µ µ'} {Γ : Ctx µ} {e : µ ⊢ 𝕖} {t : µ ⊢ 𝕥} {p : µ ⊢ 𝕡 µ'} {P : µ ⊢ ℙ µ'} →
+  (m : Matches e p) →
+  Γ ⊢ e ∶ t →
+  Γ ⊢ p ∶ P →
+  Γ ⊢* matching-sub m ∶ {!Γ ▶▶ PatTy→Ctx' P!}
+⊢matching-sub = ?
 
 subject-reduction :
   Γ ⊢ e ∶ t →
