@@ -263,6 +263,7 @@ data _↪_ : µ ⊢ M → µ ⊢ M → Set where
     (m : Matches e p) →
     matching-sub m ≡ σ →
     match e cs ↪ e' ⋯ₛ (idₛ ∥ₛ σ)
+  -- TODO: ξ-match ...
   ξ-λ :
     e ↪ e' →
     λx e ↪ λx e'
