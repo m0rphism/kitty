@@ -7,6 +7,7 @@ open import Kitty.Term.Prelude using (_∋_; List; []; _▷_; _▷▷_) public
 open import Kitty.Term.Modes using (Modes)
 open import Kitty.Util.Closures
 open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
+open import Data.Bool using (Bool; true; false)
 
 -- Fixities --------------------------------------------------------------------
 
@@ -58,8 +59,8 @@ data _⊢_ : List Modeᵥ → Modeₜ → Set where
   Σ[x∶_]_ : µ ⊢ 𝕖  →  µ ▷ 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
   _,_     : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
 
-  `⊤      : µ ⊢ 𝕖
-  tt      : µ ⊢ 𝕖
+  `Bool   : µ ⊢ 𝕖
+  `bool   : Bool → µ ⊢ 𝕖
 
   ★       : µ ⊢ 𝕖
 
@@ -69,7 +70,7 @@ data _⊢_ : List Modeᵥ → Modeₜ → Set where
   _∷_     : µ ⊢ 𝕔  →  µ ⊢ 𝕔𝕤  →  µ ⊢ 𝕔𝕤
   `ᵖ      : µ ⊢ 𝕡 ([] ▷ 𝕖)
   _,ᵖ_    : µ ⊢ 𝕡 µ₁  →  (µ ▷▷ µ₁) ⊢ 𝕡 µ₂  →  µ ⊢ 𝕡 (µ₁ ▷▷ µ₂)
-  ttᵖ     : µ ⊢ 𝕡 []
+  `boolᵖ  : Bool → µ ⊢ 𝕡 []
   -- dotᵖ    : µ ⊢ 𝕖 → µ ⊢ 𝕡 []
 
   []ᵖ     : µ ⊢ ℙ []
@@ -87,6 +88,7 @@ variable
   C C₁ C₂ C₃ C' C₁' C₂' C₃' : µ ⊢ ℂ
   t t₁ t₂ t₃ t' t₁' t₂' t₃' : µ ⊢ M
   E E₁ E₂ E₃ E' E₁' E₂' E₃' : µ ⊢ M
+  b b₁ b₂ b₃ b' b₁' b₂' b₃' : Bool
 
 -- Deriving Renaming/Substitution and related lemmas.
 open import Kitty.Derive using (derive; module Derived)
@@ -141,8 +143,8 @@ mutual
               → Value (Σ[x∶ t₁ ] t₂)
     _,_     : Value e₁ → Value e₂ → Value (e₁ , e₂)
 
-    `⊤      : Value {µ} `⊤
-    tt      : Value {µ} tt
+    `Bool   : Value {µ} `Bool
+    `bool   : Value {µ} (`bool b)
 
     ★       : Value {µ} ★
 
@@ -151,8 +153,8 @@ mutual
 data Matches : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕡 µ' → Set where
   M-` :
     Matches {µ₂ = µ₂} e `ᵖ
-  M-tt :
-    Matches {µ₂ = µ₂} (tt {µ = µ}) ttᵖ
+  M-bool :
+    Matches {µ₂ = µ₂} (`bool {µ = µ} b) (`boolᵖ b)
   M-, :
     Matches e₁ p₁ →
     Matches e₂ p₂ →
@@ -160,7 +162,7 @@ data Matches : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕡 µ' → Set where
 
 matching-sub : ∀ {µ µ' µ''} {e : µ ⊢ 𝕖} {p : µ' ⊢ 𝕡 µ''} → Matches e p → µ'' →ₛ µ
 matching-sub {e = e} M-` = ⦅ e ⦆ₛ₀
-matching-sub M-tt        = []*
+matching-sub M-bool      = []*
 matching-sub (M-, m₁ m₂) = matching-sub m₁ ∥ₛ matching-sub m₂
 
 data _∈cs_ (c : µ ⊢ 𝕔) : µ ⊢ 𝕔𝕤 → Set where
@@ -216,8 +218,8 @@ open Semantics semantics public hiding (_↪_) renaming (module WithConfluence t
 data Canonical : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕖 → Set where
   C-λ :
     Canonical (λx e) (∀[x∶ t₁ ] t₂)
-  C-tt :
-    Canonical (tt {µ = µ₁}) (`⊤ {µ = µ₂})
+  C-bool :
+    Canonical (`bool {µ = µ₁} b) (`Bool {µ = µ₂})
   C-, :
     Canonical e₁ t₁ →
     Canonical e₂ t₂ →
@@ -262,10 +264,10 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ⊢ e₁ ∶ t₁ →
     Γ ⊢ e₂ ∶ t₂ ⋯ₛ ⦅ e₁ ⦆ₛ →
     Γ ⊢ e₁ , e₂ ∶ Σ[x∶ t₁ ] t₂
-  ⊢tt :
-    Γ ⊢ tt ∶ `⊤
-  ⊢⊤ :
-    Γ ⊢ `⊤ ∶ ★
+  ⊢bool :
+    Γ ⊢ `bool b ∶ `Bool
+  ⊢Bool :
+    Γ ⊢ `Bool ∶ ★
   ⊢· :
     Γ ⊢ e₁ ∶ ∀[x∶ t₁ ] t₂ →
     Γ ⊢ e₂ ∶ t₁ →
@@ -291,8 +293,8 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ⊢ c  ∶ Clause t t' →
     Γ ⊢ cs ∶ Clause t t' →
     Γ ⊢ (c ∷ cs) ∶ Clause t t'
-  ⊢-ttᵖ :
-    Γ ⊢ ttᵖ ∶ []ᵖ
+  ⊢-boolᵖ :
+    Γ ⊢ `boolᵖ b ∶ []ᵖ
   ⊢-`ᵖ :
     Γ ⊢ `ᵖ ∶ []ᵖ ▶ᵖ t
   ⊢-,ᵖ :
