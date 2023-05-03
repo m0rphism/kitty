@@ -2,7 +2,8 @@ module Kitty.Examples.SystemF-Derive.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
 open import Kitty.Examples.SystemF-Derive.Definitions
-open import Kitty.Typing.IKit compose-traversal kit-type record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
+open import Kitty.Typing.IKit compose-traversal kit-type ctx-repr
+  record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = λ { refl ⊢e → ⊢e } }
 open IKit ⦃ … ⦄
 
 _⊢⋯_ :

@@ -77,7 +77,14 @@ kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕜 ; 𝕜 → 𝕜 
 
 open KitType kit-type public
 
-open import Kitty.Typing.OPE compose-traversal kit-type public
+open import Kitty.Typing.CtxRepr kit-type
+
+ctx-repr : CtxRepr
+ctx-repr = List-CtxRepr
+
+open CtxRepr ctx-repr public
+
+open import Kitty.Typing.OPE compose-traversal kit-type ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ

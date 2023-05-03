@@ -62,7 +62,7 @@ private instance _ = ckitᵣ
 private instance _ = ckitₛᵣ
 private instance _ = ckitₛₛ
 
-open ReflexiveTransitiveClosure using (step; refl)
+open ReflexiveTransitiveClosure using (step; refl) public
 
 record Semantics : Set₁ where
   infix 3 _↪_

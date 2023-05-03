@@ -210,7 +210,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
   ⊢-clause : ∀ {Γ : Ctx µ} {p : µ ⊢ 𝕡 µ'} {t' : µ ⊢ 𝕥} →
     Γ ⊢ p ∶ P →
     (Γ ▶▶ PatTy→Ctx' P) ⊢ e ∶ wk* µ' t' →
-    Γ ⊢ (p ⇒ e) ∶ Clause t t'
+    Γ ⊢ (p ⇒ e) ∶ Clause t t' -- TODO: where does t come from...
   ⊢-clause-[] :
     Γ ⊢ [] ∶ Clause t t'
   ⊢-clause-∷ : ∀ {Γ : Ctx µ} →
