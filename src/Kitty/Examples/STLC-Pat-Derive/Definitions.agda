@@ -108,22 +108,22 @@ open Derived.Functional D public
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import Kitty.Typing.Types terms
+open import Kitty.Typing.TypeModes terms
 
 -- Each variable mode corresponds to a term mode that represents its type.
-kit-type : KitType
-kit-type = record { ↑ₜ = ↑ₜ }
+type-modes : TypeModes
+type-modes = record { ↑ₜ = ↑ₜ }
 
-open KitType kit-type public hiding (↑ₜ)
+open TypeModes type-modes public hiding (↑ₜ)
 
-open import Kitty.Typing.CtxRepr kit-type
+open import Kitty.Typing.CtxRepr type-modes
 
 ctx-repr : CtxRepr
 ctx-repr = Functional-CtxRepr
 
 open CtxRepr ctx-repr public
 
-open import Kitty.Typing.OPE compose-traversal kit-type ctx-repr public
+open import Kitty.Typing.OPE compose-traversal ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ

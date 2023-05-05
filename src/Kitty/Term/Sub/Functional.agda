@@ -131,12 +131,12 @@ instance
     }
 
 open import Kitty.Term.Traversal 𝕋 SubWithLaws-→
-open import Kitty.Term.KitHomotopy 𝕋 SubWithLaws-→
-module Fun-SubCompose (T : Traversal) (H : KitHomotopy T) where
+open import Kitty.Term.KitHomotopy {𝕋 = 𝕋} {𝕊 = SubWithLaws-→}
+module Fun-SubCompose {T : Traversal} (H : KitHomotopy T) where
   open Traversal T
   open KitHomotopy T H
-  open import Kitty.Term.ComposeKit 𝕋 SubWithLaws-→ T H
-  open import Kitty.Term.SubCompose 𝕋 SubWithLaws-→ T H
+  open import Kitty.Term.ComposeKit H
+  open import Kitty.Term.SubCompose H
   open ComposeKit ⦃ … ⦄
 
   _·ₖ_ : ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄ {µ₁ µ₂ µ₃}

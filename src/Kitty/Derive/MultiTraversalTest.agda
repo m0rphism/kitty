@@ -132,8 +132,7 @@ module Example where
     multi-traversal : MultiTraversal
     multi-traversal = mkMultiTraversal _⋯_ ⋯-var ⋯-↑
 
-    open Derived multi-traversal hiding (_⋯_; ⋯-var; ⋯-↑)
-    open Sub-Functional
+    open Derived.Functional multi-traversal hiding (terms; _⋯_; ⋯-var; ⋯-↑) public
 
     `id : [] ⊢ 𝕖
     `id = λx (# 0)
@@ -149,8 +148,7 @@ module Example where
 
   module Derived' where
     unquoteDecl traversal = derive-MultiTraversal 𝕄 _⊢_ traversal
-    open Derived traversal
-    open Sub-Functional
+    open Derived.Functional traversal public
 
     open import Data.List.Relation.Unary.Any using (here; there)
 

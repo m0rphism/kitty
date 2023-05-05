@@ -1,7 +1,11 @@
 open import Kitty.Term.Modes
 import Kitty.Term.Sub as S
 
-module Kitty.Term.Traversal {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : S.SubWithLaws 𝕋 ℓ) where
+module Kitty.Term.Traversal
+    {𝕄 : Modes}
+    (𝕋 : Terms 𝕄)
+    {ℓ} (𝕊 : S.SubWithLaws 𝕋 ℓ)
+  where
 
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; cong; module ≡-Reasoning)

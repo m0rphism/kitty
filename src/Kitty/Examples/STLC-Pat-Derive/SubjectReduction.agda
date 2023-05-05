@@ -6,7 +6,7 @@ open ≡-Reasoning
 open import Kitty.Examples.STLC-Pat-Derive.Definitions
 open import Function using () renaming (_∋_ to _by_)
 
-open import Kitty.Typing.ITerms compose-traversal kit-type ctx-repr
+open import Kitty.Typing.ITerms compose-traversal ctx-repr
 
 ≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
   Γ₁ ≡ᶜ Γ₂ →
@@ -34,7 +34,7 @@ iterms : ITerms
 iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢-`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
 open ITerms iterms using (_⊢*_∶_)
 
-open import Kitty.Typing.IKit compose-traversal kit-type ctx-repr iterms
+open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
   
 open IKit ⦃ … ⦄
 

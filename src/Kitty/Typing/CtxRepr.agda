@@ -500,9 +500,9 @@ record CtxRepr : Set₁ where
   open import Kitty.Term.Kit 𝕋
   open import Kitty.Term.Traversal 𝕋
   open import Kitty.Term.Sub 𝕋
-  open import Kitty.Term.KitHomotopy 𝕋
+  open import Kitty.Term.KitHomotopy {𝕋 = 𝕋}
 
-  module CtxReprSubst {ℓ} (𝕊 : SubWithLaws ℓ) (T : Traversal 𝕊) (H : KitHomotopy 𝕊 T) where
+  module CtxReprSubst {ℓ} (𝕊 : SubWithLaws ℓ) (T : Traversal 𝕊) (H : KitHomotopy T) where
     private instance _ = 𝕊
 
     open TypeModes TM
@@ -510,8 +510,8 @@ record CtxRepr : Set₁ where
     open Kit ⦃ … ⦄
     open SubWithLaws 𝕊
     open Sub SubWithLaws-Sub
-    open KitHomotopy 𝕊 T H
-    open import Kitty.Term.KitT 𝕋 𝕊 T
+    open KitHomotopy T H
+    open import Kitty.Term.KitT T
 
     wk*-Ctx' : ∀ {µ₁ µ₂} µ₁' → Ctx' µ₁ µ₂ → Ctx' (µ₁ ▷▷ µ₁') µ₂
     wk*-Ctx' {µ₁} {µ₂} µ₁' Γ =

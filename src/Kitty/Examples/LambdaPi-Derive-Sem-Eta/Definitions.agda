@@ -1,4 +1,4 @@
-module Kitty.Examples.LambdaPi-Derive-Sem.Definitions where
+module Kitty.Examples.LambdaPi-Derive-Sem-Eta.Definitions where
 
 open import Data.List.Relation.Unary.Any using (here; there) public
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
@@ -57,15 +57,22 @@ open Derived.Functional D public
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import Kitty.Typing.Types terms
+open import Kitty.Typing.TypeModes terms
 
 -- Each variable mode corresponds to a term mode that represents its type.
-kit-type : KitType
-kit-type = record { ↑ₜ = λ { m → m } }
+type-modes : TypeModes
+type-modes = record { ↑ₜ = λ { m → m } }
 
-open KitType kit-type public
+open TypeModes type-modes public
 
-open import Kitty.Typing.OPE compose-traversal kit-type public
+open import Kitty.Typing.CtxRepr type-modes
+
+ctx-repr : CtxRepr
+ctx-repr = List-CtxRepr
+
+open CtxRepr ctx-repr public
+
+open import Kitty.Typing.OPE compose-traversal ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -110,7 +117,7 @@ data _↪_ : µ ⊢ M → µ ⊢ M → Set where
     e₂ ↪ e₂' →
     e₁ · e₂ ↪ e₁ · e₂'
 
-open import Kitty.Semantics.ISemantics compose-traversal kit-type
+open import Kitty.Semantics.ISemantics compose-traversal ctx-repr
 
 semantics : Semantics
 semantics = record { _↪_ = _↪_ }

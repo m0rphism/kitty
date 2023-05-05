@@ -2,7 +2,12 @@ open import Kitty.Term.Modes
 open import Kitty.Term.Traversal using (Traversal)
 import Kitty.Term.Sub
 
-module Kitty.Term.KitHomotopy {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) where
+module Kitty.Term.KitHomotopy
+    {𝕄 : Modes}
+    {𝕋 : Terms 𝕄}
+    {ℓ} {𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ}
+    (T : Traversal 𝕋 𝕊)
+  where
 
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Level using () renaming (suc to lsuc)
@@ -11,7 +16,7 @@ open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.KitT 𝕋 𝕊 T
+open import Kitty.Term.KitT T
 open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties

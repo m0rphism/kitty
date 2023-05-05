@@ -13,9 +13,9 @@ module Kitty.Typing.ITerms
   {ℓ}
   {𝕊 : SubWithLaws 𝕋 ℓ}
   {T : Traversal 𝕋 𝕊}
-  {H : KitHomotopy 𝕋 𝕊 T}
-  {𝕊C : SubCompose 𝕋 𝕊 T H}
-  (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C)
+  {H : KitHomotopy T}
+  {𝕊C : SubCompose H}
+  (C : ComposeTraversal 𝕊C)
   {TM : TypeModes 𝕋}
   (ℂ  : CtxRepr TM)
   where
@@ -34,7 +34,7 @@ open Modes 𝕄
 open Terms 𝕋
 open Kitty.Typing.TypeModes.TypeModes TM
 open CtxRepr ℂ
-open import Kitty.Typing.OPE C TM ℂ
+open import Kitty.Typing.OPE C ℂ
 open Traversal T
 open SubWithLaws 𝕊
 open import Kitty.Term.Sub 𝕋

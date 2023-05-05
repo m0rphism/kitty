@@ -3,7 +3,13 @@ open import Kitty.Term.Traversal using (Traversal)
 open import Kitty.Term.KitHomotopy using (KitHomotopy)
 import Kitty.Term.Sub
 
-module Kitty.Term.ComposeKit {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊) (H : KitHomotopy 𝕋 𝕊 T) where
+module Kitty.Term.ComposeKit
+    {𝕄 : Modes}
+    {𝕋 : Terms 𝕄}
+    {ℓ} {𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ}
+    {T : Traversal 𝕋 𝕊}
+    (H : KitHomotopy T)
+    where
 
 open import Data.List using (List; []; _∷_; length)
 open import Data.List.Properties using (++-identityʳ)
@@ -16,7 +22,7 @@ open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.KitT 𝕋 𝕊 T
+open import Kitty.Term.KitT T
 open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
 open import Kitty.Util.SubstProperties

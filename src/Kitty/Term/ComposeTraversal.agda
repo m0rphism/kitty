@@ -4,8 +4,14 @@ open import Kitty.Term.KitHomotopy using (KitHomotopy)
 import Kitty.Term.Sub
 import Kitty.Term.SubCompose
 
-module Kitty.Term.ComposeTraversal {𝕄 : Modes} (𝕋 : Terms 𝕄) {ℓ} (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) (T : Traversal 𝕋 𝕊)
-                                   (H : KitHomotopy 𝕋 𝕊 T) (𝕊C : Kitty.Term.SubCompose.SubCompose 𝕋 𝕊 T H) where
+module Kitty.Term.ComposeTraversal
+    {𝕄 : Modes}
+    {𝕋 : Terms 𝕄}
+    {ℓ} {𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ}
+    {T : Traversal 𝕋 𝕊}
+    {H : KitHomotopy T}
+    (𝕊C : Kitty.Term.SubCompose.SubCompose H)
+  where
 
 open import Data.List using (List; []; _∷_)
 open import Data.List.Membership.Propositional using (_∈_)
@@ -17,11 +23,11 @@ open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
-open import Kitty.Term.KitT 𝕋 𝕊 T
+open import Kitty.Term.KitT T
 open import Kitty.Term.KitOrder 𝕋
 open import Kitty.Term.Sub 𝕋
-open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
-open import Kitty.Term.SubCompose 𝕋 𝕊 T H
+open import Kitty.Term.ComposeKit H
+open import Kitty.Term.SubCompose H
 open import Kitty.Util.SubstProperties
 
 open Modes 𝕄

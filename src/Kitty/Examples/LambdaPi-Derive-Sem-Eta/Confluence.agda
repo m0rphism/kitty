@@ -1,4 +1,4 @@
-module Kitty.Examples.LambdaPi-Derive-Sem.Confluence where
+module Kitty.Examples.LambdaPi-Derive-Sem-Eta.Confluence where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; subst₂; cong; cong₂; module ≡-Reasoning)
 open ≡-Reasoning

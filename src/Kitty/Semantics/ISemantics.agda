@@ -13,9 +13,9 @@ module Kitty.Semantics.ISemantics
     {𝕋 : Terms 𝕄}
     {ℓ} {𝕊 : SubWithLaws 𝕋 ℓ}
     {T : Traversal 𝕋 𝕊}
-    {H : KitHomotopy 𝕋 𝕊 T}
-    {𝕊C : SubCompose 𝕋 𝕊 T H}
-    (C : ComposeTraversal 𝕋 𝕊 T H 𝕊C)
+    {H : KitHomotopy T}
+    {𝕊C : SubCompose H}
+    (C : ComposeTraversal 𝕊C)
     {TM : TypeModes 𝕋}
     (ℂ  : CtxRepr TM)
   where
@@ -40,12 +40,12 @@ open Kitty.Term.Sub.SubWithLaws 𝕊
 open Sub SubWithLaws-Sub
 open Kitty.Term.Traversal.Traversal T
 open Kitty.Term.KitHomotopy.KitHomotopy H
-open import Kitty.Term.KitT 𝕋 𝕊 T
-open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
+open import Kitty.Term.KitT T
+open import Kitty.Term.ComposeKit H
 open Kitty.Term.ComposeTraversal.ComposeTraversal C
 open Kitty.Typing.TypeModes.TypeModes TM
 open CtxRepr ℂ
-open import Kitty.Typing.OPE C TM ℂ
+open import Kitty.Typing.OPE C ℂ
 
 open ~-Reasoning
 

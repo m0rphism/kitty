@@ -59,12 +59,12 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
 
   open Traversal S kit-traversal public
 
-  open import Kitty.Term.KitT terms S kit-traversal public
+  open import Kitty.Term.KitT kit-traversal public
   open KitT ⦃ … ⦄ public
 
   instance 𝕂ᵣ = kitᵣ; 𝕂ₛ = kitₛ; Kᵣ = kittᵣ; Kₛ = kittₛ
 
-  open import Kitty.Term.KitHomotopy terms S kit-traversal public
+  open import Kitty.Term.KitHomotopy kit-traversal public
 
   ~-cong-↑*''' :
     ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
@@ -99,12 +99,12 @@ module WithSub {ℓ} (S : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
 
   open KitHomotopy kit-homotopy public hiding (~-cong-⋯)
 
-  open import Kitty.Term.ComposeKit 𝕋 S kit-traversal kit-homotopy public
-  open import Kitty.Term.SubCompose 𝕋 S kit-traversal kit-homotopy public
+  open import Kitty.Term.ComposeKit kit-homotopy public
+  open import Kitty.Term.SubCompose kit-homotopy public
 
   module WithSubCompose (SC : SubCompose) where
     -- instance 𝕊C = SC
-    open import Kitty.Term.ComposeTraversal 𝕋 S kit-traversal kit-homotopy SC
+    open import Kitty.Term.ComposeTraversal SC
 
     open ComposeKit ⦃ … ⦄ public
     open SubCompose SC public
@@ -151,8 +151,8 @@ module Functional where
   open import Kitty.Term.Sub.Functional 𝕋 using  (Sub-→; SubWithLaws-→) public
   open WithSub SubWithLaws-→ public
 
-  open Fun-SubCompose kit-traversal kit-homotopy hiding (SubCompose-→)
-  open Fun-SubCompose kit-traversal kit-homotopy using  (SubCompose-→) public
+  open Fun-SubCompose kit-homotopy hiding (SubCompose-→)
+  open Fun-SubCompose kit-homotopy using  (SubCompose-→) public
   open WithSubCompose SubCompose-→ public
 
 module Instance where

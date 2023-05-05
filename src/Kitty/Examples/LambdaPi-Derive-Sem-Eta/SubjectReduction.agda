@@ -1,12 +1,12 @@
-module Kitty.Examples.LambdaPi-Derive-Sem.SubjectReduction where
+module Kitty.Examples.LambdaPi-Derive-Sem-Eta.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong-app; subst; module ≡-Reasoning)
 open ≡-Reasoning
 open import Kitty.Examples.LambdaPi-Derive-Sem.Definitions
 open import Kitty.Examples.LambdaPi-Derive-Sem.Confluence
 open import Kitty.Util.Closures
-open import Kitty.Semantics.ISemantics compose-traversal kit-type
-open import Kitty.Typing.IKit compose-traversal kit-type record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
+open import Kitty.Semantics.ISemantics compose-traversal ctx-repr
+open import Kitty.Typing.IKit compose-traversal ctx-repr record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 open IKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)

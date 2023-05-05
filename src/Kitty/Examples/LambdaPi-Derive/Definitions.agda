@@ -72,7 +72,7 @@ ctx-repr = Functional-CtxRepr
 
 open CtxRepr ctx-repr public
 
-open import Kitty.Typing.OPE compose-traversal type-modes ctx-repr public
+open import Kitty.Typing.OPE compose-traversal ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ

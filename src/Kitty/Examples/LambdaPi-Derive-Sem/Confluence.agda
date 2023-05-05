@@ -82,7 +82,7 @@ data _↪ₚ_ : µ ⊢ M → µ ⊢ M → Set where
 ↪ₚ-refl {t = t₁ · t₂}      = ξ-· ↪ₚ-refl ↪ₚ-refl
 ↪ₚ-refl {t = ★}            = ξ-★
 
-open import Kitty.Semantics.ISemantics compose-traversal type-modes ctx-repr
+open import Kitty.Semantics.ISemantics compose-traversal ctx-repr
 
 semanticsₚ : Semantics
 semanticsₚ = record { _↪_ = _↪ₚ_ }

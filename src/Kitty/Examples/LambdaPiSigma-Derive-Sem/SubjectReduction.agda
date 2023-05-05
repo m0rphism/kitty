@@ -5,14 +5,12 @@ open ≡-Reasoning
 open import Kitty.Examples.LambdaPiSigma-Derive-Sem.Definitions
 open import Kitty.Examples.LambdaPiSigma-Derive-Sem.Confluence
 open import Kitty.Util.Closures
-open import Kitty.Semantics.ISemantics compose-traversal kit-type
-open import Kitty.Typing.IKit compose-traversal kit-type ctx-repr iterms
+open import Kitty.Semantics.ISemantics compose-traversal ctx-repr
+open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
 open IKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃-syntax; Σ-syntax; _×_ ; _,_; proj₁; proj₂)
-
-open ReflexiveTransitiveClosure using (refl; step)
 
 --------------------------------------------------------------------------------
 

@@ -84,7 +84,7 @@ ctx-repr = List-CtxRepr
 
 open CtxRepr ctx-repr public
 
-open import Kitty.Typing.OPE compose-traversal type-modes ctx-repr public
+open import Kitty.Typing.OPE compose-traversal ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -120,7 +120,7 @@ mutual
   data Neutral : µ ⊢ M → Set where
     `[_]_  : ∀ (eq : m→M m ≡ M) (x : µ ∋ m) → Neutral (`[ eq ] x)
     _·_    : Neutral e₁ → Value e₂ → Neutral (e₁ · e₂)
-    _∙_    : Neutral e₁ → Value t₂ → Neutral (e₁ ∙ t₂)
+    _∙t    : Neutral e₁ → Neutral (e₁ ∙ t₂)
 
   data Value : µ ⊢ M → Set where
     λx_     : ∀ (e : (µ ▷ 𝕖) ⊢ 𝕖) → Value (λx e)

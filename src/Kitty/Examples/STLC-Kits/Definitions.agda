@@ -104,10 +104,10 @@ open Traversal traversal public hiding (_⋯_; ⋯-var; ⋯-id)
 
 -- Kitty KitHomotopy
 
-open import Kitty.Term.KitT terms SubWithLaws-→ traversal
+open import Kitty.Term.KitT traversal
 open KitT ⦃ … ⦄
 
-open import Kitty.Term.KitHomotopy terms SubWithLaws-→ traversal
+open import Kitty.Term.KitHomotopy traversal
 
 ~-cong-⋯ :
   ∀ ⦃ 𝕂₁ 𝕂₂ : Kit ⦄
@@ -127,14 +127,14 @@ kit-homotopy = record { ~-cong-⋯ = ~-cong-⋯ }
 
 -- Kitty KitCompose
 
-open import Kitty.Term.ComposeKit terms SubWithLaws-→ traversal kit-homotopy
+open import Kitty.Term.ComposeKit kit-homotopy
 open ComposeKit ⦃ … ⦄ public
 
-open import Kitty.Term.SubCompose terms SubWithLaws-→ traversal kit-homotopy
-open Fun-SubCompose traversal kit-homotopy
+open import Kitty.Term.SubCompose kit-homotopy
+open Fun-SubCompose kit-homotopy
 open SubCompose SubCompose-→ hiding (_·ₖ_)
 
-open import Kitty.Term.ComposeTraversal terms SubWithLaws-→ traversal kit-homotopy SubCompose-→
+open import Kitty.Term.ComposeTraversal SubCompose-→
 
 ⋯-assoc :
   ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂₁⊔𝕂₂ : Kit ⦄
@@ -184,7 +184,7 @@ ctx-repr = List-CtxRepr
 
 open CtxRepr ctx-repr public
 
-open import Kitty.Typing.OPE compose-traversal type-modes ctx-repr public
+open import Kitty.Typing.OPE compose-traversal ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
