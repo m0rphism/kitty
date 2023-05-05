@@ -2,28 +2,35 @@ module Kitty.Everything where
 
 import Kitty
 
-import Kitty.Compose
-import Kitty.Derive
-import Kitty.Generics
-import Kitty.Kit
-import Kitty.Modes
-import Kitty.OPE
-import Kitty.Prelude
-import Kitty.Types
+import Kitty.Term.ComposeKit
+import Kitty.Term.ComposeTraversal
+import Kitty.Term.Kit
+import Kitty.Term.KitHomotopy
+import Kitty.Term.KitOrder
+import Kitty.Term.KitT
+import Kitty.Term.Modes
+import Kitty.Term.MultiSub
+import Kitty.Term.MultiTraversal
+import Kitty.Term.MultiTraversalDerived
+import Kitty.Term.Prelude
+import Kitty.Term.Sub
+import Kitty.Term.SubCompose
+import Kitty.Term.Traversal
+-- import Kitty.Term.Strengthen
+
+import Kitty.Typing.CtxRepr
+import Kitty.Typing.IKit
+import Kitty.Typing.ITerms
+import Kitty.Typing.OPE
+import Kitty.Typing.TypeModes
+
+import Kitty.Semantics.ISemantics
+
+import Kitty.Util.Closures
+import Kitty.Util.Star
+import Kitty.Util.SubstProperties
 
 import Kitty.Derive.Common
-import Kitty.Derive.Desc
-import Kitty.Derive.From
-import Kitty.Derive.FromTo
-import Kitty.Derive.Iso
-import Kitty.Derive.To
-import Kitty.Derive.ToFrom
+import Kitty.Derive.MultiTraversal
 
-import Kitty.Examples.Derive
-import Kitty.Examples.DeriveImpl
-import Kitty.Examples.Generics
-import Kitty.Examples.STLC.Definitions
-import Kitty.Examples.STLC.Progress
-import Kitty.Examples.STLC.SubjectReduction
-
-import Kitty.Experimental.Everything
+-- import Kitty.Experimental.Everything
