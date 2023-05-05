@@ -1,11 +1,15 @@
 module Kitty.Examples.LambdaPi-Derive-Sem.Confluence where
 
+open import Data.Product using (∃-syntax; _×_ ; _,_)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Function using () renaming (_∋_ to _by_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; module ≡-Reasoning)
 open ≡-Reasoning
+
 open import Kitty.Examples.LambdaPi-Derive-Sem.Definitions
 open import Kitty.Util.Closures
 
-open import Kitty.Typing.ITerms compose-traversal kit-type ctx-repr
+open import Kitty.Typing.ITerms compose-traversal ctx-repr
 
 ≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
   Γ₁ ≡ᶜ Γ₂ →
@@ -21,11 +25,8 @@ open import Kitty.Typing.ITerms compose-traversal kit-type ctx-repr
 iterms : ITerms
 iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` ; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
 
-open import Kitty.Typing.IKit compose-traversal kit-type ctx-repr iterms
+open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
 open IKit ⦃ … ⦄
-open import Function using () renaming (_∋_ to _by_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (∃-syntax; _×_ ; _,_)
 
 ξ-λ* :
   e ↪* e' →
@@ -81,7 +82,7 @@ data _↪ₚ_ : µ ⊢ M → µ ⊢ M → Set where
 ↪ₚ-refl {t = t₁ · t₂}      = ξ-· ↪ₚ-refl ↪ₚ-refl
 ↪ₚ-refl {t = ★}            = ξ-★
 
-open import Kitty.Semantics.ISemantics compose-traversal kit-type ctx-repr
+open import Kitty.Semantics.ISemantics compose-traversal type-modes ctx-repr
 
 semanticsₚ : Semantics
 semanticsₚ = record { _↪_ = _↪ₚ_ }
@@ -96,8 +97,6 @@ open Semantics semanticsₚ public using () renaming
 
 rsemanticsₚ : ReflexiveSemantics semanticsₚ
 rsemanticsₚ = record { ↪-refl = ↪ₚ-refl }
-
-open ReflexiveTransitiveClosure using (refl; step)
 
 open SemKit ⦃ … ⦄
 

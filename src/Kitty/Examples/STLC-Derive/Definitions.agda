@@ -52,21 +52,28 @@ variable
   E E₁ E₂ E₃ E' E₁' E₂' : µ ⊢ M
 
 -- Deriving Renaming/Substitution and related lemmas.
-open import Kitty.Derive.Traversal using (derive-traversal; module Derived)
-unquoteDecl traversal = derive-traversal 𝕄 _⊢_ traversal
-open Derived traversal public
+open import Kitty.Derive using (derive; module Derived)
+unquoteDecl D = derive 𝕄 _⊢_ D
+open Derived.Functional D public
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import Kitty.Typing.Types terms
+open import Kitty.Typing.TypeModes terms
 
 -- Each variable mode corresponds to a term mode that represents its type.
-kit-type : KitType
-kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕥 } }
+type-modes : TypeModes
+type-modes = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕥 } }
 
-open KitType kit-type public
+open TypeModes type-modes public
 
-open import Kitty.Typing.OPE kit-assoc-lemmas kit-type public
+open import Kitty.Typing.CtxRepr type-modes
+
+ctx-repr : CtxRepr
+ctx-repr = List-CtxRepr
+
+open CtxRepr ctx-repr public
+
+open import Kitty.Typing.OPE compose-traversal type-modes ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -79,7 +86,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ∋ x ∶ T →
     Γ ⊢ ` x ∶ T
   τ-λ : {Γ : Ctx µ} →
-    Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wkᵣ →
+    Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wknᵣ →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   τ-· :
     Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →

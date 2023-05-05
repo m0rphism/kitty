@@ -1,14 +1,31 @@
 module Kitty.Examples.LambdaPi-Derive.Confluence where
 
+open import Data.Product using (∃-syntax; _×_ ; _,_)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Function using () renaming (_∋_ to _by_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; module ≡-Reasoning)
 open ≡-Reasoning
+
 open import Kitty.Examples.LambdaPi-Derive.Definitions
 open import Kitty.Util.Closures
-open import Kitty.Typing.IKit compose-traversal kit-type record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
+open import Kitty.Typing.ITerms compose-traversal ctx-repr
+
+≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
+  Γ₁ ≡ᶜ Γ₂ →
+  Γ₁ ⊢ e ∶ t →
+  Γ₂ ⊢ e ∶ t
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢` {x = x} ∋x) = ⊢` (≡ᶜ-cong-∋ x Γ₁≡Γ₂ ∋x)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢λ ⊢e₁ ⊢e₂)    = ⊢λ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶ Γ₁≡Γ₂ refl) ⊢e₂)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢∀ ⊢e₁ ⊢e₂)    = ⊢∀ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶ Γ₁≡Γ₂ refl) ⊢e₂)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢· ⊢e₁ ⊢e₂)    = ⊢· (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₂)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢★              = ⊢★
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢≣ eq ⊢e)      = ⊢≣ eq (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e)
+
+iterms : ITerms
+iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+
+open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
 open IKit ⦃ … ⦄
-open import Function using () renaming (_∋_ to _by_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (∃-syntax; _×_ ; _,_)
 
 ξ-λ* :
   e ↪* e' →

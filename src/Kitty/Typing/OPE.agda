@@ -4,7 +4,7 @@ open import Kitty.Term.Traversal using (Traversal)
 open import Kitty.Term.KitHomotopy using (KitHomotopy)
 open import Kitty.Term.SubCompose using (SubCompose)
 open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
-open import Kitty.Typing.Types using (KitType)
+open import Kitty.Typing.TypeModes using (TypeModes)
 open import Kitty.Typing.CtxRepr using (CtxRepr)
 
 module Kitty.Typing.OPE
@@ -16,8 +16,8 @@ module Kitty.Typing.OPE
   {H  : KitHomotopy 𝕋 𝕊 T}
   {𝕊C : SubCompose 𝕋 𝕊 T H}
   (C  : ComposeTraversal 𝕋 𝕊 T H 𝕊C)
-  (KT : KitType 𝕋)
-  (ℂ  : CtxRepr KT)
+  (TM : TypeModes 𝕋)
+  (ℂ  : CtxRepr TM)
   where
 
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
@@ -38,7 +38,7 @@ open Kitty.Term.Traversal.Traversal T
 open import Kitty.Term.KitT 𝕋 𝕊 T
 open import Kitty.Term.ComposeKit 𝕋 𝕊 T H
 open Kitty.Term.ComposeTraversal.ComposeTraversal C
-open Kitty.Typing.Types.KitType KT
+open Kitty.Typing.TypeModes.TypeModes TM
 
 open SubWithLaws 𝕊
 open Sub SubWithLaws-Sub

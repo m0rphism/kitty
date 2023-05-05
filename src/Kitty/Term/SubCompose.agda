@@ -61,7 +61,7 @@ record SubCompose : Set (lsuc ℓ) where
     `/id (x & ϕ₁' &/⋯ ϕ₂')  ≡⟨ cong `/id (sym (&-·ₖ-&/⋯ ϕ₁' ϕ₂' x)) ⟩
     `/id (x & (ϕ₁' ·ₖ ϕ₂')) ∎
 
-  -- TODO: Dead code?
+  -- This is used to prove the variable case of ⋯-assoc.
   tm-⋯-· :
     ∀ ⦃ 𝕂₁ 𝕂₂ 𝕂 ⦄ ⦃ C : ComposeKit 𝕂₁ 𝕂₂ 𝕂 ⦄ {µ₁} {µ₂} {µ₃} {m}
       (ϕ₁ : µ₁ –[ 𝕂₁ ]→ µ₂)

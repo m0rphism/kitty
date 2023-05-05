@@ -3,7 +3,7 @@ module Kitty.Examples.MutRef-Derive.SubjectReduction where
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
 open import Data.Product using (∃-syntax; Σ-syntax; _,_)
 open import Kitty.Examples.MutRef-Derive.Definitions
-open import Kitty.Typing.IKit compose-traversal kit-type iterms
+open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
 open import Data.List.Properties using (++-identityʳ)
 open IKit ⦃ … ⦄
 

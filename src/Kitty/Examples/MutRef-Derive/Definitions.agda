@@ -76,15 +76,22 @@ open Derived.Functional D public
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import Kitty.Typing.Types terms
+open import Kitty.Typing.TypeModes terms
 
 -- Each variable mode corresponds to a term mode that represents its type.
-kit-type : KitType
-kit-type = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕥 } }
+type-modes : TypeModes
+type-modes = record { ↑ₜ = λ { 𝕖 → 𝕥 ; 𝕥 → 𝕥 } }
 
-open KitType kit-type public
+open TypeModes type-modes public
 
-open import Kitty.Typing.OPE compose-traversal kit-type public
+open import Kitty.Typing.CtxRepr type-modes
+
+ctx-repr : CtxRepr
+ctx-repr = Functional-CtxRepr
+
+open CtxRepr ctx-repr public
+
+open import Kitty.Typing.OPE compose-traversal type-modes ctx-repr public
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
@@ -114,16 +121,28 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ⊢ e₂ ∶ t →
     Γ ⊢ (e₁ ≔ e₂) ∶ t
 
-open import Kitty.Typing.ITerms compose-traversal kit-type
-iterms : ITerms
-iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
+open import Kitty.Typing.ITerms compose-traversal ctx-repr
 
-open ITerms iterms hiding (_⊢_∶_; ⊢`) public
+≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
+  Γ₁ ≡ᶜ Γ₂ →
+  Γ₁ ⊢ e ∶ t →
+  Γ₂ ⊢ e ∶ t
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢` {x = x} ∋x) = ⊢` (≡ᶜ-cong-∋ x Γ₁≡Γ₂ ∋x)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢λ ⊢e)         = ⊢λ (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶ Γ₁≡Γ₂ refl) ⊢e)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢· ⊢e₁ ⊢e₂)    = ⊢· (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₂)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢new ⊢e)       = ⊢new (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢get ⊢e)       = ⊢get (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e)
+≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢≔ ⊢e₁ ⊢e₂)    = ⊢≔ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₂)
+
+iterms : ITerms
+iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+
+open ITerms iterms hiding (_⊢_∶_; ⊢`; ≡ᶜ-cong-⊢) public
 open import Relation.Binary.PropositionalEquality using (subst)
 open import Data.List.Properties using (++-identityʳ)
 
 MapRef : Ctx µ → Ctx µ
-MapRef Σ {𝕖} x = Ref (Σ x)
+MapRef Σ 𝕖 x = Ref (Σ _ x)
 
 wk*' : ∀ {M} µ → [] ⊢ M → µ ⊢ M
 wk*' µ t = subst (_⊢ _) (++-identityʳ µ) (wk* µ t)

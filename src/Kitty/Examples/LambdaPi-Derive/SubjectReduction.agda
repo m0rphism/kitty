@@ -1,15 +1,16 @@
 module Kitty.Examples.LambdaPi-Derive.SubjectReduction where
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong-app; subst; module ≡-Reasoning)
+open import Data.Product using (∃-syntax; Σ-syntax; _×_ ; _,_; proj₁; proj₂)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Function using () renaming (_∋_ to _by_)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong-app; subst; module ≡-Reasoning)
 open ≡-Reasoning
+
 open import Kitty.Examples.LambdaPi-Derive.Definitions
 open import Kitty.Examples.LambdaPi-Derive.Confluence
 open import Kitty.Util.Closures
-open import Kitty.Typing.IKit compose-traversal kit-type record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
+open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
 open IKit ⦃ … ⦄
-open import Function using () renaming (_∋_ to _by_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-open import Data.Product using (∃-syntax; Σ-syntax; _×_ ; _,_; proj₁; proj₂)
 
 _↪σ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
 σ₁ ↪σ σ₂ = ∀ {m} (x : _ ∋ m) → σ₁ _ x ↪ σ₂ _ x
@@ -244,7 +245,7 @@ open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 --------------------------------------------------------------------------------
 
 _≣*_ : ∀ {µ} (Γ₁ Γ₂ : Ctx µ) → Set
-Γ₁ ≣* Γ₂ = ∀ {m} (x : _ ∋ m) → Γ₁ x ≣ Γ₂ x
+Γ₁ ≣* Γ₂ = ∀ {m} (x : _ ∋ m) → Γ₁ _ x ≣ Γ₂ _ x
 
 ≣*-refl : ∀ {µ} {Γ : Ctx µ} →
   Γ ≣* Γ
@@ -254,7 +255,7 @@ _≣*_ : ∀ {µ} (Γ₁ Γ₂ : Ctx µ) → Set
   Γ₁ ≣* Γ₂ →
   t₁ ≣ t₂ →
   (Γ₁ ▶ t₁) ≣* (Γ₂ ▶ t₂)
-≣*-ext {M = 𝕖} Γ₁≣Γ₂ t₁≣t₂ (here refl) = t₁≣t₂
+≣*-ext {M = 𝕖} Γ₁≣Γ₂ t₁≣t₂ (here refl) = {!t₁≣t₂!}
 ≣*-ext {M = M} Γ₁≣Γ₂ t₁≣t₂ (there x)   = Γ₁≣Γ₂ x
 
 ≣*-↑ : ∀ {µ} {Γ₁ Γ₂ : Ctx µ} {M} {t : µ ⊢ M} →
@@ -273,11 +274,11 @@ _≣*_ : ∀ {µ} (Γ₁ Γ₂ : Ctx µ) → Set
 ≣-wk = map-≣ ↪-wk
 
 ≣*-wk-telescope :
-  Γ₁ x ≣ Γ₂ x →
+  Γ₁ _ x ≣ Γ₂ _ x →
   wk-telescope Γ₁ x ≣ wk-telescope Γ₂ x
-≣*-wk-telescope {x = here refl} eq = ≣-wk eq
-≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq = ≣-wk (≣*-wk-telescope {Γ₁ = λ x → Γ₁ (there x)}
-                                                                              {Γ₂ = λ x → Γ₂ (there x)}
+≣*-wk-telescope {x = here refl} eq = ≣-wk {!eq!}
+≣*-wk-telescope {Γ₁ = Γ₁} {x = there x} {Γ₂ = Γ₂}  eq = ≣-wk (≣*-wk-telescope {Γ₁ = λ _ x → Γ₁ _ (there x)}
+                                                                              {Γ₂ = λ _ x → Γ₂ _ (there x)}
                                                                               eq)
 
 ≣*-pres : ∀ {µ} {Γ₁ Γ₂ : Ctx µ} {M} {e : µ ⊢ M} {t : µ ⊢ M} →

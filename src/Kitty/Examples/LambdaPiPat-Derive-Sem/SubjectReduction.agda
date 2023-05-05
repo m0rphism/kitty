@@ -12,8 +12,6 @@ open import Function using () renaming (_∋_ to _by_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Data.Product using (∃-syntax; Σ-syntax; _×_ ; _,_; proj₁; proj₂)
 
-open ReflexiveTransitiveClosure using (refl; step)
-
 --------------------------------------------------------------------------------
 
 _⊢⋯_ :

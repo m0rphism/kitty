@@ -1,7 +1,7 @@
 open import Kitty.Term.Modes
-open import Kitty.Typing.Types
+open import Kitty.Typing.TypeModes
 
-module Kitty.Typing.CtxRepr {𝕄 : Modes} {𝕋 : Terms 𝕄} (KT : KitType 𝕋) where
+module Kitty.Typing.CtxRepr {𝕄 : Modes} {𝕋 : Terms 𝕄} (TM : TypeModes 𝕋) where
 
 open import Data.List using (List; []; drop)
 open import Data.List.Properties using (++-assoc; ++-identityʳ)
@@ -16,7 +16,7 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 
 open Modes 𝕄
 open Terms 𝕋
-open KitType KT using (_∶⊢_)
+open TypeModes TM using (_∶⊢_)
 
 record CtxRepr : Set₁ where
   infix   4  _~ᶜ_  _≡ᶜ_
@@ -505,7 +505,7 @@ record CtxRepr : Set₁ where
   module CtxReprSubst {ℓ} (𝕊 : SubWithLaws ℓ) (T : Traversal 𝕊) (H : KitHomotopy 𝕊 T) where
     private instance _ = 𝕊
 
-    open KitType KT
+    open TypeModes TM
     open Traversal 𝕊 T
     open Kit ⦃ … ⦄
     open SubWithLaws 𝕊
