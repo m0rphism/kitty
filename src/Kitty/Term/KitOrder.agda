@@ -13,10 +13,15 @@ open Modes 𝕄
 open Terms 𝕋
 open Kit ⦃ … ⦄
 
-record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where 
+private variable
+  KitMode KitMode₁ KitMode₂ : Set
+  _∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : List VarMode → KitMode → Set
+  ⦃ 𝕂 ⦄ ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂  ⦄ : Kit _∋/⊢_
+
+record _⊑ₖ_ (𝕂₁ : Kit _∋/⊢₁_) (𝕂₂ : Kit _∋/⊢₂_) : Set₁ where 
   private instance _ = 𝕂₁; _ = 𝕂₂
   field
-    ι-Mode : Kit.VarMode/TermMode 𝕂₁ → Kit.VarMode/TermMode 𝕂₂
+    ι-Mode : Mode 𝕂₁ → Mode 𝕂₂
     ι-id/m→M : ∀ m → ι-Mode (Kit.id/m→M 𝕂₁ m) ≡ Kit.id/m→M 𝕂₂ m
     ι-m→M/id : ∀ m/M → Kit.m→M/id 𝕂₁ m/M ≡ Kit.m→M/id 𝕂₂ (ι-Mode m/M)
 
@@ -37,8 +42,8 @@ record _⊑ₖ_ (𝕂₁ 𝕂₂ : Kit) : Set₁ where
   --   let sub = subst (µ₂ ∋/⊢[ 𝕂₂ ]_) (ι-id/m→M m) in
   --   ϕ ,ₖ  sub (ι-∋/⊢ x/t)
 
-⊑ₖ-refl : ∀ ⦃ 𝕂 : Kit ⦄ → 𝕂 ⊑ₖ 𝕂
-⊑ₖ-refl ⦃ 𝕂 ⦄ = record
+⊑ₖ-refl : 𝕂 ⊑ₖ 𝕂
+⊑ₖ-refl = record
   { ι-Mode   = λ m/M → m/M
   ; ι-id/m→M = λ m → refl
   ; ι-m→M/id = λ m/M → refl

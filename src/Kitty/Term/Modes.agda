@@ -10,8 +10,8 @@ record Modes : Set₁ where
     {TermMode} : Set
     m→M        : VarMode → TermMode
 
-  Scoped : Set₁
-  Scoped = List VarMode → TermMode → Set
+  Scoped : Set → Set₁
+  Scoped M = List VarMode → M → Set
 
 record Terms (𝕄 : Modes) : Set₁ where
   open Modes 𝕄

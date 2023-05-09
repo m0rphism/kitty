@@ -23,7 +23,6 @@ open Kit ⦃ … ⦄
 open Sub ⦃ … ⦄
 open SubWithLaws 𝕊
 open _⊑ₖ_ ⦃ … ⦄
-open import Kitty.Term.MultiSub 𝕋
 
 private variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
@@ -36,17 +35,22 @@ record Traversal : Set (lsuc ℓ) where
   infixl   5  _⋯_
 
   field
-    _⋯_   : ∀ ⦃ 𝕂 : Kit ⦄ → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+    _⋯_   :
+      ∀ {KitMode : Set} {_∋/⊢_ : Scoped KitMode} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+        {µ₁ µ₂ M} 
+      → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
 
-    ⋯-var : ∀ ⦃ 𝕂 : Kit ⦄ (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
-            → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
+    ⋯-var :
+      ∀ {KitMode : Set} {_∋/⊢_ : Scoped KitMode} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+        (x : µ₁ ∋ m) (ϕ : µ₁ –[ 𝕂 ]→ µ₂)
+      → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
 
-    ⋯-id : ∀ ⦃ 𝕂 : Kit ⦄ {µ} {M} (t : µ ⊢ M)
-            → t ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ t
+    ⋯-id :
+      ∀ {KitMode : Set} {_∋/⊢_ : Scoped KitMode} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+        {µ} {M} (t : µ ⊢ M)
+      → t ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ t
 
-  kitₛ : Kit
-  Kit.VarMode/TermMode kitₛ = TermMode
-  Kit._∋/⊢_            kitₛ = _⊢_
+  kitₛ : Kit _⊢_
   Kit.id/m→M           kitₛ = m→M
   Kit.m→M/id           kitₛ = λ M → M
   Kit.id/m→M/id        kitₛ = λ m → refl
@@ -83,7 +87,9 @@ record Traversal : Set (lsuc ℓ) where
         Kit.wk kitₛ _ (` x) ∎
     }
 
-  ⊑ₖ-⊥ : ∀ ⦃ 𝕂 : Kit ⦄ → kitᵣ ⊑ₖ 𝕂
+  ⊑ₖ-⊥ :
+    ∀ {KitMode : Set} {_∋/⊢_ : Scoped KitMode} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+    → kitᵣ ⊑ₖ 𝕂
   ⊑ₖ-⊥ ⦃ 𝕂 ⦄ = record
     { ι-Mode   = Kit.id/m→M 𝕂
     ; ι-id/m→M = λ m → refl
@@ -137,7 +143,10 @@ record Traversal : Set (lsuc ℓ) where
   wk→ᵣ* = wkₖ*
   wk→ₛ* = wkₖ*
 
-  wkn : ∀ ⦃ 𝕂 ⦄ {µ} {m} → µ –[ 𝕂 ]→ (µ ▷ m)
+  wkn :
+    ∀ {KitMode : Set} {_∋/⊢_ : Scoped KitMode} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+      {µ} {m}
+    → µ –[ 𝕂 ]→ (µ ▷ m)
   wkn = wkₖ _ id
 
   wknᵣ : ∀ {µ} {m} → µ →ᵣ (µ ▷ m)
@@ -199,7 +208,9 @@ record Traversal : Set (lsuc ℓ) where
   _⋯ₛ_ = _⋯_
   _⋯ᵣ_ = _⋯_
 
-  _⋯[_]_ : µ₁ ⊢ M → (𝕂 : Kit) → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
+  _⋯[_]_ :
+    ∀ {KitMode : Set} {_∋/⊢_ : Scoped KitMode}
+    → µ₁ ⊢ M → (𝕂 : Kit _∋/⊢_) → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M
   t ⋯[ 𝕂 ] ϕ = t ⋯ ϕ where instance _ = 𝕂
 
   -- -- Alternative without duplication and `R.id` instead of `idᵣ`:

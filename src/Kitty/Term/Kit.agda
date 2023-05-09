@@ -13,23 +13,17 @@ open import Kitty.Term.Prelude
 open Modes 𝕄
 open Terms 𝕋
 
-private
-  variable
-    m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
-    M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
-    µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
+private variable
+  m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
+  M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
+  µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
 
 -- Required for proving that `kitᵣ ≢ kitₛ`
 data KitTag : Set where
   instance K-Ren K-Sub : KitTag
 
-record Kit : Set₁ where
-  infix   4  _∋/⊢_
-
+record Kit {VarMode/TermMode : Set} (_∋/⊢_ : List VarMode → VarMode/TermMode → Set) : Set₁ where
   field
-    VarMode/TermMode : Set
-    _∋/⊢_            : List VarMode → VarMode/TermMode → Set 
-
     id/m→M           : VarMode → VarMode/TermMode
     m→M/id           : VarMode/TermMode → TermMode
     id/m→M/id        : ∀ m → m→M/id (id/m→M m) ≡ m→M m
@@ -57,12 +51,15 @@ record Kit : Set₁ where
   -- wk'* : µ –→ (µ ▷▷ µ')
   -- wk'* _ x = wk* _ (id/` x)
 
-_∋/⊢[_]_ : List VarMode → (𝕂 : Kit) → Kit.VarMode/TermMode 𝕂 → Set
-µ ∋/⊢[ 𝕂 ] sm = Kit._∋/⊢_ 𝕂 µ sm
+Mode : ∀ {M} {_∋/⊢_ : Scoped M} → Kit _∋/⊢_ → Set
+Mode {M} _ = M
 
-kitᵣ : Kit
-Kit.VarMode/TermMode kitᵣ = VarMode
-Kit._∋/⊢_            kitᵣ = _∋_
+_∋/⊢[_]_ :
+  ∀ {M : Set} {_∋/⊢_ : Scoped M} →
+  List VarMode → (𝕂 : Kit {M} _∋/⊢_) → M → Set
+_∋/⊢[_]_ {M} {_∋/⊢_} µ 𝕂 sm = µ ∋/⊢ sm
+
+kitᵣ : Kit {VarMode} _∋_
 Kit.id/m→M           kitᵣ = λ m → m
 Kit.m→M/id           kitᵣ = m→M
 Kit.id/m→M/id        kitᵣ = λ m → refl
