@@ -57,7 +57,9 @@ private
     ℓ₁ ℓ₂ : Level
     Γ Γ₁ Γ₂ : Ctx µ
     x y z : µ ∋ m
-    𝕂 : Kit
+    KitMode : Set
+    _∋/⊢_ : Scoped KitMode
+    𝕂 : Kit _∋/⊢_
     𝔸₁ : ComposeKit 𝕂 kitᵣ 𝕂
     𝔸₂ : ComposeKit kitᵣ 𝕂 𝕂
     -- WK : WkDistKit ⦃ 𝕂 ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄
@@ -130,8 +132,8 @@ record Semantics : Set₁ where
     t₁ ↪* t₂ →
     ⦅ t₁ ⦆ₛ ↪*σ ⦅ t₂ ⦆ₛ
   ↪*σ-⦅_⦆ {t₁ = t₁} {t₂}  t₁≣t₂  = λ x →
-    subst₂ (_↪*_) (sym (~→~' (⦅⦆-,ₖ t₁) _ x))
-                 (sym (~→~' (⦅⦆-,ₖ t₂) _ x))
+    subst₂ (_↪*_) (sym (use-~-hom (⦅⦆-,ₖ t₁) _ x))
+                 (sym (use-~-hom (⦅⦆-,ₖ t₂) _ x))
                  (↪*σ-ext (↪*σ-refl {σ = idₛ}) t₁≣t₂ x)
 
   open ReflexiveTransitiveClosure₂ (_→ₛ_) _↪σ_ renaming
@@ -220,19 +222,19 @@ record Semantics : Set₁ where
     t₁ ≣ t₂ →
     ⦅ t₁ ⦆ₛ ≣σ ⦅ t₂ ⦆ₛ
   ≣σ-⦅_⦆ {t₁ = t₁} {t₂}  t₁≣t₂  = λ x →
-    subst₂ (_≣_) (sym (~→~' (⦅⦆-,ₖ t₁) _ x))
-                 (sym (~→~' (⦅⦆-,ₖ t₂) _ x))
+    subst₂ (_≣_) (sym (use-~-hom (⦅⦆-,ₖ t₁) _ x))
+                 (sym (use-~-hom (⦅⦆-,ₖ t₂) _ x))
                  (≣σ-ext (≣σ-refl {σ = idₛ}) t₁≣t₂ x)
 
   ≣→Σ : ∀ {µ M} {t₁ t₂ : µ ⊢ M} → t₁ ≣ t₂ → ∃[ t ] t₁ ↪* t × t₂ ↪* t 
   ≣→Σ (mk-≣ t t₁↪*t t₂↪*t) = t , t₁↪*t , t₂↪*t
 
   open Kit ⦃ … ⦄
-  to-ϕ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂} → (∀ m → (µ₁ ∋ m) → µ₂ ∋/⊢[ 𝕂 ] id/m→M m) → µ₁ –[ 𝕂 ]→ µ₂
+  to-ϕ : ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {µ₁ µ₂} → (∀ m → (µ₁ ∋ m) → µ₂ ∋/⊢[ 𝕂 ] id/m→M m) → µ₁ –[ 𝕂 ]→ µ₂
   to-ϕ {µ₁ = []}      f = []*
   to-ϕ {µ₁ = µ₁ ▷ m₁} f = to-ϕ (λ _ x → f _ (there x)) ,ₖ f m₁ (here refl)
 
-  &-to-ϕ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂ m} →
+  &-to-ϕ : ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {µ₁ µ₂ m} →
     (f : ∀ m → (µ₁ ∋ m) → µ₂ ∋/⊢[ 𝕂 ] id/m→M m) →
     (x : µ₁ ∋ m) →
     x & to-ϕ f ≡ f m x
@@ -288,8 +290,8 @@ record ReflexiveSemantics (Sem : Semantics) : Set₁ where
     t₁ ↪ t₂ →
     ⦅ t₁ ⦆ₛ ↪σ ⦅ t₂ ⦆ₛ
   ↪σ-⦅_⦆ {t₁ = t₁} {t₂}  t₁≣t₂  = λ x →
-    subst₂ (_↪_) (sym (~→~' (⦅⦆-,ₖ t₁) _ x))
-                 (sym (~→~' (⦅⦆-,ₖ t₂) _ x))
+    subst₂ (_↪_) (sym (use-~-hom (⦅⦆-,ₖ t₁) _ x))
+                 (sym (use-~-hom (⦅⦆-,ₖ t₂) _ x))
                  (↪σ-ext (↪σ-refl {σ = idₛ}) t₁≣t₂ x)
 
   to''' : ∀ {µ₁ µ₂ m} {σ₁ σ₂ : (µ₁ ▷ m) →ₛ µ₂} {t₂' t₁'} →
@@ -302,7 +304,7 @@ record ReflexiveSemantics (Sem : Semantics) : Set₁ where
     step (λ { (here refl) → subst (here refl & σ₁ ↪_) q ↪-refl
             ; (there x)   → subst (there x & σ₁ ↪_)
                                   (there x & σ₁ ≡⟨ sym (&-↓ σ₁ x) ⟩
-                                   x & σ₁ ↓ₛ    ≡⟨ ~→~' p _ x ⟩
+                                   x & σ₁ ↓ₛ    ≡⟨ use-~-hom p _ x ⟩
                                    x & σ₂ ↓ₛ    ≡⟨ &-↓ σ₂ x ⟩
                                    there x & σ₂ ∎)
                                   ↪-refl})
@@ -326,7 +328,7 @@ record ReflexiveSemantics (Sem : Semantics) : Set₁ where
                refl
                t'↪*t₂)
 
-  ≡→~ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ 𝕂 ]→ µ₂} →
+  ≡→~ : ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ 𝕂 ]→ µ₂} →
     ϕ₁ ≡ ϕ₂ →
     ϕ₁ ~ ϕ₂
   ≡→~ refl = ~-refl
@@ -348,7 +350,7 @@ record ReflexiveSemantics (Sem : Semantics) : Set₁ where
            ; (there x)   → subst₂ (_↪_)
                                   (&-↓ σ₁ x)
                                   (sym (&-,ₖ-there σ' (here refl & σ₁) x))
-                                  (subst (_↪ x & σ') (~→~' b _ x) (σ₁↪*σ' x))
+                                  (subst (_↪ x & σ') (use-~-hom b _ x) (σ₁↪*σ' x))
            })
         (to'' (~-sym (↓-,ₖ σ' (here refl & σ₁)))
               refl
@@ -368,21 +370,20 @@ record ReflexiveSemantics (Sem : Semantics) : Set₁ where
   ... | σ₁↪*σ₂' = to' σ₁↪*σ₂' (σ₁↪*σ₂ (here refl))
 
 record SemKit (Sem : Semantics)
-    (𝕂 : Kit)
+    {M' : Set}
+    {_∋/⊢_ : Scoped M'}
+    (𝕂 : Kit _∋/⊢_)
     (K : KitT 𝕂)
     (C₁ : ComposeKit 𝕂 kitᵣ 𝕂)
     (C₂ : ComposeKit 𝕂 𝕂 𝕂)
+    (_≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set)
     : Set₁ where
 
   open Semantics Sem
   open Kit 𝕂
   private instance _ = 𝕂
 
-  infix 3 _≡/↪_
-
   field
-    _≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set
-
     ≡/↪-refl : ∀ {µ M} {t : µ ∋/⊢ M} →
       t ≡/↪ t
 
@@ -395,7 +396,7 @@ record SemKit (Sem : Semantics)
       wk m t₁ ≡/↪ wk m t₂
 
   ↪/id' : ∀ {µ₁ µ₂ m} {x : µ₁ ∋ m} {ϕ₁ ϕ₂ : µ₁ –[ 𝕂 ]→ µ₂} →
-    x & ϕ₁ ≡/↪ x & ϕ₂ →
+    (x & ϕ₁) ≡/↪ (x & ϕ₂) →
     ` x ⋯ ϕ₁ ↪ ` x ⋯ ϕ₂
   ↪/id' {x = x} {ϕ₁} {ϕ₂} p = subst₂ (_↪_) (sym (⋯-var x ϕ₁))
                                            (sym (⋯-var x ϕ₂))
@@ -439,8 +440,8 @@ record SemKit (Sem : Semantics)
     ϕ₁ ≡ϕ/↪ϕ ϕ₂ →
     (ϕ₁ ↑ m) ≡ϕ/↪ϕ (ϕ₂ ↑ m)
   ≡ϕ/↪ϕ-↑ {ϕ₁ = ϕ₁} {ϕ₂} ϕ₁↪ϕ₂ = λ x →
-    subst₂ (_≡/↪_) (sym (~→~' (↑-,ₖ ϕ₁ _) _ x))
-                   (sym (~→~' (↑-,ₖ ϕ₂ _) _ x))
+    subst₂ (_≡/↪_) (sym (use-~-hom (↑-,ₖ ϕ₁ _) _ x))
+                   (sym (use-~-hom (↑-,ₖ ϕ₂ _) _ x))
                    (≡ϕ/↪ϕ-ext (≡ϕ/↪ϕ-wk ϕ₁↪ϕ₂) ≡/↪-refl x)
 
   to'''ϕ : ∀ {µ₁ µ₂ m} {ϕ₁ ϕ₂ : (µ₁ ▷ m) –[ 𝕂 ]→ µ₂} {t₂' t₁'} →
@@ -450,21 +451,21 @@ record SemKit (Sem : Semantics)
     t₁' ≡*/↪* t₂' →
     ϕ₁ ≡ϕ/↪ϕ* ϕ₂
   to'''ϕ {ϕ₁ = ϕ₁} {ϕ₂ = ϕ₂} p refl q refl =
-    step (λ { (here refl) → subst (here refl & ϕ₁ ≡/↪_) q ≡/↪-refl
-            ; (there x)   → subst (there x & ϕ₁ ≡/↪_)
+    step (λ { (here refl) → subst ((here refl & ϕ₁) ≡/↪_) q ≡/↪-refl
+            ; (there x)   → subst ((there x & ϕ₁) ≡/↪_)
                                   (there x & ϕ₁ ≡⟨ sym (&-↓ ϕ₁ x) ⟩
-                                   x & ϕ₁ ↓     ≡⟨ ~→~' p _ x ⟩
+                                   x & ϕ₁ ↓     ≡⟨ use-~-hom p _ x ⟩
                                    x & ϕ₂ ↓     ≡⟨ &-↓ ϕ₂ x ⟩
                                    there x & ϕ₂ ∎)
                                   ≡/↪-refl})
           refl
   to'''ϕ {ϕ₁ = ϕ₁} {ϕ₂ = ϕ₂} p refl refl (step {a₂ = t'} t₁↪t' t'↪*t₂) =
     step {a₂ = (ϕ₁ ↓) ,ₖ t'}
-        (λ { (here refl) → subst (here refl & ϕ₁ ≡/↪_)
+        (λ { (here refl) → subst ((here refl & ϕ₁) ≡/↪_)
                                  (t'                          ≡⟨ sym (&-,ₖ-here (ϕ₁ ↓) t') ⟩
                                   here refl & ((ϕ₁ ↓) ,ₖ t') ∎)
                                  t₁↪t'
-           ; (there x)   → subst (there x & ϕ₁ ≡/↪_)
+           ; (there x)   → subst ((there x & ϕ₁) ≡/↪_)
                                  (there x & ϕ₁            ≡⟨ sym (&-↓ ϕ₁ x) ⟩
                                   x & ϕ₁ ↓                ≡⟨ sym (&-,ₖ-there (ϕ₁ ↓) t' x) ⟩
                                   there x & (ϕ₁ ↓) ,ₖ t' ∎)
@@ -477,7 +478,7 @@ record SemKit (Sem : Semantics)
                refl
                t'↪*t₂)
 
-  ≡→~ : ∀ ⦃ 𝕂 : Kit ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ 𝕂 ]→ µ₂} →
+  ≡→~ : ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ 𝕂 ]→ µ₂} →
     ϕ₁ ≡ ϕ₂ →
     ϕ₁ ~ ϕ₂
   ≡→~ refl = ~-refl
@@ -493,13 +494,13 @@ record SemKit (Sem : Semantics)
   to''ϕ b p refl q refl t₁↪*t₂ = to'''ϕ (~-trans (~-sym b) (≡→~ p)) refl q t₁↪*t₂
   to''ϕ {ϕ₁ = ϕ₁} b refl refl q (step {a₂ = ϕ'} ϕ₁↪*ϕ' ϕ'↪*ϕ₂) t₁↪*t₂ =
     step {a₂ = ϕ' ,ₖ (here refl & ϕ₁)}
-        (λ { (here refl) → subst (here refl & ϕ₁ ≡/↪_)
+        (λ { (here refl) → subst ((here refl & ϕ₁) ≡/↪_)
                                  (sym (&-,ₖ-here ϕ' (here refl & ϕ₁)))
                                  ≡/↪-refl
            ; (there x)   → subst₂ (_≡/↪_)
                                   (&-↓ ϕ₁ x)
                                   (sym (&-,ₖ-there ϕ' (here refl & ϕ₁) x))
-                                  (subst (_≡/↪ x & ϕ') (~→~' b _ x) (ϕ₁↪*ϕ' x))
+                                  (subst (_≡/↪ (x & ϕ')) (use-~-hom b _ x) (ϕ₁↪*ϕ' x))
            })
         (to''ϕ (~-sym (↓-,ₖ ϕ' (here refl & ϕ₁)))
               refl
@@ -525,22 +526,22 @@ record SemTraversal {Sem : Semantics} (RSem : ReflexiveSemantics Sem) : Set (lsu
 
   field
     ↪-⋯ :
-      ∀ ⦃ 𝕂 : Kit ⦄
+      ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
         ⦃ K : KitT 𝕂 ⦄
         ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
         ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
         ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
         ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-        ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ ⦄
+        {_≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set}
+        ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ _≡/↪_ ⦄
         {µ₁ µ₂ M} {t t' : µ₁ ⊢ M} {ϕ ϕ' : µ₁ –[ 𝕂 ]→ µ₂}
       → t ↪ t'
       → ϕ ≡ϕ/↪ϕ ϕ'
       → t ⋯ ϕ ↪ t' ⋯ ϕ'
 
-  semkitᵣ : SemKit Sem kitᵣ kittᵣ ckitᵣ ckitᵣ
+  semkitᵣ : SemKit Sem kitᵣ kittᵣ ckitᵣ ckitᵣ _≡_
   semkitᵣ = record
-    { _≡/↪_ = _≡_
-    ; ↪/id = λ { refl → ↪-refl }
+    { ↪/id = λ { refl → ↪-refl }
     ; ≡/↪-refl = refl
     ; ≡/↪-wk  = λ { refl → refl }
     }
@@ -552,10 +553,9 @@ record SemTraversal {Sem : Semantics} (RSem : ReflexiveSemantics Sem) : Set (lsu
     t ⋯ᵣ ϕ ↪ t' ⋯ᵣ ϕ
   ↪-⋯ᵣ t↪t' = ↪-⋯ t↪t' λ x → refl where instance _ = kitᵣ; _ = kittᵣ; _ = ckitₛᵣ; _ = ckitᵣ
 
-  semkitₛ : SemKit Sem kitₛ kittₛ ckitₛᵣ ckitₛₛ
+  semkitₛ : SemKit Sem kitₛ kittₛ ckitₛᵣ ckitₛₛ _↪_
   semkitₛ = record
-    { _≡/↪_ = _↪_
-    ; ↪/id = λ t₁↪t₂ → t₁↪t₂
+    { ↪/id = λ t₁↪t₂ → t₁↪t₂
     ; ≡/↪-refl = ↪-refl
     ; ≡/↪-wk  = ↪-⋯ᵣ
     }
@@ -571,13 +571,14 @@ record SemTraversal {Sem : Semantics} (RSem : ReflexiveSemantics Sem) : Set (lsu
   open SemKit semkitₛ using () renaming (≡/↪-wk to ↪-wk) public
 
   ↪*ϕ-⋯' :
-    ∀ ⦃ 𝕂 : Kit ⦄
+    ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
       ⦃ K : KitT 𝕂 ⦄
       ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
       ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
       ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
       ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-      ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ ⦄
+      {_≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set}
+      ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ _≡/↪_ ⦄
       {µ₁ µ₂ m} {t t' : µ₁ ⊢ m} {ϕ ϕ' : µ₁ –[ 𝕂 ]→ µ₂} →
     t ↪* t' →
     ϕ ≡ϕ/↪ϕ ϕ' →
@@ -586,13 +587,14 @@ record SemTraversal {Sem : Semantics} (RSem : ReflexiveSemantics Sem) : Set (lsu
   ↪*ϕ-⋯' (step t↪ₚt' t'↪ₚ*t'') ϕ↪ₚϕ' = step (↪-⋯ t↪ₚt' λ x → ≡/↪-refl) (↪*ϕ-⋯' t'↪ₚ*t'' ϕ↪ₚϕ')
 
   ↪*ϕ-⋯ :
-    ∀ ⦃ 𝕂 : Kit ⦄
+    ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
       ⦃ K : KitT 𝕂 ⦄
       ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
       ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
       ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
       ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-      ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ ⦄
+      {_≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set}
+      ⦃ SK : SemKit Sem 𝕂 K C₁ C₂ _≡/↪_ ⦄
     {µ₁ µ₂ m} {t t' : µ₁ ⊢ m} {ϕ ϕ' : µ₁ –[ 𝕂 ]→ µ₂} →
     t ↪* t' →
     ϕ ≡ϕ/↪ϕ* ϕ' →
@@ -696,20 +698,21 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
      = mk-≣ _ (↪*-⋯ₛ t↪*T σ↪*σ'') (↪*-⋯ₛ t'↪*T σ'↪*σ'')
 
     ↪-⋯₁' :
-      ∀ ⦃ 𝕂 : Kit ⦄
+      ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
         ⦃ K : KitT 𝕂 ⦄
         ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
         ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
         ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
         ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-        ⦃ SK : SemKit Semₚ 𝕂 K C₁ C₂ ⦄
+        {_≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set}
+        ⦃ SK : SemKit Semₚ 𝕂 K C₁ C₂ _≡/↪_ ⦄
         {µ₁ µ₂ M} {t t' : µ₁ ⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂}
       → t ↪* t'
       → t ⋯ ϕ ↪* t' ⋯ ϕ
     ↪-⋯₁' {ϕ = ϕ} t↪*t' = fromₚ* (↪ₚ*ϕ-⋯ (toₚ* t↪*t') refl)
 
     ↪-⋯₁ :
-      ∀ ⦃ 𝕂 : Kit ⦄
+      ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
         ⦃ K : KitT 𝕂 ⦄
         ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
         ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
@@ -726,7 +729,7 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
                           t↪*t')
 
     ≣-⋯₁ :
-      ∀ ⦃ 𝕂 : Kit ⦄
+      ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
         ⦃ K : KitT 𝕂 ⦄
         ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
         ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
@@ -772,7 +775,7 @@ record SemTrans (Sem Semₚ : Semantics) : Set₁ where
             eq)))
 
     -- ↪-⋯ :
-    --   ∀ ⦃ 𝕂 : Kit ⦄
+    --   ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
     --     ⦃ K : KitT 𝕂 ⦄
     --     ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
     --     ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
