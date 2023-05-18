@@ -33,6 +33,8 @@ m→M 𝕥 = 𝕥
 𝕄 : Modes
 𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
 
+open Modes 𝕄 using (Scoped) public
+
 variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : Modeᵥ
   M M₁ M₂ M₃ M' M₁' M₂' M₃' : Modeₜ
@@ -96,7 +98,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
   ⊢` : ∀ {x : µ ∋ m} →
     Γ ∋ x ∶ T →
     Γ ⊢ ` x ∶ T
-  ⊢λ :
+  ⊢λ : ∀ {e : µ ▷ 𝕖 ⊢ 𝕖} →
     Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wkₖ _ id →
     Γ ⊢ λx e ∶ t₁ ⇒ t₂
   ⊢Λ :
