@@ -48,9 +48,9 @@ private variable
   ℓ ℓ₁ ℓ₂ ℓ₃ ℓ' : Level
   A B C : Set ℓ
 
-open Modes using (Scoped)
+open Modes using (Scoped')
 
-record VarCon (𝕄 : Modes) (_⊢_ : Scoped 𝕄) : Set where
+record VarCon (𝕄 : Modes) (_⊢_ : Scoped' 𝕄) : Set where
   open Modes 𝕄
   field
     nm    : Name
@@ -63,7 +63,7 @@ record VarCon (𝕄 : Modes) (_⊢_ : Scoped 𝕄) : Set where
 
 open VarCon
 
-get-var-con : (𝕄 : Modes) (_⊢_ : Scoped 𝕄) → Name → TC (VarCon 𝕄 _⊢_)
+get-var-con : (𝕄 : Modes) (_⊢_ : Scoped' 𝕄) → Name → TC (VarCon 𝕄 _⊢_)
 get-var-con 𝕄 _⊢_ `-nm = do
   let open Modes 𝕄
   catchTC
@@ -92,7 +92,7 @@ get-var-con 𝕄 _⊢_ `-nm = do
         }
     )
 
-derive-Terms : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
+derive-Terms : (𝕄 : Modes) → (_⊢_ : Scoped' 𝕄) → Name → TC ⊤
 derive-Terms 𝕄 _⊢_ terms-nm = runFreshT do
   let open Modes 𝕄
   𝕄-nm ← quoteNameTC 𝕄
@@ -768,7 +768,7 @@ derive-MultiTraversal-record {𝕄} 𝕋 ⋯-nm ⋯-var-nm ⋯-↑-nm kit-traver
     (def (quote Kitty.Term.MultiTraversal.MultiTraversal) [ argᵥ (def 𝕋-nm []) ])
     [ clause [] [] body ]
 
-derive-MultiTraversal : (𝕄 : Modes) → (_⊢_ : Scoped 𝕄) → Name → TC ⊤
+derive-MultiTraversal : (𝕄 : Modes) → (_⊢_ : Scoped' 𝕄) → Name → TC ⊤
 derive-MultiTraversal 𝕄 _⊢_ traversal-nm = do
   liftTC $ printStr "Deriving Terms"
   terms-nm ← freshName "terms"

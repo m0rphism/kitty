@@ -13,6 +13,9 @@ record Modes : Set₁ where
   Scoped : Set → Set₁
   Scoped M = List VarMode → M → Set
 
+  Scoped' : Set₁
+  Scoped' = Scoped TermMode
+
 record Terms (𝕄 : Modes) : Set₁ where
   open Modes 𝕄
   field
