@@ -101,13 +101,14 @@ rsemanticsₚ = record { ↪-refl = ↪ₚ-refl }
 open SemKit ⦃ … ⦄
 
 ↪-⋯ :
-  ∀ ⦃ 𝕂 : Kit ⦄
+  ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
     ⦃ K : KitT 𝕂 ⦄
     ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄
     ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
     ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
     ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-    ⦃ SK : SemKit semanticsₚ 𝕂 K C₁ C₂ ⦄
+    {_≡/↪_ : ∀ {µ M} (t₁ t₂ : µ ∋/⊢ M) → Set}
+    ⦃ SK : SemKit semanticsₚ 𝕂 K C₁ C₂ _≡/↪_ ⦄
     {µ₁ µ₂ M} {t t' : µ₁ ⊢ M} {ϕ ϕ' : µ₁ –[ 𝕂 ]→ µ₂}
   → t ↪ₚ t'
   → ϕ ≡ϕ/↪ϕ ϕ'

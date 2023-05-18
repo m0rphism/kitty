@@ -16,7 +16,8 @@ open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
 open IKit ⦃ … ⦄
 
 _⊢⋯_ :
-  ∀ ⦃ 𝕂 : Kit ⦄ ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+  ∀ {M'} {_∋/⊢_ : Scoped M'} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ ⦃ K : KitT 𝕂 ⦄
+    ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
     ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
     ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
     ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄

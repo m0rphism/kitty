@@ -196,3 +196,4 @@ module ExampleVarEq where
     unquoteDecl traversal = derive-MultiTraversal 𝕄 _⊢_ traversal
     open Derived traversal
 
+

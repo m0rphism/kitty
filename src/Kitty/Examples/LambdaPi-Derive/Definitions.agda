@@ -27,6 +27,8 @@ m→M m = m
 𝕄 : Modes
 𝕄 = record { VarMode = Mode ; TermMode = Mode ; m→M = m→M }
 
+open Modes 𝕄 using (Scoped) public
+
 variable
   m m₁ m₂ m₃ m' m₁' m₂' m₃' : Mode
   M M₁ M₂ M₃ M' M₁' M₂' M₃' : Mode

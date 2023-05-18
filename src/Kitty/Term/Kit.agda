@@ -51,8 +51,8 @@ record Kit {VarMode/TermMode : Set} (_∋/⊢_ : List VarMode → VarMode/TermMo
   -- wk'* : µ –→ (µ ▷▷ µ')
   -- wk'* _ x = wk* _ (id/` x)
 
-Mode : ∀ {M} {_∋/⊢_ : Scoped M} → Kit _∋/⊢_ → Set
-Mode {M} _ = M
+mode : ∀ {M} {_∋/⊢_ : Scoped M} → Kit _∋/⊢_ → Set
+mode {M} _ = M
 
 _∋/⊢[_]_ :
   ∀ {M : Set} {_∋/⊢_ : Scoped M} →

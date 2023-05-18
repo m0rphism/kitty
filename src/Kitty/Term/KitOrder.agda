@@ -21,7 +21,7 @@ private variable
 record _⊑ₖ_ (𝕂₁ : Kit _∋/⊢₁_) (𝕂₂ : Kit _∋/⊢₂_) : Set₁ where 
   private instance _ = 𝕂₁; _ = 𝕂₂
   field
-    ι-Mode : Mode 𝕂₁ → Mode 𝕂₂
+    ι-Mode : mode 𝕂₁ → mode 𝕂₂
     ι-id/m→M : ∀ m → ι-Mode (Kit.id/m→M 𝕂₁ m) ≡ Kit.id/m→M 𝕂₂ m
     ι-m→M/id : ∀ m/M → Kit.m→M/id 𝕂₁ m/M ≡ Kit.m→M/id 𝕂₂ (ι-Mode m/M)
 
