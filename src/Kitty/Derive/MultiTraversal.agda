@@ -149,7 +149,11 @@ derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
   TermMode` ← quoteNormTC' TermMode
   VarMode` ← quoteNormTC' VarMode
   VarModes` ← quoteNormTC' (List VarMode)
-  Kit` ← quoteTC' Kit
+  Set` ← quoteTC' Set
+  let Scoped` : Term' → Term'
+      Scoped` M = def (quote Kitty.Term.Modes.Modes.Scoped) [ argᵥ (def 𝕄-nm []) ; argᵥ M ]
+  let Kit` : Term' → Term'
+      Kit` _∋/⊢_ = def (quote Kitty.Term.Kit.Kit) [ argᵥ (def 𝕋-nm []) ; argᵥ _∋/⊢_ ]
   Level` ← quoteTC' Level
   let Sub` : Term' → Term'
       Sub` ℓ = def (quote Kitty.Term.Sub.Sub) [ argᵥ (def 𝕋-nm []) ; argᵥ ℓ ]
@@ -157,7 +161,9 @@ derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
   let mk-tel c-tel =
         [ "ℓ" , argₕ Level`
         ; "𝕊" , argᵢ (Sub` (var "ℓ" []))
-        ; "𝕂" , argᵢ Kit`
+        ; "M" , argₕ Set`
+        ; "_∋/⊢_" , argₕ (Scoped` (var "M" []))
+        ; "𝕂" , argᵢ (Kit` (var "_∋/⊢_" []))
         ; "µ₁" , argₕ VarModes`
         ; "µ₂" , argₕ VarModes`
         ] ++ c-tel ++
@@ -171,6 +177,8 @@ derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
   let mk-pats c-pat = 
         [ argₕ (var "ℓ")
         ; argᵢ (var "𝕊")
+        ; argₕ (var "M")
+        ; argₕ (var "_∋/⊢_")
         ; argᵢ (var "𝕂")
         ; argₕ (var "µ₁")
         ; argₕ (var "µ₂")
@@ -211,11 +219,11 @@ derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
     let body = con c $ foldr' c-tel'' [] λ where
           (s , arg i t) c-args → _∷ c-args $ case unterm ⊢-nm t of λ where
             (just _) → arg i (def ⋯-nm [ argᵥ (var s [])
-                                        ; argᵥ (def (quote Kitty.Term.MultiSub._↑*'_)
-                                            [ argᵥ (def 𝕋-nm [])
-                                            ; argᵥ (var "f" [])
-                                            ; argᵥ unknown
-                                            ])
+                                       ; argᵥ (def (quote Kitty.Term.MultiSub._↑*'_)
+                                           [ argᵥ (def 𝕋-nm [])
+                                           ; argᵥ (var "f" [])
+                                           ; argᵥ unknown
+                                           ])
                                         ]) 
             nothing  → case s String.≟ c-µ of λ where
                           (no _)  → arg i (var s [])
@@ -232,22 +240,24 @@ derive-⋯ {𝕄} 𝕋 ⋯-nm = runFreshT do
                           (def (quote Kitty.Term.Kit.Kit.`/id)
                             [ argᵥ (var "𝕂" [])
                             ; argᵥ (def (quote Kitty.Term.Sub.Sub._&_) [ argᵥ (var "𝕊" [])
-                                                                        ; argᵥ (var "x" [])
-                                                                        ; argᵥ (var "f" [])
-                                                                        ])
+                                                                       ; argᵥ (var "x" [])
+                                                                       ; argᵥ (var "f" [])
+                                                                       ])
                             ])
 
   -- ⋯-ty ← quoteTC' (∀ {ℓ} ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M)
   let ⋯-ty = pi (argₕ (def (quote Level) [])) (abs "ℓ" (
-              pi (argᵢ (def (quote Kitty.Term.Sub.Sub) [ argᵥ (def 𝕋-nm []) ; argᵥ (var "ℓ" []) ])) (abs "𝕊" (
-              pi (argᵢ (def (quote Kitty.Term.Kit.Kit) [ argᵥ (def 𝕋-nm []) ])) (abs "𝕂" (
-              pi (argₕ VarModes`) (abs "µ₁" (
-              pi (argₕ VarModes`) (abs "µ₂" (
-              pi (argₕ TermMode`) (abs "M" (
-              pi (argᵥ (def ⊢-nm [ argᵥ (var "µ₁" []) ; argᵥ (var "M" []) ])) (abs "_" (
-              pi (argᵥ (def (quote Kitty.Term.Sub.Sub._–[_]→_)
-                        [ argᵥ (var "𝕊" []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ])) (abs "_" (
-              def ⊢-nm [ argᵥ (var "µ₂" []) ; argᵥ (var "M" []) ]))))))))))))))))
+             pi (argᵢ (def (quote Kitty.Term.Sub.Sub) [ argᵥ (def 𝕋-nm []) ; argᵥ (var "ℓ" []) ])) (abs "𝕊" (
+             pi (argₕ Set`) (abs "M" (
+             pi (argₕ (Scoped` (var "M" []))) (abs "_∋/⊢_" (
+             pi (argᵢ (Kit` (var "_∋/⊢_" []))) (abs "𝕂" (
+             pi (argₕ VarModes`) (abs "µ₁" (
+             pi (argₕ VarModes`) (abs "µ₂" (
+             pi (argₕ TermMode`) (abs "M" (
+             pi (argᵥ (def ⊢-nm [ argᵥ (var "µ₁" []) ; argᵥ (var "M" []) ])) (abs "_" (
+             pi (argᵥ (def (quote Kitty.Term.Sub.Sub._–[_]→_)
+                       [ argᵥ (var "𝕊" []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ])) (abs "_" (
+             def ⊢-nm [ argᵥ (var "µ₂" []) ; argᵥ (var "M" []) ]))))))))))))))))))))
 
   defdecFun'
     (argᵥ ⋯-nm)
@@ -277,12 +287,17 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
   𝕋-nm ← term→name =<< quoteTC' 𝕋
   VarMode` ← quoteNormTC' VarMode
   VarModes` ← quoteNormTC' (List VarMode)
+  Set` ← quoteTC' Set
+  let Scoped` : Term' → Term'
+      Scoped` M = def (quote Kitty.Term.Modes.Modes.Scoped) [ argᵥ (def 𝕄-nm []) ; argᵥ M ]
+  let Kit` : Term' → Term'
+      Kit` _∋/⊢_ = def (quote Kitty.Term.Kit.Kit) [ argᵥ (def 𝕋-nm []) ; argᵥ _∋/⊢_ ]
 
   -- _⋯_ ← unquoteTC' {A = ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (def ⋯-nm [])
 
   let body = lam visible (abs "x" (
-              lam visible (abs "f" (
-              con (quote refl) []))))
+             lam visible (abs "f" (
+             con (quote refl) []))))
 
   -- ⋯-var-ty ← quoteTC' (∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ ⦃ 𝕂 : Kit ⦄ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (f : µ₁ –[ 𝕂 ]→ µ₂)
   --                      → (ctor var-con x) ⋯ f ≡ Kit.`/id 𝕂 (x & f))
@@ -290,7 +305,9 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
   let ⋯-var-ty =
         pi (argₕ (def (quote Level) [])) (abs "ℓ" (
         pi (argᵢ (def (quote Kitty.Term.Sub.SubWithLaws) [ argᵥ (def 𝕋-nm []) ; argᵥ (var "ℓ" []) ])) (abs "𝕊" (
-        pi (argᵢ (def (quote Kitty.Term.Kit.Kit) [ argᵥ (def 𝕋-nm []) ])) (abs "𝕂" (
+        pi (argₕ Set`) (abs "M" (
+        pi (argₕ (Scoped` (var "M" []))) (abs "_∋/⊢_" (
+        pi (argᵢ (Kit` (var "_∋/⊢_" []))) (abs "𝕂" (
         pi (argₕ VarModes`) (abs "µ₁" (
         pi (argₕ VarModes`) (abs "µ₂" (
         pi (argₕ VarMode`) (abs "m" (
@@ -304,7 +321,7 @@ derive-⋯-var {𝕄} 𝕋 ⋯-nm ⋯-var-nm = runFreshT do
                             ; argᵥ (def (quote Kitty.Term.Sub.Sub._&_) [ argᵥ 𝕤`
                                                                       ; argᵥ (var "x" [])
                                                                       ; argᵥ (var "f" []) ]) ]) ]
-        ))))))))))))))))
+        ))))))))))))))))))))
 
   defdecFun'
     (argᵥ ⋯-var-nm)
@@ -396,7 +413,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
   --                   (lam visible (abs "_" (def ⋯-nm [])))
   -- let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
   let ⋯⊤' : Term'
-      ⋯⊤' = lam visible (abs "_" (def ⋯-nm []))
+      ⋯⊤' = lam visible (abs "_" (lam instance′ (abs "𝕤" (def ⋯-nm [ argᵢ (var "𝕤" []) ]))))
   let open Kitty.Term.MultiSub.TraversalOps' 𝕋
 
   -- Get constructor telescope
@@ -420,11 +437,17 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
         (λ { (x , _) → case x String.≟ "µ₁" of λ { (yes _) → false; (no _) → true } })
         c-tel'
 
-  Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
-  Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
+  KitPkg` ← quoteTC' (Kitty.Term.MultiSub.KitPkg 𝕋)
+  let unpack-kit` : Term' → Term'
+      unpack-kit` KP = def (quote Kitty.Term.MultiSub.unpack-kit) [ argᵥ (def 𝕋-nm []) ; argᵥ KP ]
+  Kits` ← quoteTC' (List (Kitty.Term.MultiSub.KitPkg 𝕋))
   VarModes` ← quoteTC' (List VarMode)
   let SubWithLaws` : Term' → Term'
       SubWithLaws` ℓ = def (quote Kitty.Term.Sub.SubWithLaws) [ argᵥ (def 𝕋-nm []) ; argᵥ ℓ ]
+
+  let 𝕤 = def (quote Kitty.Term.Sub.SubWithLaws.SubWithLaws-Sub)
+            [ argᵥ (var "𝕊" [])
+            ]
 
   -- Convert tel bindings (x , t) to var arguments, but replace `µ₁` with `µ₁ ▷▷ µ₁'`
   let con-term = con con-nm $ List.map
@@ -440,12 +463,13 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                 λ t fs → def (quote Kitty.Term.MultiSub.TraversalOps'._⋯*_)
                         [ argᵥ (def 𝕋-nm [])
                         ; argᵥ ⋯⊤'
+                        ; argᵢ 𝕤
                         ; argᵥ t
                         ; argᵥ fs
                         ]
   let _↑**`_ = (Term' → Term' → Term') by
                 λ fs µ → def (quote Kitty.Term.MultiSub._↑**_)
-                              [ argᵥ (def 𝕋-nm []) ; argᵥ fs ; argᵥ µ ]
+                              [ argᵥ (def 𝕋-nm []) ; argᵢ 𝕤 ; argᵥ fs ; argᵥ µ ]
   let lhs = con-term ⋯*` (var "fs" [] ↑**` var "µ₁'" [])
   let rhs = con con-nm $ List.map
                     (λ where (x , arg i t) → case x String.≟ c-µ of λ where
@@ -458,6 +482,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                                           nothing        → arg i (var x [])
                     )
                     c-tel
+
   let ⋯-↑-con-ty = tel→pi
         ( [ ("ℓ"   , argₕ (def (quote Level) []))
           ; ("𝕊"   , argᵢ (SubWithLaws` (var "ℓ" [])))
@@ -466,7 +491,7 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
           ; ("µ₂"  , argₕ VarModes`) 
           ; ("µ₁'" , argₕ VarModes`)
           ; ("fs"  , argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
-                          [ argᵥ (def 𝕋-nm []) ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µ₂" []) ]))
+                          [ argᵥ (def 𝕋-nm []) ; argᵢ 𝕤 ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µ₂" []) ]))
           ] ++ c-tel'x)
         (def (quote _≡_) [ argᵥ lhs ; argᵥ rhs ])
 
@@ -503,33 +528,30 @@ derive-⋯-↑-con {𝕄} 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                   [ argᵥ (con (quote Kitty.Util.Star.Star.[]) []) ])
         (con (quote refl) [])
 
-  let 𝕤 = def (quote Kitty.Term.Sub.SubWithLaws.SubWithLaws-Sub)
-            [ argᵥ (var "𝕊" [])
-            ]
-
   -- ⋯-↑-λ {𝕂s ▷ 𝕂} (f ∷ fs) t = cong₂ (_⋯_ ⦃ 𝕂 ⦄) (⋯-↑-λ fs t) refl
   let con-args = List.map
                     (λ where (x , arg i _) → arg i (var x []))
                     c-tel'x
-  let rec = def ⋯-↑-con-nm ([ argᵥ (var "fs" []) ] ++ con-args)
+  let rec = def ⋯-↑-con-nm ([ argᵢ (var "𝕊" []) ; argᵥ (var "fs" []) ] ++ con-args)
   let clause₂ = clause
-        (mk-tel [ ("𝕂" , argₕ Kit`) ; ("𝕂s" , argₕ Kits`) ]
+        (mk-tel [ ("𝕂" , argₕ KitPkg`) ; ("𝕂s" , argₕ Kits`) ]
                 [ ("µₓ" , argₕ VarModes`)
                 ; ("f" , argᵥ (def (quote Kitty.Term.Sub.Sub._–[_]→_)
                       [ argᵥ 𝕤
-                      ; argᵥ (var "µₓ" []) ; argᵥ (var "𝕂" []) ; argᵥ (var "µ₂" []) ]))
+                      ; argᵥ (var "µₓ" []) ; argᵥ (unpack-kit` (var "𝕂" [])) ; argᵥ (var "µ₂" []) ]))
                 ; ("fs" , argᵥ (def (quote Kitty.Term.MultiSub._–[_]→*_)
                       [ argᵥ (def 𝕋-nm [])
+                      ; argᵢ 𝕤
                       ; argᵥ (var "µ₁" []) ; argᵥ (var "𝕂s" []) ; argᵥ (var "µₓ" []) ]))
                 ])
         (mk-pats [ argₕ (con (quote Agda.Builtin.List.List._∷_) [ argᵥ (var "𝕂") ; argᵥ (var "𝕂s") ]) ]
-                  [ argᵥ (con (quote Kitty.Util.Star._∷_) [ argₕ (dot (var "µ₂" []))
-                                                          ; argₕ (var "µₓ")
-                                                          ; argₕ (dot (var "µ₁" []))
-                                                          ; argᵥ (var "f") ; argᵥ (var "fs") ])
-                  ])
+                 [ argᵥ (con (quote Kitty.Util.Star._∷_) [ argₕ (dot (var "µ₂" []))
+                                                         ; argₕ (var "µₓ")
+                                                         ; argₕ (dot (var "µ₁" []))
+                                                         ; argᵥ (var "f") ; argᵥ (var "fs") ])
+                 ])
         (def (quote cong₂)
-          [ argᵥ (def ⋯-nm [ argᵢ 𝕤 ; argᵢ (var "𝕂" []) ])
+          [ argᵥ (def ⋯-nm [ argᵢ 𝕤 ; argᵢ (unpack-kit` (var "𝕂" [])) ])
           ; argᵥ rec
           ; argᵥ (con (quote refl) [])
           ])
@@ -558,8 +580,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   var-con ← liftTC $ get-var-con 𝕄 _⊢_ `-nm
   𝕋-nm ← term→name =<< quoteTC' 𝕋
 
-  Kit` ← quoteTC' (Kitty.Term.Kit.Kit 𝕋)
-  Kits` ← quoteTC' (List (Kitty.Term.Kit.Kit 𝕋))
+  Kits` ← quoteTC' (List (Kitty.Term.MultiSub.KitPkg 𝕋))
   VarMode` ← quoteNormTC' VarMode
   VarModes` ← quoteTC' (List VarMode)
   let SubWithLaws` : Term' → Term'
@@ -569,7 +590,7 @@ derive-⋯-↑ {𝕄} 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
   -- _⋯⊤_ ← unquoteTC' {A = ∀ (_ : ⊤) {ℓ} ⦃ 𝕊 : Kitty.Term.Sub.Sub 𝕋 ℓ ⦄ ⦃ 𝕂 : Kitty.Term.Kit.Kit 𝕋 ⦄ {µ₁ µ₂} {M} → µ₁ ⊢ M → µ₁ –[ 𝕂 ]→ µ₂ → µ₂ ⊢ M} (lam visible (abs "_" (def ⋯-nm [])))
   -- let open Kitty.Term.MultiSub.TraversalOps' 𝕋 _⋯⊤_
   let ⋯⊤` : Term'
-      ⋯⊤` = lam visible (abs "_" (def ⋯-nm []))
+      ⋯⊤` = lam visible (abs "_" (lam instance′ (abs "𝕤" (def ⋯-nm [ argᵢ (var "𝕤" []) ]))))
   let open Kitty.Term.MultiSub.TraversalOps' 𝕋
 
   let mk-tel c-tel =

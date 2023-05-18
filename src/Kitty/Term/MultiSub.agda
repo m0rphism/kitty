@@ -29,10 +29,16 @@ private
     ℓ                         : Level 
 
 open import Data.List.Relation.Unary.All as All using (All; _∷_; [])
-open import Data.Product using (∃-syntax; Σ-syntax; _×_; _,_)
+open import Data.Product using (∃-syntax; Σ-syntax; _×_; _,_; proj₁; proj₂)
 
 KitPkg : Set₁
 KitPkg = Σ[ M ∈ Set ] Σ[ _∋/⊢_ ∈ Scoped M ] (Kit _∋/⊢_)
+
+pack-kit : ∀ {M} {_∋/⊢_ : Scoped M} → Kit _∋/⊢_ → KitPkg
+pack-kit K = _ , _ , K
+
+unpack-kit : (KP : KitPkg) → Kit (proj₁ (proj₂ KP))
+unpack-kit (_ , _ , 𝕂) = 𝕂
 
 _–[_]→*_ : ∀ ⦃ 𝕊 : Sub ℓ ⦄ → List VarMode → (_ : List KitPkg) → List VarMode → Set (ℓ ⊔ lsuc 0ℓ)
 µ₁ –[ 𝕂s ]→* µ₂ = Star (λ (_ , _ , 𝕂) x y → y –[ 𝕂 ]→ x) 𝕂s µ₂ µ₁
