@@ -3,7 +3,7 @@ module Kitty.Examples.SystemF-Paper.Definitions where
 open import Kitty.Examples.SystemF-Paper.Kits
 open import Data.List using (List; []; _∷_)
 open import Data.Product using (_,_)
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong₂; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; cong₂; subst; module ≡-Reasoning)
 open ≡-Reasoning
 
 -- Fixities --------------------------------------------------------------------
@@ -163,6 +163,29 @@ typing : Typing
 typing = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 
 open Typing typing hiding (_⊢_∶_; ⊢`) 
+
+_⊢⋯_ :
+  ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+    ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
+    ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
+    ⦃ TK : TypingKit K W C₁ C₂ ⦄
+    {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
+    {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ϕ : µ₁ –[ K ]→ µ₂} →
+  Γ₁ ⊢ e ∶ t →
+  Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
+  Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+⊢` ⊢x ⊢⋯ ⊢ϕ = ⊢`/id (⊢ϕ _ _ ⊢x)
+⊢λ {t₂ = t₂} ⊢e ⊢⋯ ⊢ϕ = ⊢λ (subst (_ ⊢ _ ∶_) (sym (⋯-↑-wk t₂ _ _)) (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)))
+⊢Λ ⊢e ⊢⋯ ⊢ϕ = ⊢Λ (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _))
+⊢· ⊢e₁ ⊢e₂ ⊢⋯ ⊢ϕ = ⊢· (⊢e₁ ⊢⋯ ⊢ϕ) (⊢e₂ ⊢⋯ ⊢ϕ)
+⊢∙ {t₁ = t₁} {t₂ = t₂} ⊢t₁ ⊢t₂ ⊢e₁ ⊢⋯ ⊢ϕ = subst (_ ⊢ _ ∶_) (sym (dist-↑-⦅⦆-⋯ t₁ t₂ _))
+                                                 (⊢∙ (⊢t₁ ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)) (⊢t₂ ⊢⋯ ⊢ϕ) (⊢e₁ ⊢⋯ ⊢ϕ))
+⊢τ ⊢⋯ ⊢ϕ = ⊢τ
+
+typing-traversal : TypingTraversal
+typing-traversal = record { _⊢⋯_ = _⊢⋯_ }
+
+open TypingTraversal typing-traversal hiding (_⊢⋯_)
 
 -- Semantics -------------------------------------------------------------------
 
