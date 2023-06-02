@@ -67,6 +67,30 @@ record Terms : Set₁ where
     weaken : ∀ {µ} m → Map µ (m ∷ µ)
     weaken m = wkm m id
 
+    _~_ :
+      ∀ {µ₁ µ₂}
+      → (ϕ₁ ϕ₂ : Map µ₁ µ₂)
+      → Set
+    _~_ {µ₁ = µ₁} ϕ₁ ϕ₂ = ∀ m (x : µ₁ ∋ m) → ϕ₁ m x ≡ ϕ₂ m x
+
+    postulate
+      -- ~-cong-⋯ : 
+      --   ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ K ]→ µ₂}
+      --   → ϕ₁ ~ ϕ₂
+      --   → t ⋯ ϕ₁ ≡ t ⋯ ϕ₂
+      ~-ext : 
+        ∀ {µ₁ µ₂} {ϕ₁ ϕ₂ : Map µ₁ µ₂}
+        → ϕ₁ ~ ϕ₂
+        → ϕ₁ ≡ ϕ₂
+
+    id↑~id : ∀ {µ m} → (id ↑ m) ~ id {m ∷ µ}
+    id↑~id m Z     = refl
+    id↑~id m (S x) =
+      (id ↑ _) m (S x) ≡⟨⟩
+      wk _ (id/` x)    ≡⟨ wk-id/` _ x ⟩
+      id/` (S x)       ≡⟨⟩
+      id m (S x)       ∎
+
   _∋/⊢[_]_ : ∀ {_∋/⊢_ : Scoped} → List (Mode Var) → Kit _∋/⊢_ → Mode Var → Set
   _∋/⊢[_]_ {_∋/⊢_} µ K m = µ ∋/⊢ m
 
@@ -74,6 +98,7 @@ record Terms : Set₁ where
   µ₁ –[ K ]→ µ₂ = Map µ₁ µ₂ where open Kit K
 
   open Kit ⦃ … ⦄ public
+
 
   Kᵣ : Kit _∋_
   Kᵣ = record
@@ -121,22 +146,6 @@ record Terms : Set₁ where
 
     instance _ = Kₛ
 
-    _~_ :
-      ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂}
-      → (ϕ₁ ϕ₂ : µ₁ –[ K ]→ µ₂)
-      → Set
-    _~_ {µ₁ = µ₁} ϕ₁ ϕ₂ = ∀ m (x : µ₁ ∋ m) → ϕ₁ m x ≡ ϕ₂ m x
-
-    postulate
-      -- ~-cong-⋯ : 
-      --   ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ K ]→ µ₂}
-      --   → ϕ₁ ~ ϕ₂
-      --   → t ⋯ ϕ₁ ≡ t ⋯ ϕ₂
-      ~-ext : 
-        ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ K ]→ µ₂}
-        → ϕ₁ ~ ϕ₂
-        → ϕ₁ ≡ ϕ₂
-
     -- Counterpart to wk-id/`
     record WkKit {_∋/⊢_ : Scoped} (K : Kit _∋/⊢_): Set₁ where
       private instance _ = K
@@ -171,8 +180,63 @@ record Terms : Set₁ where
           ∀ {µ₁} {µ₂} {m'} {m} (x/t : µ₁ ∋/⊢[ K₁ ] m) (ϕ : µ₁ –[ K₂ ]→ µ₂)
           → wk m' (x/t &/⋯ ϕ) ≡ wk m' x/t &/⋯ (ϕ ↑ m')
 
+        -- -- TODO: we only use ι₂
+        -- -- TODO: we don't need them, if we wrap &/⋯-& in `/id
+        -- ι₁ : ∀ {µ m} → µ ∋/⊢[ K₁ ] m → µ ∋/⊢[ K₁⊔K₂ ] m
+        -- ι₂ : ∀ {µ m} → µ ∋/⊢[ K₂ ] m → µ ∋/⊢[ K₁⊔K₂ ] m
+
+        -- ι₁-`/id : ∀ {µ} {m} (x/t : µ ∋/⊢[ K₁ ] m)
+        --         → `/id x/t ≡ `/id (ι₁ x/t)
+        -- ι₂-`/id : ∀ {µ} {m} (x/t : µ ∋/⊢[ K₂ ] m)
+        --         → `/id x/t ≡ `/id (ι₂ x/t)
+
       _·ₘ_ : ∀ {µ₁ µ₂ µ₃} → µ₁ –[ K₁ ]→ µ₂ → µ₂ –[ K₂ ]→ µ₃ → µ₁ –[ K₁⊔K₂ ]→ µ₃
       (ϕ₁ ·ₘ ϕ₂) _ x = x & ϕ₁ &/⋯ ϕ₂ 
+
+      -- &/⋯-& :
+      --   ∀ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ K₂ ]→ µ₂) 
+      --   → id/` ⦃ K₁ ⦄ x &/⋯ ϕ ≡ ι₂ (x & ϕ)
+      -- &/⋯-& {µ₁} {µ₂} {m} x ϕ = `/id-injective (
+      --     `/id (id/` x &/⋯ ϕ)             ≡⟨ &/⋯-⋯ (id/` x) ϕ ⟩
+      --     `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ        ≡⟨ cong (_⋯ ϕ) (id/`/id ⦃ K₁ ⦄ x) ⟩
+      --     ` x ⋯ ϕ                         ≡⟨ ⋯-var ⦃ K₂ ⦄ x ϕ ⟩
+      --     `/id ⦃ K₂ ⦄ (x & ϕ)             ≡⟨ ι₂-`/id (x & ϕ) ⟩
+      --     `/id ⦃ K₁⊔K₂ ⦄  (ι₂ (x & ϕ)) ∎)
+
+      &/⋯-& :
+        ∀ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ K₂ ]→ µ₂) 
+        → `/id (id/` ⦃ K₁ ⦄ x &/⋯ ϕ) ≡ `/id (x & ϕ)
+      &/⋯-& {µ₁} {µ₂} {m} x ϕ = 
+          `/id (id/` x &/⋯ ϕ)      ≡⟨ &/⋯-⋯ (id/` x) ϕ ⟩
+          `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ ≡⟨ cong (_⋯ ϕ) (id/`/id ⦃ K₁ ⦄ x) ⟩
+          ` x ⋯ ϕ                  ≡⟨ ⋯-var ⦃ K₂ ⦄ x ϕ ⟩
+          `/id ⦃ K₂ ⦄  (x & ϕ)     ∎
+
+      dist-↑-· :
+        ∀ {µ₁} {µ₂} {µ₃} m
+          (ϕ₁ : µ₁ –[ K₁ ]→ µ₂)
+          (ϕ₂ : µ₂ –[ K₂ ]→ µ₃)
+        → ((ϕ₁ ·ₘ ϕ₂) ↑ m) ~ ((ϕ₁ ↑ m) ·ₘ (ϕ₂ ↑ m))
+      dist-↑-· m ϕ₁ ϕ₂ m₁ x@Z = `/id-injective (
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₘ ϕ₂) ↑ m))       ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (id/` Z)                     ≡⟨ id/`/id ⦃ K₁⊔K₂ ⦄ Z ⟩
+        ` Z                                         ≡⟨ sym (id/`/id ⦃ K₂ ⦄ Z) ⟩
+        `/id ⦃ K₂ ⦄ (id/` Z)                        ≡⟨⟩
+        -- `/id ⦃ K₂ ⦄ (Z & (ϕ₂ ↑ m))                  ≡⟨ ι₂-`/id (Z & (ϕ₂ ↑ m)) ⟩
+        -- `/id ⦃ K₁⊔K₂ ⦄ (ι₂ (Z & (ϕ₂ ↑ m)))          ≡⟨ sym (cong `/id (&/⋯-& (id/` Z) (ϕ₂ ↑ m))) ⟩
+        `/id ⦃ K₂ ⦄ (Z & (ϕ₂ ↑ m))                  ≡⟨ sym (&/⋯-& (id/` Z) (ϕ₂ ↑ m)) ⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (id/` Z &/⋯ (ϕ₂ ↑ m))        ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ m) &/⋯ (ϕ₂ ↑ m))  ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ m) ·ₘ (ϕ₂ ↑ m))) ∎
+        )
+      dist-↑-· m ϕ₁ ϕ₂ m₁ x@(S y) = `/id-injective (
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₘ ϕ₂) ↑ m))       ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (wk _ (y & (ϕ₁ ·ₘ ϕ₂)))      ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (wk _ (y & ϕ₁ &/⋯ ϕ₂))       ≡⟨ cong `/id (&/⋯-wk-↑ (y & ϕ₁) ϕ₂) ⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (wk _ (y & ϕ₁) &/⋯ (ϕ₂ ↑ m)) ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ m) &/⋯ (ϕ₂ ↑ m))  ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ m) ·ₘ (ϕ₂ ↑ m))) ∎
+        )
 
     _·[_]_ :
       ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped} {K₁ : Kit _∋/⊢₁_} {K₂ : Kit _∋/⊢₂_} {K₁⊔K₂ : Kit _∋/⊢_} {µ₁ µ₂ µ₃}
@@ -187,8 +251,7 @@ record Terms : Set₁ where
         ⋯-assoc :
           ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped}
             ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
-            ⦃ W₁ : WkKit K₁ ⦄
-            ⦃ C : ComposeKit K₁ K₂ K ⦄
+            ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
             {µ₁ µ₂ µ₃ t} {m : Mode t}
             (t : µ₁ ⊢ m) (ϕ₁ : µ₁ –[ K₁ ]→ µ₂) (ϕ₂ : µ₂ –[ K₂ ]→ µ₃)
           → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₘ ϕ₂)
@@ -209,7 +272,8 @@ record Terms : Set₁ where
           x & weaken m & (ϕ ↑ m) ∎
 
       instance
-        Cᵣ : ∀ {_∋/⊢_ : Scoped} ⦃ K₂ : Kit _∋/⊢_ ⦄ → ComposeKit Kᵣ K₂ K₂
+        Cᵣ : ∀ {_∋/⊢_ : Scoped} ⦃ K₂ : Kit _∋/⊢_ ⦄
+             → ComposeKit Kᵣ K₂ K₂
         Cᵣ = record
           { _&/⋯_ = _&_
           ; &/⋯-⋯ = λ x ϕ →
@@ -220,7 +284,8 @@ record Terms : Set₁ where
             S x & (ϕ ↑ _) ∎
           }
 
-        Cₛ : ∀ {_∋/⊢_ : Scoped} ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄ ⦃ C : ComposeKit K₂ Kᵣ K₂ ⦄ → ComposeKit Kₛ K₂ Kₛ
+        Cₛ : ∀ {_∋/⊢_ : Scoped} ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄ ⦃ C : ComposeKit K₂ Kᵣ K₂ ⦄
+             → ComposeKit Kₛ K₂ Kₛ
         Cₛ ⦃ C = C ⦄ = record
           { _&/⋯_    = _⋯_
           ; &/⋯-⋯    = λ t ϕ → refl
