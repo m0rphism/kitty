@@ -64,6 +64,9 @@ record Terms : Set₁ where
     id : ∀ {µ} → Map µ µ
     id m x = id/` x
 
+    ⦅_⦆ : ∀ {µ m} → µ ∋/⊢ m → Map (m ∷ µ) µ
+    ⦅ x/t ⦆ = x/t ∷ₘ id
+
     weaken : ∀ {µ} m → Map µ (m ∷ µ)
     weaken m = wkm m id
 
@@ -99,17 +102,17 @@ record Terms : Set₁ where
 
   open Kit ⦃ … ⦄ public
 
-
-  Kᵣ : Kit _∋_
-  Kᵣ = record
-    { id/`           = λ x → x
-    ; `/id           = `_
-    ; id/`/id        = λ x → refl
-    ; id/`-injective = λ eq → eq
-    ; `/id-injective = `-injective
-    ; wk             = λ m' x → there x
-    ; wk-id/`        = λ m' x → refl
-    }
+  instance
+    Kᵣ : Kit _∋_
+    Kᵣ = record
+      { id/`           = λ x → x
+      ; `/id           = `_
+      ; id/`/id        = λ x → refl
+      ; id/`-injective = λ eq → eq
+      ; `/id-injective = `-injective
+      ; wk             = λ m' x → there x
+      ; wk-id/`        = λ m' x → refl
+      }
 
   record Traversal : Set₁ where
     infixl   5  _⋯_
@@ -129,22 +132,19 @@ record Terms : Set₁ where
           (t : µ ⊢ m)
         → t ⋯ id ⦃ K ⦄ ≡ t
 
-    instance _ = Kᵣ
-
-    Kₛ : Kit _⊢_
-    Kₛ = record
-      { id/`           = `_
-      ; `/id           = λ t → t
-      ; id/`/id        = λ x → refl
-      ; id/`-injective = `-injective
-      ; `/id-injective = λ eq → eq
-      ; wk             = λ m' t → t ⋯ weaken m'
-      ; wk-id/`        = λ m' x → (` x) ⋯ weaken m' ≡⟨ ⋯-var x (weaken m') ⟩
-                                  ` (x & weaken m') ≡⟨⟩
-                                  ` S x             ∎
-      }
-
-    instance _ = Kₛ
+    instance
+      Kₛ : Kit _⊢_
+      Kₛ = record
+        { id/`           = `_
+        ; `/id           = λ t → t
+        ; id/`/id        = λ x → refl
+        ; id/`-injective = `-injective
+        ; `/id-injective = λ eq → eq
+        ; wk             = λ m' t → t ⋯ weaken m'
+        ; wk-id/`        = λ m' x → (` x) ⋯ weaken m' ≡⟨ ⋯-var x (weaken m') ⟩
+                                    ` (x & weaken m') ≡⟨⟩
+                                    ` S x             ∎
+        }
 
     -- Counterpart to wk-id/`
     record WkKit {_∋/⊢_ : Scoped} (K : Kit _∋/⊢_): Set₁ where
