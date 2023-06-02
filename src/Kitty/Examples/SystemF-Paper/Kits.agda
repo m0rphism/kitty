@@ -394,4 +394,79 @@ record Terms : Set₁ where
                         → Γ ∋/⊢ e ∶ t
                         → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weaken ⦃ Kᵣ ⦄ _)
 
+            _∋*/⊢*_∶_ : ∀ {µ₁ µ₂} → Ctx µ₂ → µ₁ –[ K ]→ µ₂ → Ctx µ₁ → Set
+            _∋*/⊢*_∶_ {µ₁} {µ₂} Γ₂ ϕ Γ₁ =
+              ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ∶⊢ m₁) (⊢x : Γ₁ ∋ x ∶ t)
+              → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
+
           open TypingKit ⦃ … ⦄ public
+
+          infixl  5  _∋*/⊢*[_]_∶_
+          _∋*/⊢*[_]_∶_ :
+            ∀ {_∋/⊢_ : Scoped} {K : Kit _∋/⊢_}
+              {W : WkKit K} {C₁ : ComposeKit K Kᵣ K} {C₂ : ComposeKit K K K}
+              {µ₁ µ₂}
+            → Ctx µ₂ → TypingKit K W C₁ C₂ → µ₁ –[ K ]→ µ₂ → Ctx µ₁ → Set
+          Γ₂ ∋*/⊢*[ TK ] f ∶ Γ₁ = Γ₂ ∋*/⊢* f ∶ Γ₁ where instance _ = TK
+
+          record TypingTraversal : Set₁ where
+            infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
+
+            field
+              _⊢⋯_ :
+                ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+                  ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
+                  ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄ ⦃ C₄ : ComposeKit Kₛ K Kₛ ⦄
+                  ⦃ TK : TypingKit K W C₁ C₂ ⦄
+                  {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
+                  {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ϕ : µ₁ –[ K ]→ µ₂} →
+                Γ₁ ⊢ e ∶ t →
+                Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
+                Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+
+            instance
+              TKᵣ : TypingKit Kᵣ Wᵣ Cᵣ Cᵣ
+              TKᵣ = record
+                { _∋/⊢_∶_     = _∋_∶_
+                ; ∋/⊢∶-lookup = λ x → refl
+                ; id/⊢`       = λ ⊢x → ⊢x
+                ; ⊢`/id       = ⊢`
+                ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl }
+                }
+
+              TKₛ : TypingKit Kₛ Wₛ Cₛ Cₛ
+              TKₛ = record
+                { _∋/⊢_∶_     = _⊢_∶_
+                ; ∋/⊢∶-lookup = λ x → ⊢` refl
+                ; id/⊢`       = ⊢`
+                ; ⊢`/id       = λ ⊢x → ⊢x
+                ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t'
+                }
+
+            open TypingKit TKᵣ public using () renaming
+              (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_)
+            open TypingKit TKₛ public using () renaming
+              (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_)
+
+            -- open TypingKit TKᵣ public using () renaming
+            --   (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
+            -- open TypingKit TKₛ public using () renaming
+            --   (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
+
+            -- Renaming preserves typing
+
+            _⊢⋯ᵣ_ : ∀ {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
+                      {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ρ : µ₁ –[ Kᵣ ]→ µ₂} →
+                    Γ₁ ⊢ e ∶ t →
+                    Γ₂ ∋* ρ ∶ Γ₁ →
+                    Γ₂ ⊢ e ⋯ ρ ∶ t ⋯ ρ
+            _⊢⋯ᵣ_ = _⊢⋯_
+
+            -- Substitution preserves typing
+
+            _⊢⋯ₛ_ : ∀ {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
+                      {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {σ : µ₁ –[ Kₛ ]→ µ₂} →
+                    Γ₁ ⊢ e ∶ t →
+                    Γ₂ ⊢* σ ∶ Γ₁ →
+                    Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
+            _⊢⋯ₛ_ = _⊢⋯_
