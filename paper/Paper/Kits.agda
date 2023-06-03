@@ -28,26 +28,29 @@ data ModeTy : Set where
 --! Terms
 record Terms : Set₁ where
   field
-    Mode        : ModeTy → Set
-    _⊢_         : ∀ {t} → List (Mode Var) → Mode t → Set
-    `_          : ∀ {µ} {m : Mode Var} → µ ∋ m → µ ⊢ m
-    `-injective : ∀ {µ m} {x₁ x₂ : µ ∋ m} → ` x₁ ≡ ` x₂ → x₁ ≡ x₂
+    Mode         : ModeTy → Set
+    _⊢_          : ∀ {t} → List (Mode Var) → Mode t → Set
+    `_           : ∀ {µ} {m : Mode Var} → µ ∋ m → µ ⊢ m
+    `-injective  : ∀ {µ m} {x₁ x₂ : µ ∋ m} → ` x₁ ≡ ` x₂ → x₁ ≡ x₂
 
   Scoped : Set₁
   Scoped = List (Mode Var) → Mode Var → Set
 
   --! Kit {
-  record Kit (_∋/⊢_ : List (Mode Var) → Mode Var → Set) : Set where
+  record Kit (_∋/⊢_ : Scoped) : Set where
     field
       id/`            : ∀ {µ m} → µ ∋ m → µ ∋/⊢ m
       `/id            : ∀ {µ m} → µ ∋/⊢ m → µ ⊢ m
       id/`/id         : ∀ {µ m} (x : µ ∋ m) → `/id (id/` x) ≡ ` x
 
-      id/`-injective  : ∀ {µ m} {x₁ x₂ : µ ∋ m} → id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
-      `/id-injective  : ∀ {µ m} {x/t₁ x/t₂ : µ ∋/⊢ m} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
+      id/`-injective  : ∀  {µ m} {x₁ x₂ : µ ∋ m} →
+                           id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
+      `/id-injective  : ∀  {µ m} {x/t₁ x/t₂ : µ ∋/⊢ m} →
+                           `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
 
       wk              : ∀ {µ m} m' → µ ∋/⊢ m → (m' ∷ µ) ∋/⊢ m
-      wk-id/`         : ∀ {µ m} m' (x : µ ∋ m) → wk m' (id/` x) ≡ id/` (there x)
+      wk-id/`         : ∀  {µ m} m' (x : µ ∋ m) →
+                           wk m' (id/` x) ≡ id/` (there x)
     --! }
 
     --! Map
@@ -108,10 +111,12 @@ record Terms : Set₁ where
       id m (S x)       ∎
 
   --! KitNotation {
-  _∋/⊢[_]_ : ∀ {_∋/⊢_ : Scoped} → List (Mode Var) → Kit _∋/⊢_ → Mode Var → Set
+  _∋/⊢[_]_ : ∀  {_∋/⊢_ : Scoped} →
+                List (Mode Var) → Kit _∋/⊢_ → Mode Var → Set
   _∋/⊢[_]_ {_∋/⊢_} µ K m = µ ∋/⊢ m
 
-  _–[_]→_ : ∀ {_∋/⊢_ : Scoped} → List (Mode Var) → Kit _∋/⊢_ → List (Mode Var) → Set
+  _–[_]→_ : ∀  {_∋/⊢_ : Scoped} →
+               List (Mode Var) → Kit _∋/⊢_ → List (Mode Var) → Set
   µ₁ –[ K ]→ µ₂ = Map µ₁ µ₂ where open Kit K
 
   open Kit ⦃ … ⦄ public
