@@ -363,15 +363,13 @@ record Terms : Set₁ where
           `/id ⦃ K ⦄ (x & ((ϕ ↑ m) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆)) ∎
         )
       dist-↑-⦅⦆ ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ {µ₁} {µ₂} {m} x/t ϕ mx x@(S y) = `/id-injective (
-          `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))               ≡⟨⟩
-          `/id (id/` ⦃ K₁ ⦄ y &/⋯ ϕ)                   ≡⟨ &/⋯-& ⦃ C₁ ⦄ y ϕ ⟩
-          `/id (y & ϕ)                                 ≡⟨ sym (⋯-id _) ⟩
-          `/id (y & ϕ) ⋯ id                            ≡⟨ cong (`/id (y & ϕ) ⋯_) (sym (~-ext (wk-cancels-⦅⦆ (x/t &/⋯ ϕ)))) ⟩
-          `/id (y & ϕ) ⋯ (weaken ⦃ Kᵣ ⦄ m ·[ Cᵣ ] ⦅ (x/t &/⋯ ϕ) ⦆) ≡⟨ sym (⋯-assoc _ (weaken ⦃ Kᵣ ⦄ m) ⦅ (x/t &/⋯ ϕ) ⦆) ⟩
+          `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                   ≡⟨⟩
+          `/id (id/` ⦃ K₁ ⦄ y &/⋯ ϕ)                       ≡⟨ &/⋯-& ⦃ C₁ ⦄ y ϕ ⟩
+          `/id (y & ϕ)                                     ≡⟨ sym (wk-cancels-⦅⦆-⋯ (`/id (y & ϕ)) (x/t &/⋯ ϕ)) ⟩
           `/id (y & ϕ) ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ ⦅ (x/t &/⋯ ϕ) ⦆ ≡⟨ cong (_⋯ ⦅ x/t &/⋯ ϕ ⦆) (wk-`/id m (y & ϕ)) ⟩
-          `/id (wk m (y & ϕ)) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆        ≡⟨ sym (&/⋯-⋯ (wk m (y & ϕ)) ⦅ (x/t &/⋯ ϕ) ⦆) ⟩
-          `/id (wk m (y & ϕ) &/⋯ ⦅ (x/t &/⋯ ϕ) ⦆)      ≡⟨⟩
-          `/id (x & ((ϕ ↑ m) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆)) ∎
+          `/id (wk m (y & ϕ)) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆            ≡⟨ sym (&/⋯-⋯ (wk m (y & ϕ)) ⦅ (x/t &/⋯ ϕ) ⦆) ⟩
+          `/id (wk m (y & ϕ) &/⋯ ⦅ (x/t &/⋯ ϕ) ⦆)          ≡⟨⟩
+          `/id (x & ((ϕ ↑ m) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆))     ∎
         )
 
       dist-↑-⦅⦆-⋯ :
@@ -510,17 +508,13 @@ record Terms : Set₁ where
               → Γ ∋*/⊢* ⦅ t ⦆ ∶ (T ∷ₜ Γ)
             ⊢⦅_⦆ {m} {µ} {Γ} {t} {T} ⊢x/t x@Z _ refl =
               subst (Γ ∋/⊢ t ∶_)
-                    (T                               ≡⟨ sym (⋯-id T) ⟩
-                     T ⋯ id                          ≡⟨ cong (T ⋯_) (sym (~-ext (wk-cancels-⦅⦆ t))) ⟩
-                     T ⋯ (weaken ⦃ Kᵣ ⦄ _ ·ₘ ⦅ t ⦆)  ≡⟨ sym (⋯-assoc T (weaken ⦃ Kᵣ ⦄ _) ⦅ t ⦆) ⟩
+                    (T                               ≡⟨ sym (wk-cancels-⦅⦆-⋯ T t) ⟩
                      T ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ t ⦆     ≡⟨⟩
                      wk-telescope (T ∷ₜ Γ) Z ⋯ ⦅ t ⦆ ∎)
                     ⊢x/t
             ⊢⦅_⦆ {m} {µ} {Γ} {t} {T} ⊢x/t x@(S y) _ refl =
               subst (Γ ∋/⊢ id/` y ∶_)
-                    (wk-telescope Γ y                              ≡⟨ sym (⋯-id (wk-telescope Γ y)) ⟩
-                     wk-telescope Γ y ⋯ id                         ≡⟨ cong (wk-telescope Γ y ⋯_) (sym (~-ext (wk-cancels-⦅⦆ t))) ⟩
-                     wk-telescope Γ y ⋯ (weaken ⦃ Kᵣ ⦄ _ ·ₘ ⦅ t ⦆) ≡⟨ sym (⋯-assoc (wk-telescope Γ y) (weaken ⦃ Kᵣ ⦄ _) ⦅ t ⦆) ⟩
+                    (wk-telescope Γ y                              ≡⟨ sym (wk-cancels-⦅⦆-⋯ _ t) ⟩
                      wk-telescope Γ y ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ t ⦆    ≡⟨⟩
                      wk-telescope (T ∷ₜ Γ) (S y) ⋯ ⦅ t ⦆           ∎)
                     (id/⊢` refl)
