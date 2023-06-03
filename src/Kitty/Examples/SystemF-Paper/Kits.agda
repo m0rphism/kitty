@@ -223,7 +223,6 @@ record Terms : Set₁ where
 
     open ComposeKit ⦃ … ⦄ public
 
-    -- TODO: Why is this Set₁?
     record ComposeTraversal : Set₁ where
       field
         ⋯-assoc :
