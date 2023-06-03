@@ -339,6 +339,16 @@ record Terms : Set₁ where
           `/id ⦃ K ⦄ (x & id)                                ∎
         )
 
+      wk-cancels-⦅⦆-⋯ :
+        ∀ {_∋/⊢_  : Scoped} ⦃ K : Kit _∋/⊢_ ⦄
+          {µ m mt} {m' : Mode mt} (t : µ ⊢ m') (x/t : µ ∋/⊢[ K ] m) 
+        → t ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ ⦅ x/t ⦆ ≡ t
+      wk-cancels-⦅⦆-⋯ t x/t =
+        t ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ x/t ⦆    ≡⟨ ⋯-assoc t (weaken ⦃ Kᵣ ⦄ _) ⦅ x/t ⦆ ⟩
+        t ⋯ (weaken ⦃ Kᵣ ⦄ _ ·ₘ ⦅ x/t ⦆) ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
+        t ⋯ id                           ≡⟨ ⋯-id t ⟩
+        t                                ∎
+
       dist-↑-⦅⦆ :
         ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped}
           ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
@@ -483,6 +493,38 @@ record Terms : Set₁ where
                      wk-telescope (t ∷ₜ Γ₁) (S y) ⋯ (ϕ ↑ m)           ∎)
                     (∋wk/⊢wk _ _ _ _ (⊢ϕ y _ refl))
 
+            -- _,*_ : ∀ {µ₁ µ₂ m} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ : µ₁ –[ K ]→ µ₂} {e : µ₂ ∋/⊢ m} {t : µ₁ ∶⊢ m} →
+            --   Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →
+            --   Γ₂ ∋/⊢   e ∶ (t ⋯ ϕ) →
+            --   Γ₂ ∋*/⊢* (e ∷ₘ ϕ) ∶ (t ∷ₜ Γ₁)
+            -- _,*_ {µ₁} {µ₂} {m} {Γ₁} {Γ₂} {ϕ} {e} {t} ⊢ϕ ⊢e x@Z _ refl =
+            --   subst (Γ₂ ∋/⊢ e ∶_)
+            --         (t ⋯ ϕ                               ≡⟨ {!!} ⟩
+            --          t ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ (e ∷ₘ ϕ)      ≡⟨⟩
+            --          wk-telescope (t ∷ₜ Γ₁) Z ⋯ (e ∷ₘ ϕ) ∎)
+            --         ⊢e
+            -- _,*_ {µ₁} {µ₂} {m} {Γ₁} {Γ₂} {ϕ} {e} {t} ⊢ϕ ⊢e x@(S y) _ refl = {!!}
+
+            ⊢⦅_⦆ : ∀ {m µ} {Γ : Ctx µ} {t : µ ∋/⊢ m} {T : µ ∶⊢ m}
+              → Γ ∋/⊢ t ∶ T 
+              → Γ ∋*/⊢* ⦅ t ⦆ ∶ (T ∷ₜ Γ)
+            ⊢⦅_⦆ {m} {µ} {Γ} {t} {T} ⊢x/t x@Z _ refl =
+              subst (Γ ∋/⊢ t ∶_)
+                    (T                               ≡⟨ sym (⋯-id T) ⟩
+                     T ⋯ id                          ≡⟨ cong (T ⋯_) (sym (~-ext (wk-cancels-⦅⦆ t))) ⟩
+                     T ⋯ (weaken ⦃ Kᵣ ⦄ _ ·ₘ ⦅ t ⦆)  ≡⟨ sym (⋯-assoc T (weaken ⦃ Kᵣ ⦄ _) ⦅ t ⦆) ⟩
+                     T ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ t ⦆     ≡⟨⟩
+                     wk-telescope (T ∷ₜ Γ) Z ⋯ ⦅ t ⦆ ∎)
+                    ⊢x/t
+            ⊢⦅_⦆ {m} {µ} {Γ} {t} {T} ⊢x/t x@(S y) _ refl =
+              subst (Γ ∋/⊢ id/` y ∶_)
+                    (wk-telescope Γ y                              ≡⟨ sym (⋯-id (wk-telescope Γ y)) ⟩
+                     wk-telescope Γ y ⋯ id                         ≡⟨ cong (wk-telescope Γ y ⋯_) (sym (~-ext (wk-cancels-⦅⦆ t))) ⟩
+                     wk-telescope Γ y ⋯ (weaken ⦃ Kᵣ ⦄ _ ·ₘ ⦅ t ⦆) ≡⟨ sym (⋯-assoc (wk-telescope Γ y) (weaken ⦃ Kᵣ ⦄ _) ⦅ t ⦆) ⟩
+                     wk-telescope Γ y ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ t ⦆    ≡⟨⟩
+                     wk-telescope (T ∷ₜ Γ) (S y) ⋯ ⦅ t ⦆           ∎)
+                    (id/⊢` refl)
+
           open TypingKit ⦃ … ⦄ public
 
           infixl  5  _∋*/⊢*[_]_∶_
@@ -528,9 +570,9 @@ record Terms : Set₁ where
                 }
 
             open TypingKit TKᵣ public using () renaming
-              (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_)
+              (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
             open TypingKit TKₛ public using () renaming
-              (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_)
+              (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
 
             -- open TypingKit TKᵣ public using () renaming
             --   (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
