@@ -107,6 +107,7 @@ traversal = record
 open Traversal traversal hiding (_⋯_; ⋯-id)
 --! }
 
+--! Assoc
 ⋯-assoc :
   ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped}
     ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
@@ -130,22 +131,27 @@ open Traversal traversal hiding (_⋯_; ⋯-id)
 ⋯-assoc (t₁ ⇒ t₂)      ϕ₁ ϕ₂ = cong₂ _⇒_ (⋯-assoc t₁ ϕ₁ ϕ₂) (⋯-assoc t₂ ϕ₁ ϕ₂)
 ⋯-assoc ★              ϕ₁ ϕ₂ = refl
 
+--! ComposeTraversal {
 compose-traversal : ComposeTraversal
 compose-traversal = record { ⋯-assoc = ⋯-assoc }
 
 open ComposeTraversal compose-traversal hiding (⋯-assoc)
+--! }
 
 -- Type System -----------------------------------------------------------------
 
+--! Types {
 types : Types
 types = record { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → _ , 𝕜 } }
 
 open Types types
+--! }
 
 variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
   T T₁ T₂ T' T₁' T₂' : µ ∶⊢ m
 
+--! Typing
 data _⊢_∶_ : Ctx µ → µ ⊢ m → µ ∶⊢ m → Set where
   ⊢` : ∀ {x : µ ∋ m} {T : µ ∶⊢ m} →
     Γ ∋ x ∶ T →
@@ -168,11 +174,14 @@ data _⊢_∶_ : Ctx µ → µ ⊢ m → µ ∶⊢ m → Set where
   ⊢τ :
     Γ ⊢ t ∶ ★
 
+--! TypingInst {
 typing : Typing
 typing = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 
 open Typing typing hiding (_⊢_∶_; ⊢`) 
+--! }
 
+--! Preserve
 _⊢⋯_ :
   ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
     ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
@@ -191,13 +200,16 @@ _⊢⋯_ :
                                                  (⊢∙ (⊢t₁ ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)) (⊢t₂ ⊢⋯ ⊢ϕ) (⊢e₁ ⊢⋯ ⊢ϕ))
 ⊢τ ⊢⋯ ⊢ϕ = ⊢τ
 
+--! TypingTraversal {
 typing-traversal : TypingTraversal
 typing-traversal = record { _⊢⋯_ = _⊢⋯_ }
 
 open TypingTraversal typing-traversal hiding (_⊢⋯_)
+--! }
 
 -- Semantics -------------------------------------------------------------------
 
+--! Values {
 mutual
   data Neutral : µ ⊢ m → Set where
     `_  : ∀ (x : µ ∋ m) → Neutral (` x)
@@ -208,7 +220,9 @@ mutual
     λx_     : ∀ (e : (𝕖 ∷ µ) ⊢ 𝕖) → Value (λx e)
     Λα_     : ∀ (e : (𝕥 ∷ µ) ⊢ 𝕖) → Value (Λα e)
     neutral : Neutral e → Value e
+--! }
 
+--! Reduction
 data _↪_ : µ ⊢ m → µ ⊢ m → Set where
   β-λ : ∀ {e₂ : µ ⊢ 𝕖} →
     (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
@@ -232,6 +246,7 @@ data _↪_ : µ ⊢ m → µ ⊢ m → Set where
 
 -- Subject Reduction -----------------------------------------------------------
 
+--! SubjectReduction
 subject-reduction :
   Γ ⊢ e ∶ t →
   e ↪ e' →
