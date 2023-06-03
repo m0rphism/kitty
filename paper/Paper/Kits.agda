@@ -127,20 +127,13 @@ record Terms : Set₁ where
     infixl   5  _⋯_
 
     field
-      _⋯_   :
-        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂ t} {m : Mode t} 
-        → µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
-
-      ⋯-var :
-        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {m : Mode Var} 
-          (x : µ₁ ∋ m) (ϕ : µ₁ –[ K ]→ µ₂)
-        → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
-
-      ⋯-id :
-        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ t} {m : Mode t} 
-          (t : µ ⊢ m)
-        → t ⋯ id ⦃ K ⦄ ≡ t
-
+      _⋯_    :  ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂ t} {m : Mode t} →
+                µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
+      ⋯-var  :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {m : Mode Var} 
+                   (x : µ₁ ∋ m) (ϕ : µ₁ –[ K ]→ µ₂) →
+                (` x) ⋯ ϕ ≡ `/id (x & ϕ)
+      ⋯-id   :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ {µ t} {m : Mode t} (t : µ ⊢ m) →
+                t ⋯ id ⦃ K ⦄ ≡ t
     --! }
 
     --! KitInstances {
