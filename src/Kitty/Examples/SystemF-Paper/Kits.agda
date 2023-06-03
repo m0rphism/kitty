@@ -77,10 +77,6 @@ record Terms : Set₁ where
     _~_ {µ₁ = µ₁} ϕ₁ ϕ₂ = ∀ m (x : µ₁ ∋ m) → ϕ₁ m x ≡ ϕ₂ m x
 
     postulate
-      -- ~-cong-⋯ : 
-      --   ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {ϕ₁ ϕ₂ : µ₁ –[ K ]→ µ₂}
-      --   → ϕ₁ ~ ϕ₂
-      --   → t ⋯ ϕ₁ ≡ t ⋯ ϕ₂
       ~-ext : 
         ∀ {µ₁ µ₂} {ϕ₁ ϕ₂ : Map µ₁ µ₂}
         → ϕ₁ ~ ϕ₂
@@ -180,28 +176,8 @@ record Terms : Set₁ where
           ∀ {µ₁} {µ₂} {m'} {m} (x/t : µ₁ ∋/⊢[ K₁ ] m) (ϕ : µ₁ –[ K₂ ]→ µ₂)
           → wk m' (x/t &/⋯ ϕ) ≡ wk m' x/t &/⋯ (ϕ ↑ m')
 
-        -- -- TODO: we only use ι₂
-        -- -- TODO: we don't need them, if we wrap &/⋯-& in `/id
-        -- ι₁ : ∀ {µ m} → µ ∋/⊢[ K₁ ] m → µ ∋/⊢[ K₁⊔K₂ ] m
-        -- ι₂ : ∀ {µ m} → µ ∋/⊢[ K₂ ] m → µ ∋/⊢[ K₁⊔K₂ ] m
-
-        -- ι₁-`/id : ∀ {µ} {m} (x/t : µ ∋/⊢[ K₁ ] m)
-        --         → `/id x/t ≡ `/id (ι₁ x/t)
-        -- ι₂-`/id : ∀ {µ} {m} (x/t : µ ∋/⊢[ K₂ ] m)
-        --         → `/id x/t ≡ `/id (ι₂ x/t)
-
       _·ₘ_ : ∀ {µ₁ µ₂ µ₃} → µ₁ –[ K₁ ]→ µ₂ → µ₂ –[ K₂ ]→ µ₃ → µ₁ –[ K₁⊔K₂ ]→ µ₃
       (ϕ₁ ·ₘ ϕ₂) _ x = x & ϕ₁ &/⋯ ϕ₂ 
-
-      -- &/⋯-& :
-      --   ∀ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ K₂ ]→ µ₂) 
-      --   → id/` ⦃ K₁ ⦄ x &/⋯ ϕ ≡ ι₂ (x & ϕ)
-      -- &/⋯-& {µ₁} {µ₂} {m} x ϕ = `/id-injective (
-      --     `/id (id/` x &/⋯ ϕ)             ≡⟨ &/⋯-⋯ (id/` x) ϕ ⟩
-      --     `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ        ≡⟨ cong (_⋯ ϕ) (id/`/id ⦃ K₁ ⦄ x) ⟩
-      --     ` x ⋯ ϕ                         ≡⟨ ⋯-var ⦃ K₂ ⦄ x ϕ ⟩
-      --     `/id ⦃ K₂ ⦄ (x & ϕ)             ≡⟨ ι₂-`/id (x & ϕ) ⟩
-      --     `/id ⦃ K₁⊔K₂ ⦄  (ι₂ (x & ϕ)) ∎)
 
       &/⋯-& :
         ∀ {µ₁} {µ₂} {m} (x : µ₁ ∋ m) (ϕ : µ₁ –[ K₂ ]→ µ₂) 
@@ -222,8 +198,6 @@ record Terms : Set₁ where
         `/id ⦃ K₁⊔K₂ ⦄ (id/` Z)                     ≡⟨ id/`/id ⦃ K₁⊔K₂ ⦄ Z ⟩
         ` Z                                         ≡⟨ sym (id/`/id ⦃ K₂ ⦄ Z) ⟩
         `/id ⦃ K₂ ⦄ (id/` Z)                        ≡⟨⟩
-        -- `/id ⦃ K₂ ⦄ (Z & (ϕ₂ ↑ m))                  ≡⟨ ι₂-`/id (Z & (ϕ₂ ↑ m)) ⟩
-        -- `/id ⦃ K₁⊔K₂ ⦄ (ι₂ (Z & (ϕ₂ ↑ m)))          ≡⟨ sym (cong `/id (&/⋯-& (id/` Z) (ϕ₂ ↑ m))) ⟩
         `/id ⦃ K₂ ⦄ (Z & (ϕ₂ ↑ m))                  ≡⟨ sym (&/⋯-& (id/` Z) (ϕ₂ ↑ m)) ⟩
         `/id ⦃ K₁⊔K₂ ⦄ (id/` Z &/⋯ (ϕ₂ ↑ m))        ≡⟨⟩
         `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ m) &/⋯ (ϕ₂ ↑ m))  ≡⟨⟩
@@ -255,21 +229,6 @@ record Terms : Set₁ where
             {µ₁ µ₂ µ₃ t} {m : Mode t}
             (t : µ₁ ⊢ m) (ϕ₁ : µ₁ –[ K₁ ]→ µ₂) (ϕ₂ : µ₂ –[ K₂ ]→ µ₃)
           → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₘ ϕ₂)
-
-      -- ↑-wk :
-      --   ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ C : ComposeKit K Kᵣ K ⦄ 
-      --     {µ₁ µ₂} (ϕ : µ₁ –[ K ]→ µ₂) m
-      --   → (ϕ ·ₘ weaken m) ~ (λ _ x → (x & weaken m) & (ϕ ↑ m))
-      -- ↑-wk {µ₁} {µ₂} ϕ m mx x =
-      --     (ϕ ·ₘ weaken m) mx x   ≡⟨⟩
-      --     x & ϕ &/⋯ weaken m     ≡⟨ `/id-injective (
-      --       `/id (x & ϕ &/⋯ weaken m)     ≡⟨ &/⋯-⋯ (x & ϕ) (weaken m) ⟩
-      --       `/id (x & ϕ) ⋯ weaken m       ≡⟨ wk-`/id m (x & ϕ) ⟩
-      --       `/id (wk m (x & ϕ))           ∎
-      --       )
-      --     ⟩
-      --     wk m (x & ϕ)           ≡⟨⟩
-      --     x & weaken m & (ϕ ↑ m) ∎
 
       ↑-wk :
         ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
@@ -438,14 +397,9 @@ record Terms : Set₁ where
             --   Γ₁ ⊢ e ∶ t →
             --   Γ₂ ⊢ e ∶ t
 
-          -- _⊢*_∶_ : ∀ {µ₁ µ₂} → Ctx µ₂ → µ₁ –[ Kₛ ]→ µ₂ → Ctx µ₁ → Set
-          -- _⊢*_∶_ {µ₁} {µ₂} Γ₂ ϕ Γ₁ =
-          --   ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ⊢ ↑ᵗ m₁) (⊢x : Γ₁ ∋ x ∶ t)
-          --   → Γ₂ ⊢ (x & ϕ) ∶ t ⋯ ϕ
-
           record TypingKit {_∋/⊢_ : Scoped} (K : Kit _∋/⊢_) (W : WkKit K) (C₁ : ComposeKit K Kᵣ K) (C₂ : ComposeKit K K K) : Set₁ where
-            -- infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
-            -- infixl  6  _∋↑/⊢↑_
+            infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
+            infixl  6  _∋↑/⊢↑_
 
             private instance _ = K; _ = W; _ = C₁; _ = C₂
 
@@ -490,18 +444,6 @@ record Terms : Set₁ where
                      wk-telescope Γ₁ y ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ (ϕ ↑ m)    ≡⟨⟩
                      wk-telescope (t ∷ₜ Γ₁) (S y) ⋯ (ϕ ↑ m)           ∎)
                     (∋wk/⊢wk _ _ _ _ (⊢ϕ y _ refl))
-
-            -- _,*_ : ∀ {µ₁ µ₂ m} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {ϕ : µ₁ –[ K ]→ µ₂} {e : µ₂ ∋/⊢ m} {t : µ₁ ∶⊢ m} →
-            --   Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →
-            --   Γ₂ ∋/⊢   e ∶ (t ⋯ ϕ) →
-            --   Γ₂ ∋*/⊢* (e ∷ₘ ϕ) ∶ (t ∷ₜ Γ₁)
-            -- _,*_ {µ₁} {µ₂} {m} {Γ₁} {Γ₂} {ϕ} {e} {t} ⊢ϕ ⊢e x@Z _ refl =
-            --   subst (Γ₂ ∋/⊢ e ∶_)
-            --         (t ⋯ ϕ                               ≡⟨ {!!} ⟩
-            --          t ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ (e ∷ₘ ϕ)      ≡⟨⟩
-            --          wk-telescope (t ∷ₜ Γ₁) Z ⋯ (e ∷ₘ ϕ) ∎)
-            --         ⊢e
-            -- _,*_ {µ₁} {µ₂} {m} {Γ₁} {Γ₂} {ϕ} {e} {t} ⊢ϕ ⊢e x@(S y) _ refl = {!!}
 
             ⊢⦅_⦆ : ∀ {m µ} {Γ : Ctx µ} {t : µ ∋/⊢ m} {T : µ ∶⊢ m}
               → Γ ∋/⊢ t ∶ T 
@@ -563,15 +505,8 @@ record Terms : Set₁ where
                 ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t'
                 }
 
-            open TypingKit TKᵣ public using () renaming
-              (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
-            open TypingKit TKₛ public using () renaming
-              (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
-
-            -- open TypingKit TKᵣ public using () renaming
-            --   (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
-            -- open TypingKit TKₛ public using () renaming
-            --   (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
+            open TypingKit TKᵣ public using () renaming (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
+            open TypingKit TKₛ public using () renaming (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
 
             -- Renaming preserves typing
 
