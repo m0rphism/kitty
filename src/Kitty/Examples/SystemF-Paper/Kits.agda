@@ -374,9 +374,6 @@ record Terms : Set₁ where
         wk-drop-∈ (here _)  t = t ⋯ weaken ⦃ Kᵣ ⦄ _
         wk-drop-∈ (there x) t = wk-drop-∈ x t ⋯ weaken ⦃ Kᵣ ⦄ _
 
-        -- Our context is defined as a telescope.
-        -- This function automatically weakens all the types in a `Ctx µ` such that they
-        -- refer to `µ` instead of a `µ`-suffix.
         wk-telescope : ∀ {µ m} → Ctx µ → µ ∋ m → µ ∶⊢ m
         wk-telescope Γ x = wk-drop-∈ x (Γ _ x)
 
@@ -391,11 +388,6 @@ record Terms : Set₁ where
 
             ⊢` : ∀ {µ m} {Γ : Ctx µ} {x : µ ∋ m} {t} →
                 Γ ∋ x ∶ t → Γ ⊢ ` x ∶ t
-
-            -- ≡ᶜ-cong-⊢ : ∀ {µ m} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ m} {t : µ ⊢ ↑ᵗ m} → 
-            --   Γ₁ ≡ᶜ Γ₂ →
-            --   Γ₁ ⊢ e ∶ t →
-            --   Γ₂ ⊢ e ∶ t
 
           record TypingKit {_∋/⊢_ : Scoped} (K : Kit _∋/⊢_) (W : WkKit K) (C₁ : ComposeKit K Kᵣ K) (C₂ : ComposeKit K K K) : Set₁ where
             infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
