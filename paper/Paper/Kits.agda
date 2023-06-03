@@ -36,6 +36,8 @@ record Terms : Set₁ where
   Scoped : Set₁
   Scoped = List (Mode Var) → Mode Var → Set
 
+  variable _∋/⊢_  _∋/⊢₁_ _∋/⊢₂_ : Scoped
+
   --! Kit {
   record Kit (_∋/⊢_ : Scoped) : Set where
     field
@@ -111,12 +113,10 @@ record Terms : Set₁ where
       id m (S x)       ∎
 
   --! KitNotation {
-  _∋/⊢[_]_ : ∀  {_∋/⊢_ : Scoped} →
-                List (Mode Var) → Kit _∋/⊢_ → Mode Var → Set
+  _∋/⊢[_]_ : List (Mode Var) → Kit _∋/⊢_ → Mode Var → Set
   _∋/⊢[_]_ {_∋/⊢_} µ K m = µ ∋/⊢ m
 
-  _–[_]→_ : ∀  {_∋/⊢_ : Scoped} →
-               List (Mode Var) → Kit _∋/⊢_ → List (Mode Var) → Set
+  _–[_]→_ : List (Mode Var) → Kit _∋/⊢_ → List (Mode Var) → Set
   µ₁ –[ K ]→ µ₂ = Map µ₁ µ₂ where open Kit K
 
   open Kit ⦃ … ⦄ public
@@ -128,16 +128,16 @@ record Terms : Set₁ where
 
     field
       _⋯_   :
-        ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂ t} {m : Mode t} 
+        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂ t} {m : Mode t} 
         → µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
 
       ⋯-var :
-        ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {m : Mode Var} 
+        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} {m : Mode Var} 
           (x : µ₁ ∋ m) (ϕ : µ₁ –[ K ]→ µ₂)
         → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
 
       ⋯-id :
-        ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ t} {m : Mode t} 
+        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ t} {m : Mode t} 
           (t : µ ⊢ m)
         → t ⋯ id ⦃ K ⦄ ≡ t
 
@@ -178,7 +178,7 @@ record Terms : Set₁ where
 
     -- Counterpart to wk-id/`
     --! WkKit {
-    record WkKit {_∋/⊢_ : Scoped} (K : Kit _∋/⊢_): Set₁ where
+    record WkKit (K : Kit _∋/⊢_): Set₁ where
       private instance _ = K
       field
         wk-`/id :
@@ -198,7 +198,7 @@ record Terms : Set₁ where
     --! }
 
     --! ComposeKit {
-    record ComposeKit {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped} (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_) (K₁⊔K₂ : Kit _∋/⊢_) : Set where
+    record ComposeKit (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_) (K₁⊔K₂ : Kit _∋/⊢_) : Set where
       infixl  8  _&/⋯_
 
       private instance _ = K₁; _ = K₂; _ = K₁⊔K₂
@@ -258,7 +258,7 @@ record Terms : Set₁ where
 
     --! ComposeKitNotation {
     _·[_]_ :
-      ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped} {K₁ : Kit _∋/⊢₁_} {K₂ : Kit _∋/⊢₂_} {K₁⊔K₂ : Kit _∋/⊢_} {µ₁ µ₂ µ₃}
+      ∀ {K₁ : Kit _∋/⊢₁_} {K₂ : Kit _∋/⊢₂_} {K₁⊔K₂ : Kit _∋/⊢_} {µ₁ µ₂ µ₃}
       → µ₁ –[ K₁ ]→ µ₂ → ComposeKit K₁ K₂ K₁⊔K₂ → µ₂ –[ K₂ ]→ µ₃ → µ₁ –[ K₁⊔K₂ ]→ µ₃
     ϕ₁ ·[ C ] ϕ₂ = ϕ₁ ·ₘ ϕ₂ where open ComposeKit C
 
@@ -269,8 +269,7 @@ record Terms : Set₁ where
     record ComposeTraversal : Set₁ where
       field
         ⋯-assoc :
-          ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped}
-            ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
+          ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
             ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
             {µ₁ µ₂ µ₃ t} {m : Mode t}
             (t : µ₁ ⊢ m) (ϕ₁ : µ₁ –[ K₁ ]→ µ₂) (ϕ₂ : µ₂ –[ K₂ ]→ µ₃)
@@ -279,9 +278,9 @@ record Terms : Set₁ where
 
       --! CommLiftWeaken
       ↑-wk :
-        ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+        ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
            ⦃ C : ComposeKit K Kᵣ K ⦄ ⦃ C : ComposeKit Kᵣ K K ⦄ 
-          {µ₁ µ₂} (ϕ : µ₁ –[ K ]→ µ₂) m
+           {µ₁ µ₂} (ϕ : µ₁ –[ K ]→ µ₂) m
         → (ϕ ·ₘ weaken m) ~ (weaken m ·ₘ (ϕ ↑ m))
       ↑-wk {µ₁} {µ₂} ϕ m mx x = `/id-injective (
           `/id ((ϕ ·ₘ weakenᵣ m) mx x)       ≡⟨⟩
@@ -295,9 +294,9 @@ record Terms : Set₁ where
 
       --! CommLiftWeakenTraverse
       ⋯-↑-wk :
-        ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
-          ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
-          {µ₁ µ₂ mt} {m : Mode mt} (t : µ₁ ⊢ m) (ϕ : µ₁ –[ K ]→ µ₂) m
+        ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+           ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
+           {µ₁ µ₂ mt} {m : Mode mt} (t : µ₁ ⊢ m) (ϕ : µ₁ –[ K ]→ µ₂) m
         → t ⋯ ϕ ⋯ weakenᵣ m ≡ t ⋯ weakenᵣ m ⋯ (ϕ ↑ m)
       ⋯-↑-wk t ϕ m =
         t ⋯ ϕ ⋯ weakenᵣ m          ≡⟨ ⋯-assoc t ϕ (weakenᵣ m) ⟩
@@ -307,8 +306,7 @@ record Terms : Set₁ where
 
       --! ComposeKitInstances {
       instance
-        Cᵣ : ∀ {_∋/⊢_ : Scoped} ⦃ K₂ : Kit _∋/⊢_ ⦄
-             → ComposeKit Kᵣ K₂ K₂
+        Cᵣ : ∀ ⦃ K₂ : Kit _∋/⊢_ ⦄ → ComposeKit Kᵣ K₂ K₂
         Cᵣ = record
           { _&/⋯_ = _&_
           ; &/⋯-⋯ = λ x ϕ →
@@ -317,7 +315,7 @@ record Terms : Set₁ where
           ; &/⋯-wk-↑ = λ x ϕ → refl
           }
 
-        Cₛ : ∀ {_∋/⊢_ : Scoped} ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄ ⦃ C : ComposeKit K₂ Kᵣ K₂ ⦄
+        Cₛ : ∀ ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄ ⦃ C : ComposeKit K₂ Kᵣ K₂ ⦄
              → ComposeKit Kₛ K₂ Kₛ
         Cₛ ⦃ C = C ⦄ = record
           { _&/⋯_    = _⋯_
@@ -338,8 +336,7 @@ record Terms : Set₁ where
 
       --! WeakenCancelsSingle
       wk-cancels-⦅⦆ :
-        ∀ {_∋/⊢_  : Scoped} ⦃ K : Kit _∋/⊢_ ⦄
-          {µ m} (x/t : µ ∋/⊢[ K ] m) 
+        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ m} (x/t : µ ∋/⊢[ K ] m) 
         → (weakenᵣ m ·[ Cᵣ ] ⦅ x/t ⦆) ~ id
       wk-cancels-⦅⦆ ⦃ K ⦄ x/t mx x = `/id-injective (
           `/id ⦃ K ⦄ (x & (weakenᵣ _ ·[ Cᵣ ] ⦅ x/t ⦆)) ≡⟨⟩
@@ -350,8 +347,7 @@ record Terms : Set₁ where
 
       --! WeakenCancelsSingleTraverse
       wk-cancels-⦅⦆-⋯ :
-        ∀ {_∋/⊢_  : Scoped} ⦃ K : Kit _∋/⊢_ ⦄
-          {µ m mt} {m' : Mode mt} (t : µ ⊢ m') (x/t : µ ∋/⊢[ K ] m) 
+        ∀ ⦃ K : Kit _∋/⊢_ ⦄ {µ m mt} {m' : Mode mt} (t : µ ⊢ m') (x/t : µ ∋/⊢[ K ] m) 
         → t ⋯ weakenᵣ m ⋯ ⦅ x/t ⦆ ≡ t
       wk-cancels-⦅⦆-⋯ t x/t =
         t ⋯ weakenᵣ _ ⋯ ⦅ x/t ⦆    ≡⟨ ⋯-assoc t (weakenᵣ _) ⦅ x/t ⦆ ⟩
@@ -361,10 +357,9 @@ record Terms : Set₁ where
 
       --! DistLiftSingle
       dist-↑-⦅⦆ :
-        ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped}
-          ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
-          ⦃ W₂ : WkKit K₂ ⦄ ⦃ C₁ : ComposeKit K₁ K₂ K ⦄ ⦃ C₂ : ComposeKit K₂ K K ⦄
-          {µ₁ µ₂ m} (x/t : µ₁ ∋/⊢[ K₁ ] m) (ϕ : µ₁ –[ K₂ ]→ µ₂) →
+        ∀  ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
+           ⦃ W₂ : WkKit K₂ ⦄ ⦃ C₁ : ComposeKit K₁ K₂ K ⦄ ⦃ C₂ : ComposeKit K₂ K K ⦄
+           {µ₁ µ₂ m} (x/t : µ₁ ∋/⊢[ K₁ ] m) (ϕ : µ₁ –[ K₂ ]→ µ₂) →
         (⦅ x/t ⦆ ·[ C₁ ] ϕ) ~ ((ϕ ↑ m) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆)
       dist-↑-⦅⦆ ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ {µ₁} {µ₂} {m} x/t ϕ mx x@Z = `/id-injective (
           `/id ⦃ K ⦄ (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))               ≡⟨⟩
@@ -385,11 +380,10 @@ record Terms : Set₁ where
 
       --! DistLiftSingleTraverse
       dist-↑-⦅⦆-⋯ :
-        ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped}
-          ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
-          ⦃ W₁ : WkKit K₁ ⦄ ⦃ W₂ : WkKit K₂ ⦄ ⦃ C₁ : ComposeKit K₁ K₂ K ⦄ ⦃ C₂ : ComposeKit K₂ K K ⦄
-          {µ₁ µ₂ m mt} {m' : Mode mt} (t : (m ∷ µ₁) ⊢ m')
-          (x/t : µ₁ ∋/⊢[ K₁ ] m) (ϕ : µ₁ –[ K₂ ]→ µ₂) →
+        ∀  ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
+           ⦃ W₁ : WkKit K₁ ⦄ ⦃ W₂ : WkKit K₂ ⦄ ⦃ C₁ : ComposeKit K₁ K₂ K ⦄ ⦃ C₂ : ComposeKit K₂ K K ⦄
+           {µ₁ µ₂ m mt} {m' : Mode mt} (t : (m ∷ µ₁) ⊢ m')
+           (x/t : µ₁ ∋/⊢[ K₁ ] m) (ϕ : µ₁ –[ K₂ ]→ µ₂) →
         t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ m) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆
       dist-↑-⦅⦆-⋯ t x/t ϕ =
         t ⋯ ⦅ x/t ⦆ ⋯ ϕ                  ≡⟨ ⋯-assoc t ⦅ x/t ⦆ ϕ ⟩
@@ -454,7 +448,7 @@ record Terms : Set₁ where
         --! }
 
           --! TypingKit {
-          record TypingKit {_∋/⊢_ : Scoped} (K : Kit _∋/⊢_) (W : WkKit K) (C₁ : ComposeKit K Kᵣ K) (C₂ : ComposeKit K K K) : Set₁ where
+          record TypingKit (K : Kit _∋/⊢_) (W : WkKit K) (C₁ : ComposeKit K Kᵣ K) (C₂ : ComposeKit K K K) : Set₁ where
             infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
             infixl  6  _∋↑/⊢↑_
 
@@ -527,8 +521,8 @@ record Terms : Set₁ where
 
           infixl  5  _∋*/⊢*[_]_∶_
           _∋*/⊢*[_]_∶_ :
-            ∀ {_∋/⊢_ : Scoped} {K : Kit _∋/⊢_}
-              {W : WkKit K} {C₁ : ComposeKit K Kᵣ K} {C₂ : ComposeKit K K K}
+            ∀ {K : Kit _∋/⊢_} {W : WkKit K}
+              {C₁ : ComposeKit K Kᵣ K} {C₂ : ComposeKit K K K}
               {µ₁ µ₂}
             → Ctx µ₂ → TypingKit K W C₁ C₂ → µ₁ –[ K ]→ µ₂ → Ctx µ₁ → Set
           Γ₂ ∋*/⊢*[ TK ] f ∶ Γ₁ = Γ₂ ∋*/⊢* f ∶ Γ₁ where instance _ = TK
@@ -540,7 +534,7 @@ record Terms : Set₁ where
 
             field
               _⊢⋯_ :
-                ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+                ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
                   ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
                   ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
                   ⦃ TK : TypingKit K W C₁ C₂ ⦄
