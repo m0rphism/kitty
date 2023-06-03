@@ -276,15 +276,12 @@ record Terms : Set₁ where
           }
 
       Cᵣᵣ : ComposeKit Kᵣ Kᵣ Kᵣ
-      Cᵣᵣ = Cᵣ
-
       Cᵣₛ : ComposeKit Kᵣ Kₛ Kₛ
-      Cᵣₛ = Cᵣ
-
       Cₛᵣ : ComposeKit Kₛ Kᵣ Kₛ
-      Cₛᵣ = Cₛ
-
       Cₛₛ : ComposeKit Kₛ Kᵣ Kₛ
+      Cᵣᵣ = Cᵣ
+      Cᵣₛ = Cᵣ
+      Cₛᵣ = Cₛ
       Cₛₛ = Cₛ
 
       wk-cancels-⦅⦆ :
