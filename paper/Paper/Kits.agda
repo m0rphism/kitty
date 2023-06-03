@@ -1,4 +1,3 @@
-\begin{code}
 module Paper.Kits where
 
 open import Data.Nat using (ℕ; zero; suc)
@@ -519,5 +518,3 @@ record Terms : Set₁ where
                     Γ₂ ⊢* σ ∶ Γ₁ →
                     Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
             _⊢⋯ₛ_ = _⊢⋯_
-
-\end{code}

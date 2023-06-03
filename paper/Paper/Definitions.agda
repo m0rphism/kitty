@@ -1,5 +1,6 @@
-\begin{code}
 module Paper.Definitions where
+
+--! F >
 
 open import Paper.Kits
 open import Data.List using (List; []; _∷_)
@@ -17,6 +18,7 @@ infix   7  `_
 
 -- Modes -----------------------------------------------------------------------
 
+--! Mode
 data Mode : ModeTy → Set where
   𝕖  : Mode Var    -- Expressions
   𝕥  : Mode Var    -- Types
@@ -30,7 +32,7 @@ variable
 
 -- Syntax ----------------------------------------------------------------------
 
--- Expressions, Types, and Kinds
+--! Syntax
 data _⊢_ : List (Mode Var) → Mode mt → Set where
   `_        : ∀ {m} → µ ∋ m → µ ⊢ m        -- Term and Type Variables
   λx_       : (𝕖 ∷ µ) ⊢ 𝕖 → µ ⊢ 𝕖          -- Term Abstraction
@@ -49,6 +51,7 @@ variable
 
 -- Substitution & Lemmas -------------------------------------------------------
 
+--! Terms {
 terms : Terms
 terms = record
   { Mode         = Mode
@@ -58,7 +61,9 @@ terms = record
   }
 
 open Terms terms hiding (Mode; _⊢_; `_)
+--! }
 
+--! TraversalOp
 _⋯_ :
   ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ₁ µ₂} 
   → µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
@@ -71,6 +76,7 @@ _⋯_ :
 (t₁ ⇒ t₂)       ⋯ ϕ = (t₁ ⋯ ϕ) ⇒ (t₂ ⋯ ϕ)
 ★               ⋯ ϕ = ★
 
+--! TraversalId
 ⋯-id :
   ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ {µ} (t : µ ⊢ m)
   → t ⋯ id ⦃ K ⦄ ≡ t
@@ -90,6 +96,7 @@ _⋯_ :
 ⋯-id (t₁ ⇒ t₂)       = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
 ⋯-id ★               = refl
 
+--! Traversal {
 traversal : Traversal
 traversal = record
   { _⋯_   = _⋯_
@@ -98,6 +105,7 @@ traversal = record
   }
 
 open Traversal traversal hiding (_⋯_; ⋯-id)
+--! }
 
 ⋯-assoc :
   ∀ {_∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ : Scoped}
@@ -235,5 +243,3 @@ subject-reduction (⊢Λ ⊢e)                      (ξ-Λ e↪e')    = ⊢Λ (s
 subject-reduction (⊢· ⊢e₁ ⊢e₂)                 (ξ-·₁ e₁↪e₁') = ⊢· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (⊢· ⊢e₁ ⊢e₂)                 (ξ-·₂ e₂↪e₂') = ⊢· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
 subject-reduction (⊢∙ ⊢t₁ ⊢t₂ ⊢e₁)             (ξ-∙₁ e₁↪e₁') = ⊢∙ ⊢t₁ ⊢t₂ (subject-reduction ⊢e₁ e₁↪e₁')
-
-\end{code}
