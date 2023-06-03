@@ -8,12 +8,13 @@ SRCS=$(wildcard $(LAGDA_DIR)/*.agda)
 TGTS=$(patsubst $(LAGDA_DIR)/%.agda,$(CACHE_DIR)/$(LAGDA_DIR)/%.tex,$(SRCS))
 TGTS_INPUT=$(patsubst $(LAGDA_DIR)/%.agda,$(LAGDA_DIR)/%,$(SRCS))
 
-.PHONY: all
+.PHONY: all paper
 
 all: paper
 
-paper: $(SRCS)
-	./agdatex.py $(CACHE_DIR) $(SRCS)
+paper: $(MAIN_PDF)
+
+$(MAIN_PDF): $(TGTS) $(MAIN_TEX)
 	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex	                               ;\
 	cp -f $(EXTRA_FILES) $(CACHE_DIR)/				                           ;\
 	cd $(CACHE_DIR)												                               ;\
@@ -27,6 +28,9 @@ paper: $(SRCS)
 	pdflatex main.tex
 
 	cp $(CACHE_DIR)/main.pdf $(MAIN_PDF)
+
+$(TGTS): $(SRCS)
+	./agdatex.py $(CACHE_DIR) $(SRCS)
 
 # $(CACHE_DIR)/$(LAGDA_DIR)/%.tex: $(LAGDA_DIR)/%.lagda.tex
 # 	agda --latex --only-scope-checking --latex-dir=$(CACHE_DIR) $^

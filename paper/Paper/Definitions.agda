@@ -2,6 +2,7 @@ module Paper.Definitions where
 
 --! F >
 
+
 open import Paper.Kits
 open import Data.List using (List; []; _∷_)
 open import Data.Product using (_,_)
