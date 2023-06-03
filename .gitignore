@@ -1,6 +1,8 @@
 *.agdai
 paper/_build
 paper/**/auto/
+paper_old/_build
+paper_old/**/auto/
 presentation/_build
 presentation/**/auto/
 *.pdf

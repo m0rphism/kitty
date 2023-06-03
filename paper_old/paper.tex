@@ -1,7 +1,5 @@
-% \documentclass[sigplan, screen]{acmart}
+\documentclass[sigplan, screen]{acmart}
 % \documentclass[sigplan, screen, anonymous, review, authordraft]{acmart}
-% \documentclass[sigplan,10pt,anonymous,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
-\documentclass[sigplan,10pt]{acmart}
 
 \bibliographystyle{ACM-Reference-Format}
 
@@ -27,7 +25,6 @@
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{stmaryrd}
 
 \usepackage[links]{agda}
 
@@ -47,60 +44,29 @@
 \newunicodechar{∷}{\ensuremath{\mathop{::}}}
 \newunicodechar{⊢}{\ensuremath{\vdash}}
 \newunicodechar{∀}{\ensuremath{\forall}}
-\newunicodechar{ˣ}{\ensuremath{{}^{\textsf{x}}}}
-\newunicodechar{ᵅ}{\ensuremath{{}^{\textsf{\alpha}}}}
-\newunicodechar{ᵗ}{\ensuremath{{}^{\textsf{t}}}}
-\newunicodechar{ᵣ}{\ensuremath{{}_{\textsf{r}}}}
-\newunicodechar{ᵥ}{\ensuremath{{}_{\textsf{v}}}}
 \newunicodechar{₁}{\ensuremath{{}_1}}
 \newunicodechar{₂}{\ensuremath{{}_2}}
-\newunicodechar{₃}{\ensuremath{{}_3}}
-\newunicodechar{ₖ}{\ensuremath{{}_{\textsf{k}}}}
-\newunicodechar{ₘ}{\ensuremath{{}_{\textsf{m}}}}
+\newunicodechar{ᵣ}{\ensuremath{{}_{\textsf{r}}}}
 \newunicodechar{ₛ}{\ensuremath{{}_{\textsf{s}}}}
-\newunicodechar{ₜ}{\ensuremath{{}_{\textsf{t}}}}
 \newunicodechar{→}{\ensuremath{\to}}
 \newunicodechar{◆}{\ensuremath{\diamond}}
 \newunicodechar{⊤}{\ensuremath{\top}}
 \newunicodechar{★}{\ensuremath{\star}}
+\newunicodechar{ˣ}{\ensuremath{{}^{\textsf{x}}}}
+\newunicodechar{ᵅ}{\ensuremath{{}^{\textsf{\alpha}}}}
+\newunicodechar{ᵥ}{\ensuremath{{}_{\textsf{v}}}}
+\newunicodechar{ₜ}{\ensuremath{{}_{\textsf{t}}}}
 \newunicodechar{𝕖}{\ensuremath{\mathbb{e}}}
 \newunicodechar{𝕥}{\ensuremath{\mathbb{t}}}
 \newunicodechar{𝕜}{\ensuremath{\mathbb{k}}}
 \newunicodechar{∙}{\ensuremath{\bullet}}
-\newunicodechar{↪}{\ensuremath{\hookrightarrow}}
-\newunicodechar{∶}{\ensuremath{:}}
-\newunicodechar{⋯}{\ensuremath{\cdot\cdot\cdot}}
-\newunicodechar{⦅}{\ensuremath{\llparenthesis}}
-\newunicodechar{⦆}{\ensuremath{\rrparenthesis}}
-\newunicodechar{⟦}{\ensuremath{\llbracket}}
-\newunicodechar{⟧}{\ensuremath{\rrbracket}}
-\newunicodechar{⦃}{\ensuremath{\{\!\!\{}}
-\newunicodechar{⦄}{\ensuremath{\}\!\!\}}}
-\newunicodechar{α}{\ensuremath{\alpha}}
-\newunicodechar{λ}{\ensuremath{\lambda}}
-\newunicodechar{Λ}{\ensuremath{\Lambda}}
-\newunicodechar{ϕ}{\ensuremath{\phi}}
-\newunicodechar{Γ}{\ensuremath{\Gamma}}
-\newunicodechar{∎}{\ensuremath{\blacksquare}}
-% \newunicodechar{∎}{\ensuremath{\qed}}
-\newunicodechar{↑}{\ensuremath{\uparrow}}
-\newunicodechar{∋}{\ensuremath{\ni}}
-\newunicodechar{∈}{\ensuremath{\in}}
-\newunicodechar{∃}{\ensuremath{\exists}}
-\newunicodechar{ℓ}{\ensuremath{\ell}}
-\newunicodechar{⊔}{\ensuremath{\sqcup}}
-\newunicodechar{ρ}{\ensuremath{\rho}}
-\newunicodechar{σ}{\ensuremath{\sigma}}
-\newunicodechar{τ}{\ensuremath{\tau}}
-\newunicodechar{ξ}{\ensuremath{\xi}}
-\newunicodechar{β}{\ensuremath{\beta}}
 
 % \newunicodechar{Γ}{\ensuremath{\texttt{\Gamma}}}
 % \newunicodechar{λ}{\ensuremath{\texttt{\lambda}}}
 
 % \usepackage{cite}
 % \usepackage{DejaVuSansMono}
-% \usepackage{alphabeta} % Make greek letter macros also work in text-mode.
+\usepackage{alphabeta} % Make greek letter macros also work in text-mode.
 
 \usepackage{microtype}
 \DisableLigatures[-]{encoding=T1}
