@@ -19,7 +19,7 @@ infix   7  `_
 data Mode : ModeTy → Set where
   𝕖 : Mode Var   -- Expressions
   𝕥 : Mode Var   -- Types
-  𝕜 : Mode Term  -- Kinds
+  𝕜 : Mode NoVar -- Kinds
 
 variable
   mt                        : ModeTy

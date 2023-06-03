@@ -18,7 +18,7 @@ pattern Z = here refl
 pattern S x = there x
 
 data ModeTy : Set where
-  Var Term : ModeTy
+  Var NoVar : ModeTy
 
 record Terms : Set₁ where
   field
