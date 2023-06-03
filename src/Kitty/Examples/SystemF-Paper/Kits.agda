@@ -98,18 +98,6 @@ record Terms : Set₁ where
 
   open Kit ⦃ … ⦄ public
 
-  instance
-    Kᵣ : Kit _∋_
-    Kᵣ = record
-      { id/`           = λ x → x
-      ; `/id           = `_
-      ; id/`/id        = λ x → refl
-      ; id/`-injective = λ eq → eq
-      ; `/id-injective = `-injective
-      ; wk             = λ m' x → there x
-      ; wk-id/`        = λ m' x → refl
-      }
-
   record Traversal : Set₁ where
     infixl   5  _⋯_
 
@@ -129,6 +117,17 @@ record Terms : Set₁ where
         → t ⋯ id ⦃ K ⦄ ≡ t
 
     instance
+      Kᵣ : Kit _∋_
+      Kᵣ = record
+        { id/`           = λ x → x
+        ; `/id           = `_
+        ; id/`/id        = λ x → refl
+        ; id/`-injective = λ eq → eq
+        ; `/id-injective = `-injective
+        ; wk             = λ m' x → there x
+        ; wk-id/`        = λ m' x → refl
+        }
+
       Kₛ : Kit _⊢_
       Kₛ = record
         { id/`           = `_
@@ -142,13 +141,18 @@ record Terms : Set₁ where
                                     ` S x             ∎
         }
 
+    open Kit Kᵣ public using () renaming 
+      (Map to _→ᵣ_; wkm to wkmᵣ; _∷ₘ_ to _∷ᵣ_; _↑_ to _↑ᵣ_; id to idᵣ; ⦅_⦆ to ⦅_⦆ᵣ; weaken to weakenᵣ)
+    open Kit Kₛ public using () renaming 
+      (Map to _→ₛ_; wkm to wkmₛ; _∷ₘ_ to _∷ₛ_; _↑_ to _↑ₛ_; id to idₛ; ⦅_⦆ to ⦅_⦆ₛ; weaken to weakenₛ)
+
     -- Counterpart to wk-id/`
     record WkKit {_∋/⊢_ : Scoped} (K : Kit _∋/⊢_): Set₁ where
       private instance _ = K
       field
         wk-`/id :
           ∀ m {µ m'} (x/t : µ ∋/⊢ m')
-          → `/id x/t ⋯ weaken ⦃ Kᵣ ⦄ m ≡ `/id (wk m x/t)
+          → `/id x/t ⋯ weakenᵣ m ≡ `/id (wk m x/t)
 
     instance
       Wᵣ : WkKit Kᵣ
@@ -236,25 +240,25 @@ record Terms : Set₁ where
           {µ₁ µ₂} (ϕ : µ₁ –[ K ]→ µ₂) m
         → (ϕ ·ₘ weaken m) ~ (weaken m ·ₘ (ϕ ↑ m))
       ↑-wk {µ₁} {µ₂} ϕ m mx x = `/id-injective (
-          `/id ((ϕ ·ₘ weaken ⦃ Kᵣ ⦄ m) mx x)       ≡⟨⟩
-          `/id (x & ϕ &/⋯ weaken ⦃ Kᵣ ⦄ m)         ≡⟨ &/⋯-⋯ (x & ϕ) (weaken ⦃ Kᵣ ⦄ m) ⟩
-          `/id (`/id (x & ϕ) ⋯ weaken ⦃ Kᵣ ⦄ m)    ≡⟨ wk-`/id m (x & ϕ) ⟩
+          `/id ((ϕ ·ₘ weakenᵣ m) mx x)       ≡⟨⟩
+          `/id (x & ϕ &/⋯ weakenᵣ m)         ≡⟨ &/⋯-⋯ (x & ϕ) (weakenᵣ m) ⟩
+          `/id (`/id (x & ϕ) ⋯ weakenᵣ m)    ≡⟨ wk-`/id m (x & ϕ) ⟩
           `/id (S x & (ϕ ↑ m))                     ≡⟨ sym (&/⋯-& (S x) (ϕ ↑ m)) ⟩
           `/id (S x &/⋯ (ϕ ↑ m))                   ≡⟨⟩
-          `/id (x & weaken ⦃ Kᵣ ⦄ m &/⋯ (ϕ ↑ m))   ≡⟨⟩
-          `/id ((weaken ⦃ Kᵣ ⦄ m ·ₘ (ϕ ↑ m)) mx x) ∎
+          `/id (x & weakenᵣ m &/⋯ (ϕ ↑ m))   ≡⟨⟩
+          `/id ((weakenᵣ m ·ₘ (ϕ ↑ m)) mx x) ∎
         )
 
       ⋯-↑-wk :
         ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
           ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
           {µ₁ µ₂ mt} {m : Mode mt} (t : µ₁ ⊢ m) (ϕ : µ₁ –[ K ]→ µ₂) m
-        → t ⋯ ϕ ⋯ weaken ⦃ Kᵣ ⦄ m ≡ t ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ (ϕ ↑ m)
+        → t ⋯ ϕ ⋯ weakenᵣ m ≡ t ⋯ weakenᵣ m ⋯ (ϕ ↑ m)
       ⋯-↑-wk t ϕ m =
-        t ⋯ ϕ ⋯ weaken ⦃ Kᵣ ⦄ m          ≡⟨ ⋯-assoc t ϕ (weaken ⦃ Kᵣ ⦄ m) ⟩
-        t ⋯ (ϕ ·ₘ weaken ⦃ Kᵣ ⦄ m)       ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ m)) ⟩
-        t ⋯ (weaken ⦃ Kᵣ ⦄ m ·ₘ (ϕ ↑ m)) ≡⟨ sym (⋯-assoc t (weaken ⦃ Kᵣ ⦄ m) (ϕ ↑ m)) ⟩
-        t ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ (ϕ ↑ m)    ∎
+        t ⋯ ϕ ⋯ weakenᵣ m          ≡⟨ ⋯-assoc t ϕ (weakenᵣ m) ⟩
+        t ⋯ (ϕ ·ₘ weakenᵣ m)       ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ m)) ⟩
+        t ⋯ (weakenᵣ m ·ₘ (ϕ ↑ m)) ≡⟨ sym (⋯-assoc t (weakenᵣ m) (ϕ ↑ m)) ⟩
+        t ⋯ weakenᵣ m ⋯ (ϕ ↑ m)    ∎
 
       instance
         Cᵣ : ∀ {_∋/⊢_ : Scoped} ⦃ K₂ : Kit _∋/⊢_ ⦄
@@ -287,9 +291,9 @@ record Terms : Set₁ where
       wk-cancels-⦅⦆ :
         ∀ {_∋/⊢_  : Scoped} ⦃ K : Kit _∋/⊢_ ⦄
           {µ m} (x/t : µ ∋/⊢[ K ] m) 
-        → (weaken ⦃ Kᵣ ⦄ m ·[ Cᵣ ] ⦅ x/t ⦆) ~ id
+        → (weakenᵣ m ·[ Cᵣ ] ⦅ x/t ⦆) ~ id
       wk-cancels-⦅⦆ ⦃ K ⦄ x/t mx x = `/id-injective (
-          `/id ⦃ K ⦄ (x & (weaken ⦃ Kᵣ ⦄ _ ·[ Cᵣ ] ⦅ x/t ⦆)) ≡⟨⟩
+          `/id ⦃ K ⦄ (x & (weakenᵣ _ ·[ Cᵣ ] ⦅ x/t ⦆)) ≡⟨⟩
           `/id ⦃ K ⦄ (id/` (S x) &/⋯ ⦅ x/t ⦆)                ≡⟨ &/⋯-& ⦃ Cᵣ ⦃ K ⦄ ⦄ (S x) ⦅ x/t ⦆ ⟩
           `/id ⦃ K ⦄ (id/` x)                                ≡⟨⟩
           `/id ⦃ K ⦄ (x & id)                                ∎
@@ -298,10 +302,10 @@ record Terms : Set₁ where
       wk-cancels-⦅⦆-⋯ :
         ∀ {_∋/⊢_  : Scoped} ⦃ K : Kit _∋/⊢_ ⦄
           {µ m mt} {m' : Mode mt} (t : µ ⊢ m') (x/t : µ ∋/⊢[ K ] m) 
-        → t ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ ⦅ x/t ⦆ ≡ t
+        → t ⋯ weakenᵣ m ⋯ ⦅ x/t ⦆ ≡ t
       wk-cancels-⦅⦆-⋯ t x/t =
-        t ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ x/t ⦆    ≡⟨ ⋯-assoc t (weaken ⦃ Kᵣ ⦄ _) ⦅ x/t ⦆ ⟩
-        t ⋯ (weaken ⦃ Kᵣ ⦄ _ ·ₘ ⦅ x/t ⦆) ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
+        t ⋯ weakenᵣ _ ⋯ ⦅ x/t ⦆    ≡⟨ ⋯-assoc t (weakenᵣ _) ⦅ x/t ⦆ ⟩
+        t ⋯ (weakenᵣ _ ·ₘ ⦅ x/t ⦆) ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
         t ⋯ id                           ≡⟨ ⋯-id t ⟩
         t                                ∎
 
@@ -322,7 +326,7 @@ record Terms : Set₁ where
           `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                   ≡⟨⟩
           `/id (id/` ⦃ K₁ ⦄ y &/⋯ ϕ)                       ≡⟨ &/⋯-& ⦃ C₁ ⦄ y ϕ ⟩
           `/id (y & ϕ)                                     ≡⟨ sym (wk-cancels-⦅⦆-⋯ (`/id (y & ϕ)) (x/t &/⋯ ϕ)) ⟩
-          `/id (y & ϕ) ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ ⦅ (x/t &/⋯ ϕ) ⦆ ≡⟨ cong (_⋯ ⦅ x/t &/⋯ ϕ ⦆) (wk-`/id m (y & ϕ)) ⟩
+          `/id (y & ϕ) ⋯ weakenᵣ m ⋯ ⦅ (x/t &/⋯ ϕ) ⦆ ≡⟨ cong (_⋯ ⦅ x/t &/⋯ ϕ ⦆) (wk-`/id m (y & ϕ)) ⟩
           `/id (wk m (y & ϕ)) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆            ≡⟨ sym (&/⋯-⋯ (wk m (y & ϕ)) ⦅ (x/t &/⋯ ϕ) ⦆) ⟩
           `/id (wk m (y & ϕ) &/⋯ ⦅ (x/t &/⋯ ϕ) ⦆)          ≡⟨⟩
           `/id (x & ((ϕ ↑ m) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆))     ∎
@@ -368,8 +372,8 @@ record Terms : Set₁ where
         (t ∷ₜ Γ) _ (there x)   = Γ _ x
 
         wk-drop-∈ : ∀ {µ m t} {m' : Mode t} → (x : µ ∋ m) → drop-∈ x µ ⊢ m' → µ ⊢ m'
-        wk-drop-∈ (here _)  t = t ⋯ weaken ⦃ Kᵣ ⦄ _
-        wk-drop-∈ (there x) t = wk-drop-∈ x t ⋯ weaken ⦃ Kᵣ ⦄ _
+        wk-drop-∈ (here _)  t = t ⋯ weakenᵣ _
+        wk-drop-∈ (there x) t = wk-drop-∈ x t ⋯ weakenᵣ _
 
         wk-telescope : ∀ {µ m} → Ctx µ → µ ∋ m → µ ∶⊢ m
         wk-telescope Γ x = wk-drop-∈ x (Γ _ x)
@@ -410,7 +414,7 @@ record Terms : Set₁ where
               -- Weakening preserveres variable/term typings.
               ∋wk/⊢wk  : ∀ {µ m m'} (Γ : Ctx µ) (t' : µ ∶⊢ m) (e : µ ∋/⊢ m') (t : µ ∶⊢ m')
                         → Γ ∋/⊢ e ∶ t
-                        → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weaken ⦃ Kᵣ ⦄ _)
+                        → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weakenᵣ _)
 
             _∋*/⊢*_∶_ : ∀ {µ₁ µ₂} → Ctx µ₂ → µ₁ –[ K ]→ µ₂ → Ctx µ₁ → Set
             _∋*/⊢*_∶_ {µ₁} {µ₂} Γ₂ ϕ Γ₁ =
@@ -423,14 +427,14 @@ record Terms : Set₁ where
               ((t ⋯ ϕ) ∷ₜ Γ₂) ∋*/⊢* (ϕ ↑ m) ∶ (t ∷ₜ Γ₁)
             _∋↑/⊢↑_ {µ₁} {µ₂} {Γ₁} {Γ₂} {ϕ} {m} ⊢ϕ t {mx} x@Z _ refl =
               subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (K Kit.& Z) (ϕ ↑ m) ∶_)
-                    (t ⋯ ϕ ⋯ weaken ⦃ Kᵣ ⦄ m            ≡⟨ ⋯-↑-wk t ϕ m ⟩
-                     t ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ (ϕ ↑ m)      ≡⟨⟩
+                    (t ⋯ ϕ ⋯ weakenᵣ m            ≡⟨ ⋯-↑-wk t ϕ m ⟩
+                     t ⋯ weakenᵣ m ⋯ (ϕ ↑ m)      ≡⟨⟩
                      wk-telescope (t ∷ₜ Γ₁) Z ⋯ (ϕ ↑ m) ∎)
                     (id/⊢` {x = here refl} {Γ = (t ⋯ ϕ) ∷ₜ Γ₂} refl)
             _∋↑/⊢↑_ {µ₁} {µ₂} {Γ₁} {Γ₂} {ϕ} {m} ⊢ϕ t {mx} x@(S y) _ refl =
               subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (K Kit.& S y) (ϕ ↑ m) ∶_)
-                    (wk-telescope Γ₁ y ⋯ ϕ ⋯ weaken ⦃ Kᵣ ⦄ m          ≡⟨ ⋯-↑-wk _ ϕ m ⟩
-                     wk-telescope Γ₁ y ⋯ weaken ⦃ Kᵣ ⦄ m ⋯ (ϕ ↑ m)    ≡⟨⟩
+                    (wk-telescope Γ₁ y ⋯ ϕ ⋯ weakenᵣ m          ≡⟨ ⋯-↑-wk _ ϕ m ⟩
+                     wk-telescope Γ₁ y ⋯ weakenᵣ m ⋯ (ϕ ↑ m)    ≡⟨⟩
                      wk-telescope (t ∷ₜ Γ₁) (S y) ⋯ (ϕ ↑ m)           ∎)
                     (∋wk/⊢wk _ _ _ _ (⊢ϕ y _ refl))
 
@@ -440,13 +444,13 @@ record Terms : Set₁ where
             ⊢⦅_⦆ {m} {µ} {Γ} {t} {T} ⊢x/t x@Z _ refl =
               subst (Γ ∋/⊢ t ∶_)
                     (T                               ≡⟨ sym (wk-cancels-⦅⦆-⋯ T t) ⟩
-                     T ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ t ⦆     ≡⟨⟩
+                     T ⋯ weakenᵣ _ ⋯ ⦅ t ⦆     ≡⟨⟩
                      wk-telescope (T ∷ₜ Γ) Z ⋯ ⦅ t ⦆ ∎)
                     ⊢x/t
             ⊢⦅_⦆ {m} {µ} {Γ} {t} {T} ⊢x/t x@(S y) _ refl =
               subst (Γ ∋/⊢ id/` y ∶_)
                     (wk-telescope Γ y                              ≡⟨ sym (wk-cancels-⦅⦆-⋯ _ t) ⟩
-                     wk-telescope Γ y ⋯ weaken ⦃ Kᵣ ⦄ _ ⋯ ⦅ t ⦆    ≡⟨⟩
+                     wk-telescope Γ y ⋯ weakenᵣ _ ⋯ ⦅ t ⦆    ≡⟨⟩
                      wk-telescope (T ∷ₜ Γ) (S y) ⋯ ⦅ t ⦆           ∎)
                     (id/⊢` refl)
 
@@ -500,7 +504,7 @@ record Terms : Set₁ where
             -- Renaming preserves typing
 
             _⊢⋯ᵣ_ : ∀ {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
-                      {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ρ : µ₁ –[ Kᵣ ]→ µ₂} →
+                      {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ρ : µ₁ →ᵣ µ₂} →
                     Γ₁ ⊢ e ∶ t →
                     Γ₂ ∋* ρ ∶ Γ₁ →
                     Γ₂ ⊢ e ⋯ ρ ∶ t ⋯ ρ
@@ -509,7 +513,7 @@ record Terms : Set₁ where
             -- Substitution preserves typing
 
             _⊢⋯ₛ_ : ∀ {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
-                      {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {σ : µ₁ –[ Kₛ ]→ µ₂} →
+                      {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {σ : µ₁ →ₛ µ₂} →
                     Γ₁ ⊢ e ∶ t →
                     Γ₂ ⊢* σ ∶ Γ₁ →
                     Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
