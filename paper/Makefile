@@ -1,5 +1,6 @@
 MAIN_TEX=paper.tex
 MAIN_PDF=paper.pdf
+FAST_PDF=paper_fast.pdf
 LAGDA_DIR=Paper
 CACHE_DIR=_build
 EXTRA_FILES=$(wildcard *.bib *.cls *.sty *.tex)
@@ -12,22 +13,27 @@ TGTS_INPUT=$(patsubst $(LAGDA_DIR)/%.agda,$(LAGDA_DIR)/%,$(SRCS))
 
 all: paper
 
-paper: $(MAIN_PDF)
+fast: $(FAST_PDF)
 
-$(MAIN_PDF): $(TGTS) $(MAIN_TEX)
-	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex	                               ;\
-	cp -f $(EXTRA_FILES) $(CACHE_DIR)/				                           ;\
-	cd $(CACHE_DIR)												                               ;\
-	for t in $(TGTS_INPUT); do                                            \
-	  sed -i "s|.*SED MARKER.*|  \\\\input{$$t}\\nSED MARKER|g" main.tex ;\
-	done																	                               ;\
-	sed -i "/.*SED MARKER.*/d" main.tex		                               ;\
-	pdflatex main.tex											                               ;\
-	bibtex main														                               ;\
-	pdflatex main.tex											                               ;\
+paper: $(FAST_PDF)
+	cd $(CACHE_DIR)	  ;\
+	bibtex main		  ;\
+	pdflatex main.tex ;\
 	pdflatex main.tex
 
 	cp $(CACHE_DIR)/main.pdf $(MAIN_PDF)
+
+$(FAST_PDF): $(TGTS) $(MAIN_TEX)
+	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex                                 ;\
+	cp -f $(EXTRA_FILES) $(CACHE_DIR)/                                   ;\
+	cd $(CACHE_DIR)                                                      ;\
+	for t in $(TGTS_INPUT); do                                            \
+	  sed -i "s|.*SED MARKER.*|  \\\\input{$$t}\\nSED MARKER|g" main.tex ;\
+	done                                                                 ;\
+	sed -i "/.*SED MARKER.*/d" main.tex                                  ;\
+	pdflatex main.tex
+
+	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
 
 $(TGTS): $(SRCS)
 	./agdatex.py $(CACHE_DIR) $(SRCS)
