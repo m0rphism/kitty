@@ -92,6 +92,12 @@ print("Restoring original files...")
 for src_path, bak_path in zip(src_paths, bak_paths):
     bak_path.rename(src_path)
 
+# print("Deleting .lagda.tex files...")
+# for tgt_path in tgt_paths:
+#     tgt_path.unlink()
+
 print("Deleting .lagda.tex files...")
-for tgt_path in tgt_paths:
-    tgt_path.unlink()
+tgt_paths2 = [ cache_dir + "/" + p.stem + ".lagda.tex" for p in src_paths ]
+for tgt_path, tgt_path2 in zip(tgt_paths, tgt_paths2):
+    Path(tgt_path2).parents[0].mkdir(exist_ok=True, parents=True)
+    tgt_path.rename(tgt_path2)
