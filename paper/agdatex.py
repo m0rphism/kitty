@@ -39,6 +39,9 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
     for line_num, line in enumerate(src.splitlines()):
         l = line.strip()
         if l.startswith("--!") or l.startswith("-- !"):
+            if mode == "command" and stop_command_on_empty_line:
+                stop_command_on_empty_line = False
+                stop_command()
             l = l.split("!", 1)[1].strip()
             if "{" in l:
                 name = l.split(" ", 1)[0]
