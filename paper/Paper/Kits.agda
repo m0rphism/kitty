@@ -11,15 +11,12 @@ open import Data.Product using (∃-syntax; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; module ≡-Reasoning)
 open ≡-Reasoning
 
---! Variables {
 infix  4  _∋_
 
-_∋_ : ∀ {ℓ} {A : Set ℓ} → List A → A → Set _
-xs ∋ x = x ∈ xs
-
-pattern Z = here refl
-pattern S x = there x
---! }
+--! Variables
+data _∋_ {ℓ} {A : Set ℓ} : List A → A → Set ℓ where
+  Z : ∀ {xs x} → (x ∷ xs) ∋ x
+  S : ∀ {xs x y} → xs ∋ x → (y ∷ xs) ∋ x
 
 --! ModeTy
 data ModeTy : Set where
@@ -386,8 +383,8 @@ record Terms : Set₁ where
 
         --! ContextHelper {
         depth : ∀ {ℓ} {A : Set ℓ} {x : A} {xs : List A} → xs ∋ x → ℕ
-        depth Z     = zero
-        depth (S x) = suc (depth x)
+        depth Z      = zero
+        depth (S x)  = suc (depth x)
 
         -- We need to drop one extra using `suc`, because otherwise the types in a
         -- context are allowed to use themselves.
