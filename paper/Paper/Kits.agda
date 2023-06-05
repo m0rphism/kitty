@@ -185,7 +185,7 @@ record Terms : Set₁ where
 
     --! ComposeKit {
     record ComposeKit  (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_)
-                       (K₁⊔K₂ : Kit _∋/⊢_) : Set where
+                 (K₁⊔K₂ : Kit _∋/⊢_) : Set where
       infixl  8  _&/⋯_
 
       private instance _ = K₁; _ = K₂; _ = K₁⊔K₂
@@ -255,11 +255,10 @@ record Terms : Set₁ where
     --! }
 
       --! CommLiftWeaken
-      ↑-wk :
-        ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
-           ⦃ C : ComposeKit K Kᵣ K ⦄ ⦃ C : ComposeKit Kᵣ K K ⦄ 
-           (ϕ : µ₁ –[ K ]→ µ₂) m
-        → (ϕ ·ₘ weaken m) ~ (weaken m ·ₘ (ϕ ↑ m))
+      ↑-wk :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+                 ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
+                 (ϕ : µ₁ –[ K ]→ µ₂) m
+              → (ϕ ·ₘ weaken m) ~ (weaken m ·ₘ (ϕ ↑ m))
       --! CommLiftWeakenProof
       ↑-wk {µ₁} {µ₂} ϕ m mx x = `/id-injective (
           `/id ((ϕ ·ₘ weakenᵣ m) mx x)        ≡⟨⟩
@@ -271,11 +270,10 @@ record Terms : Set₁ where
           `/id ((weakenᵣ m ·ₘ (ϕ ↑ m)) mx x)  ∎)
 
       --! CommLiftWeakenTraverse
-      ⋯-↑-wk :
-        ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
-           ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
-           (t : µ₁ ⊢ m) (ϕ : µ₁ –[ K ]→ µ₂) m
-        → t ⋯ ϕ ⋯ weakenᵣ m ≡ t ⋯ weakenᵣ m ⋯ (ϕ ↑ m)
+      ⋯-↑-wk : ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+                  ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
+                  (t : µ₁ ⊢ m) (ϕ : µ₁ –[ K ]→ µ₂) m
+               → t ⋯ ϕ ⋯ weakenᵣ m ≡ t ⋯ weakenᵣ m ⋯ (ϕ ↑ m)
       --! CommLiftWeakenTraverseProof
       ⋯-↑-wk t ϕ m =
         t ⋯ ϕ ⋯ weakenᵣ m           ≡⟨ ⋯-assoc t ϕ (weakenᵣ m) ⟩
@@ -291,16 +289,14 @@ record Terms : Set₁ where
           ; &/⋯-⋯ = λ x ϕ →
             `/id (x & ϕ) ≡⟨ sym (⋯-var x ϕ) ⟩
             (` x) ⋯ ϕ    ∎
-          ; &/⋯-wk-↑ = λ x ϕ → refl
-          }
+          ; &/⋯-wk-↑ = λ x ϕ → refl }
 
         Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄
               ⦃ C : ComposeKit K₂ Kᵣ K₂ ⦄ → ComposeKit Kₛ K₂ Kₛ
         Cₛ ⦃ C = C ⦄ = record
           { _&/⋯_    = _⋯_
           ; &/⋯-⋯    = λ t ϕ → refl
-          ; &/⋯-wk-↑ = λ t ϕ → ⋯-↑-wk t ϕ _
-          }
+          ; &/⋯-wk-↑ = λ t ϕ → ⋯-↑-wk t ϕ _ }
       --! }
 
       --! ComposeKitInstancesConcrete
@@ -512,16 +508,16 @@ record Terms : Set₁ where
             infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
             field
-              _⊢⋯_ :
-                ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
-                  ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
-                  ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
-                  ⦃ TK : TypingKit K W C₁ C₂ ⦄
-                  {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
-                  {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ϕ : µ₁ –[ K ]→ µ₂} →
-                Γ₁ ⊢ e ∶ t →
-                Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
-                Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+              _⊢⋯_ :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+                         ⦃ C₁ : ComposeKit K Kᵣ K ⦄
+                         ⦃ C₂ : ComposeKit K K K ⦄
+                         ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
+                         ⦃ TK : TypingKit K W C₁ C₂ ⦄
+                         {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
+                         {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ϕ : µ₁ –[ K ]→ µ₂} →
+                      Γ₁ ⊢ e ∶ t →
+                      Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
+                      Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
           --! }
 
             --! TypingInstances {
@@ -532,8 +528,7 @@ record Terms : Set₁ where
                 ; ∋/⊢∶-lookup = λ x → refl
                 ; id/⊢`       = λ ⊢x → ⊢x
                 ; ⊢`/id       = ⊢`
-                ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl }
-                }
+                ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl } }
 
               TKₛ : TypingKit Kₛ Wₛ Cₛ Cₛ
               TKₛ = record
@@ -541,8 +536,7 @@ record Terms : Set₁ where
                 ; ∋/⊢∶-lookup = λ x → ⊢` refl
                 ; id/⊢`       = ⊢`
                 ; ⊢`/id       = λ ⊢x → ⊢x
-                ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t'
-                }
+                ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
             --! }
 
             --! TypingTraversalNotation {
