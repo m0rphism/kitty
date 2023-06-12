@@ -15,8 +15,8 @@ infix  4  _∋_
 
 --! Variables
 data _∋_ {ℓ} {A : Set ℓ} : List A → A → Set ℓ where
-  zero : ∀ {xs x} → (x ∷ xs) ∋ x
-  suc  : ∀ {xs x y} → xs ∋ x → (y ∷ xs) ∋ x
+  zero  : ∀ {xs x} → (x ∷ xs) ∋ x
+  suc   : ∀ {xs x y} → xs ∋ x → (y ∷ xs) ∋ x
 
 --! SortTy
 data SortTy : Set where Var NoVar : SortTy
@@ -284,18 +284,18 @@ record Terms : Set₁ where
       instance
         Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → ComposeKit Kᵣ K₂ K₂
         Cᵣ = record
-          { _&/⋯_ = _&_
-          ; &/⋯-⋯ = λ x ϕ →
+          { _&/⋯_     = _&_
+          ; &/⋯-⋯     = λ x ϕ →
             `/id (x & ϕ) ≡⟨ sym (⋯-var x ϕ) ⟩
             (` x) ⋯ ϕ    ∎
-          ; &/⋯-wk-↑ = λ x ϕ → refl }
+          ; &/⋯-wk-↑  = λ x ϕ → refl }
 
         Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄
               ⦃ C : ComposeKit K₂ Kᵣ K₂ ⦄ → ComposeKit Kₛ K₂ Kₛ
         Cₛ ⦃ C = C ⦄ = record
-          { _&/⋯_    = _⋯_
-          ; &/⋯-⋯    = λ t ϕ → refl
-          ; &/⋯-wk-↑ = λ t ϕ → ⋯-↑-wk t ϕ _ }
+          { _&/⋯_     = _⋯_
+          ; &/⋯-⋯     = λ t ϕ → refl
+          ; &/⋯-wk-↑  = λ t ϕ → ⋯-↑-wk t ϕ _ }
       --! }
 
       --! ComposeKitInstancesConcrete
