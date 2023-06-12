@@ -17,54 +17,54 @@ infixr  6  _⇒_
 infixl  6  _·_  _∙_
 infix   7  `_
 
--- Modes -----------------------------------------------------------------------
+-- Sorts -----------------------------------------------------------------------
 
---! Mode
-data Mode : ModeTy → Set where
-  𝕖  : Mode Var    -- Expressions
-  𝕥  : Mode Var    -- Types
-  𝕜  : Mode NoVar  -- Kinds
+--! Sort
+data Sort : SortTy → Set where
+  𝕖  : Sort Var    -- Expressions
+  𝕥  : Sort Var    -- Types
+  𝕜  : Sort NoVar  -- Kinds
 
 -- Syntax ----------------------------------------------------------------------
 
 private variable
-  mt                         : ModeTy
-  m m₁ m₂ m₃ m' m₁' m₂' m₃'  : Mode mt
-  µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃'  : List (Mode Var)
-  x y z x₁ x₂                : µ ∋ m
+  st                         : SortTy
+  s s₁ s₂ s₃ s' s₁' s₂' s₃'  : Sort st
+  S S₁ S₂ S₃ S' S₁' S₂' S₃'  : List (Sort Var)
+  x y z x₁ x₂                : S ∋ s
 
 --! Syntax
-data _⊢_ : List (Mode Var) → Mode mt → Set where
-  `_        : ∀ {m} → µ ∋ m → µ ⊢ m        -- Term and Type Variables
-  λx_       : (𝕖 ∷ µ) ⊢ 𝕖 → µ ⊢ 𝕖          -- Term Abstraction
-  Λα_       : (𝕥 ∷ µ) ⊢ 𝕖 → µ ⊢ 𝕖          -- Type Abstraction
-  ∀[α∶_]_   : µ ⊢ 𝕜 → (𝕥 ∷ µ) ⊢ 𝕥 → µ ⊢ 𝕥  -- Universal Quantification
-  _·_       : µ ⊢ 𝕖 → µ ⊢ 𝕖 → µ ⊢ 𝕖        -- Term Application
-  _∙_       : µ ⊢ 𝕖 → µ ⊢ 𝕥 → µ ⊢ 𝕖        -- Type Application
-  _⇒_       : µ ⊢ 𝕥 → µ ⊢ 𝕥 → µ ⊢ 𝕥        -- Function Type
-  ★         : µ ⊢ 𝕜                        -- Type Kind
+data _⊢_ : List (Sort Var) → Sort st → Set where
+  `_        : ∀ {s} → S ∋ s → S ⊢ s        -- Term and Type Variables
+  λx_       : (𝕖 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Term Abstraction
+  Λα_       : (𝕥 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Type Abstraction
+  ∀[α∶_]_   : S ⊢ 𝕜 → (𝕥 ∷ S) ⊢ 𝕥 → S ⊢ 𝕥  -- Universal Quantification
+  _·_       : S ⊢ 𝕖 → S ⊢ 𝕖 → S ⊢ 𝕖        -- Term Application
+  _∙_       : S ⊢ 𝕖 → S ⊢ 𝕥 → S ⊢ 𝕖        -- Type Application
+  _⇒_       : S ⊢ 𝕥 → S ⊢ 𝕥 → S ⊢ 𝕥        -- Function Type
+  ★         : S ⊢ 𝕜                        -- Type Kind
 
 variable
-  e e₁ e₂ e₃ e' e₁' e₂'  : µ ⊢ 𝕖
-  t t₁ t₂ t₃ t' t₁' t₂'  : µ ⊢ 𝕥
-  k k₁ k₂ k₃ k' k₁' k₂'  : µ ⊢ 𝕜
-  E E₁ E₂ E₃ E' E₁' E₂'  : µ ⊢ m
+  e e₁ e₂ e₃ e' e₁' e₂'  : S ⊢ 𝕖
+  t t₁ t₂ t₃ t' t₁' t₂'  : S ⊢ 𝕥
+  k k₁ k₂ k₃ k' k₁' k₂'  : S ⊢ 𝕜
+  E E₁ E₂ E₃ E' E₁' E₂'  : S ⊢ s
 
 -- Substitution & Lemmas -------------------------------------------------------
 
 --! Terms {
 terms : Terms
 terms = record
-  { Mode         = Mode
+  { Sort         = Sort
   ; _⊢_          = _⊢_
   ; `_           = `_
   ; `-injective  = λ { refl → refl } }
 
-open Terms terms hiding (Mode; _⊢_; `_)
+open Terms terms hiding (Sort; _⊢_; `_)
 --! }
 
 --! TraversalOp
-_⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → µ₁ ⊢ m → µ₁ –[ K ]→ µ₂ → µ₂ ⊢ m
+_⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ → S₂ ⊢ s
 (` x)           ⋯ ϕ = `/id (ϕ _ x)
 (λx t)          ⋯ ϕ = λx (t ⋯ (ϕ ↑ 𝕖))
 (Λα t)          ⋯ ϕ = Λα (t ⋯ (ϕ ↑ 𝕥))
@@ -75,7 +75,7 @@ _⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → µ₁ ⊢ m → µ₁ –[ K ]→ µ�
 ★               ⋯ ϕ = ★
 
 --! TraversalId
-⋯-id : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (t : µ ⊢ m) → t ⋯ id ⦃ K ⦄ ≡ t
+⋯-id : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (t : S ⊢ s) → t ⋯ id ⦃ K ⦄ ≡ t
 --! TraversalIdProofInteresting
 ⋯-id ⦃ K ⦄ (` x)     = id/`/id ⦃ K ⦄ x
 ⋯-id (t₁ · t₂)       = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
@@ -110,7 +110,7 @@ open Traversal traversal hiding (_⋯_; ⋯-id)
 ⋯-assoc :
   ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
     ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
-    (t : µ₁ ⊢ m) (ϕ₁ : µ₁ –[ K₁ ]→ µ₂) (ϕ₂ : µ₂ –[ K₂ ]→ µ₃)
+    (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
   → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₘ ϕ₂)
 --! AssocProofInteresting
 ⋯-assoc (` x)          ϕ₁ ϕ₂ = sym (&/⋯-⋯ (ϕ₁ _ x) ϕ₂)
@@ -160,15 +160,15 @@ open Types types
 --! }
 
 variable
-  Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
-  T T₁ T₂ T' T₁' T₂' : µ ∶⊢ m
+  Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx S
+  T T₁ T₂ T' T₁' T₂' : S ∶⊢ s
 
 --! Typing
-data _⊢_∶_ : Ctx µ → µ ⊢ m → µ ∶⊢ m → Set where
-  ⊢`  :  ∀ {x : µ ∋ m} {T : µ ∶⊢ m} →
+data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
+  ⊢`  :  ∀ {x : S ∋ s} {T : S ∶⊢ s} →
          Γ ∋ x ∶ T →
          Γ ⊢ ` x ∶ T
-  ⊢λ  :  ∀ {e : (𝕖 ∷ µ) ⊢ 𝕖} →
+  ⊢λ  :  ∀ {e : (𝕖 ∷ S) ⊢ 𝕖} →
          (t₁ ∷ₜ Γ) ⊢ e ∶ (wk _ t₂) →
          Γ ⊢ λx e ∶ t₁ ⇒ t₂
   ⊢Λ  :  (k ∷ₜ Γ) ⊢ e ∶ t₂ →
@@ -176,7 +176,7 @@ data _⊢_∶_ : Ctx µ → µ ⊢ m → µ ∶⊢ m → Set where
   ⊢·  :  Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →
          Γ ⊢ e₂ ∶ t₁ →
          Γ ⊢ e₁ · e₂ ∶ t₂
-  ⊢∙  :  {Γ : Ctx µ} →
+  ⊢∙  :  {Γ : Ctx S} →
          (k₂ ∷ₜ Γ) ⊢ t₁ ∶ k₁ →
          Γ ⊢ t₂ ∶ k₂ →
          Γ ⊢ e₁ ∶ ∀[α∶ k₂ ] t₁ →
@@ -196,8 +196,8 @@ _⊢⋯_ :
     ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
     ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
     ⦃ TK : TypingKit K W C₁ C₂ ⦄
-    {µ₁ µ₂ mt} {Γ₁ : Ctx µ₁} {Γ₂ : Ctx µ₂} {m : Mode mt}
-    {e : µ₁ ⊢ m} {t : µ₁ ∶⊢ m} {ϕ : µ₁ –[ K ]→ µ₂} →
+    {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
+    {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
   Γ₁ ⊢ e ∶ t →
   Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
@@ -223,21 +223,21 @@ open TypingTraversal typing-traversal hiding (_⊢⋯_)
 
 --! Values {
 mutual
-  data Neutral : µ ⊢ m → Set where
-    `_   : ∀ (x : µ ∋ m) → Neutral (` x)
+  data Neutral : S ⊢ s → Set where
+    `_   : ∀ (x : S ∋ s) → Neutral (` x)
     _·_  : Neutral e₁ → Value e₂ → Neutral (e₁ · e₂)
     _∙t  : Neutral e₁ → Neutral (e₁ ∙ t₂)
 
-  data Value : µ ⊢ m → Set where
-    λx_      : ∀ (e : (𝕖 ∷ µ) ⊢ 𝕖) → Value (λx e)
-    Λα_      : ∀ (e : (𝕥 ∷ µ) ⊢ 𝕖) → Value (Λα e)
+  data Value : S ⊢ s → Set where
+    λx_      : ∀ (e : (𝕖 ∷ S) ⊢ 𝕖) → Value (λx e)
+    Λα_      : ∀ (e : (𝕥 ∷ S) ⊢ 𝕖) → Value (Λα e)
     neutral  : Neutral e → Value e
 --! }
 
 --! Reduction
-data _↪_ : µ ⊢ m → µ ⊢ m → Set where
-  β-λ   :  ∀ {e₂ : µ ⊢ 𝕖} → (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
-  β-Λ   :  ∀ {t₂ : µ ⊢ 𝕥} → (Λα e₁) ∙ t₂ ↪ e₁ ⋯ ⦅ t₂ ⦆
+data _↪_ : S ⊢ s → S ⊢ s → Set where
+  β-λ   :  ∀ {e₂ : S ⊢ 𝕖} → (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
+  β-Λ   :  ∀ {t₂ : S ⊢ 𝕥} → (Λα e₁) ∙ t₂ ↪ e₁ ⋯ ⦅ t₂ ⦆
   ξ-λ   :  e ↪ e' → λx e ↪ λx e'
   ξ-Λ   :  e ↪ e' → Λα e ↪ Λα e'
   ξ-·₁  :  e₁ ↪ e₁' → e₁ · e₂ ↪ e₁' · e₂
