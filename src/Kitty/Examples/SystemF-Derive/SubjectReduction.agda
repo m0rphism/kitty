@@ -2,17 +2,17 @@ module Kitty.Examples.SystemF-Derive.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst)
 open import Kitty.Examples.SystemF-Derive.Definitions
-open import Kitty.Typing.IKit compose-traversal ctx-repr
+open import Kitty.Typing.TypingKit compose-traversal ctx-repr
   record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = λ { refl ⊢e → ⊢e } }
-open IKit ⦃ … ⦄
+open TypingKit ⦃ … ⦄
 
 _⊢⋯_ :
-  ∀ {M'} {_∋/⊢_ : Scoped M'} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+  ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
     ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
-    ⦃ IK : IKit 𝕂 K C₁ C₂ ⦄
+    ⦃ IK : TypingKit 𝕂 K C₁ C₂ ⦄
     ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
     ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-    {e : µ₁ ⊢ M} {t : µ₁ ∶⊢ M} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} →
+    {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ 𝕂 ]→ S₂} →
   Γ₁ ⊢ e ∶ t →
   Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
@@ -24,7 +24,7 @@ _⊢⋯_ :
                                                  (⊢∙ (⊢t₁ ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)) (⊢t₂ ⊢⋯ ⊢ϕ) (⊢e₁ ⊢⋯ ⊢ϕ))
 ⊢τ                                 ⊢⋯ ⊢ϕ = ⊢τ
 
-open ITraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
+open TypingTraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
 subject-reduction :
   Γ ⊢ e ∶ t →

@@ -1,6 +1,6 @@
-open import Kitty.Term.Modes
+open import Kitty.Term.Terms
 
-module Kitty.Term.Kit {𝕄 : Modes} (𝕋 : Terms 𝕄) where
+module Kitty.Term.Kit (𝕋 : Terms) where
 
 open import Data.List using (List; [])
 open import Data.List.Properties using (++-assoc)
@@ -10,59 +10,48 @@ open ≡-Reasoning
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Kitty.Term.Prelude
 
-open Modes 𝕄
 open Terms 𝕋
 
 private variable
-  m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
-  M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
-  µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
+  st : SortTy
+  s s₁ s₂ s₃ s' s₁' s₂' s₃' : Sort st
+  S S₁ S₂ S₃ S' S₁' S₂' S₃' : List (Sort Var)
 
 -- Required for proving that `kitᵣ ≢ kitₛ`
 data KitTag : Set where
   instance K-Ren K-Sub : KitTag
 
-record Kit {VarMode/TermMode : Set} (_∋/⊢_ : List VarMode → VarMode/TermMode → Set) : Set₁ where
+record Kit (_∋/⊢_ : VarScoped) : Set₁ where
   field
-    id/m→M           : VarMode → VarMode/TermMode
-    m→M/id           : VarMode/TermMode → TermMode
-    id/m→M/id        : ∀ m → m→M/id (id/m→M m) ≡ m→M m
+    id/`             : ∀ {s} → S ∋ s → S ∋/⊢ s
+    `/id             : ∀ {s} → S ∋/⊢ s → S ⊢ s
+    id/`/id          : ∀ (x : S ∋ s) → `/id (id/` x) ≡ ` x
 
-    id/`             : ∀ {m} → µ ∋ m → µ ∋/⊢ id/m→M m
-    `/id             : ∀ {m} → µ ∋/⊢ id/m→M m → µ ⊢ m→M m
-    id/`/id          : ∀ (x : µ ∋ m) → `/id (id/` x) ≡ ` x
+    id/`-injective  : ∀ {S s} {x₁ x₂ : S ∋ s} → id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
+    `/id-injective  : ∀ {S s} {x/t₁ x/t₂ : S ∋/⊢ s} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
 
-    id/`-injective  : ∀ {µ m} {x₁ x₂ : µ ∋ m} → id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
-    `/id-injective  : ∀ {µ m} {x/t₁ x/t₂ : µ ∋/⊢ id/m→M m} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
-
-    wk               : ∀ m' {m/M} → µ ∋/⊢ m/M → (µ ▷ m') ∋/⊢ m/M
-    wk-id/`          : ∀ m' (x : µ ∋ m) → wk m' (id/` x) ≡ id/` (there x)
+    wk               : ∀ s' {s} → S ∋/⊢ s → (S ▷ s') ∋/⊢ s
+    wk-id/`          : ∀ s' (x : S ∋ s) → wk s' (id/` x) ≡ id/` (there x)
     kit-tag          : KitTag
 
   -- Weakening
 
-  wk* : ∀ {SM} µ' → µ ∋/⊢ SM → (µ ▷▷ µ') ∋/⊢ SM
+  wk* : ∀ {s} S' → S ∋/⊢ s → (S ▷▷ S') ∋/⊢ s
   wk* []       x = x
-  wk* (µ' ▷ m) x = wk m (wk* µ' x)
+  wk* (S' ▷ s) x = wk s (wk* S' x)
 
-  -- wk' : µ –→ (µ ▷ m)
+  -- wk' : S –→ (S ▷ s)
   -- wk' _ x = wk _ (id/` x)
 
-  -- wk'* : µ –→ (µ ▷▷ µ')
+  -- wk'* : S –→ (S ▷▷ S')
   -- wk'* _ x = wk* _ (id/` x)
 
-mode : ∀ {M} {_∋/⊢_ : Scoped M} → Kit _∋/⊢_ → Set
-mode {M} _ = M
-
 _∋/⊢[_]_ :
-  ∀ {M : Set} {_∋/⊢_ : Scoped M} →
-  List VarMode → (𝕂 : Kit {M} _∋/⊢_) → M → Set
-_∋/⊢[_]_ {M} {_∋/⊢_} µ 𝕂 sm = µ ∋/⊢ sm
+  ∀ {_∋/⊢_ : VarScoped} →
+  List (Sort Var) → (𝕂 : Kit _∋/⊢_) → Sort Var → Set
+_∋/⊢[_]_ {_∋/⊢_} S 𝕂 s = S ∋/⊢ s
 
-kitᵣ : Kit {VarMode} _∋_
-Kit.id/m→M           kitᵣ = λ m → m
-Kit.m→M/id           kitᵣ = m→M
-Kit.id/m→M/id        kitᵣ = λ m → refl
+kitᵣ : Kit _∋_
 Kit.id/`             kitᵣ = λ x → x
 Kit.`/id             kitᵣ = `_
 Kit.id/`/id          kitᵣ = λ x → refl

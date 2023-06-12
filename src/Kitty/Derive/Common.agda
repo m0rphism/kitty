@@ -32,7 +32,7 @@ open import Data.Fin as Fin using (Fin; zero; suc)
 open import Function using (_∘_; _$_; case_of_)
 
 open import Kitty.Term.Prelude using (_∋_; _▷▷_)
-open import Kitty.Term.Modes
+open import Kitty.Term.Terms
 open import Kitty.Util.Iso
 
 private variable
@@ -77,7 +77,7 @@ foldrM' : {T : Functor' ℓ} {{_ : Traversable ℓ T}}
 foldrM' ta b0 f = foldrM f b0 ta
 
 unterm : Name → Term' → Maybe (Term' × Term')
-unterm Term-nm (def f [ argᵥ µ ; argᵥ M ]) =
+unterm Term-nm (def f [ argₕ st ; argᵥ µ ; argᵥ M ]) =
   if primQNameEquality f Term-nm
     then just (µ , M)
     else nothing

@@ -1,22 +1,21 @@
-open import Kitty.Term.Modes
+open import Kitty.Term.Terms
 open import Kitty.Term.Traversal using (Traversal)
 open import Kitty.Term.KitHomotopy using (KitHomotopy)
 open import Kitty.Term.Sub using (SubWithLaws)
 open import Kitty.Term.SubCompose using (SubCompose)
 open import Kitty.Term.ComposeTraversal using (ComposeTraversal)
-open import Kitty.Typing.TypeModes using (TypeModes)
+open import Kitty.Typing.TypeSorts using (TypeSorts)
 open import Kitty.Typing.CtxRepr using (CtxRepr)
 
-module Kitty.Typing.ITerms
-  {𝕄 : Modes}
-  {𝕋 : Terms 𝕄}
+module Kitty.Typing.Typing
+  {𝕋 : Terms}
   {ℓ}
   {𝕊 : SubWithLaws 𝕋 ℓ}
   {T : Traversal 𝕋 𝕊}
   {H : KitHomotopy T}
   {𝕊C : SubCompose H}
   (C : ComposeTraversal 𝕊C)
-  {TM : TypeModes 𝕋}
+  {TM : TypeSorts 𝕋}
   (ℂ  : CtxRepr TM)
   where
 
@@ -30,9 +29,8 @@ open import Data.Nat using (ℕ; zero; suc)
 open import Kitty.Term.Prelude
 
 open import Kitty.Term.Kit 𝕋
-open Modes 𝕄
 open Terms 𝕋
-open Kitty.Typing.TypeModes.TypeModes TM
+open Kitty.Typing.TypeSorts.TypeSorts TM
 open CtxRepr ℂ
 open import Kitty.Typing.OPE C ℂ
 open Traversal T
@@ -43,48 +41,48 @@ open Kit ⦃ … ⦄
 
 private
   variable
-    m m₁ m₂ m₃ m' m₁' m₂' m₃' : VarMode
-    M M₁ M₂ M₃ M' M₁' M₂' M₃' : TermMode
-    µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List VarMode
+    st                        : SortTy
+    s s₁ s₂ s₃ s' s₁' s₂' s₃' : Sort st
+    S S₁ S₂ S₃ S' S₁' S₂' S₃' : SortCtx
     ℓ₁ ℓ₂ : Level
-    Γ Γ₁ Γ₂ : Ctx µ
-    x y z : µ ∋ m
+    Γ Γ₁ Γ₂ : Ctx S
+    x y z : S ∋ s
 
 private instance _ = kitᵣ; _ = kitₛ
 
-_∋*_∶_ : Ctx µ₂ → µ₁ →ᵣ µ₂ → Ctx µ₁ → Set
-_∋*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ ϕ Γ₁ =
-  ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ∶⊢ m→M m₁) (⊢x : Γ₁ ∋ x ∶ t)
+_∋*_∶_ : Ctx S₂ → S₁ →ᵣ S₂ → Ctx S₁ → Set
+_∋*_∶_ {S₂ = S₂} {S₁ = S₁} Γ₂ ϕ Γ₁ =
+  ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) (⊢x : Γ₁ ∋ x ∶ t)
   → Γ₂ ∋ (x & ϕ) ∶ t ⋯ ϕ
 
-record ITerms : Set₁ where
+record Typing : Set₁ where
   infix   4  _⊢_∶_
   field
-    _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set
+    _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set
 
-    ⊢` : ∀ {Γ : Ctx µ} {x : µ ∋ m} {t} →
+    ⊢` : ∀ {Γ : Ctx S} {x : S ∋ s} {t} →
          Γ ∋ x ∶ t → Γ ⊢ ` x ∶ t
 
-    ≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
+    ≡ᶜ-cong-⊢ : ∀ {S st} {s : Sort st} {Γ₁ Γ₂ : Ctx S} {e : S ⊢ s} {t : S ∶⊢ s} → 
       Γ₁ ≡ᶜ Γ₂ →
       Γ₁ ⊢ e ∶ t →
       Γ₂ ⊢ e ∶ t
 
-  _⊢*_∶_ : Ctx µ₂ → µ₁ →ₛ µ₂ → Ctx µ₁ → Set
-  _⊢*_∶_ {µ₂ = µ₂} {µ₁ = µ₁} Γ₂ ϕ Γ₁ =
-    ∀ {m₁} (x : µ₁ ∋ m₁) (t : µ₁ ∶⊢ m→M m₁) (⊢x : Γ₁ ∋ x ∶ t)
+  _⊢*_∶_ : Ctx S₂ → S₁ →ₛ S₂ → Ctx S₁ → Set
+  _⊢*_∶_ {S₂ = S₂} {S₁ = S₁} Γ₂ ϕ Γ₁ =
+    ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) (⊢x : Γ₁ ∋ x ∶ t)
     → Γ₂ ⊢ (x & ϕ) ∶ t ⋯ ϕ
 
 
 open import Data.List.Properties using (++-assoc; ++-identityʳ)
 open import Kitty.Util.List
 
-~ᶜ-cong-wk-telescope : ∀ {µ m} {Γ₁ Γ₂ : Ctx µ} →
+~ᶜ-cong-wk-telescope : ∀ {S s} {Γ₁ Γ₂ : Ctx S} →
   Γ₁ ~ᶜ Γ₂ →
-  (x : µ ∋ m) →
+  (x : S ∋ s) →
   wk-telescope Γ₁ x ≡ wk-telescope Γ₂ x
-~ᶜ-cong-wk-telescope {µ} {m} {Γ₁} {Γ₂} Γ₁~Γ₂ x =
-  let sub = subst (_∶⊢ m→M m) (++-identityʳ (drop-∈ x µ)) in
+~ᶜ-cong-wk-telescope {S} {s} {Γ₁} {Γ₂} Γ₁~Γ₂ x =
+  let sub = subst (_∶⊢ s) (++-identityʳ (drop-∈ x S)) in
   wk-telescope Γ₁ x                ≡⟨⟩
   wk-drop-∈ x (lookup Γ₁ x)        ≡⟨⟩
   wk-drop-∈ x (sub (lookup' Γ₁ x)) ≡⟨ cong (λ ■ → wk-drop-∈ x (sub ■)) (Γ₁~Γ₂ _ x) ⟩
@@ -92,19 +90,19 @@ open import Kitty.Util.List
   wk-drop-∈ x (lookup Γ₂ x)        ≡⟨⟩
   wk-telescope Γ₂ x                ∎
 
-≡ᶜ-cong-wk-telescope : {Γ₁ Γ₂ : Ctx µ} →
+≡ᶜ-cong-wk-telescope : {Γ₁ Γ₂ : Ctx S} →
   Γ₁ ≡ᶜ Γ₂ →
-  (x : µ ∋ m) →
+  (x : S ∋ s) →
   wk-telescope Γ₁ x ≡ wk-telescope Γ₂ x
 ≡ᶜ-cong-wk-telescope Γ₁~Γ₂ x = ~ᶜ-cong-wk-telescope (≡ᶜ→~ᶜ Γ₁~Γ₂) x
 
-~₂-cong-∋ : ∀ {µ m} {Γ₁ Γ₂ : Ctx µ} (x : µ ∋ m) {t : µ ∶⊢ m→M m} → 
+~₂-cong-∋ : ∀ {S s} {Γ₁ Γ₂ : Ctx S} (x : S ∋ s) {t : S ∶⊢ s} → 
   Γ₁ ~ᶜ Γ₂ →
   Γ₁ ∋ x ∶ t →
   Γ₂ ∋ x ∶ t
 ~₂-cong-∋ x Γ₁~Γ₂ refl = sym (~ᶜ-cong-wk-telescope Γ₁~Γ₂ x)
 
-≡ᶜ-cong-∋ : ∀ {µ m} {Γ₁ Γ₂ : Ctx µ} (x : µ ∋ m) {t : µ ∶⊢ m→M m} → 
+≡ᶜ-cong-∋ : ∀ {S s} {Γ₁ Γ₂ : Ctx S} (x : S ∋ s) {t : S ∶⊢ s} → 
   Γ₁ ≡ᶜ Γ₂ →
   Γ₁ ∋ x ∶ t →
   Γ₂ ∋ x ∶ t
