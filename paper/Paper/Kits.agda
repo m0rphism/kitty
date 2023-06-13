@@ -25,7 +25,7 @@ data SortTy : Set where Var NoVar : SortTy
 record Terms : Set₁ where
   field
     Sort         : SortTy → Set
-    _⊢_          : ∀ {t} → List (Sort Var) → Sort t → Set
+    _⊢_          : ∀ {st} → List (Sort Var) → Sort st → Set
     `_           : ∀ {S} {s : Sort Var} → S ∋ s → S ⊢ s
     `-injective  : ∀ {S s} {x₁ x₂ : S ∋ s} → ` x₁ ≡ ` x₂ → x₁ ≡ x₂
 
@@ -112,7 +112,7 @@ record Terms : Set₁ where
 
   _–[_]→_ :  List (Sort Var) → Kit _∋/⊢_ →
              List (Sort Var) → Set
-  S₁ –[ K ]→ S₂ = Map S₁ S₂ where open Kit K
+  S₁ –[ K ]→ S₂ = Kit.Map K S₁ S₂
 
   open Kit ⦃ … ⦄ public
   --! }
@@ -166,6 +166,9 @@ record Terms : Set₁ where
     record WkKit (K : Kit _∋/⊢_): Set₁ where
       private instance _ = K
       field
+        wk-id/` :
+          ∀ s' (x : S ∋ s)
+          → wk s' (id/` x) ≡ id/` (suc x)
         wk-`/id :
           ∀ s {S s'} (x/t : S ∋/⊢ s')
           → `/id x/t ⋯ weakenᵣ s ≡ `/id (wk s x/t)
@@ -184,7 +187,7 @@ record Terms : Set₁ where
 
     --! ComposeKit {
     record ComposeKit  (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_)
-                 (K₁⊔K₂ : Kit _∋/⊢_) : Set where
+                       (K₁⊔K₂ : Kit _∋/⊢_) : Set where
       infixl  8  _&/⋯_
 
       private instance _ = K₁; _ = K₂; _ = K₁⊔K₂
@@ -370,7 +373,7 @@ record Terms : Set₁ where
       --! TypeSorts
       record Types : Set₁ where
         field
-          ↑ᵗ : ∀ {t} → Sort t → ∃[ t ] Sort t
+          ↑ᵗ : ∀ {st} → Sort st → ∃[ st' ] Sort st'
 
         --! Types
         _∶⊢_ : ∀ {t} → List (Sort Var) → Sort t → Set

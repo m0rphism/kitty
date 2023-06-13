@@ -231,7 +231,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
   dist-↑-⦅⦆-· :
     ∀ {_∋/⊢₁_ : VarScoped} ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄
       {_∋/⊢₂_ : VarScoped} ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄
-      {_∋/⊢_ : VarScoped}  ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+      {_∋/⊢_ : VarScoped}  ⦃ 𝕂 : Kit _∋/⊢_ ⦄ 
       ⦃ W₁ : KitT 𝕂₁ ⦄
       ⦃ W₂ : KitT 𝕂₂ ⦄
       ⦃ W : KitT 𝕂 ⦄

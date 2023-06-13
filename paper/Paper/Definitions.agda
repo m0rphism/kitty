@@ -35,7 +35,7 @@ private variable
 
 --! Syntax
 data _⊢_ : List (Sort Var) → Sort st → Set where
-  `_        : ∀ {s} → S ∋ s → S ⊢ s        -- Term and Type Variables
+  `_        : S ∋ s → S ⊢ s                -- Term and Type Variables
   λx_       : (𝕖 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Term Abstraction
   Λα_       : (𝕥 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Type Abstraction
   ∀[α∶_]_   : S ⊢ 𝕜 → (𝕥 ∷ S) ⊢ 𝕥 → S ⊢ 𝕥  -- Universal Quantification
