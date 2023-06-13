@@ -44,8 +44,8 @@ private instance
   _ = Kᵣ
   _ = Kₛ
   _ = Cᵣ
-  _ = kittᵣ
-  _ = kittₛ
+  _ = Wᵣ
+  _ = Wₛ
 
 private variable
   st                        : SortTy

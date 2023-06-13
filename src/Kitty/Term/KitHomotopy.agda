@@ -29,7 +29,7 @@ open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
 private instance _ = Kᵣ; _ = Kₛ
-private instance _ = kittᵣ; _ = kittₛ
+private instance _ = Wᵣ; _ = Wₛ
 
 private variable
   _∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ _∋/⊢₃_ : VarScoped

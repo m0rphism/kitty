@@ -64,7 +64,7 @@ module WithSub {ℓ} (𝕊 : Kitty.Term.Sub.SubWithLaws 𝕋 ℓ) where
   open import Kitty.Term.KitT kit-traversal public
   open KitT ⦃ … ⦄ public
 
-  instance Kᵣ' = Kᵣ; Kₛ' = Kₛ; Wᵣ = kittᵣ; Wₛ = kittₛ
+  instance Kᵣ' = Kᵣ; Kₛ' = Kₛ; Wᵣ' = Wᵣ; Wₛ' = Wₛ
 
   open import Kitty.Term.KitHomotopy kit-traversal public
 
@@ -172,8 +172,8 @@ module Instance where
   --   Kᵣᵣ = Cᵣ
   --   Kₛᵣ = Cₛᵣ
   --   Kₛₛ = Cₛₛ
-  --   wk-Kᵣ = kittᵣ
-  --   wk-Kₛ = kittₛ
+  --   wk-Kᵣ = Wᵣ
+  --   wk-Kₛ = Wₛ
 
 -- module StarAttempt where
 --   open import Kitty.Util.Star

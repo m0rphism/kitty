@@ -44,8 +44,8 @@ private variable
 private instance
   _ = Kᵣ
   _ = Kₛ
-  _ = kittᵣ
-  _ = kittₛ
+  _ = Wᵣ
+  _ = Wₛ
 
 record ComposeKit (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_) (K₁⊔K₂ : Kit _∋/⊢_) : Set (lsuc ℓ) where
   infixl  8  _&/⋯_

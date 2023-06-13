@@ -116,21 +116,21 @@ wk-`/id ⦃ KT = KT ⦄ s x/t = KitK.wkₖ-⋯ (KitT.KitT-KitK KT)
   → `/id (wk s x/t₁) ≡ `/id (wk s x/t₂)
 ~-wk ⦃ KT₁ = KT₁ ⦄ ⦃ KT₂ = KT₂ ⦄ = KitWk.~-wk (KitT.KitT-KitWk KT₁) ⦃ KK₂ = KitT.KitT-KitK KT₂ ⦄ 
 
-kittᵣ : KitT Kᵣ
-kittᵣ = record
+Wᵣ : KitT Kᵣ
+Wᵣ = record
   { KitT-KitK  = kitkᵣ
   ; KitT-KitWk = kitwkᵣ
   }
 
-kittₛ : KitT Kₛ
-kittₛ = record
+Wₛ : KitT Kₛ
+Wₛ = record
   { KitT-KitK  = kitkₛ
   ; KitT-KitWk = kitwkₛ
   }
 
 open KitT ⦃ … ⦄
 
-private instance _ = kittᵣ; _ = kittₛ
+private instance _ = Wᵣ; _ = Wₛ
 
 ~-cong-wk :
   ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ 

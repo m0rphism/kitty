@@ -38,8 +38,8 @@ open import Data.List.Membership.Propositional using (_∈_)
 
 private instance _ = Kᵣ
 private instance _ = Kₛ
-private instance _ = kittᵣ
-private instance _ = kittₛ
+private instance _ = Wᵣ
+private instance _ = Wₛ
 private instance _ = Cᵣ
 private instance _ = Cₛᵣ
 private instance _ = Cₛₛ

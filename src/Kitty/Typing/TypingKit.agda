@@ -79,8 +79,8 @@ record TypingKit
 
   private instance _ = Kᵣ
   private instance _ = Kₛ
-  private instance _ = kittᵣ
-  private instance _ = kittₛ
+  private instance _ = Wᵣ
+  private instance _ = Wₛ
   private instance _ = Cᵣ
   private instance _ = K
   private instance _ = W
@@ -500,8 +500,8 @@ open ComposeKit ⦃ ... ⦄
 
 private instance _ = Kᵣ
 private instance _ = Kₛ
-private instance _ = kittᵣ
-private instance _ = kittₛ
+private instance _ = Wᵣ
+private instance _ = Wₛ
 private instance _ = Cᵣ
 private instance _ = Cₛᵣ
 private instance _ = Cₛₛ
@@ -524,7 +524,7 @@ record TypingTraversal : Set (lsuc ℓ) where
     --         (` x) ⋯ f ≡ subst (S₂ ⊢_) (id/s) (tm _ (f _ x))
 
   instance
-    iKᵣ : TypingKit Kᵣ kittᵣ Cᵣ Cᵣ
+    iKᵣ : TypingKit Kᵣ Wᵣ Cᵣ Cᵣ
     TypingKit._∋/⊢_∶_ iKᵣ = _∋_∶_
     TypingKit.∋/⊢∶-lookup iKᵣ = λ _ → refl
     TypingKit.id/⊢`   iKᵣ = λ ⊢x → ⊢x
@@ -532,7 +532,7 @@ record TypingTraversal : Set (lsuc ℓ) where
     TypingKit.∋wk/⊢wk iKᵣ Γ t' x t refl = wk-telescope-there Γ t' x
     TypingKit.≡ᶜ-cong-∋/⊢ iKᵣ = ≡ᶜ-cong-∋
 
-    iKₛ : TypingKit Kₛ kittₛ Cₛᵣ Cₛₛ
+    iKₛ : TypingKit Kₛ Wₛ Cₛᵣ Cₛₛ
     TypingKit._∋/⊢_∶_ iKₛ = _⊢_∶_
     TypingKit.∋/⊢∶-lookup iKₛ = λ _ → ⊢` refl
     TypingKit.id/⊢`   iKₛ = ⊢`

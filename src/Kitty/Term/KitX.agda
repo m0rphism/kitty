@@ -48,7 +48,7 @@ record KitX {_∋/⊢_ : VarScoped} (K : Kit _∋/⊢_) : Set (lsuc ℓ) where
 instance
   kitxᵣ : KitX Kᵣ
   kitxᵣ = record
-    { KitX-KitT         = kittᵣ
+    { KitX-KitT         = Wᵣ
     ; KitX-ComposeKitₖₖ = Cᵣ ⦃ Kᵣ ⦄
     ; KitX-ComposeKitₖᵣ = Cᵣ ⦃ Kᵣ ⦄
     ; KitX-ComposeKitᵣₖ = Cᵣ ⦃ Kᵣ ⦄
@@ -58,7 +58,7 @@ instance
 
   kitxₛ : KitX Kₛ
   kitxₛ = record
-    { KitX-KitT         = kittₛ
+    { KitX-KitT         = Wₛ
     ; KitX-ComposeKitₖₖ = Cₛₛ
     ; KitX-ComposeKitₖᵣ = Cₛᵣ
     ; KitX-ComposeKitᵣₖ = Cᵣ ⦃ Kₛ ⦄
