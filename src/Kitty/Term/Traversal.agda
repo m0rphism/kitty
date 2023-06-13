@@ -142,6 +142,16 @@ record Traversal : Set (lsuc ℓ) where
   wknᵣ = wkn
   wknₛ = wkn
 
+  wkn* :
+    ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {S} S'
+    → S –[ 𝕂 ]→ (S ▷▷ S')
+  wkn* S = wkₖ* S id
+
+  wknᵣ* : ∀ {S} S' → S →ᵣ (S ▷▷ S')
+  wknₛ* : ∀ {S} S' → S →ₛ (S ▷▷ S')
+  wknᵣ* S = wkn* S
+  wknₛ* S = wkn* S
+
   -- Lifting
 
   _↑ᵣ_  : ∀ {S₁} {S₂} → S₁ →ᵣ S₂ → ∀ s  → (S₁ ▷  s)  →ᵣ (S₂ ▷ s)
