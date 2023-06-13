@@ -27,80 +27,80 @@ private variable
   s s₁ s₂ s₃ s' s₁' s₂' s₃' : Sort st
   S S₁ S₂ S₃ S' S₁' S₂' S₃' : SortCtx
 
-private instance _ = kitᵣ
+private instance _ = Kᵣ
 
 record Traversal : Set (lsuc ℓ) where
   infixl   5  _⋯_
 
   field
     _⋯_   :
-      ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+      ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
         {S₁ S₂ st} {s : Sort st} 
-      → S₁ ⊢ s → S₁ –[ 𝕂 ]→ S₂ → S₂ ⊢ s
+      → S₁ ⊢ s → S₁ –[ K ]→ S₂ → S₂ ⊢ s
 
     ⋯-var :
-      ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
-        (x : S₁ ∋ s) (ϕ : S₁ –[ 𝕂 ]→ S₂)
+      ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
+        (x : S₁ ∋ s) (ϕ : S₁ –[ K ]→ S₂)
       → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
 
     ⋯-id :
-      ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+      ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
         {S} {st} {s : Sort st} (t : S ⊢ s)
-      → t ⋯ id ⦃ 𝕂 = 𝕂 ⦄ ≡ t
+      → t ⋯ id ⦃ K = K ⦄ ≡ t
 
-  kitₛ : Kit _⊢_
-  Kit.id/`             kitₛ = `_
-  Kit.`/id             kitₛ = λ t → t
-  Kit.id/`/id          kitₛ = λ x → refl
-  Kit.wk               kitₛ = λ s t → t ⋯ wkₖ _ id
-  Kit.wk-id/`          kitₛ = λ s x →
+  Kₛ : Kit _⊢_
+  Kit.id/`             Kₛ = `_
+  Kit.`/id             Kₛ = λ t → t
+  Kit.id/`/id          Kₛ = λ x → refl
+  Kit.wk               Kₛ = λ s t → t ⋯ wkₖ _ id
+  Kit.wk-id/`          Kₛ = λ s x →
     (` x) ⋯ wkₖ s id     ≡⟨ ⋯-var x (wkₖ s id) ⟩
     `/id (x & wkₖ s id)  ≡⟨ cong (`/id) (&-wkₖ-wk id x) ⟩
     `/id (wk _ (x & id)) ≡⟨ cong (`/id) (cong (wk _) (&-id x)) ⟩
     `/id (wk _ x)        ≡⟨⟩
     (` there x)          ∎
-  Kit.kit-tag          kitₛ = K-Sub
-  Kit.id/`-injective   kitₛ = λ eq → `-injective eq
-  Kit.`/id-injective   kitₛ = λ eq → eq
+  Kit.kit-tag          Kₛ = K-Sub
+  Kit.id/`-injective   Kₛ = λ eq → `-injective eq
+  Kit.`/id-injective   Kₛ = λ eq → eq
 
-  private instance _ = kitₛ
+  private instance _ = Kₛ
 
-  ⊑-ᵣₛ : kitᵣ ⊑ₖ kitₛ
+  ⊑-ᵣₛ : Kᵣ ⊑ₖ Kₛ
   ⊑-ᵣₛ = record
     { ι-∋/⊢    = `_
     ; ι-id/`   = λ x → refl
     ; ι-`/id   = λ x/t → refl
     ; ι-wk     = λ {s'} {s} {S} x →
-        ` Kit.wk kitᵣ _ x   ≡⟨⟩
+        ` Kit.wk Kᵣ _ x   ≡⟨⟩
         ` there x           ≡⟨ cong (λ ■ → ` there ■) (sym (&-id x)) ⟩
         ` there (x & id)    ≡⟨ cong `_ (sym (&-wkₖ-wk id x)) ⟩
-        ` (x & wkₖ _ id)    ≡⟨ sym (⋯-var ⦃ kitᵣ ⦄ x (wkₖ _ id)) ⟩
+        ` (x & wkₖ _ id)    ≡⟨ sym (⋯-var ⦃ Kᵣ ⦄ x (wkₖ _ id)) ⟩
         (` x) ⋯ wkₖ _ id    ≡⟨⟩
-        Kit.wk kitₛ _ (` x) ∎
+        Kit.wk Kₛ _ (` x) ∎
     }
 
   ⊑ₖ-⊥ :
-    ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
-    → kitᵣ ⊑ₖ 𝕂
-  ⊑ₖ-⊥ ⦃ 𝕂 ⦄ = record
-    { ι-∋/⊢    = Kit.id/` 𝕂
+    ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
+    → Kᵣ ⊑ₖ K
+  ⊑ₖ-⊥ ⦃ K ⦄ = record
+    { ι-∋/⊢    = Kit.id/` K
     ; ι-id/`   = λ x → refl
-    ; ι-`/id   = λ x → sym (Kit.id/`/id 𝕂 x)
+    ; ι-`/id   = λ x → sym (Kit.id/`/id K x)
     ; ι-wk     = λ x → sym (wk-id/` _ x)
     }
 
   infixl   5   _⋯ᵣ_  _⋯ₛ_ _⋯[_]_
   infixl   9  _∥ᵣ_  _∥ₛ_
 
-  open Kit kitᵣ using () renaming (wk to wkᵣ; wk* to wk*ᵣ) public
-  open Kit kitₛ using () renaming (wk to wkₛ; wk* to wk*ₛ) public
+  open Kit Kᵣ using () renaming (wk to wkᵣ; wk* to wk*ᵣ) public
+  open Kit Kₛ using () renaming (wk to wkₛ; wk* to wk*ₛ) public
 
   -- Substitution / Renaming
 
   _→ᵣ_ : SortCtx → SortCtx → Set ℓ
   _→ₛ_ : SortCtx → SortCtx → Set ℓ
-  _→ᵣ_ = _–[ kitᵣ ]→_
-  _→ₛ_ = _–[ kitₛ ]→_
+  _→ᵣ_ = _–[ Kᵣ ]→_
+  _→ₛ_ = _–[ Kₛ ]→_
 
   -- Empty
 
@@ -133,8 +133,8 @@ record Traversal : Set (lsuc ℓ) where
   wk→ₛ* = wkₖ*
 
   wkn :
-    ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {S} {s}
-    → S –[ 𝕂 ]→ (S ▷ s)
+    ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄ {S} {s}
+    → S –[ K ]→ (S ▷ s)
   wkn = wkₖ _ id
 
   wknᵣ : ∀ {S} {s} → S →ᵣ (S ▷ s)
@@ -143,8 +143,8 @@ record Traversal : Set (lsuc ℓ) where
   wknₛ = wkn
 
   wkn* :
-    ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {S} S'
-    → S –[ 𝕂 ]→ (S ▷▷ S')
+    ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄ {S} S'
+    → S –[ K ]→ (S ▷▷ S')
   wkn* S = wkₖ* S id
 
   wknᵣ* : ∀ {S} S' → S →ᵣ (S ▷▷ S')
@@ -208,12 +208,12 @@ record Traversal : Set (lsuc ℓ) where
 
   _⋯[_]_ :
     ∀ {_∋/⊢_ : VarScoped}
-    → S₁ ⊢ s → (𝕂 : Kit _∋/⊢_) → S₁ –[ 𝕂 ]→ S₂ → S₂ ⊢ s
-  t ⋯[ 𝕂 ] ϕ = t ⋯ ϕ where instance _ = 𝕂
+    → S₁ ⊢ s → (K : Kit _∋/⊢_) → S₁ –[ K ]→ S₂ → S₂ ⊢ s
+  t ⋯[ K ] ϕ = t ⋯ ϕ where instance _ = K
 
   -- -- Alternative without duplication and `R.id` instead of `idᵣ`:
-  -- module R = Kit kitᵣ
-  -- module S = Kit kitₛ
+  -- module R = Kit Kᵣ
+  -- module S = Kit Kₛ
 
   -- -- Composition
 

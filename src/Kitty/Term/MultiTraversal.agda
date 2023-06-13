@@ -39,19 +39,19 @@ record MultiTraversal : Setω where
 
   field
     _⋯_ :
-      ∀ {ℓ} ⦃ 𝕊 : Sub ℓ ⦄ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ →
-      S₁ ⊢ s → S₁ –[ 𝕂 ]→ S₂ → S₂ ⊢ s
+      ∀ {ℓ} ⦃ 𝕊 : Sub ℓ ⦄ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄ →
+      S₁ ⊢ s → S₁ –[ K ]→ S₂ → S₂ ⊢ s
 
   open TraversalOps _⋯_ public
 
   field
     ⋯-var :
-      ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
-        (x : S₁ ∋ s) (f : S₁ –[ 𝕂 ]→ S₂) →
+      ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
+        (x : S₁ ∋ s) (f : S₁ –[ K ]→ S₂) →
       (` x) ⋯ f ≡ `/id (x & f)
 
     ⋯-↑ :
-      ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {𝕂s₁ 𝕂s₂ : List KitPkg} {S₁} {S₂}
-        (fs : S₁ –[ 𝕂s₁ ]→* S₂) (gs : S₁ –[ 𝕂s₂ ]→* S₂) →
+      ∀ {ℓ} ⦃ 𝕊 : SubWithLaws ℓ ⦄ {Ks₁ Ks₂ : List KitPkg} {S₁} {S₂}
+        (fs : S₁ –[ Ks₁ ]→* S₂) (gs : S₁ –[ Ks₂ ]→* S₂) →
       fs ≈ₓ gs →
       fs ≈ₜ gs

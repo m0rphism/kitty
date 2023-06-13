@@ -48,7 +48,7 @@ private
     Γ Γ₁ Γ₂ : Ctx S
     x y z : S ∋ s
 
-private instance _ = kitᵣ; _ = kitₛ
+private instance _ = Kᵣ; _ = Kₛ
 
 _∋*_∶_ : Ctx S₂ → S₁ →ᵣ S₂ → Ctx S₁ → Set
 _∋*_∶_ {S₂ = S₂} {S₁ = S₁} Γ₂ ϕ Γ₁ =

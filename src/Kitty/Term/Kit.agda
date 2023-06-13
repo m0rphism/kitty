@@ -17,7 +17,7 @@ private variable
   s s₁ s₂ s₃ s' s₁' s₂' s₃' : Sort st
   S S₁ S₂ S₃ S' S₁' S₂' S₃' : List (Sort Var)
 
--- Required for proving that `kitᵣ ≢ kitₛ`
+-- Required for proving that `Kᵣ ≢ Kₛ`
 data KitTag : Set where
   instance K-Ren K-Sub : KitTag
 
@@ -48,17 +48,17 @@ record Kit (_∋/⊢_ : VarScoped) : Set₁ where
 
 _∋/⊢[_]_ :
   ∀ {_∋/⊢_ : VarScoped} →
-  List (Sort Var) → (𝕂 : Kit _∋/⊢_) → Sort Var → Set
-_∋/⊢[_]_ {_∋/⊢_} S 𝕂 s = S ∋/⊢ s
+  List (Sort Var) → (K : Kit _∋/⊢_) → Sort Var → Set
+_∋/⊢[_]_ {_∋/⊢_} S K s = S ∋/⊢ s
 
-kitᵣ : Kit _∋_
-Kit.id/`             kitᵣ = λ x → x
-Kit.`/id             kitᵣ = `_
-Kit.id/`/id          kitᵣ = λ x → refl
-Kit.wk               kitᵣ = λ _ x → there x
-Kit.wk-id/`          kitᵣ = λ _ x → refl
-Kit.kit-tag          kitᵣ = K-Ren
-Kit.id/`-injective   kitᵣ = λ eq → eq
-Kit.`/id-injective   kitᵣ = λ eq → `-injective eq
+Kᵣ : Kit _∋_
+Kit.id/`             Kᵣ = λ x → x
+Kit.`/id             Kᵣ = `_
+Kit.id/`/id          Kᵣ = λ x → refl
+Kit.wk               Kᵣ = λ _ x → there x
+Kit.wk-id/`          Kᵣ = λ _ x → refl
+Kit.kit-tag          Kᵣ = K-Ren
+Kit.id/`-injective   Kᵣ = λ eq → eq
+Kit.`/id-injective   Kᵣ = λ eq → `-injective eq
 
 open Kit ⦃ … ⦄

@@ -53,13 +53,13 @@ private
     S S₁ S₂ S₃ S' S₁' S₂' S₃' : SortCtx
     ℓ₁ ℓ₂ : Level
 
-private instance _ = kitᵣ
-private instance _ = kitₛ
+private instance _ = Kᵣ
+private instance _ = Kₛ
 private instance _ = kittᵣ
 private instance _ = kittₛ
-private instance _ = ckitᵣ
-private instance _ = ckitₛᵣ
-private instance _ = ckitₛₛ
+private instance _ = Cᵣ
+private instance _ = Cₛᵣ
+private instance _ = Cₛₛ
 private instance _ = 𝕊
 private instance _ = 𝕊C
 
@@ -123,7 +123,7 @@ data OPE : S₁ →ᵣ S₂ → Ctx S₁ → Ctx S₂ → Set ℓ where
     OPE (ρ ↑ s) (Γ₁ ▶ T) (Γ₂ ▶ (T ⋯ ρ))
   ope-drop  : ∀ {ρ : S₁ →ᵣ S₂} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {T : S₂ ∶⊢ s} →
     OPE  ρ        Γ₁  Γ₂ →
-    OPE (ρ ·ₖ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) Γ₁ (Γ₂ ▶ T)
+    OPE (ρ ·ₖ wkₖ ⦃ K = Kᵣ ⦄ _ id) Γ₁ (Γ₂ ▶ T)
 
 ope-pres-telescope : ∀ {S₁} {S₂} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ρ : S₁ →ᵣ S₂} {s} (x : S₁ ∋ s) →
   OPE ρ Γ₁ Γ₂ →
@@ -151,8 +151,8 @@ ope-pres-telescope {S₁} {S₂} {Γ₁} {Γ₂} {ρ} {s} x           (ope-drop 
   wk-telescope (Γ₂' ▶ T) (there (x & ρ' & id))      ≡⟨ cong (λ ■ → wk-telescope (Γ₂' ▶ T) (there ■)) (&-id (x & ρ')) ⟩
   wk-telescope (Γ₂' ▶ T) (there (x & ρ'))           ≡⟨ wk-telescope-there Γ₂' T (x & ρ') ⟩
   wk-telescope Γ₂' (x & ρ') ⋯ wknᵣ                  ≡⟨⟩
-  wk-telescope Γ₂' (x & ρ') ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id ≡⟨ cong (_⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) (ope-pres-telescope x ope) ⟩
-  wk-telescope Γ₁ x ⋯ ρ' ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id    ≡⟨ ⋯-assoc (wk-telescope Γ₁ x) ρ' (wkₖ ⦃ 𝕂 = kitᵣ ⦄ _ id) ⟩
+  wk-telescope Γ₂' (x & ρ') ⋯ wkₖ ⦃ K = Kᵣ ⦄ _ id ≡⟨ cong (_⋯ wkₖ ⦃ K = Kᵣ ⦄ _ id) (ope-pres-telescope x ope) ⟩
+  wk-telescope Γ₁ x ⋯ ρ' ⋯ wkₖ ⦃ K = Kᵣ ⦄ _ id    ≡⟨ ⋯-assoc (wk-telescope Γ₁ x) ρ' (wkₖ ⦃ K = Kᵣ ⦄ _ id) ⟩
   wk-telescope Γ₁ x ⋯ (ρ' ·ₖ wkₖ _ id)              ∎
 
 -- _∋*_∶_ : Ctx S₂ → S₁ →ᵣ S₂ → Ctx S₁ → Set

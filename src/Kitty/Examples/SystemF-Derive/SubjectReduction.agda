@@ -7,12 +7,11 @@ open import Kitty.Typing.TypingKit compose-traversal ctx-repr
 open TypingKit ⦃ … ⦄
 
 _⊢⋯_ :
-  ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
-    ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
-    ⦃ IK : TypingKit 𝕂 K C₁ C₂ ⦄
-    ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
-    ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-    {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ 𝕂 ]→ S₂} →
+  ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
+    ⦃ W : KitT K ⦄ ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
+    ⦃ IK : TypingKit K W C₁ C₂ ⦄
+    ⦃ C₄ : ComposeKit K Kₛ Kₛ ⦄
+    {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
   Γ₁ ⊢ e ∶ t →
   Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ

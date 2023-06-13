@@ -36,13 +36,13 @@ open import Data.Product using (Σ-syntax; ∃-syntax; _,_)
 open import Data.List.Properties using (++-identityʳ; take++drop)
 open import Data.List.Membership.Propositional using (_∈_)
 
-private instance _ = kitᵣ
-private instance _ = kitₛ
+private instance _ = Kᵣ
+private instance _ = Kₛ
 private instance _ = kittᵣ
 private instance _ = kittₛ
-private instance _ = ckitᵣ
-private instance _ = ckitₛᵣ
-private instance _ = ckitₛₛ
+private instance _ = Cᵣ
+private instance _ = Cₛᵣ
+private instance _ = Cₛₛ
 private instance _ = 𝕊
 private instance _ = 𝕊C
 

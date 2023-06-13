@@ -26,103 +26,103 @@ open Sub SubWithLaws-Sub
 open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
-private instance _ = kitᵣ; _ = kitₛ
+private instance _ = Kᵣ; _ = Kₛ
 
 private variable
   _∋/⊢_ _∋/⊢₁_ _∋/⊢₂_ _∋/⊢₃_ : VarScoped
 
 module Private where
-  record KitK (𝕂 : Kit _∋/⊢_) : Set₁ where
-    private instance _ = 𝕂
+  record KitK (K : Kit _∋/⊢_) : Set₁ where
+    private instance _ = K
     field
       wkₖ-⋯ :
         ∀ {S} {s} {sx}
-          {x/t : S ∋/⊢[ 𝕂 ] sx}
-        → `/id x/t ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ s id ≡ `/id (wk s x/t)
+          {x/t : S ∋/⊢[ K ] sx}
+        → `/id x/t ⋯ wkₖ ⦃ K = Kᵣ ⦄ s id ≡ `/id (wk s x/t)
 
   wkₖ-⋯ᵣ :
     ∀ {S} {s} {sx} {x : S ∋ sx}
-    → ` x ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ s id ≡ ` there x
+    → ` x ⋯ wkₖ ⦃ K = Kᵣ ⦄ s id ≡ ` there x
   wkₖ-⋯ᵣ {S} {s} {sx} {x} =
-    ` x ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ s id   ≡⟨ ⋯-var x (wkₖ ⦃ 𝕂 = kitᵣ ⦄ s id) ⟩
-    ` (x & wkₖ ⦃ 𝕂 = kitᵣ ⦄ s id) ≡⟨ cong `_ (&-wkₖ-wk id x) ⟩
+    ` x ⋯ wkₖ ⦃ K = Kᵣ ⦄ s id   ≡⟨ ⋯-var x (wkₖ ⦃ K = Kᵣ ⦄ s id) ⟩
+    ` (x & wkₖ ⦃ K = Kᵣ ⦄ s id) ≡⟨ cong `_ (&-wkₖ-wk id x) ⟩
     ` (there (x & id))            ≡⟨ cong (λ ■ → ` there ■) (&-id x) ⟩
     ` there x                     ∎
 
-  kitkᵣ : KitK kitᵣ
+  kitkᵣ : KitK Kᵣ
   kitkᵣ = record { wkₖ-⋯ = wkₖ-⋯ᵣ }
 
-  kitkₛ : KitK kitₛ
+  kitkₛ : KitK Kₛ
   kitkₛ = record { wkₖ-⋯ = refl }
 
-  record KitWk (𝕂₁ : Kit _∋/⊢₁_) : Set₁ where
-    private instance _ = 𝕂₁
+  record KitWk (K₁ : Kit _∋/⊢₁_) : Set₁ where
+    private instance _ = K₁
     field
       ~-wk :
-        ∀ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄ ⦃ KK₂ : KitK 𝕂₂ ⦄ {S} {s} {sx}
-          {x/t₁ : S ∋/⊢[ 𝕂₁ ] sx}
-          {x/t₂ : S ∋/⊢[ 𝕂₂ ] sx}
+        ∀ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ KK₂ : KitK K₂ ⦄ {S} {s} {sx}
+          {x/t₁ : S ∋/⊢[ K₁ ] sx}
+          {x/t₂ : S ∋/⊢[ K₂ ] sx}
         → `/id x/t₁ ≡ `/id x/t₂
         → `/id (wk s x/t₁) ≡ `/id (wk s x/t₂)
 
   ~-wkᵣ :
-    ∀ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄ {S} {s} {sx}
+    ∀ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ {S} {s} {sx}
       {x₁ : S ∋ sx}
-      {x/t₂ : S ∋/⊢[ 𝕂₂ ] sx}
+      {x/t₂ : S ∋/⊢[ K₂ ] sx}
     → ` x₁ ≡ `/id x/t₂
     → ` there x₁ ≡ `/id (wk s x/t₂)
-  ~-wkᵣ ⦃ 𝕂₂ ⦄ {S} {s} {sx} {x₁} {x/t₂} eq =
-    ` there x₁                          ≡⟨ sym (id/`/id ⦃ 𝕂₂ ⦄ (there x₁)) ⟩
-    `/id ⦃ 𝕂₂ ⦄ (id/` (there x₁))       ≡⟨ cong (`/id ⦃ 𝕂₂ ⦄) (sym (wk-id/` ⦃ 𝕂₂ ⦄ s x₁)) ⟩
-    `/id ⦃ 𝕂₂ ⦄ (wk ⦃ 𝕂₂ ⦄ s (id/` x₁)) ≡⟨ cong (λ ■ → `/id ⦃ 𝕂₂ ⦄ (wk ⦃ 𝕂₂ ⦄ s ■))
-                                                (`/id-injective (trans (id/`/id ⦃ 𝕂₂ ⦄ x₁) eq)) ⟩
-    `/id ⦃ 𝕂₂ ⦄ (wk s x/t₂)             ∎
+  ~-wkᵣ ⦃ K₂ ⦄ {S} {s} {sx} {x₁} {x/t₂} eq =
+    ` there x₁                          ≡⟨ sym (id/`/id ⦃ K₂ ⦄ (there x₁)) ⟩
+    `/id ⦃ K₂ ⦄ (id/` (there x₁))       ≡⟨ cong (`/id ⦃ K₂ ⦄) (sym (wk-id/` ⦃ K₂ ⦄ s x₁)) ⟩
+    `/id ⦃ K₂ ⦄ (wk ⦃ K₂ ⦄ s (id/` x₁)) ≡⟨ cong (λ ■ → `/id ⦃ K₂ ⦄ (wk ⦃ K₂ ⦄ s ■))
+                                                (`/id-injective (trans (id/`/id ⦃ K₂ ⦄ x₁) eq)) ⟩
+    `/id ⦃ K₂ ⦄ (wk s x/t₂)             ∎
 
-  kitwkᵣ : KitWk kitᵣ
-  kitwkᵣ = record { ~-wk = λ ⦃ 𝕂₂ ⦄ x → ~-wkᵣ ⦃ 𝕂₂ ⦄ x }
+  kitwkᵣ : KitWk Kᵣ
+  kitwkᵣ = record { ~-wk = λ ⦃ K₂ ⦄ x → ~-wkᵣ ⦃ K₂ ⦄ x }
 
   ~-wkₛ :
-    ∀ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄ ⦃ KK₂ : KitK 𝕂₂ ⦄ {S} {s} {sx}
+    ∀ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ KK₂ : KitK K₂ ⦄ {S} {s} {sx}
       {t₁ : S ⊢ sx}
-      {x/t₂ : S ∋/⊢[ 𝕂₂ ] sx}
+      {x/t₂ : S ∋/⊢[ K₂ ] sx}
     → t₁ ≡ `/id x/t₂
     → wk s t₁ ≡ `/id (wk s x/t₂)
-  ~-wkₛ ⦃ 𝕂₂ ⦄ ⦃ KK₂ ⦄ {S} {s} {sx} {_} {x/t₂} refl =
+  ~-wkₛ ⦃ K₂ ⦄ ⦃ KK₂ ⦄ {S} {s} {sx} {_} {x/t₂} refl =
     wk s (`/id x/t₂)                  ≡⟨⟩
-    `/id x/t₂ ⋯ wkₖ ⦃ 𝕂 = kitᵣ ⦄ s id ≡⟨ KitK.wkₖ-⋯ KK₂ ⟩
-    `/id ⦃ 𝕂₂ ⦄ (wk s x/t₂)           ∎
+    `/id x/t₂ ⋯ wkₖ ⦃ K = Kᵣ ⦄ s id ≡⟨ KitK.wkₖ-⋯ KK₂ ⟩
+    `/id ⦃ K₂ ⦄ (wk s x/t₂)           ∎
 
-  kitwkₛ : KitWk kitₛ
+  kitwkₛ : KitWk Kₛ
   kitwkₛ = record { ~-wk = ~-wkₛ }
 
 open Private
 
-record KitT (𝕂 : Kit _∋/⊢_) : Set₁ where
+record KitT (K : Kit _∋/⊢_) : Set₁ where
   field
-    KitT-KitK  : KitK 𝕂
-    KitT-KitWk : KitWk 𝕂
+    KitT-KitK  : KitK K
+    KitT-KitWk : KitWk K
 
 wk-`/id :
-  ∀ ⦃ 𝕂 : Kit _∋/⊢_ ⦄ ⦃ KT : KitT 𝕂 ⦄ {S} s {sx}
-    (x/t : S ∋/⊢[ 𝕂 ] sx)
+  ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ KT : KitT K ⦄ {S} s {sx}
+    (x/t : S ∋/⊢[ K ] sx)
   → wk s (`/id x/t) ≡ `/id (wk s x/t)
 wk-`/id ⦃ KT = KT ⦄ s x/t = KitK.wkₖ-⋯ (KitT.KitT-KitK KT)
 
 ~-wk :
-  ∀ ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄ ⦃ KT₁ : KitT 𝕂₁ ⦄ ⦃ KT₂ : KitT 𝕂₂ ⦄ {S} {s} {sx}
-    {x/t₁ : S ∋/⊢[ 𝕂₁ ] sx}
-    {x/t₂ : S ∋/⊢[ 𝕂₂ ] sx}
+  ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ KT₁ : KitT K₁ ⦄ ⦃ KT₂ : KitT K₂ ⦄ {S} {s} {sx}
+    {x/t₁ : S ∋/⊢[ K₁ ] sx}
+    {x/t₂ : S ∋/⊢[ K₂ ] sx}
   → `/id x/t₁ ≡ `/id x/t₂
   → `/id (wk s x/t₁) ≡ `/id (wk s x/t₂)
 ~-wk ⦃ KT₁ = KT₁ ⦄ ⦃ KT₂ = KT₂ ⦄ = KitWk.~-wk (KitT.KitT-KitWk KT₁) ⦃ KK₂ = KitT.KitT-KitK KT₂ ⦄ 
 
-kittᵣ : KitT kitᵣ
+kittᵣ : KitT Kᵣ
 kittᵣ = record
   { KitT-KitK  = kitkᵣ
   ; KitT-KitWk = kitwkᵣ
   }
 
-kittₛ : KitT kitₛ
+kittₛ : KitT Kₛ
 kittₛ = record
   { KitT-KitK  = kitkₛ
   ; KitT-KitWk = kitwkₛ
@@ -133,22 +133,22 @@ open KitT ⦃ … ⦄
 private instance _ = kittᵣ; _ = kittₛ
 
 ~-cong-wk :
-  ∀ ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄ 
-    ⦃ K₁ : KitT 𝕂₁ ⦄ ⦃ K₂ : KitT 𝕂₂ ⦄
-    {S₁} {S₂} {s} {ϕ : S₁ –[ 𝕂₁ ]→ S₂} {ϕ' : S₁ –[ 𝕂₂ ]→ S₂} →
+  ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ 
+    ⦃ W₁ : KitT K₁ ⦄ ⦃ W₂ : KitT K₂ ⦄
+    {S₁} {S₂} {s} {ϕ : S₁ –[ K₁ ]→ S₂} {ϕ' : S₁ –[ K₂ ]→ S₂} →
   ϕ ~ ϕ' →
   wkₖ s ϕ ~ wkₖ s ϕ'
-~-cong-wk ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ {S₁} {S₂} {s} {ϕ} {ϕ'} ϕ~ϕ' = mk-~ λ sx x →
-  `/id ⦃ 𝕂₁ ⦄ (x & wkₖ _ ϕ)   ≡⟨ cong `/id (&-wkₖ-wk ϕ x) ⟩
-  `/id ⦃ 𝕂₁ ⦄ (wk _ (x & ϕ))  ≡⟨ ~-wk (use-~ ϕ~ϕ' _ x) ⟩
-  `/id ⦃ 𝕂₂ ⦄ (wk _ (x & ϕ')) ≡⟨ cong `/id (sym (&-wkₖ-wk ϕ' x)) ⟩
-  `/id ⦃ 𝕂₂ ⦄ (x & wkₖ _ ϕ')  ∎
+~-cong-wk ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ {S₁} {S₂} {s} {ϕ} {ϕ'} ϕ~ϕ' = mk-~ λ sx x →
+  `/id ⦃ K₁ ⦄ (x & wkₖ _ ϕ)   ≡⟨ cong `/id (&-wkₖ-wk ϕ x) ⟩
+  `/id ⦃ K₁ ⦄ (wk _ (x & ϕ))  ≡⟨ ~-wk (use-~ ϕ~ϕ' _ x) ⟩
+  `/id ⦃ K₂ ⦄ (wk _ (x & ϕ')) ≡⟨ cong `/id (sym (&-wkₖ-wk ϕ' x)) ⟩
+  `/id ⦃ K₂ ⦄ (x & wkₖ _ ϕ')  ∎
 
 open ~-Reasoning 
 ~-cong-wk* :
-  ∀ ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄
-    ⦃ K₁ : KitT 𝕂₁ ⦄ ⦃ K₂ : KitT 𝕂₂ ⦄
-    {S₁} {S₂} {S} {ϕ : S₁ –[ 𝕂₁ ]→ S₂} {ϕ' : S₁ –[ 𝕂₂ ]→ S₂} →
+  ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄
+    ⦃ W₁ : KitT K₁ ⦄ ⦃ W₂ : KitT K₂ ⦄
+    {S₁} {S₂} {S} {ϕ : S₁ –[ K₁ ]→ S₂} {ϕ' : S₁ –[ K₂ ]→ S₂} →
   ϕ ~ ϕ' →
   wkₖ* S ϕ ~ wkₖ* S ϕ'
 ~-cong-wk* {S = []} {ϕ} {ϕ'} ϕ~ϕ' =
@@ -163,21 +163,21 @@ open ~-Reasoning
   wkₖ* (S ▷ s) ϕ'   ~∎
 
 ~-cong-↑ :
-  ∀ ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄
-    ⦃ K₁ : KitT 𝕂₁ ⦄ ⦃ K₂ : KitT 𝕂₂ ⦄
-    {S₁} {S₂} {s} {ϕ : S₁ –[ 𝕂₁ ]→ S₂} {ϕ' : S₁ –[ 𝕂₂ ]→ S₂} →
+  ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄
+    ⦃ W₁ : KitT K₁ ⦄ ⦃ W₂ : KitT K₂ ⦄
+    {S₁} {S₂} {s} {ϕ : S₁ –[ K₁ ]→ S₂} {ϕ' : S₁ –[ K₂ ]→ S₂} →
   ϕ ~ ϕ' →
   (ϕ ↑ s) ~ (ϕ' ↑ s)
-~-cong-↑ ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {S₁} {S₂} {s} {ϕ} {ϕ'} ϕ~ϕ' =
+~-cong-↑ ⦃ K₁ ⦄ ⦃ K₂ ⦄ {S₁} {S₂} {s} {ϕ} {ϕ'} ϕ~ϕ' =
   (ϕ ↑ s)                        ~⟨ ↑-,ₖ ϕ s ⟩
-  (wkₖ _ ϕ  ,ₖ id/` (here refl)) ~⟨ ~-cong-,ₖ (~-cong-wk ϕ~ϕ') (~ₓ-refl ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄) ⟩
+  (wkₖ _ ϕ  ,ₖ id/` (here refl)) ~⟨ ~-cong-,ₖ (~-cong-wk ϕ~ϕ') (~ₓ-refl ⦃ K₁ ⦄ ⦃ K₂ ⦄) ⟩
   (wkₖ _ ϕ' ,ₖ id/` (here refl)) ~⟨ ~-sym (↑-,ₖ ϕ' s) ⟩
   (ϕ' ↑ s)                       ~∎
 
 ~-cong-↑* :
-  ∀ ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄ ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄
-    ⦃ K₁ : KitT 𝕂₁ ⦄ ⦃ K₂ : KitT 𝕂₂ ⦄
-    {S₁} {S₂} {S} {ϕ : S₁ –[ 𝕂₁ ]→ S₂} {ϕ' : S₁ –[ 𝕂₂ ]→ S₂} →
+  ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄
+    ⦃ W₁ : KitT K₁ ⦄ ⦃ W₂ : KitT K₂ ⦄
+    {S₁} {S₂} {S} {ϕ : S₁ –[ K₁ ]→ S₂} {ϕ' : S₁ –[ K₂ ]→ S₂} →
   ϕ ~ ϕ' →
   (ϕ ↑* S) ~ (ϕ' ↑* S)
 ~-cong-↑* {S = []}    {ϕ = ϕ} {ϕ' = ϕ'} ϕ~ϕ' =
@@ -193,17 +193,17 @@ open ~-Reasoning
 
 open import Data.List.Properties using (++-assoc)
 ↑*-▷▷ :
-  ∀ ⦃ 𝕂 : Kit _∋/⊢_ ⦄ ⦃ K : KitT 𝕂 ⦄ {S₁ S₂} (ϕ : S₁ –[ 𝕂 ]→ S₂) S S' →
-  let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc S' S S₁) (++-assoc S' S S₂) in
+  ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : KitT K ⦄ {S₁ S₂} (ϕ : S₁ –[ K ]→ S₂) S S' →
+  let sub = subst₂ (_–[ K ]→_) (++-assoc S' S S₁) (++-assoc S' S S₂) in
   ϕ ↑* S ↑* S' ~ sub (ϕ ↑* (S ▷▷ S'))
-↑*-▷▷ ⦃ 𝕂 ⦄ {S₁} {S₂} ϕ S [] =
-  let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc [] S S₁) (++-assoc [] S S₂) in
+↑*-▷▷ ⦃ K ⦄ {S₁} {S₂} ϕ S [] =
+  let sub = subst₂ (_–[ K ]→_) (++-assoc [] S S₁) (++-assoc [] S S₂) in
   ϕ ↑* S ↑* []         ~⟨ ↑*-[] (ϕ ↑* S) ⟩
   ϕ ↑* (S ▷▷ [])       ~⟨⟩
   sub (ϕ ↑* (S ▷▷ [])) ~∎
-↑*-▷▷ ⦃ 𝕂 ⦄ {S₁} {S₂} ϕ S (S' ▷ s') =
-  let sub = subst₂ (_–[ 𝕂 ]→_) (++-assoc (S' ▷ s') S S₁) (++-assoc (S' ▷ s') S S₂) in
-  let sub' = subst₂ (_–[ 𝕂 ]→_) (++-assoc S' S S₁) (++-assoc S' S S₂) in
+↑*-▷▷ ⦃ K ⦄ {S₁} {S₂} ϕ S (S' ▷ s') =
+  let sub = subst₂ (_–[ K ]→_) (++-assoc (S' ▷ s') S S₁) (++-assoc (S' ▷ s') S S₂) in
+  let sub' = subst₂ (_–[ K ]→_) (++-assoc S' S S₁) (++-assoc S' S S₂) in
   ϕ ↑* S ↑* (S' ▷ s')         ~⟨ ↑*-▷ S' s' (ϕ ↑* S) ⟩
   (ϕ ↑* S ↑* S') ↑ s'         ~⟨ ~-cong-↑ (↑*-▷▷ ϕ S S') ⟩
   sub' (ϕ ↑* (S ▷▷ S')) ↑ s'  ~≡⟨ dist-subst₂'

@@ -32,36 +32,36 @@ open import Level using () renaming (suc to lsuc)
 open SubCompose 𝕊C
 open Kitty.Term.ComposeTraversal.ComposeTraversal C
 
-record KitX {_∋/⊢_ : VarScoped} (𝕂 : Kit _∋/⊢_) : Set (lsuc ℓ) where
+record KitX {_∋/⊢_ : VarScoped} (K : Kit _∋/⊢_) : Set (lsuc ℓ) where
   field
-    ⦃ KitX-KitT         ⦄ : KitT 𝕂
-    ⦃ KitX-ComposeKitₖₖ ⦄ : ComposeKit 𝕂 𝕂 𝕂
-    ⦃ KitX-ComposeKitₖᵣ ⦄ : ComposeKit 𝕂 kitᵣ 𝕂
-    ⦃ KitX-ComposeKitᵣₖ ⦄ : ComposeKit kitᵣ 𝕂 𝕂
-    ⦃ KitX-ComposeKitₖₛ ⦄ : ComposeKit 𝕂 kitₛ kitₛ
-    ⦃ KitX-ComposeKitₛₖ ⦄ : ComposeKit kitₛ 𝕂 kitₛ
+    ⦃ KitX-KitT         ⦄ : KitT K
+    ⦃ KitX-ComposeKitₖₖ ⦄ : ComposeKit K K K
+    ⦃ KitX-ComposeKitₖᵣ ⦄ : ComposeKit K Kᵣ K
+    ⦃ KitX-ComposeKitᵣₖ ⦄ : ComposeKit Kᵣ K K
+    ⦃ KitX-ComposeKitₖₛ ⦄ : ComposeKit K Kₛ Kₛ
+    ⦃ KitX-ComposeKitₛₖ ⦄ : ComposeKit Kₛ K Kₛ
 
   instance
     KitX-Kit : Kit _∋/⊢_
-    KitX-Kit = 𝕂
+    KitX-Kit = K
 
 instance
-  kitxᵣ : KitX kitᵣ
+  kitxᵣ : KitX Kᵣ
   kitxᵣ = record
     { KitX-KitT         = kittᵣ
-    ; KitX-ComposeKitₖₖ = ckitᵣ ⦃ kitᵣ ⦄
-    ; KitX-ComposeKitₖᵣ = ckitᵣ ⦃ kitᵣ ⦄
-    ; KitX-ComposeKitᵣₖ = ckitᵣ ⦃ kitᵣ ⦄
-    ; KitX-ComposeKitₖₛ = ckitᵣ ⦃ kitₛ ⦄
-    ; KitX-ComposeKitₛₖ = ckitₛᵣ
+    ; KitX-ComposeKitₖₖ = Cᵣ ⦃ Kᵣ ⦄
+    ; KitX-ComposeKitₖᵣ = Cᵣ ⦃ Kᵣ ⦄
+    ; KitX-ComposeKitᵣₖ = Cᵣ ⦃ Kᵣ ⦄
+    ; KitX-ComposeKitₖₛ = Cᵣ ⦃ Kₛ ⦄
+    ; KitX-ComposeKitₛₖ = Cₛᵣ
     }
 
-  kitxₛ : KitX kitₛ
+  kitxₛ : KitX Kₛ
   kitxₛ = record
     { KitX-KitT         = kittₛ
-    ; KitX-ComposeKitₖₖ = ckitₛₛ
-    ; KitX-ComposeKitₖᵣ = ckitₛᵣ
-    ; KitX-ComposeKitᵣₖ = ckitᵣ ⦃ kitₛ ⦄
-    ; KitX-ComposeKitₖₛ = ckitₛₛ
-    ; KitX-ComposeKitₛₖ = ckitₛₛ
+    ; KitX-ComposeKitₖₖ = Cₛₛ
+    ; KitX-ComposeKitₖᵣ = Cₛᵣ
+    ; KitX-ComposeKitᵣₖ = Cᵣ ⦃ Kₛ ⦄
+    ; KitX-ComposeKitₖₛ = Cₛₛ
+    ; KitX-ComposeKitₛₖ = Cₛₛ
     }

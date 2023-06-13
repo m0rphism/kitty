@@ -59,17 +59,17 @@ private
     Γ Γ₁ Γ₂ : Ctx S
     x y z : S ∋ s
     _∋/⊢_ : VarScoped
-    𝕂 : Kit _∋/⊢_
-    𝔸₁ : ComposeKit 𝕂 kitᵣ 𝕂
-    𝔸₂ : ComposeKit kitᵣ 𝕂 𝕂
-    -- WK : WkDistKit ⦃ 𝕂 ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄
+    K : Kit _∋/⊢_
+    𝔸₁ : ComposeKit K Kᵣ K
+    𝔸₂ : ComposeKit Kᵣ K K
+    -- WK : WkDistKit ⦃ K ⦄ ⦃ 𝔸₁ ⦄ ⦃ 𝔸₂ ⦄
 
 record TypingKit
     {_∋/⊢_ : VarScoped}
-    (𝕂 : Kit _∋/⊢_)
-    (K : KitT 𝕂)
-    (C₁ : ComposeKit 𝕂 kitᵣ 𝕂)
-    (C₂ : ComposeKit 𝕂 𝕂 𝕂)
+    (K : Kit _∋/⊢_)
+    (W : KitT K)
+    (C₁ : ComposeKit K Kᵣ K)
+    (C₂ : ComposeKit K K K)
     : Set₁ where
 
   infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
@@ -77,18 +77,18 @@ record TypingKit
   -- infixl  5  _,ₖ_
   -- infixl  6  _↑_  _↑*_
 
-  private instance _ = kitᵣ
-  private instance _ = kitₛ
+  private instance _ = Kᵣ
+  private instance _ = Kₛ
   private instance _ = kittᵣ
   private instance _ = kittₛ
-  private instance _ = ckitᵣ
-  private instance _ = 𝕂
+  private instance _ = Cᵣ
   private instance _ = K
+  private instance _ = W
   private instance _ = C₁
   private instance _ = C₂
 
-  open Kit 𝕂
-  open KitT K
+  open Kit K
+  open KitT W
 
   field
     -- Variable/Term Typing
@@ -125,19 +125,19 @@ record TypingKit
   -- _∋*_∶_ {S₁ = S₁} Γ₂ ρ Γ₁ = ∀ (x : S₁ ∋ 𝕖) → wk-telescope Γ₂ (ρ _ x) ≡ wk-telescope Γ₁ x ⋯ ρ
   -- TODO: IS THIS EQUIVALENT TO OPE?
 
-  _∋*/⊢*_∶_ : Ctx S₂ → S₁ –[ 𝕂 ]→ S₂ → Ctx S₁ → Set
+  _∋*/⊢*_∶_ : Ctx S₂ → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
   _∋*/⊢*_∶_ {S₂ = S₂} {S₁ = S₁} Γ₂ ϕ Γ₁ =
     -- ∀ {s₁} → (x : S₁ ∋ s₁) → Γ₂ ◆ f _ x ∶ subst (S₂ ∶⊢_) (sym (s→m/s→M s₁)) (wk-telescope Γ₁ x ⋯ f)
     ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) (⊢x : Γ₁ ∋ x ∶ t)
     → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
 
-  ≡ᶜ-cong-∋*/⊢* : ∀ {S₁ S₂} {Γ₁ : Ctx S₁} {ϕ : S₁ –[ 𝕂 ]→ S₂} {Γ₂ Γ₂' : Ctx S₂} → 
+  ≡ᶜ-cong-∋*/⊢* : ∀ {S₁ S₂} {Γ₁ : Ctx S₁} {ϕ : S₁ –[ K ]→ S₂} {Γ₂ Γ₂' : Ctx S₂} → 
     Γ₂ ≡ᶜ Γ₂' →
     Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →
     Γ₂' ∋*/⊢* ϕ ∶ Γ₁
   ≡ᶜ-cong-∋*/⊢* Γ₂≡ᶜΓ₂' ⊢ϕ = λ x t ⊢x → ≡ᶜ-cong-∋/⊢ _ Γ₂≡ᶜΓ₂' (⊢ϕ x t ⊢x)
 
-  _∋↑/⊢↑_ : ∀ {S₁} {S₂} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ 𝕂 ]→ S₂} {s} →
+  _∋↑/⊢↑_ : ∀ {S₁} {S₂} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} {s} →
     Γ₂             ∋*/⊢* ϕ       ∶ Γ₁ →
     (t : S₁ ∶⊢ s) →
     (Γ₂ ▶ (t ⋯ ϕ)) ∋*/⊢* (ϕ ↑ s) ∶ (Γ₁ ▶ t)
@@ -163,7 +163,7 @@ record TypingKit
 
   open CtxReprSubst 𝕊 T H public
 
-  _∋↑*/⊢↑*_ : ∀ {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ 𝕂 ]→ S₂} →
+  _∋↑*/⊢↑*_ : ∀ {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} →
     Γ₂             ∋*/⊢* ϕ       ∶ Γ₁ →
     ∀ {S'} (Γ' : Ctx' S₁ S') →
     (Γ₂ ▶▶ (Γ' ⋯Ctx' ϕ)) ∋*/⊢* (ϕ ↑* S') ∶ (Γ₁ ▶▶ Γ')
@@ -216,7 +216,7 @@ record TypingKit
     (Γ₂ ▶▶ (Γ' ⋯Ctx' ϕ)) ∋/⊢ there x & ϕ ↑* (S' ▷ s') ∶ (t ⋯ ϕ ↑* (S' ▷ s'))
       by ⊢ϕ↑↑' (there x) t ∋x  -- Γ₂∋*/⊢*ϕ ∋↑*/⊢↑* (λ x → Γ' (there x))
 
-  _,*_ : ∀ {s} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ 𝕂 ]→ S₂} {e : S₂ ∋/⊢ s} {t : S₁ ∶⊢ s} →
+  _,*_ : ∀ {s} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} {e : S₂ ∋/⊢ s} {t : S₁ ∶⊢ s} →
     Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →
     Γ₂ ∋/⊢   e ∶ t ⋯ ϕ →
     Γ₂ ∋*/⊢* ϕ ,ₖ e ∶ Γ₁ ▶ t
@@ -251,7 +251,7 @@ record TypingKit
     Γ ∋/⊢ id/` x ∶ (wk-telescope Γ x)
       by ∋/⊢∶-lookup x)
 
-  _⊢↓ : ∀ {S₁ S₂ s₁} {Γ₁ : Ctx (S₁ ▷ s₁)} {Γ₂ : Ctx S₂} {ϕ : (S₁ ▷ s₁) –[ 𝕂 ]→ S₂} →
+  _⊢↓ : ∀ {S₁ S₂ s₁} {Γ₁ : Ctx (S₁ ▷ s₁)} {Γ₂ : Ctx S₂} {ϕ : (S₁ ▷ s₁) –[ K ]→ S₂} →
     Γ₂ ∋*/⊢* ϕ ∶ Γ₁ →
     Γ₂ ∋*/⊢* ϕ ↓ ∶ Γ₁ ↓ᶜ
   _⊢↓ {S₁} {S₂} {s₁} {Γ₁} {Γ₂} {ϕ} ⊢ϕ {sx} x t refl =
@@ -281,7 +281,7 @@ record TypingKit
   -- Γ ⊢ 1 : ℕ ⋯ { 1 / x, 2 / y }
   -- Γ ⊢ 2 : ℕ ⋯ { 1 / x, 2 / y }
 
-  _∋*/⊢*''_∶_ : Ctx S₂ → S₁ –[ 𝕂 ]→ S₂ → Ctx S₁ → Set
+  _∋*/⊢*''_∶_ : Ctx S₂ → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
   _∋*/⊢*''_∶_ {S₂ = S₂} {S₁ = S₁} Γ₂ ϕ Γ₁ =
     -- ∀ {s₁} → (x : S₁ ∋ s₁) → Γ₂ ◆ f _ x ∶ subst (S₂ ∶⊢_) (sym (s→m/s→M s₁)) (wk-telescope Γ₁ x ⋯ f)
     ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) (⊢x : Γ₁ ∋ x ∶ t)
@@ -298,13 +298,13 @@ record TypingKit
   _∋'_∶_ : Ctx' S' S → S ∋ s → S' ▷▷ S ∶⊢ s → Set
   Γ ∋' x ∶ t = wk-telescope' Γ x ≡ t
 
-  _∋*/⊢*_∶_via_ : ∀ {S S₁ S₂} → Ctx S₂ → S₁ –[ 𝕂 ]→ S₂ → Ctx' S S₁ → S –[ 𝕂 ]→ S₂ → Set
+  _∋*/⊢*_∶_via_ : ∀ {S S₁ S₂} → Ctx S₂ → S₁ –[ K ]→ S₂ → Ctx' S S₁ → S –[ K ]→ S₂ → Set
   _∋*/⊢*_∶_via_ {S} {S₁} {S₂} Γ₂ ϕ Γ₁ ϕ' =
     ∀ {s₁} (x : S₁ ∋ s₁) (t : S ▷▷ S₁ ∶⊢ s₁) (⊢x : Γ₁ ∋' x ∶ t)
     → Γ₂ ∋/⊢ x & ϕ ∶ (t ⋯ (ϕ' ∥ ϕ) )
 
   postulate
-    _⊢∥'_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx' S₁ S₂} {ϕ₁ : S₁ –[ 𝕂 ]→ S} {ϕ₂ : S₂ –[ 𝕂 ]→ S} →
+    _⊢∥'_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx' S₁ S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
       Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
       Γ ∋*/⊢* ϕ₂ ∶ Γ₂ via ϕ₁ →
       Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶ Γ₂
@@ -333,11 +333,11 @@ record TypingKit
 
   -- TODO: Dependency not yet upgraded to 2.6.4
   postulate
-    _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ 𝕂 ]→ S} {ϕ₂ : S₂ –[ 𝕂 ]→ S} →
+    _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
       Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
       Γ ∋*/⊢* ϕ₂ ∶ Γ₂ →
       Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶ wk*-Ctx _ Γ₂
-  -- _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ 𝕂 ]→ S} {ϕ₂ : S₂ –[ 𝕂 ]→ S} →
+  -- _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
   --   Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
   --   Γ ∋*/⊢* ϕ₂ ∶ Γ₂ →
   --   Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶ wk*-Ctx _ Γ₂
@@ -362,7 +362,7 @@ record TypingKit
   --          (sym (&-∥-here ϕ₁ ϕ₂))
   --          (wk-telescope Γ₂ (here refl) ⋯ ϕ₂                           ≡⟨⟩
   --           wkₛ _ (lookup Γ₂ (here refl)) ⋯ ϕ₂                         ≡⟨ ~-cong-⋯ _ (~-sym (wk*-∥₁ ϕ₁ ϕ₂)) ⟩
-  --           wkₛ _ (lookup Γ₂ (here refl)) ⋯ sub₂ (wkₖ* S₁ (id {S = []}) ↑* (S₂ ▷ s₂)) ·[ ckitᵣ ] (ϕ₁ ∥ ϕ₂)
+  --           wkₛ _ (lookup Γ₂ (here refl)) ⋯ sub₂ (wkₖ* S₁ (id {S = []}) ↑* (S₂ ▷ s₂)) ·[ Cᵣ ] (ϕ₁ ∥ ϕ₂)
   --             ≡⟨ sym (⋯-assoc _ _ (ϕ₁ ∥ ϕ₂)) ⟩
   --           wkₛ _ (lookup Γ₂ (here refl)) ⋯ᵣ sub₂ (wkₖ* S₁ (id {S = []}) ↑* (S₂ ▷ s₂)) ⋯ (ϕ₁ ∥ ϕ₂)
   --             ≡⟨ cong (_⋯ ϕ₁ ∥ ϕ₂) (dist-subst-sub' _ _ (wkₛ _ (lookup Γ₂ (here refl))) (wkₖ* S₁ (id {S = []}) ↑* (S₂ ▷ s₂))) ⟩
@@ -437,7 +437,7 @@ record TypingKit
   --   )
 
   -- -- TODO: shouldn't substitution Typings allow Ctx' instead of Ctx?
-  -- _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ 𝕂 ]→ S} {ϕ₂ : S₂ –[ 𝕂 ]→ S} →
+  -- _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
   --   Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
   --   Γ ∋*/⊢* ϕ₂ ∶ Γ₂ →
   --   Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶' wk*-Ctx' _ Γ₂
@@ -456,7 +456,7 @@ record TypingKit
   -- _⊢∥_ {S} {S₁} {S₂ ▷ s₂} {Γ} {Γ₁} {Γ₂} {ϕ₁} {ϕ₂} ⊢ϕ₁ ⊢ϕ₂ {sx} (there x) t ∋x = {!!}
 
   ⊢*~ :
-    ∀ {S₁} {S₂} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ ϕ' : S₁ –[ 𝕂 ]→ S₂} 
+    ∀ {S₁} {S₂} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ ϕ' : S₁ –[ K ]→ S₂} 
     → ϕ ~ ϕ'
     → Γ₂ ∋*/⊢* ϕ ∶ Γ₁
     → Γ₂ ∋*/⊢* ϕ' ∶ Γ₁
@@ -490,66 +490,65 @@ open TypingKit ⦃ ... ⦄
 
 infixl  5  _∋*/⊢*[_]_∶_
 _∋*/⊢*[_]_∶_ :
-  ∀ {_∋/⊢_ : VarScoped} {𝕂 : Kit _∋/⊢_}
-    {K : KitT 𝕂} {C₁ : ComposeKit 𝕂 kitᵣ 𝕂} {C₂ : ComposeKit 𝕂 𝕂 𝕂}
-  → Ctx S₂ → TypingKit 𝕂 K C₁ C₂ → S₁ –[ 𝕂 ]→ S₂ → Ctx S₁ → Set
+  ∀ {_∋/⊢_ : VarScoped} {K : Kit _∋/⊢_}
+    {W : KitT K} {C₁ : ComposeKit K Kᵣ K} {C₂ : ComposeKit K K K}
+  → Ctx S₂ → TypingKit K W C₁ C₂ → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
 Γ₂ ∋*/⊢*[ IK ] f ∶ Γ₁ = Γ₂ ∋*/⊢* f ∶ Γ₁ where instance _ = IK
 
 open Kit ⦃ ... ⦄
 open ComposeKit ⦃ ... ⦄
 
-private instance _ = kitᵣ
-private instance _ = kitₛ
+private instance _ = Kᵣ
+private instance _ = Kₛ
 private instance _ = kittᵣ
 private instance _ = kittₛ
-private instance _ = ckitᵣ
-private instance _ = ckitₛᵣ
-private instance _ = ckitₛₛ
+private instance _ = Cᵣ
+private instance _ = Cₛᵣ
+private instance _ = Cₛₛ
 
 record TypingTraversal : Set (lsuc ℓ) where
   infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
   field
     -- Substitution/Renaming preserves typing
-    _⊢⋯_ : ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
-             ⦃ K : KitT 𝕂 ⦄ ⦃ C₁ : ComposeKit 𝕂 kitᵣ 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
-             ⦃ IK : TypingKit 𝕂 K C₁ C₂ ⦄
-             ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
-             ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-             {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ 𝕂 ]→ S₂} →
+    _⊢⋯_ : ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
+             ⦃ W : KitT K ⦄ ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
+             ⦃ IK : TypingKit K W C₁ C₂ ⦄
+             ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
+             {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
            Γ₁ ⊢ e ∶ t →
            Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
            Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
 
-    -- ⋯-var : ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ (x : S₁ ∋ s) (f : S₁ –→ S₂) →
+    -- ⋯-var : ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄ (x : S₁ ∋ s) (f : S₁ –→ S₂) →
     --         (` x) ⋯ f ≡ subst (S₂ ⊢_) (id/s) (tm _ (f _ x))
 
   instance
-    ikitᵣ : TypingKit kitᵣ kittᵣ ckitᵣ ckitᵣ
-    TypingKit._∋/⊢_∶_ ikitᵣ = _∋_∶_
-    TypingKit.∋/⊢∶-lookup ikitᵣ = λ _ → refl
-    TypingKit.id/⊢`   ikitᵣ = λ ⊢x → ⊢x
-    TypingKit.⊢`/id   ikitᵣ = ⊢`
-    TypingKit.∋wk/⊢wk ikitᵣ Γ t' x t refl = wk-telescope-there Γ t' x
-    TypingKit.≡ᶜ-cong-∋/⊢ ikitᵣ = ≡ᶜ-cong-∋
+    iKᵣ : TypingKit Kᵣ kittᵣ Cᵣ Cᵣ
+    TypingKit._∋/⊢_∶_ iKᵣ = _∋_∶_
+    TypingKit.∋/⊢∶-lookup iKᵣ = λ _ → refl
+    TypingKit.id/⊢`   iKᵣ = λ ⊢x → ⊢x
+    TypingKit.⊢`/id   iKᵣ = ⊢`
+    TypingKit.∋wk/⊢wk iKᵣ Γ t' x t refl = wk-telescope-there Γ t' x
+    TypingKit.≡ᶜ-cong-∋/⊢ iKᵣ = ≡ᶜ-cong-∋
 
-    ikitₛ : TypingKit kitₛ kittₛ ckitₛᵣ ckitₛₛ
-    TypingKit._∋/⊢_∶_ ikitₛ = _⊢_∶_
-    TypingKit.∋/⊢∶-lookup ikitₛ = λ _ → ⊢` refl
-    TypingKit.id/⊢`   ikitₛ = ⊢`
-    TypingKit.⊢`/id   ikitₛ = λ ⊢t → ⊢t
-    TypingKit.∋wk/⊢wk ikitₛ Γ t' x t ⊢e = ⊢e ⊢⋯ λ x₁ t₁ ⊢x₁ →
+    iKₛ : TypingKit Kₛ kittₛ Cₛᵣ Cₛₛ
+    TypingKit._∋/⊢_∶_ iKₛ = _⊢_∶_
+    TypingKit.∋/⊢∶-lookup iKₛ = λ _ → ⊢` refl
+    TypingKit.id/⊢`   iKₛ = ⊢`
+    TypingKit.⊢`/id   iKₛ = λ ⊢t → ⊢t
+    TypingKit.∋wk/⊢wk iKₛ Γ t' x t ⊢e = ⊢e ⊢⋯ λ x₁ t₁ ⊢x₁ →
       (Γ ▶ t') ∋ (x₁ & wknᵣ) ∶ (t₁ ⋯ wknᵣ)
         by subst (λ ■ → (Γ ▶ t') ∋ ■ ∶ (t₁ ⋯ wknᵣ))
                 (sym (trans (&-wkₖ-wk id x₁) (cong there (&-id x₁)))) (
       (Γ ▶ t') ∋ (there x₁) ∶ (t₁ ⋯ wknᵣ)
         by (∋wk/⊢wk Γ t' x₁ t₁ ⊢x₁))
-    TypingKit.≡ᶜ-cong-∋/⊢ ikitₛ = λ x → ≡ᶜ-cong-⊢
+    TypingKit.≡ᶜ-cong-∋/⊢ iKₛ = λ x → ≡ᶜ-cong-⊢
 
-  open TypingKit ikitᵣ public using () renaming
+  open TypingKit iKᵣ public using () renaming
     (∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ; _⊢↓ to ⊢↓ᵣ; _⊢∥_ to _⊢∥ᵣ_; _⊢∥'_ to _⊢∥'ᵣ_;
     _∋*/⊢*_∶_via_ to _∋*_∶_via_)
-  open TypingKit ikitₛ public using () renaming
+  open TypingKit iKₛ public using () renaming
     (∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ; _⊢↓ to ⊢↓ₛ; _⊢∥_ to _⊢∥ₛ_; _⊢∥'_ to _⊢∥'ₛ_;
     _∋*/⊢*_∶_via_ to _⊢*_∶_via_)
 

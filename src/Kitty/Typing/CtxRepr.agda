@@ -515,7 +515,7 @@ record CtxRepr : Set₁ where
     wk*-Ctx' : ∀ {S₁ S₂} S₁' → Ctx' S₁ S₂ → Ctx' (S₁ ▷▷ S₁') S₂
     wk*-Ctx' {S₁} {S₂} S₁' Γ =
       map-Ctx' (λ sx x t → t ⋯ᵣ ((wkₖ* S₁' (id {S = S₁})) ↑* drop-∈ x S₂)) Γ
-      where instance _ = kitᵣ
+      where instance _ = Kᵣ
 
     wk*-Ctx : ∀ {S₂} S₁ → Ctx S₂ → Ctx' S₁ S₂
     wk*-Ctx {S₂} S₁ Γ =
@@ -548,32 +548,32 @@ record CtxRepr : Set₁ where
     wk*-Ctx-↓ Γ = ~ᶜ→≡ᶜ (wk*-Ctx-↓-~ Γ)
 
     infixl  5  _⋯Ctx'_
-    _⋯Ctx'_ : ∀ {_∋/⊢_ : VarScoped} ⦃ 𝕂 : Kit _∋/⊢_ ⦄ {S₁ S₂ S'} → Ctx' S₁ S' → S₁ –[ 𝕂 ]→ S₂ → Ctx' S₂ S'
-    _⋯Ctx'_ ⦃ 𝕂 ⦄ {S' = S'} Γ ϕ = map-Ctx' (λ _ x t → t ⋯ (ϕ ↑* drop-∈ x S')) Γ
+    _⋯Ctx'_ : ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄ {S₁ S₂ S'} → Ctx' S₁ S' → S₁ –[ K ]→ S₂ → Ctx' S₂ S'
+    _⋯Ctx'_ ⦃ K ⦄ {S' = S'} Γ ϕ = map-Ctx' (λ _ x t → t ⋯ (ϕ ↑* drop-∈ x S')) Γ
 
     ~-cong-⋯Ctx' :
-      ∀ {_∋/⊢₁_ : VarScoped} ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄
-        {_∋/⊢₂_ : VarScoped} ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄ 
-        ⦃ K₁ : KitT 𝕂₁ ⦄ 
-        ⦃ K₂ : KitT 𝕂₂ ⦄ 
+      ∀ {_∋/⊢₁_ : VarScoped} ⦃ K₁ : Kit _∋/⊢₁_ ⦄
+        {_∋/⊢₂_ : VarScoped} ⦃ K₂ : Kit _∋/⊢₂_ ⦄ 
+        ⦃ W₁ : KitT K₁ ⦄ 
+        ⦃ W₂ : KitT K₂ ⦄ 
         {S₁ S₁' S₂}
-        {ϕ₁ : S₁ –[ 𝕂₁ ]→ S₁'}
-        {ϕ₂ : S₁ –[ 𝕂₂ ]→ S₁'}
+        {ϕ₁ : S₁ –[ K₁ ]→ S₁'}
+        {ϕ₂ : S₁ –[ K₂ ]→ S₁'}
         {Γ₁ Γ₂ : Ctx' S₁ S₂} →
       Γ₁ ~ᶜ Γ₂ →
       ϕ₁ ~ ϕ₂ →
       (Γ₁ ⋯Ctx' ϕ₁) ~ᶜ (Γ₂ ⋯Ctx' ϕ₂)
-    ~-cong-⋯Ctx' ⦃ 𝕂₁ ⦄ ⦃ 𝕂₂ ⦄ {S₁} {S₁'} {S₂} {ϕ₁} {ϕ₂} {Γ₁} {Γ₂} Γ₁~Γ₂ ϕ₁~ϕ₂ =
+    ~-cong-⋯Ctx' ⦃ K₁ ⦄ ⦃ K₂ ⦄ {S₁} {S₁'} {S₂} {ϕ₁} {ϕ₂} {Γ₁} {Γ₂} Γ₁~Γ₂ ϕ₁~ϕ₂ =
       ~-cong-map-Ctx' Γ₁~Γ₂ (λ s x t → ~-cong-⋯ t (~-cong-↑* ϕ₁~ϕ₂))
 
     ≡ᶜ-cong-⋯Ctx' :
-      ∀ {_∋/⊢₁_ : VarScoped} ⦃ 𝕂₁ : Kit _∋/⊢₁_ ⦄
-        {_∋/⊢₂_ : VarScoped} ⦃ 𝕂₂ : Kit _∋/⊢₂_ ⦄ 
-        ⦃ K₁ : KitT 𝕂₁ ⦄ 
-        ⦃ K₂ : KitT 𝕂₂ ⦄ 
+      ∀ {_∋/⊢₁_ : VarScoped} ⦃ K₁ : Kit _∋/⊢₁_ ⦄
+        {_∋/⊢₂_ : VarScoped} ⦃ K₂ : Kit _∋/⊢₂_ ⦄ 
+        ⦃ W₁ : KitT K₁ ⦄ 
+        ⦃ W₂ : KitT K₂ ⦄ 
         {S₁ S₁' S₂}
-        {ϕ₁ : S₁ –[ 𝕂₁ ]→ S₁'}
-        {ϕ₂ : S₁ –[ 𝕂₂ ]→ S₁'}
+        {ϕ₁ : S₁ –[ K₁ ]→ S₁'}
+        {ϕ₂ : S₁ –[ K₂ ]→ S₁'}
         {Γ₁ Γ₂ : Ctx' S₁ S₂} →
       Γ₁ ≡ᶜ Γ₂ →
       ϕ₁ ~ ϕ₂ →
