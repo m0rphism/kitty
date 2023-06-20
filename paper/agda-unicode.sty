@@ -1,5 +1,18 @@
 \ProvidesPackage{agda-unicode}
 
+\usepackage[links]{agda}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage{microtype}
+\DisableLigatures[-]{encoding=T1}
+
+\usepackage{stmaryrd}
+
+\usepackage{bbold} % lower case mathbb letters
+% \usepackage{alphabeta} % Make greek letter macros also work in text-mode.
+
 \usepackage{newunicodechar}
 \newunicodechar{≡}{\ensuremath{\equiv}}
 \newunicodechar{ℕ}{\ensuremath{\mathbb{N}}}
