@@ -60,7 +60,7 @@ module Example1 where
   S₁ →ₛ S₂ = ∀ s → S₁ ∋ s → S₂ ⊢ s
 
   --! ExampleSub
-  σ : [ 𝕖 , 𝕥 ] →ₛ []                -- replaces:
+  σ : [ 𝕖 , 𝕥 ] →ₛ []                   -- replaces:
   σ .𝕖 zero        = λx (` zero)        --   expr-var 0 with an expr
   σ .𝕥 (suc zero)  = ∀[α∶ ★ ] (` zero)  --   type-var 1 with a type
 
