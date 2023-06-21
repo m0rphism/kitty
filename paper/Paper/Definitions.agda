@@ -51,6 +51,17 @@ variable
 
 -- Substitution & Lemmas -------------------------------------------------------
 
+module Example1 where
+  --! ExampleSubRen
+  _→ᵣ_ _→ₛ_ : List (Sort Var) → List (Sort Var) → Set
+  S₁ →ᵣ S₂ = ∀ s → S₁ ∋ s → S₂ ∋ s
+  S₁ →ₛ S₂ = ∀ s → S₁ ∋ s → S₂ ⊢ s
+
+  --! ExampleSub
+  σ : (𝕖 ∷ 𝕥 ∷ []) →ₛ []                -- replaces:
+  σ .𝕖 zero        = λx (` zero)        --   expr-var 0 with an expr
+  σ .𝕥 (suc zero)  = ∀[α∶ ★ ] (` zero)  --   type-var 1 with a type
+
 --! Terms {
 terms : Terms
 terms = record

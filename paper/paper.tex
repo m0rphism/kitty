@@ -44,8 +44,25 @@
   \end{tcolorbox}%
 }
 
+\newenvironment{ExampleCode*}{%
+  \begin{tcolorbox}[%
+    colframe=white,%
+    colback=yellow!5,%
+    boxrule=0.0pt,%
+    top=2.5pt,%
+    left=2.5pt,%
+    bottom=2.5pt,%
+    right=2.5pt,%
+    boxsep=0pt%
+  ]\vspace{-0.2\baselineskip}%
+}{%
+  \vspace{-1\baselineskip}%
+  \end{tcolorbox}%
+}
+
 \newcommand*\LibCode[1]{\begin{LibCode*}{#1}\end{LibCode*}}
 \newcommand*\AppCode[1]{{#1}}
+\newcommand*\ExampleCode[1]{\begin{ExampleCode*}{#1}\end{ExampleCode*}}
 
 \begin{document}
   \begin{abstract}
@@ -84,6 +101,8 @@
   % .lagda.tex file:
 
   % SED MARKER
+
+  \AgdaNoSpaceAroundCode{}
 
   \section{Introduction}
   Formalizing metatheory of programming languages in a proof assistant 
@@ -124,7 +143,7 @@
 
   \section{Syntax}
   The following shows a typical intrinsically-scoped syntax of System F:
-  \FUnsortedSyntax
+  \ExampleCode\FUnsortedSyntax
 
   \texttt{Type}s are indexed by the number of free type variables \texttt{n}.
   \texttt{Expr}essions are additionally indexed by the number of free expression variables \texttt{m}.
@@ -151,15 +170,29 @@
   The variable constructor \texttt{'\_} takes a sorted DeBruijn-index \texttt{S~∋~s}.
   Since the \texttt{Sort}s in \texttt{S} are restricted to the sort-type \texttt{Var}, it is not possible to construct kind-variables.
 
-
-  \subsection{Library}
   \LibCode\KTerms
-  \subsection{System F}
-  \FSort
-  \FSyntax
-  \FTerms
+  \AppCode\FTerms
 
-  \section{Maps}
+  \section{Substitution \& Renamings}
+  Our sort-indexed syntax allows us to define substitutions and
+  renamings which replace variables of all sorts simultaneously:
+
+  \ExampleCode\FExampleSubRen
+
+  A renaming \texttt{S₁ →ᵣ S₂} maps variables from \texttt{S₁} to
+  variables from \texttt{S₂}.
+  Similarly a substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
+  terms from \texttt{S₂}.
+  We consider these operations \emph{very parallel}, because they do not just replace all variables of one sort in parallel, but they replace all variables of all sorts in parallel.
+
+  \ExampleCode\FExampleSub
+
+  This representation has the benefit that there is no combinatory
+  explosion of substitutions and renamings, e.g.\ no extra lemmas have to be
+  proved between an expression-in-expression and a type-in-expression
+  substitution, because both are simply substitutions.
+
+
   \subsection{Library}
   \LibCode\KKit
   \LibCode\KMap
