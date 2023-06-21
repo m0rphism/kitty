@@ -14,8 +14,8 @@ data Type (n : ℕ) : Set where
 
 data Expr (n m : ℕ) : Set where
   `_       : Fin m → Expr n m
-  λ[x∶_]_  : Type n → Expr n (suc m) → Expr n m 
-  Λ[α∶_]_  : Kind → Expr (suc n) m → Expr n m 
+  λx_      : Expr n (suc m) → Expr n m 
+  Λα_      : Expr (suc n) m → Expr n m 
   _·_      : Expr n m → Expr n m → Expr n m
   _∙_      : Expr n m → Type n → Expr n m
 --! }
