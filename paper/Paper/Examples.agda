@@ -13,11 +13,11 @@ data Type (n : ℕ) : Set where
   _⇒_      : Type n → Type n → Type n
 
 data Expr (n m : ℕ) : Set where
-  `_       : Fin m → Expr n m
-  λx_      : Expr n (suc m) → Expr n m 
-  Λα_      : Expr (suc n) m → Expr n m 
-  _·_      : Expr n m → Expr n m → Expr n m
-  _∙_      : Expr n m → Type n → Expr n m
+  `_   : Fin m → Expr n m
+  λx_  : Expr n (suc m) → Expr n m 
+  Λα_  : Expr (suc n) m → Expr n m 
+  _·_  : Expr n m → Expr n m → Expr n m
+  _∙_  : Expr n m → Type n → Expr n m
 --! }
 
 
