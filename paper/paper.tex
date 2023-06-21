@@ -175,15 +175,14 @@
 
   \section{Substitution \& Renamings}
   Our sort-indexed syntax allows us to define substitutions and
-  renamings which replace variables of all sorts simultaneously:
+  renamings which replace all variables of all sorts simultaneously:
 
   \ExampleCode\FExampleSubRen
 
   A renaming \texttt{S₁ →ᵣ S₂} maps variables from \texttt{S₁} to
   variables from \texttt{S₂}.
-  Similarly a substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
+  A substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
   terms from \texttt{S₂}.
-  We consider these operations \emph{very parallel}, because they do not just replace all variables of one sort in parallel, but they replace all variables of all sorts in parallel.
 
   \ExampleCode\FExampleSub
 
