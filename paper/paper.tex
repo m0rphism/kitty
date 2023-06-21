@@ -128,9 +128,9 @@
   \item
     a multi-sorted extension of McBride's kits to unify renamings and substitutions and their metatheory;
   \item
-    a kit abstraction for composition and it's metatheory, unifying the four combinations of renamings and substitutions;
+    an abstraction for composition and it's metatheory, unifying the four combinations of renamings and substitutions;
   \item
-    a kit abstraction for typing relations, unifying type preservation of renaming and substitution into a single lemma;
+    an abstraction for typing relations, unifying type preservation of renaming and substitution into a single lemma;
   \item
     an Agda-implementation featuring derived term-kits, representation
     independence for substitutions and typing contexts, heterogeneous
@@ -160,6 +160,7 @@
   To avoid these drawbacks, we define a single term type \texttt{S~⊢~s} that is indexed by its sort \texttt{s},
   i.e.\ whether the term is a kind, type, or expression, and the sorts of its free variables \texttt{S}:
 
+  For example a term of type \texttt{[𝕖, 𝕥] ⊢ 𝕖} is an expression with two free variables, where variable 0 is a placeholder for an expression, and variable 1 for a type.
   \LibCode\KSortTy
 
   \AppCode\FSort
@@ -173,16 +174,17 @@
   \LibCode\KTerms
   \AppCode\FTerms
 
-  \section{Substitution \& Renamings}
-  Working with a sort-indexed syntax allows us to define substitutions and
-  renamings which replace all variables of all sorts simultaneously:
+  \section{Renamings \& Substitutions}
+  \subsection{Multi-Sorted Renamings \& Substitutions}
+  Working with a sort-indexed syntax allows us to define renamings and substitutions
+  which replace all variables of all sorts simultaneously:
 
   \ExampleCode\FExampleSubRen
 
   A renaming \texttt{S₁ →ᵣ S₂} maps variables from \texttt{S₁} to
   variables from \texttt{S₂}.
   A substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
-  terms from \texttt{S₂}.
+  terms in \texttt{S₂}.
 
   \ExampleCode\FExampleSub
 
@@ -190,6 +192,26 @@
   explosion of substitutions and renamings, e.g.\ no extra lemmas have to be
   proved between an expression-in-expression and a type-in-expression
   substitution, because both are simply substitutions.
+
+  \subsection{Unifying Renamings \& Substitutions}
+  A well-known problem with DeBruijn-indices is that full substitution
+  cannot be defined directly by structural recursion on the term.
+  The typical workaround is to define renamings and substitutions
+  separately and use renamings to weaken substitutions when going under binders.
+
+  While this keeps lemmas simple (requiring only structural induction),
+  it duplicates the amount of work as all operations and lemmas have
+  to be defined and proved for both renamings and substitutions.
+
+  To avoid this duplication,
+  McBride\cite{DBLP:journals/jar/BentonHKM12,
+  unpublished:mcbride2005kits} introduced \emph{Kits} - an abstraction
+  which allows to talk about both renamings and substitutions
+  simultaneously.
+
+  The core idea behind kits is that renamings and substitutions only
+  differ in what they return:
+  \ExampleCode\FExampleSubRen
 
 
   \subsection{Library}
@@ -259,6 +281,12 @@
   \AppCode\FTypes
 
   \section{Typing}
+  % TODO move to typing section
+  The only drawback we found, is that types can now also be indexed
+  with free expression variables, even though types can never contain
+  free variables as assured by the variable constructor. However, this
+  only causes minor issues.
+
   \subsection{Library}
   \LibCode\KVariableTyping
   \LibCode\KTyping
