@@ -42,6 +42,9 @@ record Terms : Set₁ where
 
   --! Kit {
   record Kit (_∋/⊢_ : Scoped) : Set where
+    _→ₖ_ : (S₁ S₂ : List (Sort Var)) → Set
+    _→ₖ_ S₁ S₂ = ∀ s → S₁ ∋ s → S₂ ∋/⊢ s
+
     field
       id/`            : S ∋ s → S ∋/⊢ s
       `/id            : S ∋/⊢ s → S ⊢ s

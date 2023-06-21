@@ -160,7 +160,7 @@
   To avoid these drawbacks, we define a single term type \texttt{S~⊢~s} that is indexed by its sort \texttt{s},
   i.e.\ whether the term is a kind, type, or expression, and the sorts of its free variables \texttt{S}:
 
-  For example a term of type \texttt{[𝕖, 𝕥] ⊢ 𝕖} is an expression with two free variables, where variable 0 is a placeholder for an expression, and variable 1 for a type.
+  For example a term of type \texttt{[𝕥, 𝕥] ⊢ 𝕖} is an expression (\texttt{𝕖}) with two free type-variables (\texttt{𝕥}).
   \LibCode\KSortTy
 
   \AppCode\FSort
@@ -197,7 +197,8 @@
   A well-known problem with DeBruijn-indices is that full substitution
   cannot be defined directly by structural recursion on the term.
   The typical workaround is to define renamings and substitutions
-  separately and use renamings to weaken substitutions when going under binders.
+  separately and use renamings to weaken the terms in substitutions
+  when going under binders.
 
   While this keeps lemmas simple (requiring only structural induction),
   it duplicates the amount of work as all operations and lemmas have
@@ -213,9 +214,14 @@
   differ in what they return:
   \ExampleCode\FExampleSubRen
 
+  In both cases \texttt{\_∋\_} and \texttt{\_⊢\_} are instanciated to type
+  \texttt{List (Sort Var) → Sort Var → Set}, so we can create a structure
+  to axiomatize the common theory behind both of them.
+  \LibCode\KKit
+
+
 
   \subsection{Library}
-  \LibCode\KKit
   \LibCode\KMap
   \LibCode\KAp
   \LibCode\KExt
