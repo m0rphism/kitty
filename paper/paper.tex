@@ -18,14 +18,24 @@
 }
 \email{saffrich@informatik.uni-freiburg.de} %% \email is recommended
 
-\author{Peter Thiemann}
-\orcid{0000-0002-9000-1239}                 %% \orcid is optional
-\affiliation{
-  % \department{Department2a}               %% \department is recommended
-  \institution{University of Freiburg}      %% \institution is required
-  \country{Germany}                         %% \country is recommended
-}
-\email{thiemann@informatik.uni-freiburg.de} %% \email is recommended
+% \author{Peter Thiemann}
+% \orcid{0000-0002-9000-1239}                 %% \orcid is optional
+% \affiliation{
+%   % \department{Department2a}               %% \department is recommended
+%   \institution{University of Freiburg}      %% \institution is required
+%   \country{Germany}                         %% \country is recommended
+% }
+% \email{thiemann@informatik.uni-freiburg.de} %% \email is recommended
+
+\usepackage{tcolorbox}
+% \newenvironment{LibCode}{%
+%   \begin{tcolorbox}[boxrule=0.5pt,top=0pt,left=0pt,right=2.5pt,boxsep=0pt]\vspace{-0.5\baselineskip}}{%
+%   \end{tcolorbox}}
+\newenvironment{LibCode}{%
+  \begin{tcolorbox}[boxrule=0.0pt,frame hidden,top=0pt,left=0pt,right=2.5pt,boxsep=0pt]\vspace{-0.5\baselineskip}}{%
+  \end{tcolorbox}}
+
+
 
 \begin{document}
   \begin{abstract}
@@ -66,9 +76,71 @@
   % SED MARKER
 
   \section{Introduction}
+  Formalizing metatheory of programming languages in a proof assistant 
+  requires to deal with variables, binders and substitution.
+
+  In most languages those constructs behave uniformly,
+  i.e. substitution is only concerned with variables and binders and
+  behaves homomorphic on all other syntax constructors.
+
+  Intrinsic typing 
+
+
+  \begin{enumerate}
+  \item DeBruijn
+  \item Intrinsic vs Extrinsic
+  \item Reduction under binder
+  \end{enumerate}
+
+  \subsection{Contributions}
+  \begin{enumerate}
+  \item
+    a multi-sorted approach to extrinsic typing;
+  \item
+    a multi-sorted extension of McBride's kits to unify renamings and substitutions and their metatheory;
+  \item
+    a kit abstraction for composition and it's metatheory, unifying the four combinations of renamings and substitutions;
+  \item
+    a kit abstraction for typing relations, unifying type preservation of renaming and substitution into a single lemma;
+  \item
+    an Agda-implementation featuring derived term-kits, representation
+    independence for substitutions and typing contexts, heterogeneous
+    equality, independence of functional extensionality, case studies
+    on System F, dependent lambda calculus, pattern matching, linear
+    types.
+  \end{enumerate}
+
   \newpage
 
   \section{Syntax}
+  The following shows a typical intrinsically-scoped syntax of System F:
+  \FUnsortedSyntax
+
+  \texttt{Type}s are indexed by the number of free type variables \texttt{n}.
+  \texttt{Expr}essions are additionally indexed by the number of free expression variables \texttt{m}.
+  Variables are represented as DeBruijn-indices, where \texttt{Fin n} is the type of \texttt{n} elements.
+
+  This style of syntax comes with multiple drawbacks:
+  \begin{itemize}
+  \item Bad scaling for automation
+  \item Multiple substitions require interaction lemmas
+  \end{itemize}
+
+  % Instead we define a single term type which is indexed by the sort of
+  % syntax, i.e.\ whether the term is a kind, type, or expression:
+  To avoid these drawbacks, we define a single term type \texttt{S~⊢~s} that is indexed by its sort \texttt{s},
+  i.e.\ whether the term is a kind, type, or expression, and the sorts of its free variables \texttt{S}:
+
+  \begin{LibCode}
+  \KSortTy
+  \end{LibCode}
+
+  \FSort
+  \FSyntax
+  The variable constructor \texttt{'\_} takes a sorted DeBruijn-index \texttt{S~∋~s}.
+  Since the \texttt{Sort}s in \texttt{S} are restricted to the sort-type \texttt{Var}, it is not possible to construct kind-variables.
+
+
   \subsection{Library}
   \KVariables
   \KSortTy
