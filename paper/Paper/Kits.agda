@@ -69,13 +69,13 @@ record Terms : Set₁ where
     wkm s f _ x = wk s (f _ x)
 
     --! Ext
-    _∷ₘ_ : S₂ ∋/⊢ s → S₁ →ₖ S₂ → (s ∷ S₁) →ₖ S₂
-    (x/t ∷ₘ f) _ zero    = x/t
-    (x/t ∷ₘ f) _ (suc x) = f _ x
+    _∷ₖ_ : S₂ ∋/⊢ s → S₁ →ₖ S₂ → (s ∷ S₁) →ₖ S₂
+    (x/t ∷ₖ f) _ zero    = x/t
+    (x/t ∷ₖ f) _ (suc x) = f _ x
 
     --! Lift
     _↑_ : S₁ →ₖ S₂ → ∀ s → (s ∷ S₁) →ₖ (s ∷ S₂)
-    f ↑ s = id/` zero ∷ₘ wkm s f
+    f ↑ s = id/` zero ∷ₖ wkm s f
 
     _↑*_ : S₁ →ₖ S₂ → ∀ S → (S ++ S₁) →ₖ (S ++ S₂)
     f ↑* []       = f
@@ -87,7 +87,7 @@ record Terms : Set₁ where
 
     --! Single
     ⦅_⦆ : S ∋/⊢ s → (s ∷ S) →ₖ S
-    ⦅ x/t ⦆ = x/t ∷ₘ id
+    ⦅ x/t ⦆ = x/t ∷ₖ id
 
     --! Weaken
     weaken : ∀ s → S →ₖ (s ∷ S)
@@ -169,10 +169,10 @@ record Terms : Set₁ where
 
     --! KitOpen
     open Kit Kᵣ public using () renaming 
-      (_→ₖ_ to _→ᵣ_; wkm to wkmᵣ; _∷ₘ_ to _∷ᵣ_; _↑_ to _↑ᵣ_;
+      (_→ₖ_ to _→ᵣ_; wkm to wkmᵣ; _∷ₖ_ to _∷ᵣ_; _↑_ to _↑ᵣ_;
        id to idᵣ; ⦅_⦆ to ⦅_⦆ᵣ; weaken to weakenᵣ)
     open Kit Kₛ public using () renaming 
-      (_→ₖ_ to _→ₛ_; wkm to wkmₛ; _∷ₘ_ to _∷ₛ_; _↑_ to _↑ₛ_;
+      (_→ₖ_ to _→ₛ_; wkm to wkmₛ; _∷ₖ_ to _∷ₛ_; _↑_ to _↑ₛ_;
        id to idₛ; ⦅_⦆ to ⦅_⦆ₛ; weaken to weakenₛ)
 
     -- Counterpart to wk-id/`
@@ -212,8 +212,8 @@ record Terms : Set₁ where
       --! }
 
       --! Composition
-      _·ₘ_ : S₁ –[ K₁ ]→ S₂ → S₂ –[ K₂ ]→ S₃ → S₁ –[ K₁⊔K₂ ]→ S₃
-      (ϕ₁ ·ₘ ϕ₂) _ x = x & ϕ₁ &/⋯ ϕ₂ 
+      _·ₖ_ : S₁ –[ K₁ ]→ S₂ → S₂ –[ K₂ ]→ S₃ → S₁ –[ K₁⊔K₂ ]→ S₃
+      (ϕ₁ ·ₖ ϕ₂) _ x = x & ϕ₁ &/⋯ ϕ₂ 
 
       --! ComposeKitAp
       &/⋯-& :  ∀ (x : S₁ ∋ s) (ϕ : S₁ –[ K₂ ]→ S₂) →
@@ -227,42 +227,42 @@ record Terms : Set₁ where
 
       --! DistLiftCompose
       dist-↑-· :  ∀ s (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
-                  ((ϕ₁ ·ₘ ϕ₂) ↑ s) ~ ((ϕ₁ ↑ s) ·ₘ (ϕ₂ ↑ s))
+                  ((ϕ₁ ·ₖ ϕ₂) ↑ s) ~ ((ϕ₁ ↑ s) ·ₖ (ϕ₂ ↑ s))
       --! DistLiftComposeProof
       dist-↑-· s ϕ₁ ϕ₂ s₁ x@zero = `/id-injective (
-        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₘ ϕ₂) ↑ s))       ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₖ ϕ₂) ↑ s))       ≡⟨⟩
         `/id ⦃ K₁⊔K₂ ⦄ (id/` zero)                  ≡⟨ `/`-is-` ⦃ K₁⊔K₂ ⦄ zero ⟩
         ` zero                                      ≡⟨ sym (`/`-is-` ⦃ K₂ ⦄ zero) ⟩
         `/id ⦃ K₂ ⦄ (id/` zero)                     ≡⟨⟩
         `/id ⦃ K₂ ⦄ (zero & (ϕ₂ ↑ s))               ≡⟨ sym (&/⋯-& (id/` zero) (ϕ₂ ↑ s)) ⟩
         `/id ⦃ K₁⊔K₂ ⦄ (id/` zero &/⋯ (ϕ₂ ↑ s))     ≡⟨⟩
         `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ s) &/⋯ (ϕ₂ ↑ s))  ≡⟨⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ s) ·ₘ (ϕ₂ ↑ s))) ∎
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ s) ·ₖ (ϕ₂ ↑ s))) ∎
         )
       dist-↑-· s ϕ₁ ϕ₂ s₁ x@(suc y) = `/id-injective (
-        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₘ ϕ₂) ↑ s))        ≡⟨⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (wk _ (y & (ϕ₁ ·ₘ ϕ₂)))       ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₖ ϕ₂) ↑ s))        ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (wk _ (y & (ϕ₁ ·ₖ ϕ₂)))       ≡⟨⟩
         `/id ⦃ K₁⊔K₂ ⦄ (wk _ (y & ϕ₁ &/⋯ ϕ₂))        ≡⟨ cong `/id (&/⋯-wk-↑ (y & ϕ₁) ϕ₂) ⟩
         `/id ⦃ K₁⊔K₂ ⦄ (wk _ (y & ϕ₁) &/⋯ (ϕ₂ ↑ s))  ≡⟨⟩
         `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ s) &/⋯ (ϕ₂ ↑ s))   ≡⟨⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ s) ·ₘ (ϕ₂ ↑ s)))  ∎
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ s) ·ₖ (ϕ₂ ↑ s)))  ∎
         )
 
       dist-↑*-· :  ∀ S (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
-                   ((ϕ₁ ·ₘ ϕ₂) ↑* S) ~ ((ϕ₁ ↑* S) ·ₘ (ϕ₂ ↑* S))
+                   ((ϕ₁ ·ₖ ϕ₂) ↑* S) ~ ((ϕ₁ ↑* S) ·ₖ (ϕ₂ ↑* S))
       dist-↑*-· []      ϕ₁ ϕ₂ sx x = refl
       dist-↑*-· (s ∷ S) ϕ₁ ϕ₂ sx x =
-        ((ϕ₁ ·ₘ ϕ₂) ↑* (s ∷ S)) sx x              ≡⟨⟩
-        (((ϕ₁ ·ₘ ϕ₂) ↑* S) ↑ s) sx x              ≡⟨ cong (λ ■ → (■ ↑ s) sx x) (~-ext (dist-↑*-· S ϕ₁ ϕ₂)) ⟩
-        (((ϕ₁ ↑* S) ·ₘ (ϕ₂ ↑* S)) ↑ s) sx x       ≡⟨ dist-↑-· s (ϕ₁ ↑* S) (ϕ₂ ↑* S) sx x ⟩
-        (((ϕ₁ ↑* S) ↑ s) ·ₘ ((ϕ₂ ↑* S) ↑ s)) sx x ≡⟨⟩
-        ((ϕ₁ ↑* (s ∷ S)) ·ₘ (ϕ₂ ↑* (s ∷ S))) sx x ∎
+        ((ϕ₁ ·ₖ ϕ₂) ↑* (s ∷ S)) sx x              ≡⟨⟩
+        (((ϕ₁ ·ₖ ϕ₂) ↑* S) ↑ s) sx x              ≡⟨ cong (λ ■ → (■ ↑ s) sx x) (~-ext (dist-↑*-· S ϕ₁ ϕ₂)) ⟩
+        (((ϕ₁ ↑* S) ·ₖ (ϕ₂ ↑* S)) ↑ s) sx x       ≡⟨ dist-↑-· s (ϕ₁ ↑* S) (ϕ₂ ↑* S) sx x ⟩
+        (((ϕ₁ ↑* S) ↑ s) ·ₖ ((ϕ₂ ↑* S) ↑ s)) sx x ≡⟨⟩
+        ((ϕ₁ ↑* (s ∷ S)) ·ₖ (ϕ₂ ↑* (s ∷ S))) sx x ∎
 
     --! ComposeKitNotation {
     _·[_]_ :  ∀ {K₁ : Kit _∋/⊢₁_} {K₂ : Kit _∋/⊢₂_} {K₁⊔K₂ : Kit _∋/⊢_} →
               S₁ –[ K₁ ]→ S₂ → ComposeKit K₁ K₂ K₁⊔K₂ →
               S₂ –[ K₂ ]→ S₃ → S₁ –[ K₁⊔K₂ ]→ S₃
-    ϕ₁ ·[ C ] ϕ₂ = ϕ₁ ·ₘ ϕ₂ where open ComposeKit C
+    ϕ₁ ·[ C ] ϕ₂ = ϕ₁ ·ₖ ϕ₂ where open ComposeKit C
 
     open ComposeKit ⦃ … ⦄ public
     --! }
@@ -274,23 +274,23 @@ record Terms : Set₁ where
           ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
             ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
             (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
-          → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₘ ϕ₂)
+          → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
     --! }
 
       --! CommLiftWeaken
       ↑-wk :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
                  ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
                  (ϕ : S₁ –[ K ]→ S₂) s
-              → (ϕ ·ₘ weaken s) ~ (weaken s ·ₘ (ϕ ↑ s))
+              → (ϕ ·ₖ weaken s) ~ (weaken s ·ₖ (ϕ ↑ s))
       --! CommLiftWeakenProof
       ↑-wk {S₁} {S₂} ϕ s sx x = `/id-injective (
-          `/id ((ϕ ·ₘ weakenᵣ s) sx x)        ≡⟨⟩
+          `/id ((ϕ ·ₖ weakenᵣ s) sx x)        ≡⟨⟩
           `/id (x & ϕ &/⋯ weakenᵣ s)          ≡⟨ &/⋯-⋯ (x & ϕ) (weakenᵣ s) ⟩
           `/id (`/id (x & ϕ) ⋯ weakenᵣ s)     ≡⟨ wk-`/id s (x & ϕ) ⟩
           `/id (suc x & (ϕ ↑ s))              ≡⟨ sym (&/⋯-& (suc x) (ϕ ↑ s)) ⟩
           `/id (suc x &/⋯ (ϕ ↑ s))            ≡⟨⟩
           `/id (x & weakenᵣ s &/⋯ (ϕ ↑ s))    ≡⟨⟩
-          `/id ((weakenᵣ s ·ₘ (ϕ ↑ s)) sx x)  ∎)
+          `/id ((weakenᵣ s ·ₖ (ϕ ↑ s)) sx x)  ∎)
 
       --! CommLiftWeakenTraverse
       ⋯-↑-wk : ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
@@ -300,8 +300,8 @@ record Terms : Set₁ where
       --! CommLiftWeakenTraverseProof
       ⋯-↑-wk t ϕ s =
         t ⋯ ϕ ⋯ weakenᵣ s           ≡⟨ ⋯-assoc t ϕ (weakenᵣ s) ⟩
-        t ⋯ (ϕ ·ₘ weakenᵣ s)        ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ s)) ⟩
-        t ⋯ (weakenᵣ s ·ₘ (ϕ ↑ s))  ≡⟨ sym (⋯-assoc t (weakenᵣ s) (ϕ ↑ s)) ⟩
+        t ⋯ (ϕ ·ₖ weakenᵣ s)        ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ s)) ⟩
+        t ⋯ (weakenᵣ s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-assoc t (weakenᵣ s) (ϕ ↑ s)) ⟩
         t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)     ∎
 
       --! ComposeKitInstances {
@@ -350,7 +350,7 @@ record Terms : Set₁ where
       --! WeakenCancelsSingleTraverseProof
       wk-cancels-⦅⦆-⋯ t x/t =
         t ⋯ weakenᵣ _ ⋯ ⦅ x/t ⦆     ≡⟨ ⋯-assoc t (weakenᵣ _) ⦅ x/t ⦆ ⟩
-        t ⋯ (weakenᵣ _ ·ₘ ⦅ x/t ⦆)  ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
+        t ⋯ (weakenᵣ _ ·ₖ ⦅ x/t ⦆)  ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
         t ⋯ id                      ≡⟨ ⋯-id t ⟩
         t                           ∎
 
@@ -387,8 +387,8 @@ record Terms : Set₁ where
       --! DistLiftSingleTraverseProof
       dist-↑-⦅⦆-⋯ t x/t ϕ =
         t ⋯ ⦅ x/t ⦆ ⋯ ϕ                  ≡⟨ ⋯-assoc t ⦅ x/t ⦆ ϕ ⟩
-        t ⋯ (⦅ x/t ⦆ ·ₘ ϕ)               ≡⟨ cong (t ⋯_) (~-ext (dist-↑-⦅⦆ x/t ϕ)) ⟩
-        t ⋯ ((ϕ ↑ _) ·ₘ ⦅ (x/t &/⋯ ϕ) ⦆) ≡⟨ sym (⋯-assoc t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
+        t ⋯ (⦅ x/t ⦆ ·ₖ ϕ)               ≡⟨ cong (t ⋯_) (~-ext (dist-↑-⦅⦆ x/t ϕ)) ⟩
+        t ⋯ ((ϕ ↑ _) ·ₖ ⦅ (x/t &/⋯ ϕ) ⦆) ≡⟨ sym (⋯-assoc t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
         t ⋯ (ϕ ↑ _) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆    ∎
 
       --! TypeSorts
