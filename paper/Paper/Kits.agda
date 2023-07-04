@@ -36,15 +36,14 @@ record Terms : Set₁ where
     x y z x₁ x₂                : S ∋ s
 
   --! Scoped
-  Scoped : Set₁
   Scoped = List (Sort Var) → Sort Var → Set
 
   variable _∋/⊢_  _∋/⊢₁_ _∋/⊢₂_ : Scoped
 
   --! Kit {
   record Kit (_∋/⊢_ : Scoped) : Set where
-    _→ₖ_ : (S₁ S₂ : List (Sort Var)) → Set
-    _→ₖ_ S₁ S₂ = ∀ s → S₁ ∋ s → S₂ ∋/⊢ s
+    _→ₖ_ : List (Sort Var) → List (Sort Var) → Set
+    S₁ →ₖ S₂ = ∀ s → S₁ ∋ s → S₂ ∋/⊢ s
 
     field
       -- Operations

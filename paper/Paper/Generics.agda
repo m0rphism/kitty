@@ -73,7 +73,7 @@ module WithSort(Sort : SortTy → Set) where
         ∀ {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄
           {S st} {s : Sort st} (t : Tm d S s) →
         (t ⋯ id) ≡ t
-      ⋯-id (`var x) = id/`/id x
+      ⋯-id (`var x) = `/`-is-` x
       ⋯-id (`con e) = cong `con (⋯-id' e)
 
       ⋯-id' :

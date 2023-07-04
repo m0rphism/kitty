@@ -88,7 +88,7 @@ _⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ �
 --! TraversalId
 ⋯-id : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (t : S ⊢ s) → t ⋯ id ⦃ K ⦄ ≡ t
 --! TraversalIdProofInteresting
-⋯-id ⦃ K ⦄ (` x)     = id/`/id ⦃ K ⦄ x
+⋯-id ⦃ K ⦄ (` x)     = `/`-is-` ⦃ K ⦄ x
 ⋯-id (t₁ · t₂)       = cong₂ _·_ (⋯-id t₁) (⋯-id t₂)
 ⋯-id (λx t)          = cong λx_ (
   t ⋯ (id ↑ 𝕖)  ≡⟨ cong (t ⋯_) (~-ext id↑~id) ⟩
