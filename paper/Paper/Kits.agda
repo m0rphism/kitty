@@ -3,7 +3,7 @@ module Paper.Kits where
 --! K >
 
 open import Data.Nat using (ℕ; zero; suc)
-open import Data.List using (List; []; _∷_; drop)
+open import Data.List using (List; []; _∷_; drop; _++_)
 open import Data.List.Membership.Propositional public using (_∈_)
 open import Data.List.Relation.Unary.Any public using (here; there)
 open import Data.List.Relation.Unary.All as All public using (All; []; _∷_)
@@ -77,6 +77,10 @@ record Terms : Set₁ where
     --! Lift
     _↑_ : Map S₁ S₂ → ∀ s → Map (s ∷ S₁) (s ∷ S₂)
     f ↑ s = id/` zero ∷ₘ wkm s f
+
+    _↑*_ : Map S₁ S₂ → ∀ S → Map (S ++ S₁) (S ++ S₂)
+    f ↑* []       = f
+    f ↑* (s ∷ S)  = (f ↑* S) ↑ s
       
     --! Id
     id : Map S S
@@ -107,6 +111,14 @@ record Terms : Set₁ where
       wk _ (id/` x)      ≡⟨ wk-id/` _ x ⟩
       id/` (suc x)       ≡⟨⟩
       id s (suc x)       ∎
+
+
+    id↑*~id : ∀ S → (id ↑* S) ~ id {S ++ S'}
+    id↑*~id []      sx x = refl
+    id↑*~id (s ∷ S) sx x =
+      ((id ↑* S) ↑ s) sx x ≡⟨ cong (λ ■ → (■ ↑ s) sx x) (~-ext (id↑*~id S)) ⟩
+      (id ↑ s) sx x        ≡⟨ id↑~id sx x ⟩
+      id sx x              ∎
 
   --! KitNotation {
   _∋/⊢[_]_ :  List (Sort Var) → Kit _∋/⊢_ →
@@ -236,6 +248,16 @@ record Terms : Set₁ where
         `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ s) &/⋯ (ϕ₂ ↑ s))   ≡⟨⟩
         `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ s) ·ₘ (ϕ₂ ↑ s)))  ∎
         )
+
+      dist-↑*-· :  ∀ S (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
+                   ((ϕ₁ ·ₘ ϕ₂) ↑* S) ~ ((ϕ₁ ↑* S) ·ₘ (ϕ₂ ↑* S))
+      dist-↑*-· []      ϕ₁ ϕ₂ sx x = refl
+      dist-↑*-· (s ∷ S) ϕ₁ ϕ₂ sx x =
+        ((ϕ₁ ·ₘ ϕ₂) ↑* (s ∷ S)) sx x              ≡⟨⟩
+        (((ϕ₁ ·ₘ ϕ₂) ↑* S) ↑ s) sx x              ≡⟨ cong (λ ■ → (■ ↑ s) sx x) (~-ext (dist-↑*-· S ϕ₁ ϕ₂)) ⟩
+        (((ϕ₁ ↑* S) ·ₘ (ϕ₂ ↑* S)) ↑ s) sx x       ≡⟨ dist-↑-· s (ϕ₁ ↑* S) (ϕ₂ ↑* S) sx x ⟩
+        (((ϕ₁ ↑* S) ↑ s) ·ₘ ((ϕ₂ ↑* S) ↑ s)) sx x ≡⟨⟩
+        ((ϕ₁ ↑* (s ∷ S)) ·ₘ (ϕ₂ ↑* (s ∷ S))) sx x ∎
 
     --! ComposeKitNotation {
     _·[_]_ :  ∀ {K₁ : Kit _∋/⊢₁_} {K₂ : Kit _∋/⊢₂_} {K₁⊔K₂ : Kit _∋/⊢_} →
