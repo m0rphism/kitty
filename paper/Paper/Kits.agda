@@ -60,50 +60,46 @@ record Terms : Set₁ where
                          wk s' (id/` x) ≡ id/` (suc x)
     --! }
 
-    --! Map
-    Map : (S₁ S₂ : List (Sort Var)) → Set
-    Map S₁ S₂ = ∀ s → S₁ ∋ s → S₂ ∋/⊢ s
-
     infixl  8  _&_
     --! Ap
-    _&_ : S₁ ∋ s → Map S₁ S₂ → S₂ ∋/⊢ s
+    _&_ : S₁ ∋ s → S₁ →ₖ S₂ → S₂ ∋/⊢ s
     x & f = f _ x 
 
-    wkm : ∀ s → Map S₁ S₂ → Map S₁ (s ∷ S₂)
+    wkm : ∀ s → S₁ →ₖ S₂ → S₁ →ₖ (s ∷ S₂)
     wkm s f _ x = wk s (f _ x)
 
     --! Ext
-    _∷ₘ_ : S₂ ∋/⊢ s → Map S₁ S₂ → Map (s ∷ S₁) S₂
+    _∷ₘ_ : S₂ ∋/⊢ s → S₁ →ₖ S₂ → (s ∷ S₁) →ₖ S₂
     (x/t ∷ₘ f) _ zero    = x/t
     (x/t ∷ₘ f) _ (suc x) = f _ x
 
     --! Lift
-    _↑_ : Map S₁ S₂ → ∀ s → Map (s ∷ S₁) (s ∷ S₂)
+    _↑_ : S₁ →ₖ S₂ → ∀ s → (s ∷ S₁) →ₖ (s ∷ S₂)
     f ↑ s = id/` zero ∷ₘ wkm s f
 
-    _↑*_ : Map S₁ S₂ → ∀ S → Map (S ++ S₁) (S ++ S₂)
+    _↑*_ : S₁ →ₖ S₂ → ∀ S → (S ++ S₁) →ₖ (S ++ S₂)
     f ↑* []       = f
     f ↑* (s ∷ S)  = (f ↑* S) ↑ s
       
     --! Id
-    id : Map S S
+    id : S →ₖ S
     id s x = id/` x
 
     --! Single
-    ⦅_⦆ : S ∋/⊢ s → Map (s ∷ S) S
+    ⦅_⦆ : S ∋/⊢ s → (s ∷ S) →ₖ S
     ⦅ x/t ⦆ = x/t ∷ₘ id
 
     --! Weaken
-    weaken : ∀ s → Map S (s ∷ S)
+    weaken : ∀ s → S →ₖ (s ∷ S)
     weaken s = wkm s id
 
     --! Eq
-    _~_ : (ϕ₁ ϕ₂ : Map S₁ S₂) → Set
+    _~_ : (ϕ₁ ϕ₂ : S₁ →ₖ S₂) → Set
     _~_ {S₁ = S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
 
     --! FunExt
     postulate
-      ~-ext : ∀ {ϕ₁ ϕ₂ : Map S₁ S₂} → ϕ₁ ~ ϕ₂ → ϕ₁ ≡ ϕ₂
+      ~-ext : ∀ {ϕ₁ ϕ₂ : S₁ →ₖ S₂} → ϕ₁ ~ ϕ₂ → ϕ₁ ≡ ϕ₂
 
     --! IdLift
     id↑~id : (id ↑ s) ~ id {s ∷ S}
@@ -130,7 +126,7 @@ record Terms : Set₁ where
 
   _–[_]→_ :  List (Sort Var) → Kit _∋/⊢_ →
              List (Sort Var) → Set
-  S₁ –[ K ]→ S₂ = Kit.Map K S₁ S₂
+  S₁ –[ K ]→ S₂ = Kit._→ₖ_ K S₁ S₂
 
   open Kit ⦃ … ⦄ public
   --! }
@@ -173,10 +169,10 @@ record Terms : Set₁ where
 
     --! KitOpen
     open Kit Kᵣ public using () renaming 
-      (Map to _→ᵣ_; wkm to wkmᵣ; _∷ₘ_ to _∷ᵣ_; _↑_ to _↑ᵣ_;
+      (_→ₖ_ to _→ᵣ_; wkm to wkmᵣ; _∷ₘ_ to _∷ᵣ_; _↑_ to _↑ᵣ_;
        id to idᵣ; ⦅_⦆ to ⦅_⦆ᵣ; weaken to weakenᵣ)
     open Kit Kₛ public using () renaming 
-      (Map to _→ₛ_; wkm to wkmₛ; _∷ₘ_ to _∷ₛ_; _↑_ to _↑ₛ_;
+      (_→ₖ_ to _→ₛ_; wkm to wkmₛ; _∷ₘ_ to _∷ₛ_; _↑_ to _↑ₛ_;
        id to idₛ; ⦅_⦆ to ⦅_⦆ₛ; weaken to weakenₛ)
 
     -- Counterpart to wk-id/`
