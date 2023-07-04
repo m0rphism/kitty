@@ -116,6 +116,22 @@ module WithSort(Sort : SortTy → Set) where
 
     open ComposeTraversal CT public hiding (⋯-assoc)
 
+    module WithTypes (types : Types) where
+      open Types types
+
+      data TDesc : Set₁ where
+        `σ : (A : Set) → (A → TDesc) → TDesc
+        `X : ∀ {st S} {s : Sort st} → Ctx S → S ⊢ s → S ∶⊢ s → TDesc → TDesc
+        `■ : ∀ {st S} {s : Sort st} → Ctx S → S ⊢ s → S ∶⊢ s → TDesc
+
+      TScoped : Set₁
+      TScoped = ∀ {st S} {s : Sort st} → Ctx S → S ⊢ s → S ∶⊢ s → Set
+
+      -- ⟦_⟧ᵗ : TDesc → TScoped → TScoped
+      -- ⟦ `σ A d      ⟧ᵗ X S s = Σ[ a ∈ A ] (⟦ d a ⟧ᵗ X S s)
+      -- ⟦ `X S' s' d  ⟧ᵗ X S s = X (S' ++ S) s' × ⟦ d ⟧ᵗ X S s
+      -- ⟦ `■ {st'} s' ⟧ᵗ X {st} S s = Σ[ eq ∈ st' ≡ st ] s ≡ subst Sort eq s'
+
 module Example-STLC where
   data Sort : SortTy → Set where
     𝕖 : Sort Var
