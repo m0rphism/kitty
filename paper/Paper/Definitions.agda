@@ -122,31 +122,31 @@ open Traversal traversal hiding (_⋯_; ⋯-id)
   ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
     ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
     (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
-  → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₘ ϕ₂)
+  → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
 --! AssocProofInteresting
 ⋯-assoc (` x)          ϕ₁ ϕ₂ = sym (&/⋯-⋯ (ϕ₁ _ x) ϕ₂)
 ⋯-assoc (t₁ · t₂)      ϕ₁ ϕ₂ = cong₂ _·_  (⋯-assoc t₁ ϕ₁ ϕ₂)
                                           (⋯-assoc t₂ ϕ₁ ϕ₂)
 ⋯-assoc (λx t)         ϕ₁ ϕ₂ = cong λx_ (
   (t ⋯ (ϕ₁ ↑ 𝕖)) ⋯ (ϕ₂ ↑ 𝕖)   ≡⟨ ⋯-assoc t (ϕ₁ ↑ 𝕖) (ϕ₂ ↑ 𝕖) ⟩
-  t ⋯ ((ϕ₁ ↑ 𝕖) ·ₘ (ϕ₂ ↑ 𝕖))  ≡⟨ cong (t ⋯_) (sym (
+  t ⋯ ((ϕ₁ ↑ 𝕖) ·ₖ (ϕ₂ ↑ 𝕖))  ≡⟨ cong (t ⋯_) (sym (
                                    ~-ext (dist-↑-· 𝕖 ϕ₁ ϕ₂))) ⟩
-  t ⋯ ((ϕ₁ ·ₘ ϕ₂) ↑ 𝕖)        ∎)
+  t ⋯ ((ϕ₁ ·ₖ ϕ₂) ↑ 𝕖)        ∎)
 --! AssocProofRest
 ⋯-assoc (Λα t)         ϕ₁ ϕ₂ = cong Λα_ (
   (t ⋯ (ϕ₁ ↑ 𝕥)) ⋯ (ϕ₂ ↑ 𝕥)
     ≡⟨ ⋯-assoc t (ϕ₁ ↑ 𝕥) (ϕ₂ ↑ 𝕥) ⟩
-  t ⋯ ((ϕ₁ ↑ 𝕥) ·ₘ (ϕ₂ ↑ 𝕥))
+  t ⋯ ((ϕ₁ ↑ 𝕥) ·ₖ (ϕ₂ ↑ 𝕥))
     ≡⟨ cong (t ⋯_) (sym (~-ext (dist-↑-· 𝕥 ϕ₁ ϕ₂))) ⟩
-  t ⋯ ((ϕ₁ ·ₘ ϕ₂) ↑ 𝕥)
+  t ⋯ ((ϕ₁ ·ₖ ϕ₂) ↑ 𝕥)
     ∎)
 ⋯-assoc (∀[α∶ t₁ ] t₂) ϕ₁ ϕ₂ =
   cong₂ ∀[α∶_]_ (⋯-assoc t₁ ϕ₁ ϕ₂) (
     (t₂ ⋯ (ϕ₁ ↑ 𝕥)) ⋯ (ϕ₂ ↑ 𝕥)
       ≡⟨ ⋯-assoc t₂ (ϕ₁ ↑ 𝕥) (ϕ₂ ↑ 𝕥) ⟩
-    t₂ ⋯ ((ϕ₁ ↑ 𝕥) ·ₘ (ϕ₂ ↑ 𝕥))
+    t₂ ⋯ ((ϕ₁ ↑ 𝕥) ·ₖ (ϕ₂ ↑ 𝕥))
       ≡⟨ cong (t₂ ⋯_) (sym (~-ext (dist-↑-· 𝕥 ϕ₁ ϕ₂))) ⟩
-    t₂ ⋯ ((ϕ₁ ·ₘ ϕ₂) ↑ 𝕥)
+    t₂ ⋯ ((ϕ₁ ·ₖ ϕ₂) ↑ 𝕥)
       ∎)
 ⋯-assoc (t₁ ∙ t₂)      ϕ₁ ϕ₂ =
   cong₂ _∙_ (⋯-assoc t₁ ϕ₁ ϕ₂) (⋯-assoc t₂ ϕ₁ ϕ₂)

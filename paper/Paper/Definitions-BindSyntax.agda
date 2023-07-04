@@ -116,7 +116,7 @@ open Traversal traversal hiding (_⋯_; ⋯-id)
   ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
     ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
     (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
-  → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₘ ϕ₂)
+  → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
 --! AssocProofInteresting
 ⋯-assoc (` x)          ϕ₁ ϕ₂ = sym (&/⋯-⋯ (ϕ₁ _ x) ϕ₂)
 ⋯-assoc (t₁ · t₂)      ϕ₁ ϕ₂ = cong₂ _·_  (⋯-assoc t₁ ϕ₁ ϕ₂) (⋯-assoc t₂ ϕ₁ ϕ₂)
@@ -129,9 +129,9 @@ open Traversal traversal hiding (_⋯_; ⋯-id)
 ⋯-assoc ★              ϕ₁ ϕ₂ = refl
 ⋯-assoc ([x∶ t ] e)     ϕ₁ ϕ₂ = cong₂ [x∶_]_ (⋯-assoc t ϕ₁ ϕ₂) (
   (e ⋯ (ϕ₁ ↑ _)) ⋯ (ϕ₂ ↑ _)   ≡⟨ ⋯-assoc e (ϕ₁ ↑ _) (ϕ₂ ↑ _) ⟩
-  e ⋯ ((ϕ₁ ↑ _) ·ₘ (ϕ₂ ↑ _))  ≡⟨ cong (e ⋯_) (sym (
+  e ⋯ ((ϕ₁ ↑ _) ·ₖ (ϕ₂ ↑ _))  ≡⟨ cong (e ⋯_) (sym (
                                    ~-ext (dist-↑-· _ ϕ₁ ϕ₂))) ⟩
-  e ⋯ ((ϕ₁ ·ₘ ϕ₂) ↑ _)        ∎)
+  e ⋯ ((ϕ₁ ·ₖ ϕ₂) ↑ _)        ∎)
 
 --! ComposeTraversal {
 compose-traversal : ComposeTraversal

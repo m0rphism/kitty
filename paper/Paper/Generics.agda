@@ -95,7 +95,7 @@ module WithSort(Sort : SortTy → Set) where
           ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
           ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
           (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
-        → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₘ ϕ₂)
+        → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
       ⋯-assoc (`var x)  ϕ₁ ϕ₂ = sym (&/⋯-⋯ (ϕ₁ _ x) ϕ₂)
       ⋯-assoc (`con e') ϕ₁ ϕ₂ = cong `con (⋯-assoc' e' ϕ₁ ϕ₂)
 
@@ -104,7 +104,7 @@ module WithSort(Sort : SortTy → Set) where
           ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
           ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
           (t : ⟦ d' ⟧ (Tm d) S₁ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
-        → (t ⋯' ϕ₁) ⋯' ϕ₂ ≡ t ⋯' (ϕ₁ ·ₘ ϕ₂)
+        → (t ⋯' ϕ₁) ⋯' ϕ₂ ≡ t ⋯' (ϕ₁ ·ₖ ϕ₂)
       ⋯-assoc' {d' = `σ A d'}     (a , D')  ϕ₁ ϕ₂ = cong (a ,_) (⋯-assoc' D' ϕ₁ ϕ₂)
       ⋯-assoc' {d' = `X S' M' d'} (e₁ , e₂) ϕ₁ ϕ₂ = cong₂ _,_ (trans (⋯-assoc e₁ (ϕ₁ ↑* S') (ϕ₂ ↑* S'))
                                                                     (cong (e₁ ⋯_) (sym (~-ext (dist-↑*-· S' ϕ₁ ϕ₂)))) )
