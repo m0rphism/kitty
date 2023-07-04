@@ -35,6 +35,7 @@ record Terms : Set₁ where
     S S₁ S₂ S₃ S' S₁' S₂' S₃'  : List (Sort Var)
     x y z x₁ x₂                : S ∋ s
 
+  --! Scoped
   Scoped : Set₁
   Scoped = List (Sort Var) → Sort Var → Set
 
@@ -46,13 +47,16 @@ record Terms : Set₁ where
     _→ₖ_ S₁ S₂ = ∀ s → S₁ ∋ s → S₂ ∋/⊢ s
 
     field
+      -- Operations
       id/`            : S ∋ s → S ∋/⊢ s
       `/id            : S ∋/⊢ s → S ⊢ s
-      id/`/id         : ∀ (x : S ∋ s) → `/id (id/` x) ≡ ` x
+      wk              : ∀ s' → S ∋/⊢ s → (s' ∷ S) ∋/⊢ s
+
+      -- Axioms
+      `/`-is-`        : ∀ (x : S ∋ s) → `/id (id/` x) ≡ ` x
       id/`-injective  : id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
       `/id-injective  :  ∀ {x/t₁ x/t₂ : S ∋/⊢ s} →
                          `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
-      wk              : ∀ s' → S ∋/⊢ s → (s' ∷ S) ∋/⊢ s
       wk-id/`         :  ∀ s' (x : S ∋ s) →
                          wk s' (id/` x) ≡ id/` (suc x)
     --! }
@@ -151,20 +155,20 @@ record Terms : Set₁ where
       Kᵣ = record
         { id/`            = λ x → x
         ; `/id            = `_
-        ; id/`/id         = λ x → refl
+        ; wk              = λ s' x → suc x
+        ; `/`-is-`        = λ x → refl
         ; id/`-injective  = λ eq → eq
         ; `/id-injective  = `-injective
-        ; wk              = λ s' x → suc x
         ; wk-id/`         = λ s' x → refl }
 
       Kₛ : Kit _⊢_
       Kₛ = record
         { id/`            = `_
         ; `/id            = λ t → t
-        ; id/`/id         = λ x → refl
+        ; `/`-is-`        = λ x → refl
+        ; wk              = λ s' t → t ⋯ weaken s'
         ; id/`-injective  = `-injective
         ; `/id-injective  = λ eq → eq
-        ; wk              = λ s' t → t ⋯ weaken s'
         ; wk-id/`         = λ s' x → ⋯-var x (weaken s') }
     --! }
 
@@ -222,7 +226,7 @@ record Terms : Set₁ where
       --! ComposeKitApProof
       &/⋯-& x ϕ = 
           `/id (id/` x &/⋯ ϕ)       ≡⟨ &/⋯-⋯ (id/` x) ϕ ⟩
-          `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ  ≡⟨ cong (_⋯ ϕ) (id/`/id ⦃ K₁ ⦄ x) ⟩
+          `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ  ≡⟨ cong (_⋯ ϕ) (`/`-is-` ⦃ K₁ ⦄ x) ⟩
           ` x ⋯ ϕ                   ≡⟨ ⋯-var ⦃ K₂ ⦄ x ϕ ⟩
           `/id ⦃ K₂ ⦄  (x & ϕ)      ∎
 
@@ -232,8 +236,8 @@ record Terms : Set₁ where
       --! DistLiftComposeProof
       dist-↑-· s ϕ₁ ϕ₂ s₁ x@zero = `/id-injective (
         `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₘ ϕ₂) ↑ s))       ≡⟨⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (id/` zero)                  ≡⟨ id/`/id ⦃ K₁⊔K₂ ⦄ zero ⟩
-        ` zero                                      ≡⟨ sym (id/`/id ⦃ K₂ ⦄ zero) ⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (id/` zero)                  ≡⟨ `/`-is-` ⦃ K₁⊔K₂ ⦄ zero ⟩
+        ` zero                                      ≡⟨ sym (`/`-is-` ⦃ K₂ ⦄ zero) ⟩
         `/id ⦃ K₂ ⦄ (id/` zero)                     ≡⟨⟩
         `/id ⦃ K₂ ⦄ (zero & (ϕ₂ ↑ s))               ≡⟨ sym (&/⋯-& (id/` zero) (ϕ₂ ↑ s)) ⟩
         `/id ⦃ K₁⊔K₂ ⦄ (id/` zero &/⋯ (ϕ₂ ↑ s))     ≡⟨⟩
