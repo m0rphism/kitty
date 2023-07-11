@@ -7,7 +7,7 @@
 
 \bibliographystyle{ACM-Reference-Format}
 
-\title{Kit Theory}
+\title{Abstractions for Multi-Sorted Substitutions}
 
 \author{Hannes Saffrich}
 \orcid{0000-0002-1825-0097}                 %% \orcid is optional
@@ -160,19 +160,27 @@
   \newpage
 
   \section{Syntax}
+  \subsection{Single-Sorted Syntax}
   The following shows a typical intrinsically-scoped syntax of System F:
   \ExampleCode\FUnsortedSyntax
 
   \texttt{Type}s are indexed by the number of free type variables \texttt{n}.
   \texttt{Expr}essions are additionally indexed by the number of free expression variables \texttt{m}.
-  Variables are represented as DeBruijn-indices, where \texttt{Fin n} is the type of \texttt{n} elements.
+  Variables \texttt{`\_} are represented as DeBruijn-indices, where \texttt{Fin n} is the type of \texttt{n} elements.
 
-  This style of syntax comes with multiple drawbacks:
-  \begin{itemize}
-  \item Bad scaling for automation
-  \item Multiple substitutions require interaction lemmas
-  \end{itemize}
+  We identify two drawbacks with this style of syntax:
+  \begin{enumerate}
+  \item the syntactic categories (\texttt{Kind}, \texttt{Type}, and \texttt{Expr})
+    have different types, which makes it difficult to treat them uniformly; and
+  \item the different sorts of variables are modeled separately, which requires to define not just
+    type-in-type and expression-in-expression substitution, but also type-in-expression substitution.
+    Consequently, interaction lemmas between those substitutions are required.
+    In general, this leads to a combinatory explosion of
+    substitutions, e.g.\ adding kind variables would lead to a total of 6
+    different substitutions.
+  \end{enumerate}
 
+  \subsection{Multi-Sorted Syntax}
   % Instead we define a single term type which is indexed by the sort of
   % syntax, i.e.\ whether the term is a kind, type, or expression:
   To avoid these drawbacks, we define a single term type \texttt{S~⊢~s} that is indexed by its sort \texttt{s},
@@ -189,6 +197,7 @@
   The variable constructor \texttt{'\_} takes a sorted DeBruijn-index \texttt{S~∋~s}.
   Since the \texttt{Sort}s in \texttt{S} are restricted to the sort-type \texttt{Var}, it is not possible to construct kind-variables.
 
+  \subsection{A Structure for Multi-Sorted Syntax}
   \LibCode\KTerms
   \AppCode\FTerms
 
@@ -202,7 +211,7 @@
   A renaming \texttt{S₁ →ᵣ S₂} maps variables from \texttt{S₁} to
   variables from \texttt{S₂}.
   A substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
-  terms in \texttt{S₂}.
+  terms containing variables from \texttt{S₂}.
 
   \ExampleCode\FExampleSub
 
@@ -214,22 +223,21 @@
   \subsection{Unifying Renamings \& Substitutions}
   A well-known problem with DeBruijn-indices is that full substitution
   cannot be defined directly by structural recursion on the term.
-  The typical workaround is to define renamings and substitutions
+  The usual workaround is to define renamings and substitutions
   separately and use renamings to weaken the terms in substitutions
-  when going under binders.
+  when going under binders. 
 
   While this keeps lemmas simple (requiring only structural induction),
   it duplicates the amount of work as all operations and lemmas have
   to be defined and proved for both renamings and substitutions.
 
   To avoid this duplication,
-  McBride\cite{DBLP:journals/jar/BentonHKM12,
-  unpublished:mcbride2005kits} introduced \emph{Kits} - an abstraction
-  which allows to talk about both renamings and substitutions
-  simultaneously.
+  McBride\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
+  introduced an abstraction called \emph{Kits}, which allows to talk about
+  both renamings and substitutions simultaneously.
 
-  The core idea behind kits is that renamings and substitutions only
-  differ in what they return:
+  The core observation leading to this abstraction is that renamings
+  and substitutions only differ in their return type:
   \ExampleCode\FExampleSubRen
 
   In both cases \texttt{\_∋\_} and \texttt{\_⊢\_} are instanciated to the type
