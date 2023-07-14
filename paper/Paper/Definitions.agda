@@ -65,14 +65,14 @@ module Example1 where
   σ .𝕥 (suc zero)  = ∀[α∶ ★ ] (` zero)  --   type-var 1 with a type
 
 --! Terms
-terms : Terms
-terms = record
+SystemF-Terms : Terms
+SystemF-Terms = record
   { Sort         = Sort
   ; _⊢_          = _⊢_
   ; `_           = `_
   ; `-injective  = λ { refl → refl } }
 
-open Terms terms hiding (Sort; _⊢_; `_)
+open Terms SystemF-Terms hiding (Sort; _⊢_; `_)
 
 --! TraversalOp
 _⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ → S₂ ⊢ s

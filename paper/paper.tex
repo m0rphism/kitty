@@ -212,12 +212,14 @@
   \texttt{𝕜}.
 
   \subsection{A Structure for Multi-Sorted Syntax}
-  The rest of our formalization builds on top of a multi-sorted
-  syntax, which we capture in the following structure:
+  The rest of our framework builds on top of a multi-sorted
+  syntax for which we define the following structure:
   \LibCode\KTerms
-  Aside from capturing our syntactic definitions, we require a proof that the
-  variable introduction \texttt{`\_} is injective. This is trivially true
-  for all constructors. The instantiation for our System F syntax is straightforward:
+  The first three fields record the definitions of sorts, terms, and variable introduction.
+  The last field records that variable introduction
+  \texttt{`\_} is injective, which is trivially true for
+  constructors. The instantiation for our System F syntax is
+  straightforward:
   \AppCode\FTerms
 
   \section{Renamings \& Substitutions}
@@ -240,11 +242,22 @@
   substitution, because both are simply substitutions.
 
   \subsection{Unifying Renamings \& Substitutions}
+  A well-known problem with DeBruijn-indices is that the operation of
+  applying a substitution \texttt{σ} to a term \texttt{t} cannot be
+  defined directly by structural recursion on \texttt{t}.
+  If \texttt{t} is a term like \texttt{λx e},
+  where the subterm \texttt{e} is under a binder, we need to adjust \texttt{σ}
+  for the shifted DeBruijn-indices in \texttt{e}:
+  \begin{itemize}
+  \item The variable \texttt{zero} refers in \texttt{e} to the variable bound by the binder.
+  \item a variable \texttt{suc x} refers to variable \texttt{x} in \texttt{σ}.
+  \end{itemize}
+
+  \subsection{Unifying Renamings \& Substitutions}
   A well-known problem with DeBruijn-indices is that full substitution
   cannot be defined directly by structural recursion on the term.
-  The usual workaround is to define renamings and substitutions
-  separately and use renamings to weaken the terms in substitutions
-  when going under binders. 
+  The usual workaround is to define renamings first and use them
+  to weaken the terms in substitutions when going under binders.
 
   While this keeps lemmas simple (requiring only structural induction),
   it duplicates the amount of work as all operations and lemmas have
