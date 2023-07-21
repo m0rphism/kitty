@@ -41,12 +41,13 @@ record Sub ℓ : Set (lsuc ℓ) where
     -- TODO: we might want this also to be Kit-heterogenous, to allow for talking about
     -- parallel compositions of two unknown, potentially different Kits.
     _∥_  : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S₁ S₂ S} → (S₁ –[ K ]→ S) → (S₂ –[ K ]→ S) → ((S₁ ▷▷ S₂) –[ K ]→ S)
-    ⦅_⦆  : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S s} → S ∋/⊢ s → (S ▷ s) –[ K ]→ S
+    ⦅_⦆ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S S' s} → (S ▷▷ S') ∋/⊢ s → (S ▷ s) –[ K ]→ (S ▷▷ S')
     -- Singleton renaming/substitution for terms with 1 free variable.
     -- Allows the term to be substituted to have arbitrary free variables.
     -- This is useful for things like pattern matching in combination with `_∥_`,
     -- where a matching substitution needs to be built up piece by piece.
     ⦅_⦆₀ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S s} → S ∋/⊢ s → ([] ▷ s) –[ K ]→ S
+
 
     _&_  : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S₁} {S₂} {s} → S₁ ∋ s → S₁ –[ K ]→ S₂ → S₂ ∋/⊢ s
 
@@ -478,8 +479,8 @@ record SubWithLaws ℓ : Set (lsuc ℓ) where
     ∥-▷ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S₁ S₂ S s} → (ϕ₁ : S₁ –[ K ]→ S) → (ϕ₂ : (S₂ ▷ s) –[ K ]→ S)
       → (ϕ₁ ∥ ϕ₂) ~ ((ϕ₁ ∥ (ϕ₂ ↓)) ,ₖ (here refl & ϕ₂))
 
-    ⦅⦆-,ₖ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S s} (x/t : S ∋/⊢ s) →
-      ⦅ x/t ⦆ ~ (id ,ₖ x/t)
+    ⦅⦆-,ₖ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S S' s} (x/t : (S ▷▷ S') ∋/⊢ s) →
+      ⦅ x/t ⦆ ~ (wkₖ* S' id ,ₖ x/t)
 
     ⦅⦆₀-,ₖ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S s} (x/t : S ∋/⊢ s) →
       ⦅ x/t ⦆₀ ~ ([]* ,ₖ x/t)

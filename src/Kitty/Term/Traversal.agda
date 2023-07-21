@@ -186,10 +186,15 @@ record Traversal : Set (lsuc ℓ) where
 
   -- Single substitution
 
-  ⦅_⦆ᵣ  : ∀ {S s} → S ∋ s → (S ▷ s)  →ᵣ S
-  ⦅_⦆ₛ  : ∀ {S s} → S ⊢ s → (S ▷ s)  →ₛ S
+  ⦅_⦆ᵣ  : ∀ {S S' s} → (S ▷▷ S') ∋ s → (S ▷ s)  →ᵣ (S ▷▷ S')
+  ⦅_⦆ₛ  : ∀ {S S' s} → (S ▷▷ S') ⊢ s → (S ▷ s)  →ₛ (S ▷▷ S')
   ⦅_⦆ᵣ  = ⦅_⦆
   ⦅_⦆ₛ  = ⦅_⦆
+
+  ⦅_⦆'ᵣ  : ∀ {S s} → S ∋ s → (S ▷ s)  →ᵣ S
+  ⦅_⦆'ₛ  : ∀ {S s} → S ⊢ s → (S ▷ s)  →ₛ S
+  ⦅_⦆'ᵣ  = ⦅_⦆
+  ⦅_⦆'ₛ  = ⦅_⦆
 
   -- Singleton renaming/substitution for terms with 1 free variable.
   -- Allows the term to be substituted to have arbitrary free variables.

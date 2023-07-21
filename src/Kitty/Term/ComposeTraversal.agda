@@ -244,20 +244,21 @@ record ComposeTraversal : Set (lsuc ℓ) where
     sx x@(here refl) →
       `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                        ≡⟨ cong `/id (&-·ₖ-&/⋯ ⦅ x/t ⦆ ϕ x) ⟩
       `/id (x & ⦅ x/t ⦆ &/⋯ ϕ)                              ≡⟨ cong (λ ■ → `/id (■ &/⋯ ϕ)) (use-~-hom (⦅⦆-,ₖ x/t) _ x) ⟩
-      `/id (x & (id ,ₖ x/t) &/⋯ ϕ)                          ≡⟨ cong (λ ■ → `/id (■ &/⋯ ϕ)) (&-,ₖ-here id x/t) ⟩
+      `/id (x & (wkₖ* [] id ,ₖ x/t) &/⋯ ϕ)                  ≡⟨ cong (λ ■ → `/id (■ &/⋯ ϕ)) (&-,ₖ-here (wkₖ* [] id) x/t) ⟩
       `/id (x/t &/⋯ ϕ)                                      ≡⟨ ι-`/id (x/t &/⋯ ϕ) ⟩
-      `/id (ι-∋/⊢ (x/t &/⋯ ϕ))                              ≡⟨ cong (λ ■ → `/id (ι-∋/⊢ ■)) (sym (&-,ₖ-here id (x/t &/⋯[ C₁ ] ϕ))) ⟩
-      `/id (ι-∋/⊢ (here refl & (id ⦃ K = K ⦄ ,ₖ (x/t &/⋯[ C₁ ] ϕ))))
+      `/id (ι-∋/⊢ (x/t &/⋯ ϕ))                              ≡⟨ cong (λ ■ → `/id (ι-∋/⊢ ■)) (sym (&-,ₖ-here (wkₖ* [] id) (x/t &/⋯[ C₁ ] ϕ))) ⟩
+      `/id (ι-∋/⊢ (here refl & (wkₖ* [] (id ⦃ K = K ⦄) ,ₖ (x/t &/⋯[ C₁ ] ϕ))))
                                                             ≡⟨ cong (λ ■ → `/id (ι-∋/⊢ ■))
-                                                                    (sym (use-~-hom (⦅⦆-,ₖ (x/t &/⋯[ C₁ ] ϕ)) _ (here refl))) ⟩
-      `/id (ι-∋/⊢ (here refl & ⦅ x/t &/⋯[ C₁ ] ϕ ⦆))        ≡⟨ cong `/id (sym (&/⋯-& ⦃ C₂ ⦄ (here refl) ⦅ x/t &/⋯[ C₁ ] ϕ ⦆)) ⟩
+                                                                    (sym (use-~-hom (⦅⦆-,ₖ {S' = []} (x/t &/⋯[ C₁ ] ϕ)) _ (here refl))) ⟩
+      `/id (ι-∋/⊢ (here refl & ⦅_⦆ {S' = []} (x/t &/⋯[ C₁ ] ϕ)))        ≡⟨ cong `/id (sym (&/⋯-& ⦃ C₂ ⦄ (here refl) ⦅ x/t &/⋯[ C₁ ] ϕ ⦆)) ⟩
       `/id ⦃ K ⦄ (id/` (here refl) &/⋯[ C₂ ] ⦅ x/t &/⋯[ C₁ ] ϕ ⦆) ≡⟨ cong (λ ■ → `/id (■ &/⋯ ⦅ x/t &/⋯[ C₁ ] ϕ ⦆)) (sym (&-↑-here ϕ)) ⟩ 
       `/id (x & (ϕ ↑ s) &/⋯ ⦅ x/t &/⋯[ C₁ ] ϕ ⦆)            ≡⟨ cong `/id (sym (&-·ₖ-&/⋯ (ϕ ↑ s) ⦅ x/t &/⋯[ C₁ ] ϕ ⦆ x)) ⟩
       `/id (x & ((ϕ ↑ s) ·[ C₂ ] ⦅ x/t &/⋯[ C₁ ] ϕ ⦆))      ∎
     sx x@(there y) →
       `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                                ≡⟨ cong `/id (&-·ₖ-&/⋯ ⦅ x/t ⦆ ϕ x) ⟩
       `/id (x & ⦅ x/t ⦆ &/⋯ ϕ)                                      ≡⟨ cong (λ ■ → `/id (■ &/⋯[ C₁ ] ϕ)) (use-~-hom (⦅⦆-,ₖ x/t) _ x) ⟩
-      `/id (x & (id ,ₖ x/t) &/⋯ ϕ)                                  ≡⟨ cong (λ ■ → `/id (■ &/⋯[ C₁ ] ϕ)) (&-,ₖ-there id x/t y) ⟩
+      `/id (x & (wkₖ* [] id ,ₖ x/t) &/⋯ ϕ)                          ≡⟨ cong (λ ■ → `/id (■ &/⋯[ C₁ ] ϕ)) (&-,ₖ-there (wkₖ* [] id) x/t y) ⟩
+      `/id (y & wkₖ* [] id &/⋯[ C₁ ] ϕ)                             ≡⟨ cong (λ ■ → `/id (■ &/⋯[ C₁ ] ϕ)) (use-~-hom (wkₖ*-[] id) _ y) ⟩
       `/id (y & id &/⋯[ C₁ ] ϕ)                                     ≡⟨ cong (λ ■ → `/id (■ &/⋯[ C₁ ] ϕ)) (&-id y) ⟩
       `/id ⦃ K ⦄ (id/` y &/⋯ ϕ)                                     ≡⟨ cong (`/id ⦃ K ⦄) (&/⋯-& y ϕ) ⟩
       `/id (ι-∋/⊢ ⦃ K₂⊑K₁⊔K₂ ⦃ C₁ ⦄ ⦄ (y & ϕ))                      ≡⟨ cong (`/id ⦃ K ⦄) (sym (&-ι-→ ⦃ K₁⊑K₂ = K₂⊑K₁⊔K₂ ⦃ C₁ ⦄ ⦄ ϕ y)) ⟩
@@ -266,7 +267,10 @@ record ComposeTraversal : Set (lsuc ℓ) where
       `/id (y & ϕ)                                                  ≡⟨ sym (use-~ (·-idʳ ϕ) _ y) ⟩
       `/id (y & (ϕ ·[ C₂ ] id))                                     ≡⟨ use-~ (~-cong-· ~-refl
                                                                         (~-sym (wk-cancels-,ₖ-· id (x/t &/⋯[ C₁ ] ϕ)))) _ y ⟩
+
       `/id (y & (ϕ ·[ C₂ ] (wkₖ _ id ·[ C₂ ] (id ,ₖ (x/t &/⋯[ C₁ ] ϕ))))) ≡⟨ use-~ (~-cong-· ⦃ K₁ = K₂ ⦄ ⦃ K₂ = K ⦄ ⦃ K = K ⦄ ~-refl
+                                                                            (~-cong-· ⦃ K₁ = K₂ ⦄ ⦃ K₂ = K ⦄ ⦃ K = K ⦄ ~-refl (~-cong-,ₖ (~-sym (wkₖ*-[] id)) refl))) _ y ⟩
+      `/id (y & (ϕ ·[ C₂ ] (wkₖ _ id ·[ C₂ ] (wkₖ* [] id ,ₖ (x/t &/⋯[ C₁ ] ϕ))))) ≡⟨ use-~ (~-cong-· ⦃ K₁ = K₂ ⦄ ⦃ K₂ = K ⦄ ⦃ K = K ⦄ ~-refl
                                                                             (~-cong-· ⦃ K₁ = K₂ ⦄ ⦃ K₂ = K ⦄ ⦃ K = K ⦄ ~-refl (~-sym (⦅⦆-,ₖ (x/t &/⋯[ C₁ ] ϕ))))) _ y ⟩
       `/id (y & (ϕ ·[ C₂ ] (wkₖ _ id ·[ C₂ ] ⦅ x/t &/⋯[ C₁ ] ϕ ⦆))) ≡⟨ sym (use-~ (·-assoc ϕ (wkₖ _ id) ⦅ x/t &/⋯[ C₁ ] ϕ ⦆) _ y) ⟩
       `/id (y & ((ϕ ·[ C₃ ] wkₖ _ id) ·[ C₂ ] ⦅ x/t &/⋯[ C₁ ] ϕ ⦆)) ≡⟨ use-~ (~-cong-· (~-sym (wk-ϕ-id ϕ)) ~-refl) _ y ⟩
@@ -499,10 +503,11 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (t : S ⊢ s') (x/t : S ∋/⊢[ K₂ ] s) →
     t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ ⦅ x/t ⦆ ≡ t
   wk-cancels-⦅⦆ ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ t x/t =
-    t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ ⦅ x/t ⦆     ≡⟨ ~-cong-⋯ (t ⋯ wkn ⦃ K = K₁ ⦄) (⦅⦆-,ₖ x/t) ⟩
-    t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ (id ,ₖ x/t) ≡⟨ wk-cancels-,ₖ t id x/t ⟩
-    t ⋯ id                           ≡⟨ ⋯-id t ⟩
-    t                                ∎
+    t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ ⦅ x/t ⦆             ≡⟨ ~-cong-⋯ (t ⋯ wkn ⦃ K = K₁ ⦄) (⦅⦆-,ₖ x/t) ⟩
+    t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ (wkₖ* [] id ,ₖ x/t) ≡⟨ wk-cancels-,ₖ t (wkₖ* [] id) x/t ⟩
+    t ⋯ wkₖ* [] id                           ≡⟨ ~-cong-⋯ t (wkₖ*-[] id) ⟩
+    t ⋯ id                                   ≡⟨ ⋯-id t ⟩
+    t                                        ∎
 
   wkᵣ-cancels-⦅⦆ᵣ : ∀ {S s} {st} {s' : Sort st} (t : S ⊢ s') (x : S ∋ s) →
     t ⋯ wknᵣ ⋯ ⦅ x ⦆ᵣ ≡ t
