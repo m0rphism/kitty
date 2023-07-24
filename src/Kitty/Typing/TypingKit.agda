@@ -471,7 +471,7 @@ record TypingKit
 
   ⊢⦅_⦆ : ∀ {s} {Γ : Ctx S} {t : S ∋/⊢ s} {T : S ∶⊢ (s)}
     → Γ ∋/⊢ t ∶ T 
-    → Γ ∋*/⊢* ⦅ t ⦆ ∶ Γ ▶ T
+    → Γ ∋*/⊢* ⦅ t ⦆' ∶ Γ ▶ T
   ⊢⦅_⦆ {S} {s} {Γ} {t} {T} ⊢t =
     let ⊢t' = subst (Γ ∋/⊢ t ∶_) (sym (
                 begin
@@ -480,11 +480,13 @@ record TypingKit
                   T
                 ∎
               )) ⊢t in
-    Γ ∋*/⊢* ⦅ t ⦆ ∶ Γ ▶ T
+    Γ ∋*/⊢* ⦅ t ⦆' ∶ Γ ▶ T
       by ⊢*~ (~-sym (⦅⦆-,ₖ t)) (
+    Γ ∋*/⊢* (wkₖ* [] id ,ₖ t) ∶ Γ ▶ T
+      by ⊢*~ (~-cong-,ₖ (~-sym (wkₖ*-[] id)) refl) (
     Γ ∋*/⊢* (id ,ₖ t) ∶ Γ ▶ T
       by (⊢id ,* ⊢t')
-    )
+    ))
 
 open TypingKit ⦃ ... ⦄
 

@@ -53,6 +53,9 @@ record Sub ℓ : Set (lsuc ℓ) where
 
     ι-→ : ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K₁⊑K₂ : K₁ ⊑ₖ K₂ ⦄ {S₁} {S₂} → S₁ –[ K₁ ]→ S₂ → S₁ –[ K₂ ]→ S₂
 
+  ⦅_⦆' : ∀ ⦃ K : Kit _∋/⊢_ ⦄ {S s} → (S) ∋/⊢ s → (S ▷ s) –[ K ]→ S
+  ⦅_⦆' = ⦅_⦆
+
   -- Renaming/Substitution
 
   _–→_ : ⦃ K : Kit _∋/⊢_ ⦄ → SortCtx → SortCtx → Set ℓ
