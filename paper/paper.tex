@@ -234,6 +234,9 @@
   A substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
   terms containing variables from \texttt{S₂}.
 
+  For example, the substitution, which replaces the term variable 0 with the
+  identity function and the type variable 1 with the bottom type, is defined
+  as followed:
   \ExampleCode\FExampleSub
 
   This representation has the benefit that there is no combinatory
@@ -246,12 +249,19 @@
   applying a substitution \texttt{σ} to a term \texttt{t} cannot be
   defined directly by structural recursion on \texttt{t}.
   If \texttt{t} is a term like \texttt{λx e},
-  where the subterm \texttt{e} is under a binder, we need to adjust \texttt{σ}
-  for the shifted DeBruijn-indices in \texttt{e}:
-  \begin{itemize}
-  \item The variable \texttt{zero} refers in \texttt{e} to the variable bound by the binder.
-  \item a variable \texttt{suc x} refers to variable \texttt{x} in \texttt{σ}.
-  \end{itemize}
+  where the subterm \texttt{e} is under a binder, then the variables
+  in \texttt{e} are shifted, i.e.  the variable \texttt{zero} refers
+  to the variable from the binder, whereas a variable \texttt{suc x}
+  refers to the variable \texttt{x} from outside of the binder.
+  As the terms contained in \texttt{σ} may themselves contain free variables,
+  they need to be shifted, too, before they can be substituted
+  for variables in \texttt{e}. 
+  Shifting the variables in a term is itself a substitution, which maps
+  each variable \texttt{x} to the term \texttt{` (suc x)}.
+  However, applying this shifting substitution to the terms in
+  \texttt{σ} is not structurally recursive, as the terms in \texttt{σ}
+  are not subterms of \texttt{λx e}.
+
 
   \subsection{Unifying Renamings \& Substitutions}
   A well-known problem with DeBruijn-indices is that full substitution
