@@ -119,6 +119,8 @@ subject-reduction (⊢Λ ⊢e)              (ξ-Λ e↪e')  = ⊢Λ (subject-red
 subject-reduction (⊢· ⊢e₁ ⊢e₂)         β-λ         with invert-λ ⊢e₁
 ...                                                   | t₁ , t₂ , st , ⊢e₁'
                                                       = ⊢⊑ (⊢e₁' ⊢⋯ₛ ⊢⦅ ⊢⊑ ⊢e₂ {!!} ⦆ₛ) {!!}
+                                                      -- This doesn't work, because ⊢e₁' is not structually smaller to ⊢e₁
+                                                      -- → induction on ↪ instead.
 subject-reduction (⊢· ⊢e₁ ⊢e₂)         (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢e₁ e↪e') ⊢e₂
 subject-reduction (⊢· ⊢e₁ ⊢e₂)         (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢e₂ e↪e')
 subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e) β-Λ         = {!!}
