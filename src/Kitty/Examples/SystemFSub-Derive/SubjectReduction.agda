@@ -100,6 +100,15 @@ invert-λ (⊢λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
 invert-λ (⊢⊑ ⊢e t₃⊑t) with invert-λ ⊢e
 ... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
 
+invert-Λ : {Γ : Ctx S} →
+  Γ ⊢ Λα e ∶ t →
+  ∃[ t₁ ] ∃[ t₂ ]
+    Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ t ×
+    Γ ▶ ★ ▶ (# 0 ∶⊑ (t₁ ⋯ᵣ wkn)) ⊢ (e ⋯ᵣ wkn {s = 𝕔}) ∶ (t₂ ⋯ᵣ wkn)
+invert-Λ (⊢Λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
+invert-Λ (⊢⊑ ⊢e t₃⊑t) with invert-Λ ⊢e
+... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
+
 -- Not true in general, because the input subtyping could be a faulty
 -- assumption instead of an arrow subtyping rule.
 -- For this to hold we need to forbid faulty assumptions, or add rules
@@ -110,22 +119,44 @@ invert-⊑⇒ : {Γ : Ctx S} →
 invert-⊑⇒ (⊑ₐ-` st₁ x st₂) = {!!}
 invert-⊑⇒ (⊑ₐ-⇒ st₁ st₂) = st₁ , st₂
 
+invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 ⊢ 𝕥} →
+    Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ (∀[α⊑ t₁' ] t₂') →
+    Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
+invert-⊑∀ (⊑ₐ-` st₁ x st₂) = {!!}
+invert-⊑∀ (⊑ₐ-∀ st₂) = st₂
+
 subject-reduction :
   Γ ⊢ e ∶ t →
   e ↪ e' →
   Γ ⊢ e' ∶ t
-subject-reduction (⊢λ ⊢e)              (ξ-λ e↪e')  = ⊢λ (subject-reduction ⊢e e↪e')
-subject-reduction (⊢Λ ⊢e)              (ξ-Λ e↪e')  = ⊢Λ (subject-reduction ⊢e (ren-pres-↪ wkn e↪e'))
-subject-reduction (⊢· ⊢e₁ ⊢e₂)         β-λ         with invert-λ ⊢e₁
-...                                                   | t₁ , t₂ , st , ⊢e₁'
-                                                      = ⊢⊑ (⊢e₁' ⊢⋯ₛ ⊢⦅ ⊢⊑ ⊢e₂ {!!} ⦆ₛ) {!!}
-subject-reduction (⊢· ⊢e₁ ⊢e₂)         (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢e₁ e↪e') ⊢e₂
-subject-reduction (⊢· ⊢e₁ ⊢e₂)         (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢e₂ e↪e')
-subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e) β-Λ         = {!!}
-subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e) (ξ-∙₁ e↪e') = ⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (subject-reduction ⊢e e↪e')
-subject-reduction (⊢⊑ ⊢e t⊑t')         e↪e'        = ⊢⊑ (subject-reduction ⊢e e↪e') t⊑t'
+subject-reduction (⊢λ ⊢e)                (ξ-λ e↪e')  = ⊢λ (subject-reduction ⊢e e↪e')
+subject-reduction (⊢Λ ⊢e)                (ξ-Λ e↪e')  = ⊢Λ (subject-reduction ⊢e (ren-pres-↪ wkn e↪e'))
+subject-reduction (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ         with invert-λ ⊢e₁
+...                                                     | t₁ , t₂ , st , ⊢e₁'
+                                                     with invert-⊑⇒ st
+...                                                     | st₁ , st₂
+                                                        = let st₂' = subst (_ ⊢_⊑ₐ _) (
+                                                                       t₂                   ≡⟨ sym (wk-cancels-⦅⦆ t₂ e₂) ⟩
+                                                                       t₂ ⋯ᵣ wkn ⋯ ⦅ e₂ ⦆'ₛ ∎
+                                                                     ) st₂ in
+                                                          ⊢⊑ (⊢e₁' ⊢⋯ₛ ⊢⦅ ⊢⊑ ⊢e₂ st₁ ⦆ₛ) st₂'
+subject-reduction (⊢· ⊢e₁ ⊢e₂)           (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢e₁ e↪e') ⊢e₂
+subject-reduction (⊢· ⊢e₁ ⊢e₂)           (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢e₂ e↪e')
+subject-reduction {Γ = Γ} (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e₁} ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   β-Λ         = {!!}
+-- subject-reduction {Γ = Γ} (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e₁} ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   β-Λ         with invert-Λ ⊢e
+-- ...                                                     | t₁' , t₂' , st , ⊢e'
+--                                                      with invert-⊑∀ st
+-- ...                                                     | st₂
+--                                                         = let ⊢' = subst₂ (Γ ⊢_∶_)
+--                                                                           (e₁ ⋯ᵣ wkn ⋯ {!⦅ t₂ ⋯ᵣ wkn ⦆'ₛ ↑ _!} ≡⟨ {!!} ⟩
+--                                                                            e₁ ⋯ ⦅ t₂ ⦆'ₛ    ∎)
+--                                                                           (t₂' ⋯ᵣ wkn ⋯ {!⦅ t₂ ⋯ᵣ wkn ⦆'ₛ!} ≡⟨ {!!} ⟩
+--                                                                            t₂' ⋯ ⦅ t₂ ⦆'ₛ    ∎)
+--                                                                           (⊢e' ⊢⋯ₛ ⊢⦅ t₂ ⦆) in
+--                                                           ⊢⊑ ⊢' (st₂ ⊑ₐ⋯ ⊢⦅ ⊢t₂ ⦆ₛ)
+subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   (ξ-∙₁ e↪e') = ⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (subject-reduction ⊢e e↪e')
+subject-reduction (⊢⊑ ⊢e t⊑t')           e↪e'        = ⊢⊑ (subject-reduction ⊢e e↪e') t⊑t'
 
--- subject-reduction (⊢· {t₂ = t₂} (⊢λ ⊢e₁) ⊢e₂)   β-λ          = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ t₂ _) (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆ₛ)
 -- subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (⊢Λ ⊢e₁))    β-Λ          = {!⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢t₂ ⦆ₛ!}
 
 
