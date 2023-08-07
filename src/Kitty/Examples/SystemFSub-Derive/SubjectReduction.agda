@@ -1,12 +1,12 @@
 module Kitty.Examples.SystemFSub-Derive.SubjectReduction where
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; subst₂; cong; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; subst; subst₂; cong; module ≡-Reasoning)
 open ≡-Reasoning
 open import Kitty.Examples.SystemFSub-Derive.Definitions
 open import Kitty.Typing.TypingKit compose-traversal ctx-repr
   record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = λ { refl ⊢e → ⊢e } }
 open import Data.List.Relation.Unary.Any using (here; there)
-open import Data.Product using (_×_; _,_; ∃-syntax)
+open import Data.Product using (_×_; _,_; ∃-syntax; Σ-syntax; proj₁; proj₂)
 open TypingKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
 
@@ -161,13 +161,49 @@ entail {t = t} {e = e} ⊢e t₁⊑t₂
 ... | ⊢tt               | `tt | 𝟙 | refl | refl = ⊢tt
 ... | ⊢⊑ ⊢e st          | e | t | refl | refl = ⊢⊑ (entail {!⊢e!} {!st!}) {!!}
 
+Valid : Ctx S → Set
+Valid {S} Γ =
+  ∀ (x : S ∋ 𝕔) {t₁ t₂} →
+  Γ ∋ x ∶ (t₁ ∶⊑ t₂) →
+  ∃[ y ] t₁ ≡ ` y
+
+∶⊑-wkn : ∀ {t₁ t₂ : S ▷ s ⊢ 𝕥} (t : S ⊢ ℂ) →
+  (t₁ ∶⊑ t₂) ≡ t ⋯ wknᵣ →
+  ∃[ t₁' ] ∃[ t₂' ] t₁ ≡ t₁' ⋯ wknᵣ × t₂ ≡ t₂' ⋯ wknᵣ
+∶⊑-wkn (t₁' ∶⊑ t₂') refl = t₁' , t₂' , refl , refl
+
+data Valid-Type {S} : S ⊢ s → Set where
+  instance Valid-𝕥 : ∀ {t : S ⊢ 𝕥} → Valid-Type t
+  instance Valid-𝕜 : ∀ {t : S ⊢ 𝕜} → Valid-Type t
+  instance Valid-𝕔 : ∀ {α : S ∋ 𝕥} {t : S ⊢ 𝕥} → Valid-Type ((` α) ∶⊑ t)
+
+Valid-▶ : ∀ {Γ : Ctx S} →
+  Valid Γ →
+  (t : S ∶⊢ s) →
+  ⦃ _ : Valid-Type t ⦄ →
+  Valid (_▶_ {s = s} Γ t)
+Valid-▶ {Γ = Γ} ⊢Γ _ ⦃ Valid-𝕔 {α = α} {t = t} ⦄ (here refl) {t₁} {t₂} ∋x
+ with trans (sym (wk-telescope-here Γ ((` α) ∶⊑ t))) ∋x
+... | refl = there α , refl
+Valid-▶ {Γ = Γ} ⊢Γ t ⦃ Vt ⦄ (there x) {t₁} {t₂} ∋x
+ with ∶⊑-wkn (wk-telescope Γ x) (
+        (t₁ ∶⊑ t₂)                     ≡⟨ sym ∋x ⟩
+        wk-telescope (Γ ▶ t) (there x) ≡⟨ wk-telescope-there Γ t x ⟩
+        wk-telescope Γ x ⋯ wknᵣ        ∎)
+... | t₁ , t₂ , refl , refl
+ with ⊢Γ x (wk-telescope Γ x ≡⟨ wkn-injective _ _ _ ∋x ⟩ (t₁ ∶⊑ t₂) ∎)
+... | y , eq =
+  there y , cong (_⋯ wknᵣ) eq
+
 subject-reduction :
+  Valid Γ →
   Γ ⊢ e ∶ t →
   e ↪ e' →
   Γ ⊢ e' ∶ t
-subject-reduction (⊢λ ⊢e)                (ξ-λ e↪e')  = ⊢λ (subject-reduction ⊢e e↪e')
-subject-reduction (⊢Λ ⊢e)                (ξ-Λ e↪e')  = ⊢Λ (subject-reduction ⊢e (ren-pres-↪ wkn e↪e'))
-subject-reduction (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ         with invert-λ ⊢e₁
+subject-reduction ⊢Γ (⊢λ ⊢e)                (ξ-λ e↪e')  = ⊢λ (subject-reduction (Valid-▶ ⊢Γ _) ⊢e e↪e')
+subject-reduction ⊢Γ (⊢Λ ⊢e)                (ξ-Λ e↪e')  = ⊢Λ (subject-reduction (Valid-▶ (Valid-▶ ⊢Γ ★) _)
+                                                                                ⊢e (ren-pres-↪ wkn e↪e'))
+subject-reduction ⊢Γ (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ      with invert-λ ⊢e₁
 ...                                                     | t₁ , t₂ , st , ⊢e₁'
                                                      with invert-⊑⇒ st
 ...                                                     | st₁ , st₂
@@ -176,9 +212,9 @@ subject-reduction (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ         with inver
                                                                        t₂ ⋯ᵣ wkn ⋯ ⦅ e₂ ⦆'ₛ ∎
                                                                      ) st₂ in
                                                           ⊢⊑ (⊢e₁' ⊢⋯ₛ ⊢⦅ ⊢⊑ ⊢e₂ st₁ ⦆ₛ) st₂'
-subject-reduction (⊢· ⊢e₁ ⊢e₂)           (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢e₁ e↪e') ⊢e₂
-subject-reduction (⊢· ⊢e₁ ⊢e₂)           (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢e₂ e↪e')
-subject-reduction {Γ = Γ} (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e₁} ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   β-Λ         = {!!}
+subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢Γ ⊢e₁ e↪e') ⊢e₂
+subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢Γ ⊢e₂ e↪e')
+subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e₁} ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   β-Λ         = {!!}
 -- subject-reduction {Γ = Γ} (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e₁} ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   β-Λ         with invert-Λ ⊢e
 -- ...                                                     | t₁' , t₂' , st , ⊢e'
 --                                                      with invert-⊑∀ st
@@ -190,8 +226,8 @@ subject-reduction {Γ = Γ} (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e�
 --                                                                            t₂' ⋯ ⦅ t₂ ⦆'ₛ    ∎)
 --                                                                           (⊢e' ⊢⋯ₛ ⊢⦅ t₂ ⦆) in
 --                                                           ⊢⊑ ⊢' (st₂ ⊑ₐ⋯ ⊢⦅ ⊢t₂ ⦆ₛ)
-subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   (ξ-∙₁ e↪e') = ⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (subject-reduction ⊢e e↪e')
-subject-reduction (⊢⊑ ⊢e t⊑t')           e↪e'        = ⊢⊑ (subject-reduction ⊢e e↪e') t⊑t'
+subject-reduction ⊢Γ (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   (ξ-∙₁ e↪e') = ⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (subject-reduction ⊢Γ ⊢e e↪e')
+subject-reduction ⊢Γ (⊢⊑ ⊢e t⊑t')           e↪e'        = ⊢⊑ (subject-reduction ⊢Γ  ⊢e e↪e') t⊑t'
 
 -- subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (⊢Λ ⊢e₁))    β-Λ          = {!⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢t₂ ⦆ₛ!}
 
