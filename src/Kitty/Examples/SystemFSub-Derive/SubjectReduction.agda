@@ -214,8 +214,8 @@ invert-⊑⇒ ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂)
 invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 ⊢ 𝕥} →
   Valid Γ →
   Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ (∀[α⊑ t₁' ] t₂') →
-  Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
-invert-⊑∀ ⊢Γ (⊑ₐ-∀ st₂) = st₂
+  t₁ ≡ t₁' × Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
+invert-⊑∀ ⊢Γ (⊑ₐ-∀ st₂) = refl , st₂
 invert-⊑∀ ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂)
  with ⊢Γ c ∋c
 ... | y , refl
@@ -241,18 +241,21 @@ subject-reduction ⊢Γ (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ      with in
                                                           ⊢⊑ (⊢e₁' ⊢⋯ₛ ⊢⦅ ⊢⊑ ⊢e₂ st₁ ⦆ₛ) st₂'
 subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢Γ ⊢e₁ e↪e') ⊢e₂
 subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢Γ ⊢e₂ e↪e')
-subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e₁} ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   β-Λ         = {!!}
--- subject-reduction {Γ = Γ} (⊢∙ {t₁ = t₁} {t₂ = t₂} {e₁ = Λα e₁} ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   β-Λ         with invert-Λ ⊢e
--- ...                                                     | t₁' , t₂' , st , ⊢e'
---                                                      with invert-⊑∀ st
--- ...                                                     | st₂
---                                                         = let ⊢' = subst₂ (Γ ⊢_∶_)
---                                                                           (e₁ ⋯ᵣ wkn ⋯ {!⦅ t₂ ⋯ᵣ wkn ⦆'ₛ ↑ _!} ≡⟨ {!!} ⟩
---                                                                            e₁ ⋯ ⦅ t₂ ⦆'ₛ    ∎)
---                                                                           (t₂' ⋯ᵣ wkn ⋯ {!⦅ t₂ ⋯ᵣ wkn ⦆'ₛ!} ≡⟨ {!!} ⟩
---                                                                            t₂' ⋯ ⦅ t₂ ⦆'ₛ    ∎)
---                                                                           (⊢e' ⊢⋯ₛ ⊢⦅ t₂ ⦆) in
---                                                           ⊢⊑ ⊢' (st₂ ⊑ₐ⋯ ⊢⦅ ⊢t₂ ⦆ₛ)
+subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t = t-bound} {t₁ = t-body} {t₂ = t-arg} {e₁ = Λα e₁} ⊢t-body ⊢t-arg t-arg⊑t-bound ⊢e)   β-Λ
+ with invert-Λ ⊢e
+... | _ , t-body' , st , ⊢e'
+ with invert-⊑∀ ⊢Γ st
+... | refl , t-body'⊑t-body
+ = -- First we substitute the type variable at #1, which is under the constraint binding #0
+   let ⊢e'' = Γ ▶ (t-arg ∶⊑ t-bound) ⊢ e₁ ⋯ ⦅ t-arg ⦆ₛ ⋯ᵣ wknᵣ ∶ t-body' ⋯ ⦅ t-arg ⦆ₛ ⋯ᵣ wknᵣ
+              by subst₃ (λ ■₁ ■₂ ■₃ → Γ ▶ (t-arg ∶⊑ ■₁) ⊢ ■₂ ∶ ■₃) {!!} {!!} {!!} (
+              Γ ▶ (t-arg ∶⊑ (t-bound ⋯ wknᵣ ⋯ ⦅ t-arg ⦆ₛ )) ⊢ e₁ ⋯ᵣ wknᵣ ⋯ (⦅ t-arg ⦆ₛ ↑ 𝕔) ∶ t-body' ⋯ᵣ wknᵣ ⋯ (⦅ t-arg ⦆ₛ ↑ 𝕔)
+              by ⊢e' ⊢⋯ₛ (⊢⦅ ⊢t-arg ⦆ₛ ⊢↑ ((# 0) ∶⊑ (t-bound ⋯ wknᵣ)))
+              ) in
+   -- Then we get rid of the constraint binding, since the constraint follows already from Γ
+   let ⊢e''' = Γ ⊢ e₁ ⋯ ⦅ t-arg ⦆ₛ ∶ t-body' ⋯ ⦅ t-arg ⦆ₛ
+               by entail {t = t-body' ⋯ ⦅ t-arg ⦆ₛ} {e = e₁ ⋯ ⦅ t-arg ⦆ₛ} ⊢e'' t-arg⊑t-bound in
+   ⊢⊑ ⊢e''' (t-body'⊑t-body ⊑ₐ⋯ ⊢⦅ ⊢t-arg ⦆ₛ)
 subject-reduction ⊢Γ (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   (ξ-∙₁ e↪e') = ⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (subject-reduction ⊢Γ ⊢e e↪e')
 subject-reduction ⊢Γ (⊢⊑ ⊢e t⊑t')           e↪e'        = ⊢⊑ (subject-reduction ⊢Γ  ⊢e e↪e') t⊑t'
 
