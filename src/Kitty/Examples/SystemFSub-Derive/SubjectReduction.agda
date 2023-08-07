@@ -8,6 +8,7 @@ open import Kitty.Typing.TypingKit compose-traversal ctx-repr
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Product using (_×_; _,_; ∃-syntax)
 open TypingKit ⦃ … ⦄
+open import Function using () renaming (_∋_ to _by_)
 
 subst₃ : ∀ {A B C : Set} (f : A → B → C → Set) {x y u v a b} → x ≡ y → u ≡ v → a ≡ b → f x u a → f y v b
 subst₃ _ refl refl refl p = p
@@ -124,6 +125,41 @@ invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 
     Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
 invert-⊑∀ (⊑ₐ-` st₁ x st₂) = {!!}
 invert-⊑∀ (⊑ₐ-∀ st₂) = st₂
+
+λx-injective : ∀ {e₁ e₂ : S ▷ 𝕖 ⊢ 𝕖} → (S ⊢ 𝕖 by λx e₁) ≡ (λx e₂) → e₁ ≡ e₂
+λx-injective refl = refl
+
+wkn-injective : ∀ (e₁ e₂ : S ⊢ s) s' →
+  e₁ ⋯ᵣ wkn {s = s'} ≡ e₂ ⋯ᵣ wkn {s = s'} →
+  e₁ ≡ e₂
+wkn-injective (` x) (` .(id _ x)) s' refl = refl
+wkn-injective (λx e₁) (λx e₂) s' eq = cong λx_ (wkn-injective e₁ e₂ s' {!λx-injective eq!})
+wkn-injective (Λα e₁) (Λα e₂) s' eq = {!!}
+wkn-injective (∀[α⊑ e₁ ] e₂) (∀[α⊑ e₃ ] e₄) s' eq = {!!}
+wkn-injective (e₁ · e₂) (e₃ · e₄) s' eq = {!!}
+wkn-injective (e₁ ∙ e₂) (e₃ ∙ e₄) s' eq = {!!}
+wkn-injective (e₁ ⇒ e₂) (e₃ ⇒ e₄) s' eq = {!!}
+wkn-injective `tt `tt s' eq = {!!}
+wkn-injective 𝟙 𝟙 s' eq = {!!}
+wkn-injective (e₁ ∶⊑ e₂) (e₃ ∶⊑ e₄) s' eq = {!!}
+wkn-injective ★ ★ s' eq = {!!}
+wkn-injective Cstr Cstr s' eq = {!!}
+
+
+entail : ∀ {Γ : Ctx S} {t₁ t₂ : S ⊢ 𝕥} {t : S ⊢ 𝕥} {e : S ⊢ 𝕖} →
+  Γ ▶ (t₁ ∶⊑ t₂) ⊢ (e ⋯ᵣ wkn {s = 𝕔}) ∶ (t ⋯ᵣ wkn {s = 𝕔}) →
+  Γ ⊢ t₁ ⊑ₐ t₂ →
+  Γ ⊢ e ∶ t
+entail {t = t} {e = e} ⊢e t₁⊑t₂
+ with #e ← e ⋯ᵣ wkn {s = 𝕔} in eq-e | #t ← t ⋯ᵣ wkn {s = 𝕔} in eq-t
+ with ⊢e | e | t | eq-e | eq-t
+... | ⊢` x              | e | t | eq-e | refl = {!!}
+... | ⊢λ ⊢e₁            | e | t | eq-e | eq-t = {!!}
+... | ⊢Λ ⊢e₁            | e | t | eq-e | eq-t = {!!}
+... | ⊢· ⊢e₁ ⊢e₂        | e | t | eq-e | refl = {!!}
+... | ⊢∙ ⊢e₁ ⊢e₂ st ⊢e₃ | e | t | eq-e | eq-t = {!!}
+... | ⊢tt               | `tt | 𝟙 | refl | refl = ⊢tt
+... | ⊢⊑ ⊢e st          | e | t | refl | refl = ⊢⊑ (entail {!⊢e!} {!st!}) {!!}
 
 subject-reduction :
   Γ ⊢ e ∶ t →
