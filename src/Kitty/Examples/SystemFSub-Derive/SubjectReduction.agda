@@ -227,20 +227,16 @@ subject-reduction :
   Γ ⊢ e ∶ t →
   e ↪ e' →
   Γ ⊢ e' ∶ t
-subject-reduction ⊢Γ (⊢λ ⊢e)                (ξ-λ e↪e')  = ⊢λ (subject-reduction (Valid-▶ ⊢Γ _) ⊢e e↪e')
-subject-reduction ⊢Γ (⊢Λ ⊢e)                (ξ-Λ e↪e')  = ⊢Λ (subject-reduction (Valid-▶ (Valid-▶ ⊢Γ ★) _)
-                                                                                ⊢e (ren-pres-↪ wkn e↪e'))
-subject-reduction ⊢Γ (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ      with invert-λ ⊢e₁
-...                                                     | t₁ , t₂ , st , ⊢e₁'
-                                                     with invert-⊑⇒ ⊢Γ st
-...                                                     | st₁ , st₂
-                                                        = let st₂' = subst (_ ⊢_⊑ₐ _) (
-                                                                       t₂                   ≡⟨ sym (wk-cancels-⦅⦆ t₂ e₂) ⟩
-                                                                       t₂ ⋯ᵣ wkn ⋯ ⦅ e₂ ⦆'ₛ ∎
-                                                                     ) st₂ in
-                                                          ⊢⊑ (⊢e₁' ⊢⋯ₛ ⊢⦅ ⊢⊑ ⊢e₂ st₁ ⦆ₛ) st₂'
-subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢Γ ⊢e₁ e↪e') ⊢e₂
-subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢Γ ⊢e₂ e↪e')
+subject-reduction ⊢Γ (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ
+ with invert-λ ⊢e₁
+... | t₁ , t₂ , st , ⊢e₁'
+ with invert-⊑⇒ ⊢Γ st
+... | st₁ , st₂
+ = let st₂' = subst (_ ⊢_⊑ₐ _) (
+                t₂                   ≡⟨ sym (wk-cancels-⦅⦆ t₂ e₂) ⟩
+                t₂ ⋯ᵣ wkn ⋯ ⦅ e₂ ⦆'ₛ ∎
+              ) st₂ in
+   ⊢⊑ (⊢e₁' ⊢⋯ₛ ⊢⦅ ⊢⊑ ⊢e₂ st₁ ⦆ₛ) st₂'
 subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t = t-bound} {t₁ = t-body} {t₂ = t-arg} {e₁ = Λα e₁} ⊢t-body ⊢t-arg t-arg⊑t-bound ⊢e)   β-Λ
  with invert-Λ ⊢e
 ... | _ , t-body' , st , ⊢e'
@@ -256,6 +252,11 @@ subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t = t-bound} {t₁ = t-body} {t₂ = 
    let ⊢e''' = Γ ⊢ e₁ ⋯ ⦅ t-arg ⦆ₛ ∶ t-body' ⋯ ⦅ t-arg ⦆ₛ
                by entail {t = t-body' ⋯ ⦅ t-arg ⦆ₛ} {e = e₁ ⋯ ⦅ t-arg ⦆ₛ} ⊢e'' t-arg⊑t-bound in
    ⊢⊑ ⊢e''' (t-body'⊑t-body ⊑ₐ⋯ ⊢⦅ ⊢t-arg ⦆ₛ)
+subject-reduction ⊢Γ (⊢λ ⊢e)                (ξ-λ e↪e')  = ⊢λ (subject-reduction (Valid-▶ ⊢Γ _) ⊢e e↪e')
+subject-reduction ⊢Γ (⊢Λ ⊢e)                (ξ-Λ e↪e')  = ⊢Λ (subject-reduction (Valid-▶ (Valid-▶ ⊢Γ ★) _)
+                                                                                ⊢e (ren-pres-↪ wkn e↪e'))
+subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₁ e↪e') = ⊢· (subject-reduction ⊢Γ ⊢e₁ e↪e') ⊢e₂
+subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₂ e↪e') = ⊢· ⊢e₁ (subject-reduction ⊢Γ ⊢e₂ e↪e')
 subject-reduction ⊢Γ (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   (ξ-∙₁ e↪e') = ⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (subject-reduction ⊢Γ ⊢e e↪e')
 subject-reduction ⊢Γ (⊢⊑ ⊢e t⊑t')           e↪e'        = ⊢⊑ (subject-reduction ⊢Γ  ⊢e e↪e') t⊑t'
 
