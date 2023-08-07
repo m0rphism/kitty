@@ -92,43 +92,11 @@ ren-pres-↪ {e = e} {e' = e'} ρ e↪e' with #e ← e ⋯ᵣ ρ in eq-e | #e' �
 ... | ξ-·₂ e↪e'' | refl | refl = ξ-·₂ (ren-pres-↪ ρ e↪e'')
 ... | ξ-∙₁ e↪e'' | refl | refl = ξ-∙₁ (ren-pres-↪ ρ e↪e'')
 
-invert-λ : {Γ : Ctx S} →
-  Γ ⊢ λx e ∶ t →
-  ∃[ t₁ ] ∃[ t₂ ]
-    Γ ⊢ (t₁ ⇒ t₂) ⊑ₐ t ×
-    Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wkn
-invert-λ (⊢λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
-invert-λ (⊢⊑ ⊢e t₃⊑t) with invert-λ ⊢e
-... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
-
-invert-Λ : {Γ : Ctx S} →
-  Γ ⊢ Λα e ∶ t →
-  ∃[ t₁ ] ∃[ t₂ ]
-    Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ t ×
-    Γ ▶ ★ ▶ (# 0 ∶⊑ (t₁ ⋯ᵣ wkn)) ⊢ (e ⋯ᵣ wkn {s = 𝕔}) ∶ (t₂ ⋯ᵣ wkn)
-invert-Λ (⊢Λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
-invert-Λ (⊢⊑ ⊢e t₃⊑t) with invert-Λ ⊢e
-... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
-
--- Not true in general, because the input subtyping could be a faulty
--- assumption instead of an arrow subtyping rule.
--- For this to hold we need to forbid faulty assumptions, or add rules
--- which allow to close faulty assumptions under inversion.
-invert-⊑⇒ : {Γ : Ctx S} →
-    Γ ⊢ (t₁ ⇒ t₂) ⊑ₐ (t₁' ⇒ t₂') →
-    Γ ⊢ t₁' ⊑ₐ t₁ × Γ ⊢ t₂ ⊑ₐ t₂'
-invert-⊑⇒ (⊑ₐ-` st₁ x st₂) = {!!}
-invert-⊑⇒ (⊑ₐ-⇒ st₁ st₂) = st₁ , st₂
-
-invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 ⊢ 𝕥} →
-    Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ (∀[α⊑ t₁' ] t₂') →
-    Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
-invert-⊑∀ (⊑ₐ-` st₁ x st₂) = {!!}
-invert-⊑∀ (⊑ₐ-∀ st₂) = st₂
-
 λx-injective : ∀ {e₁ e₂ : S ▷ 𝕖 ⊢ 𝕖} → (S ⊢ 𝕖 by λx e₁) ≡ (λx e₂) → e₁ ≡ e₂
 λx-injective refl = refl
 
+-- TODO: General case for kitty library:
+-- If (_& ϕ) is injective, then (_⋯ ϕ) is injective, too!
 wkn-injective : ∀ (e₁ e₂ : S ⊢ s) s' →
   e₁ ⋯ᵣ wkn {s = s'} ≡ e₂ ⋯ᵣ wkn {s = s'} →
   e₁ ≡ e₂
@@ -195,6 +163,45 @@ Valid-▶ {Γ = Γ} ⊢Γ t ⦃ Vt ⦄ (there x) {t₁} {t₂} ∋x
 ... | y , eq =
   there y , cong (_⋯ wknᵣ) eq
 
+invert-λ : {Γ : Ctx S} →
+  Γ ⊢ λx e ∶ t →
+  ∃[ t₁ ] ∃[ t₂ ]
+    Γ ⊢ (t₁ ⇒ t₂) ⊑ₐ t ×
+    Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wkn
+invert-λ (⊢λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
+invert-λ (⊢⊑ ⊢e t₃⊑t) with invert-λ ⊢e
+... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
+
+invert-Λ : {Γ : Ctx S} →
+  Γ ⊢ Λα e ∶ t →
+  ∃[ t₁ ] ∃[ t₂ ]
+    Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ t ×
+    Γ ▶ ★ ▶ (# 0 ∶⊑ (t₁ ⋯ᵣ wkn)) ⊢ (e ⋯ᵣ wkn {s = 𝕔}) ∶ (t₂ ⋯ᵣ wkn)
+invert-Λ (⊢Λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
+invert-Λ (⊢⊑ ⊢e t₃⊑t) with invert-Λ ⊢e
+... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
+
+-- Not true in general, because the input subtyping could be a faulty
+-- assumption instead of an arrow subtyping rule.
+-- For this to hold we need to forbid faulty assumptions, or add rules
+-- which allow to close faulty assumptions under inversion.
+invert-⊑⇒ : {Γ : Ctx S} →
+  Valid Γ →
+  Γ ⊢ (t₁ ⇒ t₂) ⊑ₐ (t₁' ⇒ t₂') →
+  Γ ⊢ t₁' ⊑ₐ t₁ × Γ ⊢ t₂ ⊑ₐ t₂'
+invert-⊑⇒ ⊢Γ (⊑ₐ-` st₁ x st₂) = {!!}
+invert-⊑⇒ ⊢Γ (⊑ₐ-⇒ st₁ st₂) = st₁ , st₂
+
+invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 ⊢ 𝕥} →
+  Valid Γ →
+  Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ (∀[α⊑ t₁' ] t₂') →
+  Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
+invert-⊑∀ ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂)
+ with ⊢Γ c ∋c
+... | y , refl
+ = {!!}
+invert-⊑∀ ⊢Γ (⊑ₐ-∀ st₂) = st₂
+
 subject-reduction :
   Valid Γ →
   Γ ⊢ e ∶ t →
@@ -205,7 +212,7 @@ subject-reduction ⊢Γ (⊢Λ ⊢e)                (ξ-Λ e↪e')  = ⊢Λ (sub
                                                                                 ⊢e (ren-pres-↪ wkn e↪e'))
 subject-reduction ⊢Γ (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ      with invert-λ ⊢e₁
 ...                                                     | t₁ , t₂ , st , ⊢e₁'
-                                                     with invert-⊑⇒ st
+                                                     with invert-⊑⇒ ⊢Γ st
 ...                                                     | st₁ , st₂
                                                         = let st₂' = subst (_ ⊢_⊑ₐ _) (
                                                                        t₂                   ≡⟨ sym (wk-cancels-⦅⦆ t₂ e₂) ⟩
