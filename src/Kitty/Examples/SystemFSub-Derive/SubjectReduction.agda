@@ -244,7 +244,11 @@ subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t = t-bound} {t₁ = t-body} {t₂ = 
 ... | refl , t-body'⊑t-body
  = -- First we substitute the type variable at #1, which is under the constraint binding #0
    let ⊢e'' = Γ ▶ (t-arg ∶⊑ t-bound) ⊢ e₁ ⋯ ⦅ t-arg ⦆ₛ ⋯ᵣ wknᵣ ∶ t-body' ⋯ ⦅ t-arg ⦆ₛ ⋯ᵣ wknᵣ
-              by subst₃ (λ ■₁ ■₂ ■₃ → Γ ▶ (t-arg ∶⊑ ■₁) ⊢ ■₂ ∶ ■₃) {!!} {!!} {!!} (
+              by subst₃ (λ ■₁ ■₂ ■₃ → Γ ▶ (t-arg ∶⊑ ■₁) ⊢ ■₂ ∶ ■₃)
+                        (wk-cancels-⦅⦆ t-bound t-arg)
+                        (dist-↑-f e₁ ⦅ t-arg ⦆ₛ)
+                        (dist-↑-f t-body' ⦅ t-arg ⦆ₛ)
+                        (
               Γ ▶ (t-arg ∶⊑ (t-bound ⋯ wknᵣ ⋯ ⦅ t-arg ⦆ₛ )) ⊢ e₁ ⋯ᵣ wknᵣ ⋯ (⦅ t-arg ⦆ₛ ↑ 𝕔) ∶ t-body' ⋯ᵣ wknᵣ ⋯ (⦅ t-arg ⦆ₛ ↑ 𝕔)
               by ⊢e' ⊢⋯ₛ (⊢⦅ ⊢t-arg ⦆ₛ ⊢↑ ((# 0) ∶⊑ (t-bound ⋯ wknᵣ)))
               ) in
