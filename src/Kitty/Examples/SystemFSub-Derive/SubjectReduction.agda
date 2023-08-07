@@ -260,8 +260,6 @@ subject-reduction ⊢Γ (⊢· ⊢e₁ ⊢e₂)           (ξ-·₂ e↪e') = �
 subject-reduction ⊢Γ (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t ⊢e)   (ξ-∙₁ e↪e') = ⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (subject-reduction ⊢Γ ⊢e e↪e')
 subject-reduction ⊢Γ (⊢⊑ ⊢e t⊑t')           e↪e'        = ⊢⊑ (subject-reduction ⊢Γ  ⊢e e↪e') t⊑t'
 
--- subject-reduction (⊢∙ ⊢t₁ ⊢t₂ t₂⊑t (⊢Λ ⊢e₁))    β-Λ          = {!⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢t₂ ⦆ₛ!}
-
 
 
 
