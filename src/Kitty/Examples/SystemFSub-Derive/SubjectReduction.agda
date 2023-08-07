@@ -55,6 +55,9 @@ wkn-injective _ _ _ refl = refl
 -- ⋯-injective ϕ-inj ★ ★ eq = {!!}
 -- ⋯-injective ϕ-inj Cstr Cstr eq = {!!}
 
+there-injective : ∀ {s'} {x y : S ∋ s'} → there {x = s} {xs = S} x ≡ there y → x ≡ y
+there-injective refl = refl 
+
 ↑-Injective :
   ∀ {S₁} {S₂} {ϕ : S₁ →ᵣ S₂} {s} →
   Injective-Map ϕ →
@@ -62,7 +65,7 @@ wkn-injective _ _ _ refl = refl
 ↑-Injective inj-ϕ s (here refl) (here refl) eq = refl
 ↑-Injective inj-ϕ s (here refl) (there y)   ()
 ↑-Injective inj-ϕ s (there x)   (here refl) ()
-↑-Injective inj-ϕ s (there x)   (there y)   eq = cong there (inj-ϕ _ x y {!eq!})
+↑-Injective inj-ϕ s (there x)   (there y)   eq = cong there (inj-ϕ s x y (there-injective eq))
 
 λx-injective : ∀ {e₁ e₂ : S ▷ 𝕖 ⊢ 𝕖} → (S ⊢ 𝕖 by λx e₁) ≡ (λx e₂) → e₁ ≡ e₂
 λx-injective refl = refl 
