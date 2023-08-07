@@ -45,7 +45,7 @@ data _⊢_ : ∀ {st} → List (Sort Var) → Sort st → Set where
   Cstr      : S ⊢ 𝕜
 
 variable
-  e e₁ e₂ e₃ e' e₁' e₂' : S ⊢ 𝕖
+  e e₁ e₂ e₃ e' e₁' e₂' e₁₁ e₁₂ e₂₁ e₂₂ : S ⊢ 𝕖
   t t₁ t₂ t₃ t₄ t' t₁' t₂' t₁₁ t₁₂ t₂₁ t₂₂ : S ⊢ 𝕥
   k k₁ k₂ k₃ k' k₁' k₂' : S ⊢ 𝕜
   c c₁ c₂ c₃ c' c₁' c₂' : S ⊢ 𝕔

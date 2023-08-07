@@ -1,6 +1,6 @@
 module Kitty.Examples.SystemFSub-Derive.SubjectReduction where
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; subst; subst₂; cong; module ≡-Reasoning)
+open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; subst; subst₂; cong; cong₂; module ≡-Reasoning)
 open ≡-Reasoning
 open import Kitty.Examples.SystemFSub-Derive.Definitions
 open import Kitty.Typing.TypingKit compose-traversal ctx-repr
@@ -9,6 +9,107 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.Product using (_×_; _,_; ∃-syntax; Σ-syntax; proj₁; proj₂)
 open TypingKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
+
+open import Kitty.Term.Terms
+Injective-Map :
+  ∀ {_∋/⊢_ : List (Sort Var) → Sort Var → Set} ⦃ K : Kit _∋/⊢_ ⦄ {S₁} {S₂} →
+  S₁ –[ K ]→ S₂ → Set
+Injective-Map ϕ = ∀ s (x y : _ ∋ s) → ϕ _ x ≡ ϕ _ y → x ≡ y
+
+wkn-injective : ∀ {S} {s} → Injective-Map  (wknᵣ {S = S} {s = s})
+wkn-injective _ _ _ refl = refl
+
+-- ⋯-injective :
+--   ∀ {_∋/⊢_ : List (Sort Var) → Sort Var → Set} ⦃ K : Kit _∋/⊢_ ⦄ {S₁} {S₂}
+--     {ϕ : S₁ –[ K ]→ S₂} →
+--   Injective-Map ϕ →
+--   ∀ {st} {s : Sort st} (e₁ e₂ : S₁ ⊢ s) →
+--   e₁ ⋯ ϕ ≡ e₂ ⋯ ϕ →
+--   e₁ ≡ e₂
+-- ⋯-injective ϕ-inj (` x) (` y) eq = cong `_ (ϕ-inj _ x y (`/id-injective eq)) 
+-- ⋯-injective ϕ-inj (` x) (λx e₂) eq = {!!}
+-- ⋯-injective ϕ-inj (` x) (Λα e₂) eq = {!!}
+-- ⋯-injective ϕ-inj (` x) (∀[α⊑ e₂ ] e₃) eq = {!!}
+-- ⋯-injective ϕ-inj (` x) (e₂ · e₃) eq = {!!}
+-- ⋯-injective ϕ-inj (` x) (e₂ ∙ e₃) eq = {!!}
+-- ⋯-injective ϕ-inj (` x) (e₂ ⇒ e₃) eq = {!!}
+-- ⋯-injective ϕ-inj (` x) `tt eq = {!!}
+-- ⋯-injective ϕ-inj (` x) 𝟙 eq = {!!}
+-- ⋯-injective ϕ-inj (λx e₁) (` x) eq = {!!}
+-- ⋯-injective ϕ-inj (λx e₁) (λx e₂) eq = {!!}
+-- ⋯-injective ϕ-inj (Λα e₁) (` x) eq = {!!}
+-- ⋯-injective ϕ-inj (Λα e₁) (Λα e₂) eq = {!!}
+-- ⋯-injective ϕ-inj (∀[α⊑ e₁ ] e₂) (` x) eq = {!!}
+-- ⋯-injective ϕ-inj (∀[α⊑ e₁ ] e₂) (∀[α⊑ e₃ ] e₄) eq = {!!}
+-- ⋯-injective ϕ-inj (e₁ · e₂) (` x) eq = {!!}
+-- ⋯-injective ϕ-inj (e₁ · e₂) (e₃ · e₄) eq = {!!}
+-- ⋯-injective ϕ-inj (e₁ ∙ e₂) (` x) eq = {!!}
+-- ⋯-injective ϕ-inj (e₁ ∙ e₂) (e₃ ∙ e₄) eq = {!!}
+-- ⋯-injective ϕ-inj (e₁ ⇒ e₂) (` x) eq = {!!}
+-- ⋯-injective ϕ-inj (e₁ ⇒ e₂) (e₃ ⇒ e₄) eq = {!!}
+-- ⋯-injective ϕ-inj `tt (` x) eq = {!!}
+-- ⋯-injective ϕ-inj `tt `tt eq = {!!}
+-- ⋯-injective ϕ-inj 𝟙 (` x) eq = {!!}
+-- ⋯-injective ϕ-inj 𝟙 𝟙 eq = {!!}
+-- ⋯-injective ϕ-inj (e₁ ∶⊑ e₂) (e₃ ∶⊑ e₄) eq = {!!}
+-- ⋯-injective ϕ-inj ★ ★ eq = {!!}
+-- ⋯-injective ϕ-inj Cstr Cstr eq = {!!}
+
+↑-Injective :
+  ∀ {S₁} {S₂} {ϕ : S₁ →ᵣ S₂} {s} →
+  Injective-Map ϕ →
+  Injective-Map (ϕ ↑ s)
+↑-Injective inj-ϕ s (here refl) (here refl) eq = refl
+↑-Injective inj-ϕ s (here refl) (there y)   ()
+↑-Injective inj-ϕ s (there x)   (here refl) ()
+↑-Injective inj-ϕ s (there x)   (there y)   eq = cong there (inj-ϕ _ x y {!eq!})
+
+λx-injective : ∀ {e₁ e₂ : S ▷ 𝕖 ⊢ 𝕖} → (S ⊢ 𝕖 by λx e₁) ≡ (λx e₂) → e₁ ≡ e₂
+λx-injective refl = refl 
+
+Λα-injective : ∀ {e₁ e₂ : S ▷ 𝕥 ⊢ 𝕖} → (S ⊢ 𝕖 by Λα e₁) ≡ (Λα e₂) → e₁ ≡ e₂
+Λα-injective refl = refl 
+
+∀α-injective : ∀[α⊑ t₁₁ ] t₁₂ ≡ ∀[α⊑ t₂₁ ] t₂₂ → t₁₁ ≡ t₂₁ × t₁₂ ≡ t₂₂
+∀α-injective refl = refl , refl
+
+·-injective : e₁₁ · e₁₂ ≡ e₂₁ · e₂₂ → e₁₁ ≡ e₂₁ × e₁₂ ≡ e₂₂
+·-injective refl = refl , refl
+
+∙-injective : e₁₁ ∙ t₁₂ ≡ e₂₁ ∙ t₂₂ → e₁₁ ≡ e₂₁ × t₁₂ ≡ t₂₂
+∙-injective refl = refl , refl
+
+⇒-injective : t₁₁ ⇒ t₁₂ ≡ t₂₁ ⇒ t₂₂ → t₁₁ ≡ t₂₁ × t₁₂ ≡ t₂₂
+⇒-injective refl = refl , refl
+
+∶⊑-injective : t₁₁ ∶⊑ t₁₂ ≡ t₂₁ ∶⊑ t₂₂ → t₁₁ ≡ t₂₁ × t₁₂ ≡ t₂₂
+∶⊑-injective refl = refl , refl
+
+⋯-injective :
+  ∀ {S₁} {S₂}
+    {ϕ : S₁ →ᵣ S₂} →
+  Injective-Map ϕ →
+  ∀ {st} {s : Sort st} (e₁ e₂ : S₁ ⊢ s) →
+  e₁ ⋯ ϕ ≡ e₂ ⋯ ϕ →
+  e₁ ≡ e₂
+⋯-injective ϕ-inj (` x₁)           (` x₂)           eq = cong `_ (ϕ-inj _ x₁ x₂ (`/id-injective eq))
+⋯-injective ϕ-inj (λx e₁)          (λx e₂)          eq = cong λx_ (⋯-injective (↑-Injective ϕ-inj) e₁ e₂ (λx-injective eq))
+⋯-injective ϕ-inj (Λα e₁)          (Λα e₂)          eq = cong Λα_ (⋯-injective (↑-Injective ϕ-inj) e₁ e₂ (Λα-injective eq))
+⋯-injective ϕ-inj (∀[α⊑ e₁₁ ] e₁₂) (∀[α⊑ e₂₁ ] e₂₂) eq = cong₂ ∀[α⊑_]_
+                                                               (⋯-injective ϕ-inj e₁₁ e₂₁ (proj₁ (∀α-injective eq)))
+                                                               (⋯-injective (↑-Injective ϕ-inj) e₁₂ e₂₂ (proj₂ (∀α-injective eq)))
+⋯-injective ϕ-inj (e₁₁ · e₁₂)      (e₂₁ · e₂₂)      eq = cong₂ _·_ (⋯-injective ϕ-inj e₁₁ e₂₁ (proj₁ (·-injective eq)))
+                                                                   (⋯-injective ϕ-inj e₁₂ e₂₂ (proj₂ (·-injective eq)))
+⋯-injective ϕ-inj (e₁₁ ∙ e₁₂)      (e₂₁ ∙ e₂₂)      eq = cong₂ _∙_ (⋯-injective ϕ-inj e₁₁ e₂₁ (proj₁ (∙-injective eq)))
+                                                                   (⋯-injective ϕ-inj e₁₂ e₂₂ (proj₂ (∙-injective eq)))
+⋯-injective ϕ-inj (e₁₁ ⇒ e₁₂)      (e₂₁ ⇒ e₂₂)      eq = cong₂ _⇒_ (⋯-injective ϕ-inj e₁₁ e₂₁ (proj₁ (⇒-injective eq)))
+                                                                   (⋯-injective ϕ-inj e₁₂ e₂₂ (proj₂ (⇒-injective eq)))
+⋯-injective ϕ-inj `tt              `tt              eq = refl
+⋯-injective ϕ-inj 𝟙                𝟙                eq = refl
+⋯-injective ϕ-inj (e₁₁ ∶⊑ e₁₂)     (e₂₁ ∶⊑ e₂₂)     eq = cong₂ _∶⊑_ (⋯-injective ϕ-inj e₁₁ e₂₁ (proj₁ (∶⊑-injective eq)))
+                                                                    (⋯-injective ϕ-inj e₁₂ e₂₂ (proj₂ (∶⊑-injective eq)))
+⋯-injective ϕ-inj ★                ★                eq = refl
+⋯-injective ϕ-inj Cstr             Cstr             eq = refl
 
 subst₃ : ∀ {A B C : Set} (f : A → B → C → Set) {x y u v a b} → x ≡ y → u ≡ v → a ≡ b → f x u a → f y v b
 subst₃ _ refl refl refl p = p
@@ -92,28 +193,6 @@ ren-pres-↪ {e = e} {e' = e'} ρ e↪e' with #e ← e ⋯ᵣ ρ in eq-e | #e' �
 ... | ξ-·₂ e↪e'' | refl | refl = ξ-·₂ (ren-pres-↪ ρ e↪e'')
 ... | ξ-∙₁ e↪e'' | refl | refl = ξ-∙₁ (ren-pres-↪ ρ e↪e'')
 
-λx-injective : ∀ {e₁ e₂ : S ▷ 𝕖 ⊢ 𝕖} → (S ⊢ 𝕖 by λx e₁) ≡ (λx e₂) → e₁ ≡ e₂
-λx-injective refl = refl
-
--- TODO: General case for kitty library:
--- If (_& ϕ) is injective, then (_⋯ ϕ) is injective, too!
-wkn-injective : ∀ (e₁ e₂ : S ⊢ s) s' →
-  e₁ ⋯ᵣ wkn {s = s'} ≡ e₂ ⋯ᵣ wkn {s = s'} →
-  e₁ ≡ e₂
-wkn-injective (` x) (` .(id _ x)) s' refl = refl
-wkn-injective (λx e₁) (λx e₂) s' eq = cong λx_ (wkn-injective e₁ e₂ s' {!λx-injective eq!})
-wkn-injective (Λα e₁) (Λα e₂) s' eq = {!!}
-wkn-injective (∀[α⊑ e₁ ] e₂) (∀[α⊑ e₃ ] e₄) s' eq = {!!}
-wkn-injective (e₁ · e₂) (e₃ · e₄) s' eq = {!!}
-wkn-injective (e₁ ∙ e₂) (e₃ ∙ e₄) s' eq = {!!}
-wkn-injective (e₁ ⇒ e₂) (e₃ ⇒ e₄) s' eq = {!!}
-wkn-injective `tt `tt s' eq = {!!}
-wkn-injective 𝟙 𝟙 s' eq = {!!}
-wkn-injective (e₁ ∶⊑ e₂) (e₃ ∶⊑ e₄) s' eq = {!!}
-wkn-injective ★ ★ s' eq = {!!}
-wkn-injective Cstr Cstr s' eq = {!!}
-
-
 entail : ∀ {Γ : Ctx S} {t₁ t₂ : S ⊢ 𝕥} {t : S ⊢ 𝕥} {e : S ⊢ 𝕖} →
   Γ ▶ (t₁ ∶⊑ t₂) ⊢ (e ⋯ᵣ wkn {s = 𝕔}) ∶ (t ⋯ᵣ wkn {s = 𝕔}) →
   Γ ⊢ t₁ ⊑ₐ t₂ →
@@ -159,7 +238,7 @@ Valid-▶ {Γ = Γ} ⊢Γ t ⦃ Vt ⦄ (there x) {t₁} {t₂} ∋x
         wk-telescope (Γ ▶ t) (there x) ≡⟨ wk-telescope-there Γ t x ⟩
         wk-telescope Γ x ⋯ wknᵣ        ∎)
 ... | t₁ , t₂ , refl , refl
- with ⊢Γ x (wk-telescope Γ x ≡⟨ wkn-injective _ _ _ ∋x ⟩ (t₁ ∶⊑ t₂) ∎)
+ with ⊢Γ x (wk-telescope Γ x ≡⟨ ⋯-injective wkn-injective _ _ ∋x ⟩ (t₁ ∶⊑ t₂) ∎)
 ... | y , eq =
   there y , cong (_⋯ wknᵣ) eq
 
