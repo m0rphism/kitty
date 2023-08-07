@@ -181,6 +181,18 @@ invert-Λ (⊢Λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
 invert-Λ (⊢⊑ ⊢e t₃⊑t) with invert-Λ ⊢e
 ... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
 
+invert-⊑` : ∀ {Γ : Ctx S} {α : S ∋ 𝕥} →
+  Valid Γ →
+  Γ ⊢ t ⊑ₐ (` α) →
+  ∃[ β ] t ≡ ` β
+invert-⊑` ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂)
+ with ⊢Γ c ∋c
+... | y , refl
+ with invert-⊑` ⊢Γ st₁
+... | β₂ , refl
+ = β₂ , refl
+invert-⊑` ⊢Γ ⊑ₐ-refl-var = _ , refl
+
 -- Not true in general, because the input subtyping could be a faulty
 -- assumption instead of an arrow subtyping rule.
 -- For this to hold we need to forbid faulty assumptions, or add rules
@@ -196,11 +208,12 @@ invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 
   Valid Γ →
   Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ (∀[α⊑ t₁' ] t₂') →
   Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
+invert-⊑∀ ⊢Γ (⊑ₐ-∀ st₂) = st₂
 invert-⊑∀ ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂)
  with ⊢Γ c ∋c
 ... | y , refl
- = {!!}
-invert-⊑∀ ⊢Γ (⊑ₐ-∀ st₂) = st₂
+ with invert-⊑` ⊢Γ st₁
+... | β , ()
 
 subject-reduction :
   Valid Γ →
