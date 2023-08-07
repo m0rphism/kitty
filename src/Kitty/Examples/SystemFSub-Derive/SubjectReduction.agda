@@ -181,6 +181,9 @@ invert-Λ (⊢Λ ⊢e) = _ , _ , ⊑ₐ-refl , ⊢e
 invert-Λ (⊢⊑ ⊢e t₃⊑t) with invert-Λ ⊢e
 ... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑ₐ-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
 
+-- This is the key for getting the inversion lemmas to work:
+-- By requiring `Valid Γ` we know that a subtype of a type variable
+-- has to be also a type variable, so it cannot be a ∀- or ⇒-type.
 invert-⊑` : ∀ {Γ : Ctx S} {α : S ∋ 𝕥} →
   Valid Γ →
   Γ ⊢ t ⊑ₐ (` α) →
