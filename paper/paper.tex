@@ -232,7 +232,7 @@
   A renaming \texttt{S₁ →ᵣ S₂} maps variables from \texttt{S₁} to
   variables from \texttt{S₂}.
   A substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
-  terms containing variables from \texttt{S₂}.
+  terms with free variables from \texttt{S₂}.
 
   For example, the substitution, which replaces the term variable 0 with the
   identity function and the type variable 1 with the bottom type, is defined
@@ -262,13 +262,8 @@
   \texttt{σ} is not structurally recursive, as the terms in \texttt{σ}
   are not subterms of \texttt{λx e}.
 
-
-  \subsection{Unifying Renamings \& Substitutions}
-  A well-known problem with DeBruijn-indices is that full substitution
-  cannot be defined directly by structural recursion on the term.
   The usual workaround is to define renamings first and use them
   to weaken the terms in substitutions when going under binders.
-
   While this keeps lemmas simple (requiring only structural induction),
   it duplicates the amount of work as all operations and lemmas have
   to be defined and proved for both renamings and substitutions.
