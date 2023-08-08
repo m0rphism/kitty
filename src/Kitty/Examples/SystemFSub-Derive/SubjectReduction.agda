@@ -290,16 +290,29 @@ invert-⊑⇒ : {Γ : Ctx S} →
 invert-⊑⇒ ⊢Γ st with invert-⊑⇒' ⊢Γ st
 ... | inj₁ (_ , _ , refl , st₁ , st₂) = st₁ , st₂
 
+-- TODO: Exactly the same proof as for ⇒
+invert-⊑∀' : {Γ : Ctx S} {t₁' : S ⊢ 𝕥} {t₂' : S ▷ 𝕥 ⊢ 𝕥} →
+  Valid Γ →
+  Γ ⊢ t ⊑ₐ (∀[α⊑ t₁' ] t₂') →
+  (∃[ t₁ ] ∃[ t₂ ] t ≡ (∀[α⊑ t₁ ] t₂) × t₁ ≡ t₁' × Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂') ⊎ (∃[ α ] t ≡ ` α)
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂) with ⊢Γ c ∋c
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂) | α , refl = inj₂ (invert-⊑` ⊢Γ st₁)
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) with invert-⊑∀' ⊢Γ st₃
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₂ (α , refl) with invert-⊑` ⊢Γ st₂
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₂ (α , refl) | β , refl = inj₂ (invert-⊑` ⊢Γ st₁)
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') with invert-⊑∀' ⊢Γ st₂
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₂ (α , refl) = inj₂ (invert-⊑` ⊢Γ st₁)
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , refl , t₂x⊑t₂) with invert-⊑∀' ⊢Γ st₁
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , refl , t₂x⊑t₂) | inj₂ (α , refl) = inj₂ (α , refl)
+invert-⊑∀' ⊢Γ (⊑ₐ-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , refl , t₂x⊑t₂) | inj₁ (t₁y , t₂y , refl , refl , t₂y⊑t₂x) = inj₁ (_ , _ , refl , refl , ⊑ₐ-trans t₂y⊑t₂x (⊑ₐ-trans t₂x⊑t₂ t₂⊑t₂'))
+invert-⊑∀' ⊢Γ (⊑ₐ-∀ st) = inj₁ (_ , _ , refl , refl , st)
+
 invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 ⊢ 𝕥} →
   Valid Γ →
   Γ ⊢ (∀[α⊑ t₁ ] t₂) ⊑ₐ (∀[α⊑ t₁' ] t₂') →
   t₁ ≡ t₁' × Γ ▶ ★ ⊢ t₂ ⊑ₐ t₂'
-invert-⊑∀ ⊢Γ (⊑ₐ-∀ st₂) = refl , st₂
-invert-⊑∀ ⊢Γ (⊑ₐ-` {c = ` c} st₁ (⊢` ∋c) st₂)
- with ⊢Γ c ∋c
-... | y , refl
- with invert-⊑` ⊢Γ st₁
-... | β , ()
+invert-⊑∀ ⊢Γ st with invert-⊑∀' ⊢Γ st
+... | inj₁ (_ , _ , refl , refl , st) = refl , st
 
 subject-reduction :
   Valid Γ →
