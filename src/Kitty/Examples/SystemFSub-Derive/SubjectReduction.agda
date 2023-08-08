@@ -346,7 +346,10 @@ subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t = t-bound} {t₁ = t-body} {t₂ = 
               ) in
    -- Then we get rid of the constraint binding, since the constraint follows already from Γ
    let ⊢e''' = Γ ⊢ e₁ ⋯ ⦅ t-arg ⦆ₛ ∶ t-body' ⋯ ⦅ t-arg ⦆ₛ
-               by {!!} in
+               by subst₂ (Γ ⊢_∶_) (wk-cancels-⦅⦆ (e₁ ⋯ ⦅ t-arg ⦆) cstr) (wk-cancels-⦅⦆ (t-body' ⋯ ⦅ t-arg ⦆) cstr) (
+               Γ ⊢ e₁ ⋯ ⦅ t-arg ⦆ₛ ⋯ᵣ wknᵣ ⋯ ⦅ cstr ⦆ₛ ∶ t-body' ⋯ ⦅ t-arg ⦆ ⋯ᵣ wknᵣ ⋯ ⦅ cstr ⦆ₛ 
+               by ⊢e'' ⊢⋯ₛ ⊢⦅ ⊢cstr t-arg⊑t-bound ⦆ₛ
+               ) in
                -- by entail {t = t-body' ⋯ ⦅ t-arg ⦆ₛ} {e = e₁ ⋯ ⦅ t-arg ⦆ₛ} ⊢e'' t-arg⊑t-bound in
    ⊢⊑ ⊢e''' (t-body'⊑t-body ⊑ₐ⋯ ⊢⦅ ⊢t-arg ⦆ₛ)
 subject-reduction ⊢Γ (⊢λ ⊢e)              (ξ-λ e↪e')  = ⊢λ (subject-reduction (Valid-▶ ⊢Γ _) ⊢e e↪e')
