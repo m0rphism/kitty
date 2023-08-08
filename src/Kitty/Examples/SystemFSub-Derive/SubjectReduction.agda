@@ -95,6 +95,7 @@ subst₃ _ refl refl refl p = p
 
 -- END DERIVABLE ---------------------------------------------------------------
 
+-- TODO: everything in the mutual block requires only substitution lemmas -> derivable
 mutual
   -- Substitution of type vars needs to respect constraints:
   --   (` α ∶⊑ t) ∈ Γ₁  →  Γ₂ ⊢ ϕ _ α ⊑ t 
