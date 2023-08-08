@@ -158,7 +158,7 @@ mutual
 
 open TypingTraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
--- TODO: everything requires only substitution lemmas -> derivable
+-- TODO: requires only substitution lemmas -> derivable
 ren-pres-↪ : {e e' : S ⊢ s'} (ρ : S →ᵣ S') →
   e ↪ e' →
   e ⋯ᵣ ρ ↪ e' ⋯ᵣ ρ
