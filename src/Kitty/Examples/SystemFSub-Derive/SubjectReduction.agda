@@ -10,6 +10,8 @@ open import Data.Product using (_×_; _,_; ∃-syntax; Σ-syntax; proj₁; proj�
 open TypingKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
 
+-- BEGIN DERIVABLE -------------------------------------------------------------
+
 open import Kitty.Term.Terms
 Injective-Map :
   ∀ {_∋/⊢_ : List (Sort Var) → Sort Var → Set} ⦃ K : Kit _∋/⊢_ ⦄ {S₁} {S₂} →
@@ -88,9 +90,10 @@ there-injective refl = refl
 ⋯-injective ϕ-inj cstr             cstr             eq = refl
 ⋯-injective ϕ-inj Cstr             Cstr             eq = refl
 
-
 subst₃ : ∀ {A B C : Set} (f : A → B → C → Set) {x y u v a b} → x ≡ y → u ≡ v → a ≡ b → f x u a → f y v b
 subst₃ _ refl refl refl p = p
+
+-- END DERIVABLE ---------------------------------------------------------------
 
 mutual
   -- Substitution of type vars needs to respect constraints:
