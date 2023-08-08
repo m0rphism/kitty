@@ -88,21 +88,6 @@ there-injective refl = refl
 ⋯-injective ϕ-inj cstr             cstr             eq = refl
 ⋯-injective ϕ-inj Cstr             Cstr             eq = refl
 
--- entail : ∀ {Γ : Ctx S} {t₁ t₂ : S ⊢ 𝕥} {t : S ⊢ 𝕥} {e : S ⊢ 𝕖} →
---   Γ ▶ (t₁ ∶⊑ t₂) ⊢ (e ⋯ᵣ wkn {s = 𝕔}) ∶ (t ⋯ᵣ wkn {s = 𝕔}) →
---   Γ ⊢ t₁ ⊑ₐ t₂ →
---   Γ ⊢ e ∶ t
--- entail {t = t} {e = e} ⊢e t₁⊑t₂
---  with #e ← e ⋯ᵣ wkn {s = 𝕔} in eq-e | #t ← t ⋯ᵣ wkn {s = 𝕔} in eq-t
---  with ⊢e | e | t | eq-e | eq-t
--- ... | ⊢` ∋x             | ` x | t | refl | refl = ⊢` {!wkn-injective ? ? ? ?!}
--- ... | ⊢λ ⊢e₁            | λx e | t₁ ⇒ t₂ | refl | refl = ⊢λ (entail {!⊢e₁!} {!t₁⊑t₂!})
--- ... | ⊢Λ ⊢e₁            | e | t | eq-e | eq-t = {!!}
--- ... | ⊢· ⊢e₁ ⊢e₂        | e | t | eq-e | refl = {!!}
--- ... | ⊢∙ ⊢e₁ ⊢e₂ st ⊢e₃ | e | t | eq-e | eq-t = {!!}
--- ... | ⊢tt               | `tt | 𝟙 | refl | refl = ⊢tt
--- ... | ⊢⊑ ⊢e st          | e | t | refl | refl = ⊢⊑ (entail {!⊢e!} {!st!}) {!!}
-
 
 subst₃ : ∀ {A B C : Set} (f : A → B → C → Set) {x y u v a b} → x ≡ y → u ≡ v → a ≡ b → f x u a → f y v b
 subst₃ _ refl refl refl p = p
