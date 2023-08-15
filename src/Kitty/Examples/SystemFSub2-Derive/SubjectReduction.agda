@@ -134,15 +134,12 @@ _⊢⋯_ {Γ₂ = Γ₂} ⦃ K = K ⦄ {ϕ = ϕ} (⊢∙ {t = t} {t₁ = t₁} {
                       (⊢t₁ ⊢⋯ (⊢ϕ ∋↑/⊢↑ _ ∋↑/⊢↑ _))) (⊢t₂ ⊢⋯ ⊢ϕ) (t₂⊑t ⊢⋯ ⊢ϕ) (⊢e ⊢⋯ ⊢ϕ))
 ⊢tt                ⊢⋯ ⊢ϕ = ⊢tt
 ⊢τ                 ⊢⋯ ⊢ϕ = ⊢τ
-⊑-` ⊢e₁ ⊢e₂ ⊢e₃    ⊢⋯ ⊢ϕ = ⊑-trans (⊢e₁ ⊢⋯ ⊢ϕ) (⊑-trans {!⊢e₂ ⊢⋯ ⊢ϕ!} (⊢e₃ ⊢⋯ ⊢ϕ))
--- ⊑-` ⊢e₁ ⊢e₂ ⊢e₃    ⊢⋯ ⊢ϕ = ⊑-` (⊢e₁ ⊢⋯ ⊢ϕ) {!⊢e₂ ⊢⋯ ⊢ϕ!} (⊢e₃ ⊢⋯ ⊢ϕ)
+⊑-trans ⊢e₁ ⊢e₂    ⊢⋯ ⊢ϕ = ⊑-trans (⊢e₁ ⊢⋯ ⊢ϕ) (⊢e₂ ⊢⋯ ⊢ϕ)
 ⊑-𝟙                ⊢⋯ ⊢ϕ = ⊑-𝟙
 ⊑-⇒ ⊢e₁ ⊢e₂        ⊢⋯ ⊢ϕ = ⊑-⇒ (⊢e₁ ⊢⋯ ⊢ϕ) (⊢e₂ ⊢⋯ ⊢ϕ)
 ⊑-∀ ⊢e             ⊢⋯ ⊢ϕ = ⊑-∀ (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _))
 ⊑-refl-var         ⊢⋯ ⊢ϕ = ⊑-refl
 ⊢⊑ ⊢e ⊢c           ⊢⋯ ⊢ϕ = ⊢⊑ (⊢e ⊢⋯ ⊢ϕ) (⊢c ⊢⋯ ⊢ϕ)
-
---   ⊑-` t₁⊑t₂ y t₂⊑t₃         ⊑⋯ ⊢ϕ = ⊑-` (t₁⊑t₂ ⊑⋯ ⊢ϕ) (y ⊢⋯ ⊢ϕ) (t₂⊑t₃ ⊑⋯ ⊢ϕ)
 
 open TypingTraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
@@ -206,7 +203,7 @@ invert-λ : {Γ : Ctx S} →
     Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wkn
 invert-λ (⊢λ ⊢e) = _ , _ , ⊑-refl , ⊢e
 invert-λ (⊢⊑ ⊢e t₃⊑t) with invert-λ ⊢e
-... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑-trans [t₁⇒t₂]⊑t₃ {!t₃⊑t!} , ⊢e
+... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
 
 invert-Λ : {Γ : Ctx S} →
   Γ ⊢ Λα e ∶ t →
@@ -215,7 +212,7 @@ invert-Λ : {Γ : Ctx S} →
     Γ ▶ ★ ▶ (# 0 ⊑ (t₁ ⋯ᵣ wkn)) ⊢ (e ⋯ᵣ wkn {s = 𝕔}) ∶ (t₂ ⋯ᵣ wkn)
 invert-Λ (⊢Λ ⊢e) = _ , _ , ⊑-refl , ⊢e
 invert-Λ (⊢⊑ ⊢e t₃⊑t) with invert-Λ ⊢e
-... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑-trans [t₁⇒t₂]⊑t₃ {!t₃⊑t!} , ⊢e
+... | t₁ , t₂ , [t₁⇒t₂]⊑t₃ , ⊢e = _ , _ , ⊑-trans [t₁⇒t₂]⊑t₃ t₃⊑t , ⊢e
 
 -- This is the key for getting the inversion lemmas to work:
 -- By requiring `Valid Γ` we know that a subtype of a type variable
@@ -224,68 +221,58 @@ invert-⊑` : ∀ {Γ : Ctx S} {α : S ∋ 𝕥} →
   Valid Γ →
   Γ ⊢ c ∶ t ⊑ (` α) →
   ∃[ β ] t ≡ ` β
+invert-⊑` ⊢Γ (⊢` {x = x} ∋x) = ⊢Γ x ∋x
+invert-⊑` ⊢Γ (⊑-trans ⊢c₁ ⊢c₂) with invert-⊑` ⊢Γ ⊢c₂
+... | α , refl = invert-⊑` ⊢Γ ⊢c₁
 invert-⊑` ⊢Γ ⊑-refl-var = _ , refl
-invert-⊑` ⊢Γ (⊢` {x = x} ∋c) = ⊢Γ x ∋c
-invert-⊑` ⊢Γ (⊑-` {x = x} st₁ (⊢` ∋c) st₂)
- with ⊢Γ x ∋c
-... | y , refl
- with invert-⊑` ⊢Γ st₁
-... | β₂ , refl
- = β₂ , refl
 
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 invert-⊑⇒' : {Γ : Ctx S} →
   Valid Γ →
   Γ ⊢ c ∶ t ⊑ (t₁' ⇒ t₂') →
-  (∃[ t₁ ] ∃[ t₂ ] t ≡ t₁ ⇒ t₂ × Γ ⊢ cstr ∶ t₁' ⊑ t₁ × Γ ⊢ cstr ∶ t₂ ⊑ t₂') ⊎ (∃[ α ] t ≡ ` α)
-invert-⊑⇒' = {!!}
--- invert-⊑⇒' ⊢Γ (⊑-` {c = ` c} st₁ (⊢` ∋c) st₂) with ⊢Γ c ∋c
--- invert-⊑⇒' ⊢Γ (⊑-` {c = ` c} st₁ (⊢` ∋c) st₂) | α , refl = inj₂ (invert-⊑` ⊢Γ st₁)
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) with invert-⊑⇒' ⊢Γ st₃
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₂ (α , refl) with invert-⊑` ⊢Γ st₂
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₂ (α , refl) | β , refl = inj₂ (invert-⊑` ⊢Γ st₁)
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , t₁'⊑t₁ , t₂⊑t₂') with invert-⊑⇒' ⊢Γ st₂
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , t₁'⊑t₁ , t₂⊑t₂') | inj₂ (α , refl) = inj₂ (invert-⊑` ⊢Γ st₁)
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , t₁'⊑t₁ , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , t₁⊑t₁x , t₂x⊑t₂) with invert-⊑⇒' ⊢Γ st₁
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , t₁'⊑t₁ , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , t₁⊑t₁x , t₂x⊑t₂) | inj₂ (α , refl) = inj₂ (α , refl)
--- invert-⊑⇒' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , t₁'⊑t₁ , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , t₁⊑t₁x , t₂x⊑t₂) | inj₁ (t₁y , t₂y , refl , t₁x⊑t₁y , t₂y⊑t₂x) = inj₁ (_ , _ , refl , ⊑-trans t₁'⊑t₁ (⊑-trans t₁⊑t₁x t₁x⊑t₁y) , ⊑-trans t₂y⊑t₂x (⊑-trans t₂x⊑t₂ t₂⊑t₂'))
--- invert-⊑⇒' ⊢Γ (⊑-⇒ st₁ st₂) = inj₁ (_ , _ , refl , st₁ , st₂)
+  (∃[ t₁ ] ∃[ t₂ ] Σ[ c₁ ∈ S ⊢ 𝕔 ] Σ[ c₂ ∈ S ⊢ 𝕔 ] t ≡ t₁ ⇒ t₂ × Γ ⊢ c₁ ∶ t₁' ⊑ t₁ × Γ ⊢ c₂ ∶ t₂ ⊑ t₂') ⊎ (∃[ α ] t ≡ ` α)
+invert-⊑⇒' ⊢Γ (⊑-⇒ ⊢c₁ ⊢c₂) = inj₁ (_ , _ , _ , _ , refl , ⊢c₁ , ⊢c₂)
+invert-⊑⇒' ⊢Γ (⊢` {x = x} ∋x) with ⊢Γ x ∋x
+... | α , refl = inj₂ (α , refl)
+invert-⊑⇒' ⊢Γ (⊑-trans ⊢c₁ ⊢c₂)
+ with invert-⊑⇒' ⊢Γ ⊢c₂
+... | inj₂ (α , refl) = inj₂ (invert-⊑` ⊢Γ ⊢c₁)
+... | inj₁ (t₁' , t₂' , _ , _ , refl , ⊢c₁' , ⊢c₂')
+ with invert-⊑⇒' ⊢Γ ⊢c₁
+... | inj₂ (α , refl) = inj₂ (α , refl)
+... | inj₁ (t₁'' , t₂'' , _ , _ , refl , ⊢c₁'' , ⊢c₂'') =
+  inj₁ (_ , _ , _ , _ , refl , ⊑-trans ⊢c₁' ⊢c₁'' , ⊑-trans ⊢c₂'' ⊢c₂')
 
--- Not true in general, because the input subtyping could be a faulty
--- assumption instead of an arrow subtyping rule.
--- For this to hold we need to forbid faulty assumptions, or add rules
--- which allow to close faulty assumptions under inversion.
 invert-⊑⇒ : {Γ : Ctx S} →
   Valid Γ →
   Γ ⊢ c ∶ (t₁ ⇒ t₂) ⊑ (t₁' ⇒ t₂') →
-  Γ ⊢ cstr ∶ t₁' ⊑ t₁ × Γ ⊢ cstr ∶ t₂ ⊑ t₂'
+  Σ[ c₁ ∈ S ⊢ 𝕔 ] Σ[ c₂ ∈ S ⊢ 𝕔 ] Γ ⊢ c₁ ∶ (t₁' ⊑ t₁) × Γ ⊢ c₂ ∶ (t₂ ⊑ t₂')
 invert-⊑⇒ ⊢Γ st with invert-⊑⇒' ⊢Γ st
-... | inj₁ (_ , _ , refl , st₁ , st₂) = st₁ , st₂
+... | inj₁ (_ , _ , _ , _ , refl , st₁ , st₂) = _ , _ , st₁ , st₂
 
 -- TODO: Exactly the same proof as for ⇒
 invert-⊑∀' : {Γ : Ctx S} {t₁' : S ⊢ 𝕥} {t₂' : S ▷ 𝕥 ⊢ 𝕥} →
   Valid Γ →
   Γ ⊢ c ∶ t ⊑ (∀[α⊑ t₁' ] t₂') →
-  (∃[ t₁ ] ∃[ t₂ ] t ≡ (∀[α⊑ t₁ ] t₂) × t₁ ≡ t₁' × Γ ▶ ★ ⊢ cstr ∶ t₂ ⊑ t₂') ⊎ (∃[ α ] t ≡ ` α)
-invert-⊑∀' = {!!}
--- invert-⊑∀' ⊢Γ (⊑-` {c = ` c} st₁ (⊢` ∋c) st₂) with ⊢Γ c ∋c
--- invert-⊑∀' ⊢Γ (⊑-` {c = ` c} st₁ (⊢` ∋c) st₂) | α , refl = inj₂ (invert-⊑` ⊢Γ st₁)
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) with invert-⊑∀' ⊢Γ st₃
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₂ (α , refl) with invert-⊑` ⊢Γ st₂
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₂ (α , refl) | β , refl = inj₂ (invert-⊑` ⊢Γ st₁)
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') with invert-⊑∀' ⊢Γ st₂
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₂ (α , refl) = inj₂ (invert-⊑` ⊢Γ st₁)
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , refl , t₂x⊑t₂) with invert-⊑∀' ⊢Γ st₁
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , refl , t₂x⊑t₂) | inj₂ (α , refl) = inj₂ (α , refl)
--- invert-⊑∀' ⊢Γ (⊑-` {c = cstr} st₁ (⊢cstr st₂) st₃) | inj₁ (t₁ , t₂ , refl , refl , t₂⊑t₂') | inj₁ (t₁x , t₂x , refl , refl , t₂x⊑t₂) | inj₁ (t₁y , t₂y , refl , refl , t₂y⊑t₂x) = inj₁ (_ , _ , refl , refl , ⊑-trans t₂y⊑t₂x (⊑-trans t₂x⊑t₂ t₂⊑t₂'))
--- invert-⊑∀' ⊢Γ (⊑-∀ st) = inj₁ (_ , _ , refl , refl , st)
+  (∃[ t₁ ] ∃[ t₂ ] Σ[ c ∈ (S ▷ 𝕥) ⊢ 𝕔 ] t ≡ (∀[α⊑ t₁ ] t₂) × t₁ ≡ t₁' × Γ ▶ ★ ⊢ c ∶ t₂ ⊑ t₂') ⊎ (∃[ α ] t ≡ ` α)
+invert-⊑∀' ⊢Γ (⊑-∀ ⊢c) = inj₁ (_ , _ , _ , refl , refl , ⊢c)
+invert-⊑∀' ⊢Γ (⊢` {x = x} ∋x) with ⊢Γ x ∋x
+... | α , refl = inj₂ (α , refl)
+invert-⊑∀' ⊢Γ (⊑-trans ⊢c₁ ⊢c₂)
+ with invert-⊑∀' ⊢Γ ⊢c₂
+... | inj₂ (α , refl) = inj₂ (invert-⊑` ⊢Γ ⊢c₁)
+... | inj₁ (t₁' , t₂' ,  _ , refl , ⊢c₁' , ⊢c₂')
+ with invert-⊑∀' ⊢Γ ⊢c₁
+... | inj₂ (α , refl) = inj₂ (α , refl)
+... | inj₁ (t₁'' , t₂'' , _ , refl , ⊢c₁'' , ⊢c₂'') =
+  inj₁ (_ , _ , _ , refl , trans ⊢c₁'' ⊢c₁' , ⊑-trans ⊢c₂'' ⊢c₂')
 
 invert-⊑∀ : {Γ : Ctx S} {t₁ t₁' : S ⊢ 𝕥} {t₂ t₂' : S ▷ 𝕥 ⊢ 𝕥} →
   Valid Γ →
   Γ ⊢ c ∶ (∀[α⊑ t₁ ] t₂) ⊑ (∀[α⊑ t₁' ] t₂') →
-  t₁ ≡ t₁' × Γ ▶ ★ ⊢ cstr ∶ t₂ ⊑ t₂'
+  Σ[ c ∈ S ▷ 𝕥 ⊢ 𝕔 ] t₁ ≡ t₁' × Γ ▶ ★ ⊢ c ∶ t₂ ⊑ t₂'
 invert-⊑∀ ⊢Γ st with invert-⊑∀' ⊢Γ st
-... | inj₁ (_ , _ , refl , refl , st) = refl , st
+... | inj₁ (_ , _ , _ , refl , refl , st) = _ , refl , st
 
 subject-reduction :
   Valid Γ →
@@ -296,7 +283,7 @@ subject-reduction ⊢Γ (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ
  with invert-λ ⊢e₁
 ... | t₁ , t₂ , st , ⊢e₁'
  with invert-⊑⇒ ⊢Γ st
-... | st₁ , st₂
+... | c₁ , c₂ , st₁ , st₂
  = let st₂' = subst (λ ■ → _ ⊢ _ ∶ ■ ⊑ _) (
                 t₂                   ≡⟨ sym (wk-cancels-⦅⦆ t₂ e₂) ⟩
                 t₂ ⋯ᵣ wkn ⋯ ⦅ e₂ ⦆'ₛ ∎
@@ -306,7 +293,7 @@ subject-reduction {Γ = Γ} ⊢Γ (⊢∙ {t = t-bound} {t₁ = t-body} {t₂ = 
  with invert-Λ ⊢e
 ... | _ , t-body' , st , ⊢e'
  with invert-⊑∀ ⊢Γ st
-... | refl , t-body'⊑t-body
+... | c' , refl , t-body'⊑t-body
  = -- First we substitute the type variable at #1, which is under the constraint binding #0
    let ⊢e'' = Γ ▶ (t-arg ⊑ t-bound) ⊢ e₁ ⋯ ⦅ t-arg ⦆ₛ ⋯ᵣ wknᵣ ∶ t-body' ⋯ ⦅ t-arg ⦆ₛ ⋯ᵣ wknᵣ
               by subst₃ (λ ■₁ ■₂ ■₃ → Γ ▶ (t-arg ⊑ ■₁) ⊢ ■₂ ∶ ■₃)
