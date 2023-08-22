@@ -181,10 +181,11 @@
   \end{enumerate}
 
   \subsection{Multi-Sorted Syntax}
-  To avoid these drawbacks, we define the whole syntax as a single sort-indexed type of terms.
+  To avoid these drawbacks, we define the syntax as a single
+  sort-indexed type of terms.
 
   A sort describes to which syntactic category a term belongs and is
-  itself indexed by a sort type which describes whether the syntax
+  itself indexed by a sort type, which describes whether the syntax
   permits variables of this sort:
   \LibCode\KSortTy
   \AppCode\FSort
@@ -193,7 +194,7 @@
   For example, \texttt{[𝕥, 𝕥] ⊢ 𝕖} is the type of expressions (\texttt{𝕖}) with two free type-variables (\texttt{𝕥}).
   \newpage
   \AppCode\FSyntax
-  The notation \texttt{\_⊢\_} is often used for well-typed terms in
+  The notation \texttt{\_⊢\_} is often used for terms in
   intrinsically-typed languages. This is no accident: in effect, we
   defined an intrinsically-typed language with the twist that the
   typing relation assures exactly that the syntactic categories are followed.
@@ -212,8 +213,8 @@
   \texttt{𝕜}.
 
   \subsection{A Structure for Multi-Sorted Syntax}
-  The rest of our framework builds on top of a multi-sorted
-  syntax for which we define the following structure:
+  The multi-sorted syntax makes it easy to capture general syntax definitions
+  in a structure:
   \LibCode\KTerms
   The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
@@ -225,7 +226,7 @@
   \section{Renamings \& Substitutions}
   \subsection{Multi-Sorted Renamings \& Substitutions}
   Working with a sort-indexed syntax allows us to define renamings and substitutions
-  which replace all variables of all sorts simultaneously:
+  that replace all variables of all sorts simultaneously:
 
   \ExampleCode\FExampleSubRen
 
@@ -244,13 +245,14 @@
   proved between an expression-in-expression and a type-in-expression
   substitution, because both are simply substitutions.
 
-  \subsection{Unifying Renamings \& Substitutions}
-  A well-known problem with DeBruijn-indices is that the operation of
-  applying a substitution \texttt{σ} to a term \texttt{t} cannot be
-  defined directly by structural recursion on \texttt{t}.
+  \subsection{The Need for Renamings}
+  A problem with mechanizing languages with DeBruijn-indices is that
+  the operation of applying a substitution \texttt{σ} to a term
+  \texttt{t} cannot be defined directly by structural recursion on
+  \texttt{t}.
   If \texttt{t} is a term like \texttt{λx e},
   where the subterm \texttt{e} is under a binder, then the variables
-  in \texttt{e} are shifted, i.e.  the variable \texttt{zero} refers
+  in \texttt{e} are shifted, i.e.\ the variable \texttt{zero} refers
   to the variable from the binder, whereas a variable \texttt{suc x}
   refers to the variable \texttt{x} from outside of the binder.
   As the terms contained in \texttt{σ} may themselves contain free variables,
@@ -262,20 +264,43 @@
   \texttt{σ} is not structurally recursive, as the terms in \texttt{σ}
   are not subterms of \texttt{λx e}.
 
-  The usual workaround is to define renamings first and use them
-  to weaken the terms in substitutions when going under binders.
+  The usual workaround is to first define renamings,
+  i.e.\ substitutions that replace variables with variables.
+  In contrast to general substitutions, renamings can be easily
+  shifted: they only contain variables \texttt{x}, which can be
+  shifted by simply taking their successor \texttt{suc x}.
+  As the shifting substitution is a renaming, we can then define substitution,
+  where we apply the shifting \emph{renaming} to the terms in \texttt{σ} when
+  the substitution needs to go under a binder.
+
+  % The usual workaround is to define renamings first and use them
+  % to weaken the terms in substitutions when going under binders.
   While this keeps lemmas simple (requiring only structural induction),
   it duplicates the amount of work as all operations and lemmas have
   to be defined and proved for both renamings and substitutions.
 
-  To avoid this duplication,
+  \subsection{Unifying Renamings \& Substitutions}
+  To avoid the duplication between renamings and substitutions,
   McBride\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
-  introduced an abstraction called \emph{Kits}, which allows to talk about
-  both renamings and substitutions simultaneously.
+  introduced an abstraction called \emph{Kits}.
+
+  % While Kits were originally formulated for intrinsically-typed languages,
+  % they nicely extend to our extrinsically-typed multi-sorted syntax, whose
+  % sort-indexing is a form of intrinsic typing.
+
+  A kit is a structure that abstracts over the difference between variables and terms.
+  There are always exactly two instances for Kits, one for variables and one for terms, 
 
   The core observation leading to this abstraction is that renamings
-  and substitutions only differ in their return type:
-  \ExampleCode\FExampleSubRen
+  \texttt{S₁ →ᵣ S₂}
+  and substitutions \texttt{S₁ →ₛ S₂} only differ in their return type:
+  while a substitution returns a term \texttt{S₂ ⊢ s}, a renaming returns
+  a variable \texttt{S₂ ∋ s}.
+
+  A Kit is a structure that abstracts precisely over the commonalities
+  between variables and terms. 
+
+  % \ExampleCode\FExampleSubRen
 
   In both cases \texttt{\_∋\_} and \texttt{\_⊢\_} are instanciated to the type
   \LibCode\KScoped
@@ -384,11 +409,17 @@
   \AppCode\FSubjectReductionProofInteresting
   % \FSubjectReductionProofRest
 
+  \section{Reflection \& Generics}
+
+  \section{Future Work}
+
   \section{Related Work}
   Autosubst \cite{DBLP:conf/cpp/StarkSK19, DBLP:conf/itp/SchaferTS15}.
   Kits \cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}.
   Kits linear \cite{DBLP:journals/corr/abs-2005-02247}.
   Universe \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
+
+  \section{Conclusion}
 
   % \bibliographystyle{ACM-Reference-Format}
   \bibliography{paper}

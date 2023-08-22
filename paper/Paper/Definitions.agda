@@ -19,10 +19,10 @@ infix   7  `_
 -- Sorts -----------------------------------------------------------------------
 
 --! Sort
-data Sort : SortTy → Set where
-  𝕖  : Sort Var    -- Expressions
-  𝕥  : Sort Var    -- Types
-  𝕜  : Sort NoVar  -- Kinds
+data Sort : SortTy → Set where -- Our syntax supports:
+  𝕖  : Sort Var    -- expressions and expression variables;
+  𝕥  : Sort Var    -- types and type variables; and
+  𝕜  : Sort NoVar  -- kinds, but no kind variables.
 
 -- Syntax ----------------------------------------------------------------------
 
