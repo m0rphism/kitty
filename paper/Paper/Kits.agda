@@ -41,10 +41,7 @@ record Terms : Set₁ where
   variable _∋/⊢_  _∋/⊢₁_ _∋/⊢₂_ : Scoped
 
   --! Kit {
-  record Kit (_∋/⊢_ : Scoped) : Set where
-    _→ₖ_ : List (Sort Var) → List (Sort Var) → Set
-    S₁ →ₖ S₂ = ∀ s → S₁ ∋ s → S₂ ∋/⊢ s
-
+  record Kit (_∋/⊢_ : List (Sort Var) → Sort Var → Set) : Set where
     field
       -- Operations
       id/`            : S ∋ s → S ∋/⊢ s
@@ -60,11 +57,16 @@ record Terms : Set₁ where
                          wk s' (id/` x) ≡ id/` (suc x)
     --! }
 
+    --! Map
+    _→ₖ_ : List (Sort Var) → List (Sort Var) → Set
+    S₁ →ₖ S₂ = ∀ s → S₁ ∋ s → S₂ ∋/⊢ s
+
     infixl  8  _&_
     --! Ap
     _&_ : S₁ ∋ s → S₁ →ₖ S₂ → S₂ ∋/⊢ s
     x & f = f _ x 
 
+    --! Wkm
     wkm : ∀ s → S₁ →ₖ S₂ → S₁ →ₖ (s ∷ S₂)
     wkm s f _ x = wk s (f _ x)
 
@@ -120,16 +122,16 @@ record Terms : Set₁ where
       id sx x              ∎
 
   --! KitNotation {
-  _∋/⊢[_]_ :  List (Sort Var) → Kit _∋/⊢_ →
-              Sort Var → Set
+  _∋/⊢[_]_ :  List (Sort Var) → Kit _∋/⊢_ → Sort Var → Set
   _∋/⊢[_]_ {_∋/⊢_} S K s = S ∋/⊢ s
 
   _–[_]→_ :  List (Sort Var) → Kit _∋/⊢_ →
              List (Sort Var) → Set
   S₁ –[ K ]→ S₂ = Kit._→ₖ_ K S₁ S₂
-
-  open Kit ⦃ … ⦄ public
   --! }
+
+  --! KitOpenInst
+  open Kit ⦃ … ⦄ public
 
   --! Traversal {
   record Traversal : Set₁ where
@@ -144,8 +146,8 @@ record Terms : Set₁ where
                 t ⋯ id ⦃ K ⦄ ≡ t
     --! }
 
-    --! KitInstances {
     instance
+      --! KitVar
       Kᵣ : Kit _∋_
       Kᵣ = record
         { id/`            = λ x → x
@@ -156,6 +158,7 @@ record Terms : Set₁ where
         ; `/id-injective  = `-injective
         ; wk-id/`         = λ s' x → refl }
 
+      --! KitTerm
       Kₛ : Kit _⊢_
       Kₛ = record
         { id/`            = `_
@@ -165,7 +168,6 @@ record Terms : Set₁ where
         ; id/`-injective  = `-injective
         ; `/id-injective  = λ eq → eq
         ; wk-id/`         = λ s' x → ⋯-var x (weaken s') }
-    --! }
 
     --! KitOpen
     open Kit Kᵣ public using () renaming 

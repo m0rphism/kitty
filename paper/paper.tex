@@ -282,48 +282,126 @@
   \subsection{Unifying Renamings \& Substitutions}
   To avoid the duplication between renamings and substitutions,
   McBride\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
-  introduced an abstraction called \emph{Kits}.
+  introduced an abstraction called \emph{kits}.\footnote{
+    While kits were originally formulated for intrinsically-typed languages,
+    they nicely extend to our extrinsically-typed multi-sorted syntax, whose
+    sort-indexing is a form of intrinsic typing.
+  }
 
-  % While Kits were originally formulated for intrinsically-typed languages,
-  % they nicely extend to our extrinsically-typed multi-sorted syntax, whose
-  % sort-indexing is a form of intrinsic typing.
-
-  A kit is a structure that abstracts over the difference between variables and terms.
-  There are always exactly two instances for Kits, one for variables and one for terms, 
-
-  The core observation leading to this abstraction is that renamings
-  \texttt{S₁ →ᵣ S₂}
-  and substitutions \texttt{S₁ →ₛ S₂} only differ in their return type:
-  while a substitution returns a term \texttt{S₂ ⊢ s}, a renaming returns
-  a variable \texttt{S₂ ∋ s}.
-
-  A Kit is a structure that abstracts precisely over the commonalities
-  between variables and terms. 
-
-  % \ExampleCode\FExampleSubRen
-
-  In both cases \texttt{\_∋\_} and \texttt{\_⊢\_} are instanciated to the type
-  \LibCode\KScoped
-  which allows us to create a structure to axiomatize the common
-  theory behind both of them:
+  % A \texttt{Kit} is a structure that captures the commonalities
+  % between variables and terms:
+  A \texttt{Kit} is a structure that allows to abstract over whether
+  something is a term or a variable. The intention is to instanciate
+  this structure exactly twice (once for variables and once for terms),
+  and then write definitions, which are parameterized over a kit and
+  consequently can be used for both variables and terms.
   \LibCode\KKit
 
+  As we intend to have exactly two kit instances, we choose names of
+  the form \texttt{x/y}, where \texttt{x} is the name we choose for the
+  variable instance, and \texttt{y} is the name we choose for the term
+  instance.
+  For example the parameter type \texttt{\_∋/⊢\_} will be instanciated
+  to \texttt{\_∋\_} for the variable kit, and to \texttt{\_⊢\_} for the
+  term kit.
+
+  A kit provides the following operations:
+  \begin{itemize}
+  \item 
+    \texttt{id/`} converts a variable \texttt{S ∋ s} into a
+    \texttt{S ∋/⊢ s}. For the variable kit, \texttt{S ∋/⊢ s} is instanciated to \texttt{S ∋ s}, so this
+    operation is the identity. For the term kit, \texttt{S ∋/⊢ s} is
+    instanciated to \texttt{S ⊢ s}, so this operation is the
+    variable constructor \texttt{`\_}.
+  \item 
+    \texttt{`/id} converts a \texttt{S ∋/⊢ s} into a term \texttt{S ⊢ s}
+    and is dual to the \texttt{id/`} operation.
+  \item 
+    \texttt{wk} shifts the DeBruin-Indices in a \texttt{S ∋/⊢ s}.
+    The new, unused variable \texttt{zero} can assume any sort \texttt{s'}.
+    For variables \texttt{wk} is the successor \texttt{suc}.
+    For terms \texttt{wk} means applying a shifting renaming to the term.
+  \end{itemize}
+
+  The operations need to satisfy the following properties:
+  \begin{itemize}
+  \item \texttt{`/`-is-`} states that converting a variable first to a ``variable-or-term'' and
+    then further to a term is the same as converting it directly to a
+    term using the variable constructor \texttt{`\_}.
+  \item \texttt{`/id-injective} and \texttt{id/`-injective} state that
+    \texttt{`/id} and \texttt{id/`} are injective. This property
+    follows easily, as both the identity function and the variable
+    constructor are injective.
+  \item \texttt{wk-id/`} characterizes the behaviour of the \texttt{wk} function.
+    Injecting a variable and then shifting it, is the same as injecting a shifted variable.
+  \end{itemize}
+
+  Building on the operations and axioms, we derive further operations:\footnote{
+    The definitions are included directly in the record module of the
+    Kit, so they are implicitly parameterized over a kit.
+  }
+  \begin{itemize}
+  \item 
+    We unify the definition of renamings \texttt{S₁ →ᵣ S₂} and
+    substitutions \texttt{S₁ →ₛ S₂}, which differ only in whether they
+    return variables or a terms:
+    \LibCode\KMap
+    We call a value of type \texttt{S₁ →ₖ S₂} a \emph{map}.
+  \item 
+    A map can be applied to a variable:
+    \LibCode\KAp
+  \item 
+    A map can be extended by a new variable or term:
+    \LibCode\KExt
+  \item 
+    A map can be shifted, as the Kit provides the necessary \texttt{wk} operation:
+    \LibCode\KWkm
+  \item 
+    A map can be lifted, which is the operation necessary to
+    move a map under a binder of sort \texttt{s}:
+    \LibCode\KLift
+  \item 
+    There is an identity map:
+    \LibCode\KId
+  \item 
+    There is a singleton map, which replaces \texttt{zero} and decreases
+    all other variables by one:
+    \LibCode\KSingle
+  \item 
+    There is a map which is equivalent to \texttt{wk}:
+    \LibCode\KWeaken
+  \end{itemize}
+
+  We also specify additional notation, which makes it less cumbersome
+  to explicitly pass a particular Kit to those definitions:
+  \LibCode\KKitNotation
+
+  The only task left now is to create the two instances for the kits
+  and define how a map can be applied to a term.
+  While the variable kit can be defined as expected, the term kit
+  raises a dependency problem: The \texttt{wk} operation for terms requires us
+  to already know how to apply a renaming to term.
+  To solve this problem, McBride came up with a clever solution:
+  Applying a map to a term, can be defined without even having any Kit-instances yet.
+  Afterwards we can first define the variable kit, and in the
+  definition of the term kit, we are then already allowed to apply renamings.
+  After the definition of the term-kit we are then allowed to apply
+  both renamings and substitutions as both kits defined.
+
+  
+
+  \LibCode\KKitVar
 
 
   \subsection{Library}
-  \LibCode\KAp
-  \LibCode\KExt
-  \LibCode\KLift
-  \LibCode\KId
-  \LibCode\KSingle
-  \LibCode\KWeaken
+  \LibCode\KKitOpenInst
   \LibCode\KEq
   \LibCode\KFunExt
   \LibCode\KIdLift
   % \LibCode\KIdLiftProof
-  \LibCode\KKitNotation
   \LibCode\KTraversal
-  \LibCode\KKitInstances
+  \LibCode\KKitVar
+  \LibCode\KKitTerm
   \LibCode\KKitOpen
   \subsection{System F}
   \AppCode\FTraversalOp
@@ -410,6 +488,12 @@
   % \FSubjectReductionProofRest
 
   \section{Reflection \& Generics}
+
+  \section{Beyond System F}
+  \begin{itemize}
+  \item Binders with multiple variables are supported and even pattern matching can be encoded.
+  \item Heterogenous equality
+  \end{itemize}
 
   \section{Future Work}
 
