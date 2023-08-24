@@ -5,7 +5,8 @@ paper_old/_build
 paper_old/**/auto/
 presentation/_build
 presentation/**/auto/
-*.pdf
+paper/*.pdf
+presentation/*.pdf
 *.swp
 *.swo
 .#*
