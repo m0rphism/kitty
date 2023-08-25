@@ -3,10 +3,22 @@
 import os
 import sys
 from pathlib import Path
+from argparse import ArgumentParser
 import subprocess
 
-cache_dir = sys.argv[1]
-src_paths = [Path(x) for x in sys.argv[2:]]
+ap = ArgumentParser(
+    prog="agdatex",
+    description="Extract LaTeX-Macros from .agda files guided by comment annotations",
+)
+ap.add_argument("-c", "--cachedir", metavar="PATH", help="Cache directory")
+ap.add_argument("-r", "--root", metavar="PATH", help="Project root.")
+ap.add_argument("-g", "--git", help="Infer --root by searching for .git directory.")
+ap.add_argument("sources", metavar="SRC_PATH", nargs="+", help="Path to an annotated .agda-file.")
+
+args = ap.parse_args()
+
+cache_dir = args.cachedir
+src_paths = [Path(x) for x in args.sources]
 
 tgt_paths = [ p.parents[0] / (p.stem + ".lagda.tex") for p in src_paths ]
 bak_paths = [ p.parents[0] / (p.name + ".bak") for p in src_paths ]

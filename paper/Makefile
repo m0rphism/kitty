@@ -36,7 +36,7 @@ $(FAST_PDF): $(TGTS) $(MAIN_TEX)
 	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
 
 $(TGTS): $(SRCS)
-	./agdatex.py $(CACHE_DIR) $(SRCS)
+	./agdatex.py -c $(CACHE_DIR) $(SRCS)
 
 # $(CACHE_DIR)/$(LAGDA_DIR)/%.tex: $(LAGDA_DIR)/%.lagda.tex
 # 	agda --latex --only-scope-checking --latex-dir=$(CACHE_DIR) $^
