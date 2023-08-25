@@ -4,29 +4,107 @@ import os
 import sys
 from pathlib import Path
 from argparse import ArgumentParser
+import tempfile
 import subprocess
+import shutil
+
+
+# Parse Arguments
 
 ap = ArgumentParser(
     prog="agdatex",
     description="Extract LaTeX-Macros from .agda files guided by comment annotations",
 )
-ap.add_argument("-c", "--cachedir", metavar="PATH", help="Cache directory")
-ap.add_argument("-r", "--root", metavar="PATH", help="Project root.")
-ap.add_argument("-g", "--git", help="Infer --root by searching for .git directory.")
-ap.add_argument("sources", metavar="SRC_PATH", nargs="+", help="Path to an annotated .agda-file.")
+
+ap.add_argument("-o", "--outputdir", metavar="PATH", default="latex",
+                help="Output directory for agda's LaTeX backend. Forwarded as --latex-dir to agda. Default: 'latex'.")
+
+ap.add_argument("-e", "--exportfile", metavar="PATH",
+                help="This file will \\input all generated .tex files. Default: 'OUTPUTDIR/agda_all.tex'.")
+
+ap.add_argument("-t", "--tempdir", metavar="PATH",
+                help="Temporary directory to copy the project root to. Default: fresh system-dependent temporary dir.")
+
+ap.add_argument("-k", "--keeptempdir", metavar="PATH",
+                help="Keep temporary directory for debugging.")
+
+ap.add_argument("-r", "--root", metavar="PATH",
+                help="Project root. Default: Search for .git directory.")
+
+ap.add_argument("-i", "--index", metavar="PATH",
+                help="Write the list of generated macros to this file.")
+
+ap.add_argument("sources", metavar="SRC_PATH", nargs="+",
+                help="Path to an annotated .agda-file.")
 
 args = ap.parse_args()
 
-cache_dir = args.cachedir
-src_paths = [Path(x) for x in args.sources]
+
+# Resolve Project Root
+
+if args.root is not None:
+    root = Path(args.root)
+else:
+    # Search for .git directory.
+    root = Path(os.getcwd())
+    found_git_dir = False
+    while True:
+        for p in root.iterdir():
+            if p.is_dir() and p.name == ".git":
+                found_git_dir = True
+                break
+        if found_git_dir or len(root.parents) == 0:
+            break
+        root = root.parents[0]
+    if not found_git_dir:
+        print("ERROR: No .git directory found and also no explicit --root specified.")
+        sys.exit(1)
+
+root = root.absolute()
+
+# Check if sources are relative to project root
+
+src_paths = []
+for p in args.sources:
+    try:
+        src_paths.append(Path(p).absolute().relative_to(root))
+    except ValueError as e:
+        print(f"ERROR: Source path '{p}' is not relative to root '{root}'.")
+        sys.exit(1)
+
+
+# Create temporary directory
+
+if args.tempdir is not None:
+    tmp_dir = Path(args.tempdir)
+    tmp_dir.mkdir(exist_ok=True)
+else:
+    tmp_dir_obj = tempfile.TemporaryDirectory(prefix="agdatex")
+    tmp_dir = Path(tmp_dir_obj.name)
+
+tmp_root = tmp_dir / "agda"
+tmp_root.mkdir(exist_ok=True)
+
+
+# Copy project root to temporary directory
+
+shutil.copytree(
+    root,
+    tmp_root,
+    dirs_exist_ok=True,
+    symlinks=True,
+    ignore=shutil.ignore_patterns(tmp_dir)
+)
+
+
+# Transpile .agda-sources to .lagda.tex-targets
 
 tgt_paths = [ p.parents[0] / (p.stem + ".lagda.tex") for p in src_paths ]
-bak_paths = [ p.parents[0] / (p.name + ".bak") for p in src_paths ]
 
 commands = []
 
 for src_path, tgt_path in zip(src_paths, tgt_paths):
-    with open(src_path, 'r') as f:
+    with open(tmp_root / src_path, 'r') as f:
         src = f.read();
 
     tgt = ""
@@ -90,31 +168,61 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
         stop_command_on_empty_line = False
         stop_command()
 
-    with open(tgt_path, 'w') as f:
+    with open(tmp_root / tgt_path, 'w') as f:
         f.write(tgt)
 
-print("Defined LaTeX-commands:")
-for c in commands: 
-    print("  \\" + c)
 
-print("Renaming original files...")
-for src_path, bak_path in zip(src_paths, bak_paths):
-    src_path.rename(bak_path)
+# Write generated LaTeX macros into a file, if --index was specified
+
+if args.index is not None:
+    s = ""
+    for c in commands: 
+        s += "\\" + c + "\n"
+    with open(args.index, 'w') as f:
+        f.write(s)
+
+# print("Defined LaTeX-commands:")
+# for c in commands: 
+#     print("  \\" + c)
+
+
+# Remove copies of the .agda-files, such that Agda will only see the .lagda.tex files.
+
+for src_path in src_paths:
+    (tmp_root / src_path).unlink()
+
+
+# Run agda on the .lagda.tex files to generate .tex files.
+
+output_dir = Path(args.outputdir)
+output_dir.mkdir(exist_ok=True)
 
 print("Running agda with latex backend...")
 for tgt_path in tgt_paths:
-    subprocess.run(["agda", "--latex", "--only-scope-checking", "--latex-dir=" + cache_dir, tgt_path])
+    print(f"  Processing {tgt_path}...")
+    subprocess.run(
+        ["agda", "--latex", "--only-scope-checking", "--latex-dir=" + str(output_dir.absolute()), str(tgt_path)],
+        cwd=tmp_root,
+    )
 
-print("Restoring original files...")
-for src_path, bak_path in zip(src_paths, bak_paths):
-    bak_path.rename(src_path)
 
-# print("Deleting .lagda.tex files...")
-# for tgt_path in tgt_paths:
-#     tgt_path.unlink()
+# Create a agda-includes.tex file which includes all generated .tex-files.
+if args.exportfile is not None:
+    export_file = Path(args.exportfile)
+else:
+    export_file = output_dir / "agda_all.tex"
 
-print("Deleting .lagda.tex files...")
-tgt_paths2 = [ cache_dir + "/" + p.stem + ".lagda.tex" for p in src_paths ]
-for tgt_path, tgt_path2 in zip(tgt_paths, tgt_paths2):
-    Path(tgt_path2).parents[0].mkdir(exist_ok=True, parents=True)
-    tgt_path.rename(tgt_path2)
+src_names = [ p.stem for p in src_paths ]
+s = ""
+for p in output_dir.glob("**/*.tex"):
+    if p.stem in src_names:
+        print("in")
+        s += "\\input{" + str(p.relative_to(output_dir)) + "}\n"
+with open(export_file, 'w') as f:
+    f.write(s)
+
+
+# Delete temporary directory
+
+if args.tempdir is not None and not args.keeptempdir:
+    shutil.rmtree(tmp_root)
