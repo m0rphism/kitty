@@ -25,7 +25,7 @@ ap.add_argument("-e", "--exportfile", metavar="PATH",
 ap.add_argument("-t", "--tempdir", metavar="PATH",
                 help="Temporary directory to copy the project root to. Default: fresh system-dependent temporary dir.")
 
-ap.add_argument("-k", "--keeptempdir", metavar="PATH",
+ap.add_argument("-k", "--keeptempdir", action='store_true',
                 help="Keep temporary directory for debugging.")
 
 ap.add_argument("-r", "--root", metavar="PATH",
@@ -62,6 +62,7 @@ else:
 
 root = root.absolute()
 
+
 # Check if sources are relative to project root
 
 src_paths = []
@@ -76,14 +77,11 @@ for p in args.sources:
 # Create temporary directory
 
 if args.tempdir is not None:
-    tmp_dir = Path(args.tempdir)
-    tmp_dir.mkdir(exist_ok=True)
+    tmp_root = Path(args.tempdir)
+    tmp_root.mkdir(exist_ok=True)
 else:
-    tmp_dir_obj = tempfile.TemporaryDirectory(prefix="agdatex")
-    tmp_dir = Path(tmp_dir_obj.name)
-
-tmp_root = tmp_dir / "agda"
-tmp_root.mkdir(exist_ok=True)
+    tmp_root_obj = tempfile.TemporaryDirectory(prefix="agdatex")
+    tmp_root = Path(tmp_root_obj.name)
 
 
 # Copy project root to temporary directory
@@ -93,7 +91,7 @@ shutil.copytree(
     tmp_root,
     dirs_exist_ok=True,
     symlinks=True,
-    ignore=shutil.ignore_patterns(tmp_dir)
+    ignore=shutil.ignore_patterns(tmp_root)
 )
 
 
@@ -206,7 +204,8 @@ for tgt_path in tgt_paths:
     )
 
 
-# Create a agda-includes.tex file which includes all generated .tex-files.
+# Create an export .tex-file which imports all generated .tex-files.
+
 if args.exportfile is not None:
     export_file = Path(args.exportfile)
 else:
@@ -216,7 +215,6 @@ src_names = [ p.stem for p in src_paths ]
 s = ""
 for p in output_dir.glob("**/*.tex"):
     if p.stem in src_names:
-        print("in")
         s += "\\input{" + str(p.relative_to(output_dir)) + "}\n"
 with open(export_file, 'w') as f:
     f.write(s)
