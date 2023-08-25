@@ -64,6 +64,12 @@
 \newcommand*\AppCode[1]{{#1}}
 \newcommand*\ExampleCode[1]{\begin{ExampleCode*}{#1}\end{ExampleCode*}}
 
+\newcommand*\ACode[1]{\AgdaFontStyle{#1}}
+\newcommand*\AField[1]{\AgdaField{#1}}
+\newcommand*\ACon[1]{\AgdaInductiveConstructor{#1}}
+\newcommand*\AKw[1]{\AgdaKeyword{#1}}
+\newcommand*\ADef[1]{\AgdaFunction{#1}}
+
 \begin{document}
   \begin{abstract}
     Variable binding and substitution are a long-standing nuisance for mechanized
@@ -179,10 +185,10 @@
     substitutions, e.g.\ adding kind variables would lead to a total of 6
     different substitutions.
   \end{enumerate}
+  To avoid these drawbacks, we instead use a multi-sorted syntax.
 
   \subsection{Multi-Sorted Syntax}
-  To avoid these drawbacks, we define the syntax as a single
-  sort-indexed type of terms.
+  A multi-sorted syntax is defined by a single type of sort-indexed terms.
 
   A sort describes to which syntactic category a term belongs and is
   itself indexed by a sort type, which describes whether the syntax
@@ -302,37 +308,37 @@
   variable instance, and \texttt{y} is the name we choose for the term
   instance.
   For example the parameter type \texttt{\_∋/⊢\_} will be instanciated
-  to \texttt{\_∋\_} for the variable kit, and to \texttt{\_⊢\_} for the
+  to \ACon{\_∋\_} for the variable kit, and to \AField{\_⊢\_} for the
   term kit.
 
   A kit provides the following operations:
   \begin{itemize}
   \item 
-    \texttt{id/`} converts a variable \texttt{S ∋ s} into a
-    \texttt{S ∋/⊢ s}. For the variable kit, \texttt{S ∋/⊢ s} is instanciated to \texttt{S ∋ s}, so this
-    operation is the identity. For the term kit, \texttt{S ∋/⊢ s} is
-    instanciated to \texttt{S ⊢ s}, so this operation is the
-    variable constructor \texttt{`\_}.
+    \AField{id/`} converts a variable \ACode{S \ACon{∋} s} into a
+    \ACode{S \AField{∋/⊢} s}. For the variable kit, \ACode{S ∋/⊢ s} is instanciated to \ACode{S \ACon{∋} s}, so this
+    operation is the identity. For the term kit, \ACode{S ∋/⊢ s} is
+    instanciated to \ACode{S \AField{⊢} s}, so this operation is the
+    variable constructor \AField{`\_}.
   \item 
-    \texttt{`/id} converts a \texttt{S ∋/⊢ s} into a term \texttt{S ⊢ s}
-    and is dual to the \texttt{id/`} operation.
+    \AField{`/id} converts a \ACode{S ∋/⊢ s} into a term \ACode{S \AField{⊢} s}
+    and is dual to the \AField{id/`} operation.
   \item 
-    \texttt{wk} shifts the DeBruin-Indices in a \texttt{S ∋/⊢ s}.
-    The new, unused variable \texttt{zero} can assume any sort \texttt{s'}.
-    For variables \texttt{wk} is the successor \texttt{suc}.
-    For terms \texttt{wk} means applying a shifting renaming to the term.
+    \AField{wk} shifts the DeBruin-Indices in a \ACode{S ∋/⊢ s}.
+    The new, unused variable \ACon{zero} can assume any sort \ACode{s'}.
+    For variables \AField{wk} is the successor \ACon{suc}.
+    For terms \AField{wk} means applying a shifting renaming to the term.
   \end{itemize}
 
   The operations need to satisfy the following properties:
   \begin{itemize}
-  \item \texttt{`/`-is-`} states that converting a variable first to a ``variable-or-term'' and
+  \item \AField{`/`-is-`} states that converting a variable first to a ``variable-or-term'' and
     then further to a term is the same as converting it directly to a
-    term using the variable constructor \texttt{`\_}.
-  \item \texttt{`/id-injective} and \texttt{id/`-injective} state that
-    \texttt{`/id} and \texttt{id/`} are injective. This property
+    term using the variable constructor \ACode{`\_}.
+  \item \AField{`/id-injective} and \AField{id/`-injective} state that
+    \AField{`/id} and \AField{id/`} are injective. This property
     follows easily, as both the identity function and the variable
     constructor are injective.
-  \item \texttt{wk-id/`} characterizes the behaviour of the \texttt{wk} function.
+  \item \AField{wk-id/`} characterizes the behaviour of the \AField{wk} function.
     Injecting a variable and then shifting it, is the same as injecting a shifted variable.
   \end{itemize}
 
@@ -368,7 +374,7 @@
     all other variables by one:
     \LibCode\KSingle
   \item 
-    There is a map which is equivalent to \texttt{wk}:
+    There is a map which is equivalent to \texttt{wk} on terms:
     \LibCode\KWeaken
   \end{itemize}
 

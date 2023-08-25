@@ -21,7 +21,7 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
     prefixes = []
     mode = "none"
     stop_command_on_empty_line = False
-    def start_command(name):
+    def start_command(name, is_inline):
         global mode, tgt, prefixes
         for p in prefixes:
             name = p + name
@@ -31,7 +31,8 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
         elif mode == "command":
             print(f"ERROR: Line {line_num} starts a nested command:\n  {line}")
         mode = "command"
-        tgt += "\\newcommand*\\" + name + "{\\begin{code}\n"
+        opt = "[inline]" if is_inline else ""
+        tgt += "\\newcommand*\\" + name + "{\\begin{code}" + opt + "\n"
     def stop_command():
         global mode, tgt, prefixes
         tgt += "\\end{code}}\n"
@@ -43,9 +44,13 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
                 stop_command_on_empty_line = False
                 stop_command()
             l = l.split("!", 1)[1].strip()
+
+            is_inline = l[0] == "!"
+            if is_inline:
+                l = l[1:].strip()
             if "{" in l:
                 name = l.split(" ", 1)[0]
-                start_command(name)
+                start_command(name, is_inline)
             elif "}" in l:
                 stop_command()
             elif ">" in l:
@@ -54,7 +59,7 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
                 prefixes.pop()
             else:
                 name = l.split(" ", 1)[0]
-                start_command(name)
+                start_command(name, is_inline)
                 stop_command_on_empty_line = True
                 # print(f"ERROR: Line {line_num} contains invalid agdatex command:\n  {line}")
         elif line.strip() == "":

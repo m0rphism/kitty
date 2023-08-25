@@ -43,7 +43,7 @@ data _⊢_ : List (Sort Var) → Sort st → Set where
   _⇒_       : S ⊢ 𝕥 → S ⊢ 𝕥 → S ⊢ 𝕥        -- Function Type
   ★         : S ⊢ 𝕜                        -- Type Kind
 
-variable
+private variable
   e e₁ e₂ e₃ e' e₁' e₂'  : S ⊢ 𝕖
   t t₁ t₂ t₃ t' t₁' t₂'  : S ⊢ 𝕥
   k k₁ k₂ k₃ k' k₁' k₂'  : S ⊢ 𝕜
@@ -170,7 +170,7 @@ types = record { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → 
 open Types types
 --! }
 
-variable
+private variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx S
   T T₁ T₂ T' T₁' T₂' : S ∶⊢ s
 
