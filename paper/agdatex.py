@@ -20,7 +20,7 @@ ap.add_argument("-o", "--outputdir", metavar="PATH", default="latex",
                 help="Output directory for agda's LaTeX backend. Forwarded as --latex-dir to agda. Default: 'latex'.")
 
 ap.add_argument("-e", "--exportfile", metavar="PATH",
-                help="This file will \\input all generated .tex files. Default: 'OUTPUTDIR/agda_all.tex'.")
+                help="This file will \\input all generated .tex files. Both .tex and .sty are supported. Default: 'OUTPUTDIR/agda-generated.sty'.")
 
 ap.add_argument("-t", "--tempdir", metavar="PATH",
                 help="Temporary directory to copy the project root to. Default: fresh system-dependent temporary dir.")
@@ -209,10 +209,12 @@ for tgt_path in tgt_paths:
 if args.exportfile is not None:
     export_file = Path(args.exportfile)
 else:
-    export_file = output_dir / "agda_all.tex"
+    export_file = output_dir / "agda-generated.sty"
 
 src_names = [ p.stem for p in src_paths ]
 s = ""
+if export_file.suffix == ".sty":
+    s += "\ProvidesPackage{" + export_file.stem + "}\n"
 for p in output_dir.glob("**/*.tex"):
     if p.stem in src_names:
         s += "\\input{" + str(p.relative_to(output_dir)) + "}\n"
