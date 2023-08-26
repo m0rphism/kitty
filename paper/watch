@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# requires `inotify-tools`
+
+FILES="Makefile *.sty *.tex *.bib **/*.agda"
+
+echo "Watching for changes on files:"
+for f in $FILES; do
+  echo "  $f"
+done
+echo
+
+while true; do
+  inotifywait -q -e modify ${FILES}
+  echo "––––––––––––––––––––––––––––––––––––––––––––––––––"
+  make fast
+  echo "––––––––––––––––––––––––––––––––––––––––––––––––––"
+done
