@@ -191,27 +191,28 @@
   \LibCode\KSortTy
   \AppCode\FSort
   
-  The term type \texttt{S~⊢~s} is then indexed by its sort \texttt{s} and the sorts of its free variables \texttt{S}.
-  For example, \texttt{[𝕥, 𝕥] ⊢ 𝕖} is the type of expressions (\texttt{𝕖}) with two free type-variables (\texttt{𝕥}).
+  The term type \ACode{S \ACon{⊢} s} is then indexed by its sort
+  \ACode{s} and the sorts of its free variables \ACode{S}.
+  For example, \ACon{[𝕥, 𝕥] ⊢ 𝕖} is the type of expressions (\ACon{𝕖}) with two free type-variables (\ACon{𝕥}).
   \newpage
   \AppCode\FSyntax
-  The notation \texttt{\_⊢\_} is often used for terms in
+  The notation \ACon{\_⊢\_} is often used for terms in
   intrinsically-typed languages. This is no accident: in effect, we
   defined an intrinsically-typed language with the twist that the
   typing relation assures exactly that the syntactic categories are followed.
-  Sorts \texttt{s} correspond to types, and lists of sorts \texttt{S}
+  Sorts \ACode{s} correspond to types, and lists of sorts \ACode{S}
   correspond to type environments.
 
   As it is typical in intrinsic typing, variables are represented as
-  typed (in our case sorted) DeBruijn indices \texttt{S~∋~s}, i.e.\
+  typed (in our case sorted) DeBruijn indices \ACode{S \ACon{∋} s}, i.e.\
   values of the usual proof-relevant list-membership relation:
   \LibCode\KVariables
 
   Contrary to the usual intrinsic typing, we limit the environment
-  \texttt{S} to sorts with index \texttt{Var}.
+  \ACode{S} to sorts with index \ACon{Var}.
   This ensures that it is impossible to construct kind variables, as
-  it is not possible to extend \texttt{S} with the sort of kinds
-  \texttt{𝕜}.
+  it is not possible to extend \ACode{S} with the sort of kinds
+  \ACon{𝕜}.
 
   \subsection{A Structure for Multi-Sorted Syntax}
   The multi-sorted syntax makes it easy to capture general syntax definitions
@@ -219,7 +220,7 @@
   \LibCode\KTerms
   The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
-  \texttt{`\_} is injective, which is trivially true for
+  \AField{`\_} is injective, which is trivially true for
   constructors. The instantiation for our System F syntax is
   straightforward:
   \AppCode\FTerms
@@ -231,10 +232,10 @@
 
   \ExampleCode\FExampleSubRen
 
-  A renaming \texttt{S₁ →ᵣ S₂} maps variables from \texttt{S₁} to
-  variables from \texttt{S₂}.
-  A substitution \texttt{S₁ →ₛ S₂} maps variables from \texttt{S₁} to
-  terms with free variables from \texttt{S₂}.
+  A renaming \ACode{S₁ \ADef{→ᵣ} S₂} maps variables from \ACode{S₁} to
+  variables from \ACode{S₂}.
+  A substitution \ACode{S₁ \ADef{→ₛ} S₂} maps variables from \ACode{S₁} to
+  terms with free variables from \ACode{S₂}.
 
   For example, the substitution, which replaces the term variable 0 with the
   identity function and the type variable 1 with the bottom type, is defined
@@ -248,30 +249,30 @@
 
   \subsection{The Need for Renamings}
   A problem with mechanizing languages with DeBruijn-indices is that
-  the operation of applying a substitution \texttt{σ} to a term
-  \texttt{t} cannot be defined directly by structural recursion on
-  \texttt{t}.
-  If \texttt{t} is a term like \texttt{λx e},
-  where the subterm \texttt{e} is under a binder, then the variables
-  in \texttt{e} are shifted, i.e.\ the variable \texttt{zero} refers
-  to the variable from the binder, whereas a variable \texttt{suc x}
-  refers to the variable \texttt{x} from outside of the binder.
-  As the terms contained in \texttt{σ} may themselves contain free variables,
+  the operation of applying a substitution \ACode{σ} to a term
+  \ACode{t} cannot be defined directly by structural recursion on
+  \ACode{t}.
+  If \ACode{t} is a term like \ACode{\ACon{λx} e},
+  where the subterm \ACode{e} is under a binder, then the variables
+  in \ACode{e} are shifted, i.e.\ the variable \ACon{zero} refers
+  to the variable from the binder, whereas a variable \ACode{\ACon{suc} x}
+  refers to the variable \ACode{x} from outside of the binder.
+  As the terms contained in \ACode{σ} may themselves contain free variables,
   they need to be shifted, too, before they can be substituted
-  for variables in \texttt{e}. 
+  for variables in \ACode{e}. 
   Shifting the variables in a term is itself a substitution, which maps
-  each variable \texttt{x} to the term \texttt{` (suc x)}.
+  each variable \ACode{x} to the term \ACode{\ACon{`} (\ACon{suc} x)}.
   However, applying this shifting substitution to the terms in
-  \texttt{σ} is not structurally recursive, as the terms in \texttt{σ}
-  are not subterms of \texttt{λx e}.
+  \ACode{σ} is not structurally recursive, as the terms in \ACode{σ}
+  are not subterms of \ACode{\ACon{λx} e}.
 
   The usual workaround is to first define renamings,
   i.e.\ substitutions that replace variables with variables.
   In contrast to general substitutions, renamings can be easily
-  shifted: they only contain variables \texttt{x}, which can be
-  shifted by simply taking their successor \texttt{suc x}.
+  shifted: they only contain variables \ACode{x}, which can be
+  shifted by simply taking their successor \ACode{\ACon{suc} x}.
   As the shifting substitution is a renaming, we can then define substitution,
-  where we apply the shifting \emph{renaming} to the terms in \texttt{σ} when
+  where we apply the shifting \emph{renaming} to the terms in \ACode{σ} when
   the substitution needs to go under a binder.
 
   % The usual workaround is to define renamings first and use them
@@ -289,9 +290,9 @@
     sort-indexing is a form of intrinsic typing.
   }
 
-  % A \texttt{Kit} is a structure that captures the commonalities
+  % A \ACode{Kit} is a structure that captures the commonalities
   % between variables and terms:
-  A \texttt{Kit} is a structure that allows to abstract over whether
+  A \ACode{Kit} is a structure that allows to abstract over whether
   something is a term or a variable. The intention is to instanciate
   this structure exactly twice (once for variables and once for terms),
   and then write definitions, which are parameterized over a kit and
@@ -299,10 +300,10 @@
   \LibCode\KKit
 
   As we intend to have exactly two kit instances, we choose names of
-  the form \texttt{x/y}, where \texttt{x} is the name we choose for the
-  variable instance, and \texttt{y} is the name we choose for the term
+  the form \ACode{x/y}, where \ACode{x} is the name we choose for the
+  variable instance, and \ACode{y} is the name we choose for the term
   instance.
-  For example the parameter type \texttt{\_∋/⊢\_} will be instanciated
+  For example the parameter type \ACode{\_∋/⊢\_} will be instanciated
   to \ACon{\_∋\_} for the variable kit, and to \AField{\_⊢\_} for the
   term kit.
 
@@ -328,7 +329,7 @@
   \begin{itemize}
   \item \AField{`/`-is-`} states that converting a variable first to a ``variable-or-term'' and
     then further to a term is the same as converting it directly to a
-    term using the variable constructor \ACode{`\_}.
+    term using the variable constructor \AField{`\_}.
   \item \AField{`/id-injective} and \AField{id/`-injective} state that
     \AField{`/id} and \AField{id/`} are injective. This property
     follows easily, as both the identity function and the variable
@@ -343,11 +344,11 @@
   }
   \begin{itemize}
   \item 
-    We unify the definition of renamings \texttt{S₁ →ᵣ S₂} and
-    substitutions \texttt{S₁ →ₛ S₂}, which differ only in whether they
+    We unify the definition of renamings \ACode{S₁ \ADef{→ᵣ} S₂} and
+    substitutions \ACode{S₁ \ADef{→ₛ} S₂}, which differ only in whether they
     return variables or a terms:
     \LibCode\KMap
-    We call a value of type \texttt{S₁ →ₖ S₂} a \emph{map}.
+    We call a value of type \ACode{S₁ \ADef{→ₖ} S₂} a \emph{map}.
   \item 
     A map can be applied to a variable:
     \LibCode\KAp
@@ -355,21 +356,21 @@
     A map can be extended by a new variable or term:
     \LibCode\KExt
   \item 
-    A map can be shifted, as the Kit provides the necessary \texttt{wk} operation:
+    A map can be shifted, as the Kit provides the necessary \AField{wk} operation:
     \LibCode\KWkm
   \item 
     A map can be lifted, which is the operation necessary to
-    move a map under a binder of sort \texttt{s}:
+    move a map under a binder of sort \ACode{s}:
     \LibCode\KLift
   \item 
     There is an identity map:
     \LibCode\KId
   \item 
-    There is a singleton map, which replaces \texttt{zero} and decreases
+    There is a singleton map, which replaces \ACon{zero} and decreases
     all other variables by one:
     \LibCode\KSingle
   \item 
-    There is a map which is equivalent to \texttt{wk} on terms:
+    There is a map which is equivalent to \AField{wk} on terms:
     \LibCode\KWeaken
   \end{itemize}
 
@@ -380,7 +381,7 @@
   The only task left now is to create the two instances for the kits
   and define how a map can be applied to a term.
   While the variable kit can be defined as expected, the term kit
-  raises a dependency problem: The \texttt{wk} operation for terms requires us
+  raises a dependency problem: The \AField{wk} operation for terms requires us
   to already know how to apply a renaming to term.
   To solve this problem, McBride came up with a clever solution:
   Applying a map to a term, can be defined without even having any Kit-instances yet.
