@@ -66,7 +66,18 @@
 \newcommand*\AppCode[1]{{#1}}
 \newcommand*\ExampleCode[1]{\begin{ExampleCode*}{#1}\end{ExampleCode*}}
 
-\newcommand*\ACode[1]{\AgdaFontStyle{#1}}
+% \setlength\fboxsep{0pt}
+% \usepackage{realboxes}
+% \definecolor{mygray}{rgb}{0.95,0.95,0.95}
+% \newcommand*\ACode[1]{\Colorbox{mygray}{\AgdaFontStyle{#1}}}
+
+% \newcommand*\ACode[1]{\AgdaFontStyle{#1}}
+
+% \newcommand*\ACode[1]{\texttt{#1}}
+
+\definecolor{mygray}{rgb}{0.4,0.4,0.4}
+\newcommand*\ACode[1]{\AgdaFontStyle{\textcolor{mygray}{#1}}}
+
 \newcommand*\AField[1]{\AgdaField{#1}}
 \newcommand*\ACon[1]{\AgdaInductiveConstructor{#1}}
 \newcommand*\AKw[1]{\AgdaKeyword{#1}}
@@ -193,10 +204,11 @@
   
   The term type \ACode{S \ACon{⊢} s} is then indexed by its sort
   \ACode{s} and the sorts of its free variables \ACode{S}.
-  For example, \ACon{[𝕥, 𝕥] ⊢ 𝕖} is the type of expressions (\ACon{𝕖}) with two free type-variables (\ACon{𝕥}).
+  For example, \ACode{\ACon{[𝕥, 𝕥] ⊢ 𝕖}} is the type of expressions
+  (\ACode{\ACon{𝕖}}) with two free type-variables (\ACode{\ACon{𝕥}}).
   \newpage
   \AppCode\FSyntax
-  The notation \ACon{\_⊢\_} is often used for terms in
+  The notation \ACode{\ACon{\_⊢\_}} is often used for terms in
   intrinsically-typed languages. This is no accident: in effect, we
   defined an intrinsically-typed language with the twist that the
   typing relation assures exactly that the syntactic categories are followed.
@@ -209,10 +221,10 @@
   \LibCode\KVariables
 
   Contrary to the usual intrinsic typing, we limit the environment
-  \ACode{S} to sorts with index \ACon{Var}.
+  \ACode{S} to sorts with index \ACode{\ACon{Var}}.
   This ensures that it is impossible to construct kind variables, as
   it is not possible to extend \ACode{S} with the sort of kinds
-  \ACon{𝕜}.
+  \ACode{\ACon{𝕜}}.
 
   \subsection{A Structure for Multi-Sorted Syntax}
   The multi-sorted syntax makes it easy to capture general syntax definitions
@@ -220,7 +232,7 @@
   \LibCode\KTerms
   The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
-  \AField{`\_} is injective, which is trivially true for
+  \ACode{\AField{`\_}} is injective, which is trivially true for
   constructors. The instantiation for our System F syntax is
   straightforward:
   \AppCode\FTerms
@@ -254,7 +266,7 @@
   \ACode{t}.
   If \ACode{t} is a term like \ACode{\ACon{λx} e},
   where the subterm \ACode{e} is under a binder, then the variables
-  in \ACode{e} are shifted, i.e.\ the variable \ACon{zero} refers
+  in \ACode{e} are shifted, i.e.\ the variable \ACode{\ACon{zero}} refers
   to the variable from the binder, whereas a variable \ACode{\ACon{suc} x}
   refers to the variable \ACode{x} from outside of the binder.
   As the terms contained in \ACode{σ} may themselves contain free variables,
@@ -304,37 +316,37 @@
   variable instance, and \ACode{y} is the name we choose for the term
   instance.
   For example the parameter type \ACode{\_∋/⊢\_} will be instanciated
-  to \ACon{\_∋\_} for the variable kit, and to \AField{\_⊢\_} for the
+  to \ACode{\ACon{\_∋\_}} for the variable kit, and to \ACode{\AField{\_⊢\_}} for the
   term kit.
 
   A kit provides the following operations:
   \begin{itemize}
   \item 
-    \AField{id/`} converts a variable \ACode{S \ACon{∋} s} into a
+    \ACode{\AField{id/`}} converts a variable \ACode{S \ACon{∋} s} into a
     \ACode{S \AField{∋/⊢} s}. For the variable kit, \ACode{S ∋/⊢ s} is instanciated to \ACode{S \ACon{∋} s}, so this
     operation is the identity. For the term kit, \ACode{S ∋/⊢ s} is
     instanciated to \ACode{S \AField{⊢} s}, so this operation is the
-    variable constructor \AField{`\_}.
+    variable constructor \ACode{\AField{`\_}}.
   \item 
-    \AField{`/id} converts a \ACode{S ∋/⊢ s} into a term \ACode{S \AField{⊢} s}
-    and is dual to the \AField{id/`} operation.
+    \ACode{\AField{`/id}} converts a \ACode{S ∋/⊢ s} into a term \ACode{S \AField{⊢} s}
+    and is dual to the \ACode{\AField{id/`}} operation.
   \item 
-    \AField{wk} shifts the DeBruin-Indices in a \ACode{S ∋/⊢ s}.
-    The new, unused variable \ACon{zero} can assume any sort \ACode{s'}.
-    For variables \AField{wk} is the successor \ACon{suc}.
-    For terms \AField{wk} means applying a shifting renaming to the term.
+    \ACode{\AField{wk}} shifts the DeBruin-Indices in a \ACode{S ∋/⊢ s}.
+    The new, unused variable \ACode{\ACon{zero}} can assume any sort \ACode{s'}.
+    For variables \ACode{\AField{wk}} is the successor \ACode{\ACon{suc}}.
+    For terms \ACode{\AField{wk}} means applying a shifting renaming to the term.
   \end{itemize}
 
   The operations need to satisfy the following properties:
   \begin{itemize}
-  \item \AField{`/`-is-`} states that converting a variable first to a ``variable-or-term'' and
+  \item \ACode{\AField{`/`-is-`}} states that converting a variable first to a ``variable-or-term'' and
     then further to a term is the same as converting it directly to a
-    term using the variable constructor \AField{`\_}.
-  \item \AField{`/id-injective} and \AField{id/`-injective} state that
-    \AField{`/id} and \AField{id/`} are injective. This property
+    term using the variable constructor \ACode{\AField{`\_}}.
+  \item \ACode{\AField{`/id-injective}} and \ACode{\AField{id/`-injective}} state that
+    \ACode{\AField{`/id}} and \ACode{\AField{id/`}} are injective. This property
     follows easily, as both the identity function and the variable
     constructor are injective.
-  \item \AField{wk-id/`} characterizes the behaviour of the \AField{wk} function.
+  \item \ACode{\AField{wk-id/`}} characterizes the behaviour of the \ACode{\AField{wk}} function.
     Injecting a variable and then shifting it, is the same as injecting a shifted variable.
   \end{itemize}
 
@@ -346,7 +358,7 @@
   \item 
     We unify the definition of renamings \ACode{S₁ \ADef{→ᵣ} S₂} and
     substitutions \ACode{S₁ \ADef{→ₛ} S₂}, which differ only in whether they
-    return variables or a terms:
+    return variables or terms:
     \LibCode\KMap
     We call a value of type \ACode{S₁ \ADef{→ₖ} S₂} a \emph{map}.
   \item 
@@ -356,7 +368,7 @@
     A map can be extended by a new variable or term:
     \LibCode\KExt
   \item 
-    A map can be shifted, as the Kit provides the necessary \AField{wk} operation:
+    A map can be shifted, as the Kit provides the necessary \ACode{\AField{wk}} operation:
     \LibCode\KWkm
   \item 
     A map can be lifted, which is the operation necessary to
@@ -366,56 +378,163 @@
     There is an identity map:
     \LibCode\KId
   \item 
-    There is a singleton map, which replaces \ACon{zero} and decreases
+    There is a singleton map, which replaces \ACode{\ACon{zero}} and decreases
     all other variables by one:
     \LibCode\KSingle
   \item 
-    There is a map which is equivalent to \AField{wk} on terms:
+    There is a map which is equivalent to \ACode{\AField{wk}} on terms:
     \LibCode\KWeaken
+  \item
+    Maps have an extensional equality:
+    \LibCode\KEq
+  \item
+    For simplicity we postulate functional extensionality:\footnote{
+      The actual implementation does \emph{not} use any postulates.
+      Appendix TODO explains the workaround.
+    }
+    \LibCode\KFunExt
+  \item
+    Lifting the identity map is a (larger) identity map:
+    \LibCode\KIdLift
+    % \LibCode\KIdLiftProof
   \end{itemize}
 
-  We also specify additional notation, which makes it less cumbersome
+  We also specify notation, which makes it less cumbersome
   to explicitly pass a particular Kit to those definitions:
-  \LibCode\KKitNotation
+  \begin{itemize}
+  \item \ACode{S \ADef{∋/⊢[} K \ADef{]} s} is \ACode{S ∋/⊢ s} for some \ACode{\ACon{Kit}} \ACode{K}; and
+  \item \ACode{S \ADef{–[} K \ADef{]→} s} is \ACode{S \ADef{→ₖ} s} for some \ACode{\ACon{Kit}} \ACode{K}.
+  \end{itemize}
 
-  The only task left now is to create the two instances for the kits
-  and define how a map can be applied to a term.
-  While the variable kit can be defined as expected, the term kit
-  raises a dependency problem: The \AField{wk} operation for terms requires us
-  to already know how to apply a renaming to term.
-  To solve this problem, McBride came up with a clever solution:
-  Applying a map to a term, can be defined without even having any Kit-instances yet.
-  Afterwards we can first define the variable kit, and in the
-  definition of the term kit, we are then already allowed to apply renamings.
-  After the definition of the term-kit we are then allowed to apply
-  both renamings and substitutions as both kits defined.
-
-  
-
-  \LibCode\KKitVar
-
-
-  \subsection{Library}
-  \LibCode\KKitOpenInst
-  \LibCode\KEq
-  \LibCode\KFunExt
-  \LibCode\KIdLift
-  % \LibCode\KIdLiftProof
+  The operation of applying a map to a term depends on the concrete
+  structure of a term, so we define a structure for it:
   \LibCode\KTraversal
+  The fields of this structure are:
+  \begin{itemize}
+  \item
+    \ACode{t \AField{⋯} ϕ} applies the map \ACode{ϕ} (a renaming or
+    substitution) to the term \ACode{t}.
+  \item
+    \ACode{\AField{⋯-var}} states that applying a map \ACode{ϕ} to a variable
+    term \ACode{\AField{`} x}, is the same as applying \ACode{ϕ} to
+    the variable \ACode{x}, and then converting the result from \ACode{S₂ ∋/⊢ S}
+    to \ACode{S₂ ⊢ S} via \ACode{\AField{id/`}}.
+  \item
+    \ACode{\AField{⋯-id}} states that applying the identity map
+    \ACode{id} to a term does not change the term.
+  \end{itemize}
+
+  Now we are finally ready to define the actual kit instances.
+  The variable kit definition is straightforward:
   \LibCode\KKitVar
+
+  The term kit requires both the variable kit and the
+  \ACode{\ACon{Traversal}} to be defined, because shifting a term \ACode{t} with \ACode{\AField{wk}}
+  means applying the shifting renaming to the term.
+  Hence, we define the term kit in the record module of \ACode{\ACon{Traversal}}:
   \LibCode\KKitTerm
-  \LibCode\KKitOpen
-  \subsection{System F}
+
+  % The only task left now is to create the two instances for the kits
+  % and define how a map can be applied to a term.
+  % While the variable kit can be defined as expected, the term kit
+  % raises a dependency problem: The \ACode{\AField{wk}} operation for terms requires us
+  % to already know how to apply a renaming to term.
+  % To solve this problem, McBride came up with a clever solution:
+  % Applying a map to a term, can be defined without even having any Kit-instances yet.
+  % Afterwards we can first define the variable kit, and in the
+  % definition of the term kit, we are then already allowed to apply renamings.
+  % After the definition of the term-kit we are then allowed to apply
+  % both renamings and substitutions as both kits defined.
+
+  Note that all definitions so far are library code. To make them
+  available for our System F example, all we need to do is
+  to create an instance of \ACode{\ACon{Traversal}}.
+
+  We start with the operation of applying a map to a term:
   \AppCode\FTraversalOp
+  The interesting cases are those with variables and binders:
+  \begin{itemize}
+  \item 
+    In the variable case \ACode{(\ACon{`} x) \ADef{⋯} ϕ}, we first apply the map
+    \ACode{ϕ} to the variable \ACode{x}. If \ACode{ϕ} is a renaming,
+    we get back a variable and need to apply the variable constructor
+    \ACode{\ACon{`\_}} to it. If \ACode{ϕ} is a substitution,
+    we get back a term that we can use directly.
+    Hence, the use of \ACode{`/id}.
+  \item 
+    In cases where the operation needs to go under a binder, like
+    \ACode{(\ACon{λx} e) \ADef{⋯} ϕ}, we lift the map using \AField{\_↑\_} before
+    we apply it to the subterm, to account for the bound variable.
+  \end{itemize}
+
+
   \AppCode\FTraversalId
   \AppCode\FTraversalIdProofInteresting
   % \LibCode\FTraversalIdProofRest
   \AppCode\FTraversal
+  
+  \ExampleCode\FExampleTrav
+
+
+
+  % \subsection{Unused}
+  % \LibCode\KKitOpenInst
+  % \LibCode\KKitOpen
 
   \section{Map Composition}
-  \subsection{Library}
+  An operation we did not cover in the previous section is the
+  composition of substitutions.
+  This operation and its properties are relevant in numerous places, e.g.\
+  TODO, which are also relevant for System F.
+
+  As we defined substitution in terms of renamings, we now have to
+  consider all four compositions between renamings and substitutions,
+  and their properties. The problem is again that they are dependent
+  on each other, i.e.\ composition between two substitutions relies on
+  the compositions between renamings and substitutions, which rely on
+  compositions between two renamings.
+
+  McBride et al.\cite{DBLP:journals/jar/BentonHKM12} addressed this
+  issue by duplicating the definitions and using tactics to reduce
+  boilerplate in proofs.
+
+  In contrast we define a structure similar to Kits, which allows us
+  to abstract over all four compositions and use the same trick as
+  before to eliminate the dependencies.
+  This has the benefit that a user of our library has to write less
+  boilerplate and also that we gain more expressiveness, which helps
+  us later to unify type preservation of all substitution and renaming
+  operations into a single lemma.
+  
+  We first define a \ACode{\ACon{WkKit}}, which captures properties
+  between maps and map application, which we could not include in the
+  \ACode{\ACon{Kit}} definition, as we already require
+  \ACode{\ACon{Kit}}s to define a Traversal. We then create exactly
+  two instances of the \ACode{\ACon{WkKit}} for the variable and term
+  kit, respectively. Both the structure and the instances are part of
+  the library and do not require application code.
+
+  Using the \ACode{\ACon{WkKit}}, we then define
+  the \ACode{\ACon{ComposeKit}} and \ACode{\ACon{ComposeTraversal}}
+  structures, which serve analogous purposes to \ACode{\ACon{Kit}}
+  and \ACode{\ACon{Traversal}} from before:
+  the library provides a \ACode{\ACon{ComposeKit}} for each of the
+  four compositions, whereas the \ACode{\ACon{ComposeTraversal}}
+  structure needs to be instanciated by the application with
+  lemmas parameterized over arbitrary \ACode{\ACon{ComposeKit}}s.
+  This gives the user a composition operation
+  \ACode{\AField{\_·ₖ\_}} between arbitrary maps and corresponding
+  lemmas, instead of multiple definitions and lemmas about concrete
+  maps, enabling us to reason on a more abstract level and to avoid
+  further boilerplate.
+
+  \subsection{WkKits}
+
   \LibCode\KWkKit
   \LibCode\KWkKitInstances
+
+  \subsection{Composition}
+
   \LibCode\KComposeKit
   \LibCode\KComposition
   \LibCode\KComposeKitAp
@@ -438,6 +557,7 @@
   % \LibCode\KDistLiftSingleProof
   \LibCode\KDistLiftSingleTraverse
   % \LibCode\KDistLiftSingleTraverseProof
+
   \subsection{System F}
   \AppCode\FAssoc
   \AppCode\FAssocProofInteresting

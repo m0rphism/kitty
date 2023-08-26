@@ -275,3 +275,11 @@ subject-reduction (⊢· ⊢e₁ ⊢e₂) (ξ-·₂ e₂↪e₂') =
   ⊢· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
 subject-reduction (⊢∙ ⊢t₁ ⊢t₂ ⊢e₁) (ξ-∙₁ e₁↪e₁') =
   ⊢∙ ⊢t₁ ⊢t₂ (subject-reduction ⊢e₁ e₁↪e₁')
+
+--------------------------------------------------------------------------------
+
+module Examples where
+
+  --! ExampleTrav
+  _ : (λx ` (suc zero)) ⋯ ⦅ λx ` zero ⦆ ≡ λx λx ` zero
+  _ = refl

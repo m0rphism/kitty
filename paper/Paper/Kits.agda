@@ -72,8 +72,8 @@ record Terms : Set₁ where
 
     --! Ext
     _∷ₖ_ : S₂ ∋/⊢ s → S₁ →ₖ S₂ → (s ∷ S₁) →ₖ S₂
-    (x/t ∷ₖ f) _ zero    = x/t
-    (x/t ∷ₖ f) _ (suc x) = f _ x
+    (x/t ∷ₖ f) _ zero     = x/t
+    (x/t ∷ₖ f) _ (suc x)  = f _ x
 
     --! Lift
     _↑_ : S₁ →ₖ S₂ → ∀ s → (s ∷ S₁) →ₖ (s ∷ S₂)
@@ -97,7 +97,9 @@ record Terms : Set₁ where
 
     --! Eq
     _~_ : (ϕ₁ ϕ₂ : S₁ →ₖ S₂) → Set
-    _~_ {S₁ = S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
+    _~_ ϕ₁ ϕ₂ = ∀ s (x : _ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
+
+    -- _~_ {S₁ = S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
 
     --! FunExt
     postulate
@@ -164,10 +166,10 @@ record Terms : Set₁ where
         { id/`            = `_
         ; `/id            = λ t → t
         ; `/`-is-`        = λ x → refl
-        ; wk              = λ s' t → t ⋯ weaken s'
+        ; wk              = λ s' t → t ⋯ weaken ⦃ Kᵣ ⦄ s'
         ; id/`-injective  = `-injective
         ; `/id-injective  = λ eq → eq
-        ; wk-id/`         = λ s' x → ⋯-var x (weaken s') }
+        ; wk-id/`         = λ s' x → ⋯-var x (weaken ⦃ Kᵣ ⦄ s') }
 
     --! KitOpen
     open Kit Kᵣ public using () renaming 
@@ -325,14 +327,10 @@ record Terms : Set₁ where
       --! }
 
       --! ComposeKitInstancesConcrete
-      Cᵣᵣ : ComposeKit Kᵣ Kᵣ Kᵣ
-      Cᵣₛ : ComposeKit Kᵣ Kₛ Kₛ
-      Cₛᵣ : ComposeKit Kₛ Kᵣ Kₛ
-      Cₛₛ : ComposeKit Kₛ Kᵣ Kₛ
-      Cᵣᵣ = Cᵣ
-      Cᵣₛ = Cᵣ
-      Cₛᵣ = Cₛ
-      Cₛₛ = Cₛ
+      Cᵣᵣ : ComposeKit Kᵣ Kᵣ Kᵣ;  Cᵣᵣ = Cᵣ
+      Cᵣₛ : ComposeKit Kᵣ Kₛ Kₛ;  Cᵣₛ = Cᵣ
+      Cₛᵣ : ComposeKit Kₛ Kᵣ Kₛ;  Cₛᵣ = Cₛ
+      Cₛₛ : ComposeKit Kₛ Kᵣ Kₛ;  Cₛₛ = Cₛ
 
       --! WeakenCancelsSingle
       wk-cancels-⦅⦆ :
