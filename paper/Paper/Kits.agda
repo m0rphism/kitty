@@ -64,24 +64,24 @@ record Syntax : Set₁ where
     infixl  8  _&_
     --! Ap
     _&_ : S₁ ∋ s → S₁ →ₖ S₂ → S₂ ∋/⊢ s
-    x & f = f _ x 
+    x & ϕ = ϕ _ x 
 
     --! Wkm
     wkm : ∀ s → S₁ →ₖ S₂ → S₁ →ₖ (s ∷ S₂)
-    wkm s f _ x = wk s (f _ x)
+    wkm s ϕ _ x = wk s (ϕ _ x)
 
     --! Ext
     _∷ₖ_ : S₂ ∋/⊢ s → S₁ →ₖ S₂ → (s ∷ S₁) →ₖ S₂
-    (x/t ∷ₖ f) _ zero     = x/t
-    (x/t ∷ₖ f) _ (suc x)  = f _ x
+    (x/t ∷ₖ ϕ) _ zero     = x/t
+    (x/t ∷ₖ ϕ) _ (suc x)  = ϕ _ x
 
     --! Lift
     _↑_ : S₁ →ₖ S₂ → ∀ s → (s ∷ S₁) →ₖ (s ∷ S₂)
-    f ↑ s = id/` zero ∷ₖ wkm s f
+    ϕ ↑ s = id/` zero ∷ₖ wkm s ϕ
 
     _↑*_ : S₁ →ₖ S₂ → ∀ S → (S ++ S₁) →ₖ (S ++ S₂)
-    f ↑* []       = f
-    f ↑* (s ∷ S)  = (f ↑* S) ↑ s
+    ϕ ↑* []       = ϕ
+    ϕ ↑* (s ∷ S)  = (ϕ ↑* S) ↑ s
       
     --! Id
     id : S →ₖ S
@@ -556,7 +556,7 @@ record Syntax : Set₁ where
               {C₁ : ComposeKit K Kᵣ K} {C₂ : ComposeKit K K K}
               {S₁ S₂}
             → Ctx S₂ → TypingKit K W C₁ C₂ → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
-          Γ₂ ∋*/⊢*[ TK ] f ∶ Γ₁ = Γ₂ ∋*/⊢* f ∶ Γ₁ where instance _ = TK
+          Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ = Γ₂ ∋*/⊢* ϕ ∶ Γ₁ where instance _ = TK
           --! }
 
           --! TypingTraversal {
