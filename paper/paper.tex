@@ -230,13 +230,13 @@
   The multi-sorted syntax makes it easy to define a structure for
   syntaxes of arbitrary object-languages, i.e.\ syntaxes with
   arbitrary amounts of syntactic categories and variables:
-  \LibCode\KTerms
+  \LibCode\KSyntax
   The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
   \ACode{\AField{`\_}} is injective, which is trivially true for
   constructors. The instantiation for our System F syntax is
   straightforward:
-  \AppCode\FTerms
+  \AppCode\FSyntaxInst
 
   \section{Renamings \& Substitutions}
   \subsection{Multi-Sorted Renamings \& Substitutions}
@@ -334,8 +334,8 @@
   \item 
     \ACode{\AField{wk}} shifts the DeBruin-Indices in a \ACode{S ∋/⊢ s}.
     The new, unused variable \ACode{\ACon{zero}} can assume any sort \ACode{s'}.
-    For variables \ACode{\AField{wk}} is the successor \ACode{\ACon{suc}}.
-    For terms \ACode{\AField{wk}} means applying a shifting renaming to the term.
+    For variables, \ACode{\AField{wk}} is the successor \ACode{\ACon{suc}}.
+    For terms, \ACode{\AField{wk}} means applying a shifting renaming to the term.
   \end{itemize}
 
   The operations need to satisfy the following properties:
@@ -507,13 +507,38 @@
   us later to unify type preservation of all substitution and renaming
   operations into a single lemma.
   
-  We first define a \ACode{\ACon{WkKit}}, which captures properties
-  between maps and map application, which we could not include in the
-  \ACode{\ACon{Kit}} definition, as we already require
-  \ACode{\ACon{Kit}}s to define a Traversal. We then create exactly
-  two instances of the \ACode{\ACon{WkKit}} for the variable and term
-  kit, respectively. Both the structure and the instances are part of
-  the library and do not require application code.
+  \subsection{WkKits}
+
+  In the definition of \ACode{\ACon{Kit}} we required the axiom
+  \ACode{\AField{wk-id/`}}, which captured the interaction between
+  \ACode{\AField{wk}} and \ACode{\AField{id/`}}:
+  \ExampleCode{\KWkId}
+  Injecting a variable with \ACode{\AField{id/`}} and then shifting it,
+  is the same as injecting a shifted variable.
+
+  Now that we have defined the \ACode{\ACon{Traversal}} structure, we
+  can formulate a similar interaction between
+  \ACode{\AField{wk}} and \ACode{\AField{`/id}}:
+  \ExampleCode{\KIdWk}
+  Shifting a variable/term \ACode{x/t} with \ACode{\AField{wk}} and then injecting
+  it to a term, is the same as injecting \ACode{x/t} to a term and then applying
+  a shifting renaming.
+  
+
+  As this lemma depends on map application \ACode{\ADef{\_⋯\_}} being
+  already defined, we cannot add it to the original \ACode{\ACon{Kit}}
+  structure, but need to define a new structure for it, which we call
+  a \ACode{\ACon{WkKit}}:
+  \LibCode\KWkKit
+
+  We then create exactly two instances of the \ACode{\ACon{WkKit}} for
+  the variable and term kit, respectively. 
+  \LibCode\KWkKitInstances
+
+  Both the structure and the instances are part of the library and do
+  not require application code.
+
+  \subsection{Composition}
 
   Using the \ACode{\ACon{WkKit}}, we then define
   the \ACode{\ACon{ComposeKit}} and \ACode{\ACon{ComposeTraversal}}
@@ -529,12 +554,10 @@
   maps, enabling us to reason on a more abstract level and to avoid
   further boilerplate.
 
-  \subsection{WkKits}
+  \ExampleCode\KExFourComps
+  \ExampleCode\KExTwoComps
+  \ExampleCode\KComposition
 
-  \LibCode\KWkKit
-  \LibCode\KWkKitInstances
-
-  \subsection{Composition}
 
   \LibCode\KComposeKit
   \LibCode\KComposition

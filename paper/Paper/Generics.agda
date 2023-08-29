@@ -35,15 +35,15 @@ module WithSort(Sort : SortTy → Set) where
 
   module WithDesc {d : Desc} where
 
-    terms : Terms
-    terms = record
+    syn : Syntax
+    syn = record
       { Sort        = Sort
       ; _⊢_         = Tm d
       ; `_          = `var
       ; `-injective = λ { refl → refl }
       }
 
-    open Terms terms hiding (Sort; `_; `-injective) public
+    open Syntax syn hiding (Sort; `_; `-injective) public
 
     mutual
       _⋯_ :

@@ -21,8 +21,8 @@ data _∋_ {ℓ} {A : Set ℓ} : List A → A → Set ℓ where
 --! SortTy
 data SortTy : Set where Var NoVar : SortTy
 
---! Terms
-record Terms : Set₁ where
+--! Syntax
+record Syntax : Set₁ where
   field
     Sort         : SortTy → Set
     _⊢_          : ∀ {st} → List (Sort Var) → Sort st → Set
@@ -123,6 +123,7 @@ record Terms : Set₁ where
       (id ↑ s) sx x        ≡⟨ id↑~id sx x ⟩
       id sx x              ∎
 
+
   --! KitNotation {
   _∋/⊢[_]_ :  List (Sort Var) → Kit _∋/⊢_ → Sort Var → Set
   _∋/⊢[_]_ {_∋/⊢_} S K s = S ∋/⊢ s
@@ -147,6 +148,19 @@ record Terms : Set₁ where
       ⋯-id   :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ (t : S ⊢ s) →
                 t ⋯ id ⦃ K ⦄ ≡ t
     --! }
+
+    module Example {_∋/⊢_ : Scoped} ⦃ K : Kit _∋/⊢_ ⦄ where
+      ex₁ : Set
+      ex₁ = ∀ {S s} →
+        ∀ s' (x : S ∋ s) →
+      --! WkId
+        wk s' (id/` x) ≡ id/` (suc x)
+
+      ex₂ : Set
+      ex₂ =  ∀ {S s} →
+          ∀ s' (x/t : S ∋/⊢ s) →
+      --! IdWk
+          `/id (wk s' x/t) ≡ `/id x/t ⋯ weaken s'
 
     instance
       --! KitVar
@@ -200,6 +214,25 @@ record Terms : Set₁ where
     open WkKit ⦃ … ⦄ public
     --! }
 
+    module ExamplesX where
+      private variable ⦃ K ⦄ : Kit _∋/⊢_
+
+      --! ExFourComps
+      _ᵣ·ᵣ_  : (S₁ →ᵣ  S₂) → (S₂ →ᵣ  S₃) → (S₁ →ᵣ  S₃)
+      _ᵣ·ₛ_  : (S₁ →ᵣ  S₂) → (S₂ →ₛ  S₃) → (S₁ →ₛ  S₃)
+      _ₛ·ᵣ_  : (S₁ →ₛ  S₂) → (S₂ →ᵣ  S₃) → (S₁ →ₛ  S₃)
+      _ₛ·ₛ_  : (S₁ →ₛ  S₂) → (S₂ →ₛ  S₃) → (S₁ →ₛ  S₃)
+      (ρ₁  ᵣ·ᵣ  ρ₂)  _ x = (x & ρ₁)   &  ρ₂
+      (ρ₁  ᵣ·ₛ  σ₂)  _ x = (x & ρ₁)   &  σ₂
+      (σ₁  ₛ·ᵣ  ρ₂)  _ x = (x & σ₁)   ⋯  ρ₂
+      (σ₁  ₛ·ₛ  σ₂)  _ x = (x & σ₁)   ⋯  σ₂
+
+      --! ExTwoComps
+      _ᵣ·_  : (S₁ →ᵣ  S₂) → (S₂ –[ K ]→  S₃) → (S₁ –[ K ]→  S₃)
+      _ₛ·_  : (S₁ →ₛ  S₂) → (S₂ –[ K ]→  S₃) → (S₁ →ₛ       S₃)
+      (ρ₁  ᵣ·  ϕ₂) _ x = (x & ρ₁)  & ϕ₂
+      (σ₁  ₛ·  ϕ₂) _ x = (x & σ₁)  ⋯ ϕ₂
+
     --! ComposeKit {
     record ComposeKit  (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_)
                        (K₁⊔K₂ : Kit _∋/⊢_) : Set where
@@ -217,7 +250,7 @@ record Terms : Set₁ where
 
       --! Composition
       _·ₖ_ : S₁ –[ K₁ ]→ S₂ → S₂ –[ K₂ ]→ S₃ → S₁ –[ K₁⊔K₂ ]→ S₃
-      (ϕ₁ ·ₖ ϕ₂) _ x = x & ϕ₁ &/⋯ ϕ₂ 
+      (ϕ₁ ·ₖ ϕ₂) _ x = (x & ϕ₁) &/⋯ ϕ₂ 
 
       --! ComposeKitAp
       &/⋯-& :  ∀ (x : S₁ ∋ s) (ϕ : S₁ –[ K₂ ]→ S₂) →
