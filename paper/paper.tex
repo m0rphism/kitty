@@ -534,9 +534,15 @@
   last two compositions as followed:
   \ExampleCode\KExTwoComps
 
-  But to unify those two compositions, we need a new abstraction.
-
+  But to unify those two compositions, we need a new abstraction:
   \ExampleCode\KComposition
+  The Kit-abstraction from before allowed us to abstract over what we
+  apply, i.e.\ a renaming or a substitution, but not about what we apply it
+  to, i.e.\ a variable or a term. For the latter we still have two
+  distinct operations \ACode{\ADef{\_\&\_}} and \ACode{\ADef{\_⋯\_}}.
+  A \ACode{\ACon{ComposeKit} K₁ K₂ K₁⊔K₂} fills exactly that gap by providing
+  the operation \ACode{\ADef{\_\&/⋯\_}} which applies a renaming/substitution (\ACode{K₂})
+  to a variable/term (\ACode{K₁}) and produces a variable/term (\ACode{K₁⊔K₂}).
   
   \subsection{WkKits}
 
