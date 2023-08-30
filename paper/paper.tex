@@ -513,9 +513,30 @@
   dependencies.
   This has the benefit that a user of our library has to write less
   boilerplate, but more importantly it allows to prove lemmas about the
-  composition of arbitrary maps, which enables us to later unify type
+  composition of arbitrary maps, which enable us later to unify type
   preservation of all substitution and renaming operations into a single
   lemma.
+
+  \subsection{An Examination of Composition}
+  With the infrastructure we build in the previous sections, we can
+  define the four compositions as followed:
+  \ExampleCode\KExFourComps
+  The definitions reveal an interesting asymetry, in the sense that
+  the first argument of composition guides the implementation: if we
+  compose a renaming with any map, then we first apply renaming to the
+  the variable, which yields another variable, so we apply the second
+  map to that \emph{variable}.
+  However, if we compose a substitution with any map, then we first
+  apply the substitution to that variable, which yields a term, so we
+  need to apply the second map to that \emph{term}.
+
+  With the machinery, we built so far, we can unify the first two and
+  last two compositions as followed:
+  \ExampleCode\KExTwoComps
+
+  But to unify those two compositions, we need a new abstraction.
+
+  \ExampleCode\KComposition
   
   \subsection{WkKits}
 
@@ -564,9 +585,6 @@
   maps, enabling us to reason on a more abstract level and to avoid
   further boilerplate.
 
-  \ExampleCode\KExFourComps
-  \ExampleCode\KExTwoComps
-  \ExampleCode\KComposition
 
 
   \LibCode\KComposeKit

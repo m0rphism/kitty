@@ -15,6 +15,13 @@ all: paper
 # Run pdflatex only once
 fast: $(FAST_PDF)
 
+# FIXME: workaround for make suddenly always rerunning agdatex...
+fast2: $(MAIN_TEX)
+	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex
+	cp -f $(EXTRA_FILES) $(CACHE_DIR)/
+	cd $(CACHE_DIR); pdflatex main.tex
+	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
+
 # Run pdflatex, then bibtex, then two times pdflatex
 paper: $(FAST_PDF)
 	cd $(CACHE_DIR); bibtex main; pdflatex main.tex; pdflatex main.tex
