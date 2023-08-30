@@ -484,29 +484,38 @@
   % \LibCode\KKitOpen
 
   \section{Map Composition}
-  An operation we did not cover in the previous section is the
-  composition of substitutions.
-  This operation and its properties are relevant in numerous places, e.g.\
-  TODO, which are also relevant for System F.
+  In this section we extend our framework with the composition of
+  arbitrary maps.
 
-  As we defined substitution in terms of renamings, we now have to
-  consider all four compositions between renamings and substitutions,
-  and their properties. The problem is again that they are dependent
-  on each other, i.e.\ composition between two substitutions relies on
-  the compositions between renamings and substitutions, which rely on
-  compositions between two renamings.
+  Composition of substitutions is important for most language
+  formalizations, as it allows to reason about the meaning of applying
+  multiple substitutions to a term. This appears for example in the proof of
+  substitution-preserves-typing for System F, where in the
+  case of type-application \ACode{(e \ACon{∙} t) \ADef{⋯} σ} we need to reason about
+  \ACode{(e \ADef{⋯} \ADef{⦅} t \ADef{⦆}) \ADef{⋯} σ}, which is equivalent to
+  \ACode{e \ADef{⋯} (\ADef{⦅} t \ADef{⦆} \ADef{·ₖ} σ)},
+  where \ACode{\_\ADef{·ₖ}\_} is backward composition.
+
+  As we defined substitution in terms of renamings, we need to
+  consider all four compositions between renamings and substitutions.
+  While the composition operations are defined independently of each other,
+  the \ACode{\AField{⋯-assoc}} lemma for two substitutions, depends on the
+  \ACode{\AField{⋯-assoc}} lemmas between a renaming and a substitution, which in
+  turn depend on the \ACode{\AField{⋯-assoc}} lemma between two renamings.
 
   McBride et al.\cite{DBLP:journals/jar/BentonHKM12} addressed this
   issue by duplicating the definitions and using tactics to reduce
   boilerplate in proofs.
 
-  In contrast we define a structure similar to Kits, which allows us
-  to abstract over all four compositions and use the same trick as
-  before to eliminate the dependencies.
+  In contrast we define structures similar to \ACode{\ACon{Kit}} and
+  \ACode{\ACon{Traversal}}, which allows us to abstract over all four
+  compositions and use the same trick as before to eliminate the
+  dependencies.
   This has the benefit that a user of our library has to write less
-  boilerplate and also that we gain more expressiveness, which helps
-  us later to unify type preservation of all substitution and renaming
-  operations into a single lemma.
+  boilerplate, but more importantly it allows to prove lemmas about the
+  composition of arbitrary maps, which enables us to later unify type
+  preservation of all substitution and renaming operations into a single
+  lemma.
   
   \subsection{WkKits}
 
@@ -638,11 +647,19 @@
 
   \section{Beyond System F}
   \begin{itemize}
-  \item Binders with multiple variables are supported and even pattern matching can be encoded.
-  \item Heterogenous equality
+  \item
+    Binders with multiple variables are supported and even pattern
+    matching can be encoded.
+  \item
+    Heterogenous equality
   \end{itemize}
 
   \section{Future Work}
+  \begin{itemize}
+  \item
+    Enabling more object languages by allowing subterms with less
+    restrictions on the form of \ACode{S}.
+  \end{itemize}
 
   \section{Related Work}
   Autosubst \cite{DBLP:conf/cpp/StarkSK19, DBLP:conf/itp/SchaferTS15}.
