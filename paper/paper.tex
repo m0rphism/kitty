@@ -361,7 +361,8 @@
     substitutions \ACode{S₁ \ADef{→ₛ} S₂}, which differ only in whether they
     return variables or terms:
     \LibCode\KMap
-    We call a value of type \ACode{S₁ \ADef{→ₖ} S₂} a \emph{map}.
+    We call a value of type \ACode{S₁ \ADef{→ₖ} S₂} a \emph{map} and
+    use the meta-variable \ACode{ϕ} for it.
   \item 
     A map can be applied to a variable:
     \LibCode\KAp
@@ -425,7 +426,7 @@
     \ACode{id} to a term does not change the term.
   \end{itemize}
 
-  Now we are finally ready to define the actual kit instances.
+  Finally, we define the actual kit instances.
   The variable kit definition is straightforward:
   \LibCode\KKitVar
 
