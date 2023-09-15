@@ -498,8 +498,6 @@ record Syntax : Set₁ where
             --! ]
             field
               _∋/⊢_∶_      : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
-              ∋/⊢∶-lookup  :  ∀ {Γ : Ctx S} (x : S ∋ s) →
-                              Γ ∋/⊢ id/` x ∶ wk-telescope Γ x
               id/⊢`        : ∀ {t : S ∶⊢ s} {Γ : Ctx S} →
                              Γ ∋ x ∶ t → Γ ∋/⊢ id/` x ∶ t
               ⊢`/id        : ∀ {e : S ∋/⊢ s} {t : S ∶⊢ s} {Γ : Ctx S} →
@@ -588,7 +586,6 @@ record Syntax : Set₁ where
               TKᵣ : TypingKit Kᵣ
               TKᵣ = record
                 { _∋/⊢_∶_     = _∋_∶_
-                ; ∋/⊢∶-lookup = λ x → refl
                 ; id/⊢`       = λ ⊢x → ⊢x
                 ; ⊢`/id       = ⊢`
                 ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl } }
@@ -596,7 +593,6 @@ record Syntax : Set₁ where
               TKₛ : TypingKit Kₛ
               TKₛ = record
                 { _∋/⊢_∶_     = _⊢_∶_
-                ; ∋/⊢∶-lookup = λ x → ⊢` refl
                 ; id/⊢`       = ⊢`
                 ; ⊢`/id       = λ ⊢x → ⊢x
                 ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
