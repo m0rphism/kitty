@@ -511,8 +511,9 @@ record Syntax : Set₁ where
             --! MapTyping
             _∋*/⊢*_∶_ : Ctx S₂ → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
             _∋*/⊢*_∶_ {S₂} {S₁} Γ₂ ϕ Γ₁ =
-              ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) (⊢x : Γ₁ ∋ x ∶ t)
-              → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
+              ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) →
+              Γ₁ ∋ x ∶ t →
+              Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
 
             --! LiftTyping
             _∋↑/⊢↑_ :

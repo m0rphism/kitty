@@ -866,15 +866,33 @@
   Next we define \ACode{\ACon{TypingKit}}s, which are analog to
   \ACode{\ACon{Kit}}s, but abstract about variable and term
   \emph{typing}, instead of variables and terms, themselves.
-
   \LibCode\KTypingKit
-  \subsection{Library}
-  \LibCode\KMapTyping
-  \LibCode\KLiftTyping
-  % \LibCode\KLiftTypingProof
-  \LibCode\KSingleTyping
-  % \LibCode\KSingleTypingProof
-  \LibCode\KTypingNotation
+  Building on the fields of a \ACode{\ACon{TypingKit}}, we define further operations:
+  \begin{itemize}
+  \item
+    Using the variable/term typing, we can define a renaming/substitution typing:
+    \LibCode\KMapTyping
+  \item 
+    Lifting a map preserves its typing:
+    \LibCode\KLiftTyping
+    % \LibCode\KLiftTypingProof
+  \item 
+    If a variable/term has a typing, then so does its singleton renaming/substitution:
+    \LibCode\KSingleTyping
+    % \LibCode\KSingleTypingProof
+  \end{itemize}
+  We also specify notation, which makes it less cumbersome
+  to explicitly pass a particular Kit to those definitions:
+  \begin{itemize}
+  \item \ACode{Γ₂ \ADef{∋*/⊢*[} TK \ADef{]} ϕ \ADef{∶} Γ₁} is
+    \ACode{Γ₂ \ADef{∋*/⊢*} ϕ \ADef{∶} Γ₁} for some \ACode{\ACon{TypingKit}} \ACode{TK}.
+  \end{itemize}
+  % \LibCode\KTypingNotation
+
+  We then define a \ACode{\ACon{TypingTraversal}} analogously to
+  \ACode{\ACon{Traversal}}, but instead of defining the application of
+  renamings/substitutions, it defines the type preservation of applying
+  renamings/substitutions:
   \LibCode\KTypingTraversal
   \LibCode\KTypingInstances
   % \LibCode\KTypingTraversalNotation
