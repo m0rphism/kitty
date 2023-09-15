@@ -200,19 +200,18 @@ open Typing SystemF-Typing hiding (_⊢_∶_; ⊢`)
 
 --! Preserve
 _⊢⋯_ :
-  ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
+  ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TypingKit K ⦄
     ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
     ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
-    ⦃ TK : TypingKit K ⦄
     {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
     {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
   Γ₁ ⊢ e ∶ t →
   Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
 ⊢` ⊢x ⊢⋯ ⊢ϕ = ⊢`/id (⊢ϕ _ _ ⊢x)
-⊢λ {t₂ = t₂} ⊢e ⊢⋯ ⊢ϕ = ⊢λ (subst  (_ ⊢ _ ∶_)
-                                   (sym (⋯-↑-wk t₂ _ _))
-                                   (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)))
+⊢λ {t₂ = t₂} ⊢e ⊢⋯ ⊢ϕ =
+  ⊢λ (subst  (_ ⊢ _ ∶_) (sym (⋯-↑-wk t₂ _ _))
+             (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)))
 ⊢Λ ⊢e ⊢⋯ ⊢ϕ = ⊢Λ (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _))
 ⊢· ⊢e₁ ⊢e₂ ⊢⋯ ⊢ϕ = ⊢· (⊢e₁ ⊢⋯ ⊢ϕ) (⊢e₂ ⊢⋯ ⊢ϕ)
 ⊢∙ {t₁ = t₁} {t₂ = t₂} ⊢t₁ ⊢t₂ ⊢e₁ ⊢⋯ ⊢ϕ =

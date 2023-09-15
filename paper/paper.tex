@@ -881,22 +881,27 @@
     \LibCode\KSingleTyping
     % \LibCode\KSingleTypingProof
   \end{itemize}
-  We also specify notation, which makes it less cumbersome
-  to explicitly pass a particular Kit to those definitions:
-  \begin{itemize}
-  \item \ACode{Γ₂ \ADef{∋*/⊢*[} TK \ADef{]} ϕ \ADef{∶} Γ₁} is
-    \ACode{Γ₂ \ADef{∋*/⊢*} ϕ \ADef{∶} Γ₁} for some \ACode{\ACon{TypingKit}} \ACode{TK}.
-  \end{itemize}
+  To make it easier to explicitly pass typing kits,
+  we define the notation \ACode{Γ₂ \ADef{∋*/⊢*[} TK \ADef{]} ϕ \ADef{∶} Γ₁}
+  to stand for \ACode{Γ₂ \ADef{∋*/⊢*} ϕ \ADef{∶} Γ₁} given some
+  \ACode{\ACon{TypingKit}} \ACode{TK}.
   % \LibCode\KTypingNotation
 
   We then define a \ACode{\ACon{TypingTraversal}} analogously to
   \ACode{\ACon{Traversal}}, but instead of defining the application of
-  renamings/substitutions, it defines the type preservation of applying
-  renamings/substitutions:
+  maps, it defines the type preservation of applying maps:
   \LibCode\KTypingTraversal
+  Given a variable/term \ACode{e} with typing \ACode{⊢e} and
+  a renaming/substitution \ACode{ϕ} with typing \ACode{⊢ϕ},
+  the term \ACode{⊢e \AField{⊢⋯} ⊢ϕ} is a typing for \ACode{e \AField{⋯} ϕ}.
+
+  Given a \ACode{\ACon{TypingTraversal}}, we can easily instanciate the
+  \ACode{\ACon{TypingKits}} for variables and terms:
   \LibCode\KTypingInstances
   % \LibCode\KTypingTraversalNotation
-  \subsection{System F}
+
+  We are then ready to create a \ACode{\ACon{TypingTraversal}}
+  instance for System F:
   \AppCode\FPreserve
   \AppCode\FTypingTraversal
 

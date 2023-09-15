@@ -564,23 +564,21 @@ record Syntax : Set₁ where
           Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ = Γ₂ ∋*/⊢* ϕ ∶ Γ₁ where instance _ = TK
           --! }
 
-          --! TypingTraversal {
+          --! TypingTraversal
           record TypingTraversal : Set₁ where
-            infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
-
             field
-              _⊢⋯_ :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
-                         ⦃ C₁ : ComposeKit K Kᵣ K ⦄
-                         ⦃ C₂ : ComposeKit K K K ⦄
-                         ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
-                         -- ⦃ TK : TypingKit K W C₁ C₂ ⦄
-                         ⦃ TK : TypingKit K ⦄
-                         {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
-                         {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
-                      Γ₁ ⊢ e ∶ t →
-                      Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
-                      Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
-          --! }
+              _⊢⋯_ :
+                ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TypingKit K ⦄
+                   ⦃ C₁ : ComposeKit K Kᵣ K ⦄
+                   ⦃ C₂ : ComposeKit K K K ⦄
+                   ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
+                   {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
+                   {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
+                Γ₁ ⊢ e ∶ t →
+                Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
+                Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+
+            infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
             --! TypingInstances {
             instance
