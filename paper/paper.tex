@@ -1,7 +1,7 @@
 % \documentclass[sigplan, screen]{acmart}
 % \documentclass[sigplan, screen, anonymous, review, authordraft]{acmart}
 % \documentclass[sigplan,10pt,anonymous,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
-\documentclass[sigplan,10pt]{acmart}
+\documentclass[sigplan,10pt, anonymous]{acmart}
 
 \usepackage{agda-unicode}
 \usepackage{agda-generated}
@@ -85,53 +85,166 @@
 
 \begin{document}
   \begin{abstract}
-    Variable binding and substitution are a long-standing nuisance for mechanized
-    metatheory of programming languages. A common approach is to represent
-    variables as DeBruijn Indices, where substitution is defined in terms of
-    variable renaming. If a language has $n$ different kinds of variables, and
-    $m$ different kinds of terms, we potentially need to define both
-    renaming and substitution for all $m\cdot n$ combinations and prove the
-    theory of those operations both in isolation and with respect to each other.
+    Formalizing a typed programming language in a proof assistant
+    requires to choose representations for variables and typing.
+    Variables are often represented as de Bruijn indices, where
+    substitution is usually defined in terms of renamings to allow for
+    proofs by structural induction.
+    Typing can be represented extrinsically by defining untyped terms and a typing
+    relation, or intrinsically by combining syntax and typing into a single
+    definition of well-typed terms.
+    For extrinsic typing, there is again a choice between extrinsic
+    scoping, where terms and the notion of free variables are defined
+    separately, and intrinsic scoping, where terms are indexed by their
+    free variables.
 
-    % McBride introduced kits to define both substitution and renaming by a
-    % single term traversal for intrinsically typed terms.\cite{mcbride2005kits}
-
-    We propose a technique to derive the implementation and metatheory of
-    renaming and substitution for all $m\cdot n$ combinations of variables and terms
-    from a single term traversal and three simple lemmas for extrinsically typed
-    but intrinsically scoped terms.
-    We demonstrate this technique by formalizing type soundness of System F with
-    very parallel substitutions, which replace both type and term variables at
-    once, enabling a single substitution-preserves-typing lemma.
-    We provide a well-documented implementation of the technique as an Agda
-    library.
-
-    As the technique is based on extrinsic typing, the metatheory of renaming
-    and substitution is decoupled from type preservation.
-    This has the downside, that type preservation of renaming and substitution
-    are not for free, but also the upside, that the library can be directly
-    instantiated for object languages with non-standard typing relations like
-    dependent types, type state, or resource environments.
+    This paper describes an Agda framework for formalizing programming
+    languages with extrinsic typing, intrinsic scoping, and de Bruijn
+    Indices for variables.
+    The framework supports object languages with arbitrary many
+    variable sorts and dependencies, making it suitable for
+    polymorphic languages and dependent types.
+    Given an Agda definition of syntax and typing, the framework derives
+    substitution operations and lemmas for untyped terms, and provides an
+    abstraction to prove type preservation of these operations with
+    just a single lemma.
+    The key insights behind the framework are the use of multi-sorted syntax
+    definitions, which enable parallel substitutions that replace
+    all variables of all sorts simultaneously, and
+    abstractions that unify the definitions, compositions, and typings
+    of multi-sorted renamings and substitutions.
+    Case studies have been conducted to prove subject reduction for
+    System F with subtyping, dependently typed lambda calculus, and lambda
+    calculus with pattern matching.
   \end{abstract}
+
+  % \begin{abstract}
+  %   Formalizing a typed programming language in a proof assistant
+  %   requires to choose between an extrinsic and an intrinsic
+  %   representation of typing.
+  %   \emph{Extrinsic} typing means to separately define a set of
+  %   untyped terms and a typing relation.
+  %   \emph{Intrinsic} typing means to directly define a set of well-typed terms,
+  %   incorporating the typing relation into the syntax definition.
+
+  %   One consequence of intrinsic typing is that operations on terms
+  %   are also proofs that the operations preserve typing.
+  %   This often leads to less code, as shared structure between
+  %   definitions and preservation lemmas does not need to be repeated,
+  %   but has the drawback that specification and proofs are
+  %   intertwined, making it more difficult to check if a specification is
+  %   correct.
+  % \end{abstract}
+
+  % \begin{abstract}
+  %   Formalizing a typed programming language in a proof assistant
+  %   requires to choose between an extrinsic and intrinsic representation of typing.
+  %   For extrinsic typing, 
+  %   There are two approaches to formalizing the syntax of typed object languages
+  %   in proof assistants. The extrinsic approach defines
+  %   object terms and typing relation separately, whereas the
+  %   instrinsic approach only defines well-typed terms.
+
+  %   This paper describes an Agda framework for deriving substitution
+  %   operations and lemmas for syntaxes with extrinsic typing,
+  %   intrinsic scoping, and DeBruijn Indices as variable representation.
+
+  %   This paper describes an Agda framework for formalizing programming
+  %   languages with extrinsic typing, intrinsic scoping, and DeBruijn
+  %   Indices as variable representation. The key feature of the
+  %   framework 
+  %   all sorts of object variables.
+  %   Agda's reflection mechanism is used to derive 
+  %   substitution properties for a
+  %   large class of syntaxes and only requires user code for to prove that the 
+
+  %   framework is to deal with multiple sorts of variables in a uniform way
+  % \end{abstract}
+
+  % \begin{abstract}
+  %   Variable binding and substitution are central concepts in the formalization
+  %   of programming languages in proof assistants. 
+  %   % Many different representations of variables have been developed with different
+  %   % trade-offs on proof simplicity, clarity, and reduction of boilerplate.
+  %   A common approach is to represent variables as DeBruijn Indices
+  %   and to define substitution in terms of variable renamings for the sake
+  %   of structural induction.
+  % \end{abstract}
+
+  % \begin{abstract}
+  %   Variable binding and substitution are a long-standing nuisance for mechanized
+  %   metatheory of programming languages. A common approach is to represent
+  %   variables as DeBruijn Indices, where substitution is defined in terms of
+  %   variable renaming. If a language has $n$ different kinds of variables, and
+  %   $m$ different kinds of terms, we potentially need to define both
+  %   renaming and substitution for all $m\cdot n$ combinations and prove the
+  %   theory of those operations both in isolation and with respect to each other.
+
+  %   % McBride introduced kits to define both substitution and renaming by a
+  %   % single term traversal for intrinsically typed terms.\cite{mcbride2005kits}
+
+  %   We propose a technique to derive the implementation and metatheory of
+  %   renaming and substitution for all $m\cdot n$ combinations of variables and terms
+  %   from a single term traversal and three simple lemmas for extrinsically typed
+  %   but intrinsically scoped terms.
+  %   We demonstrate this technique by formalizing type soundness of System F with
+  %   very parallel substitutions, which replace both type and term variables at
+  %   once, enabling a single substitution-preserves-typing lemma.
+  %   We provide a well-documented implementation of the technique as an Agda
+  %   library.
+
+  %   As the technique is based on extrinsic typing, the metatheory of renaming
+  %   and substitution is decoupled from type preservation.
+  %   This has the downside, that type preservation of renaming and substitution
+  %   are not for free, but also the upside, that the library can be directly
+  %   instantiated for object languages with non-standard typing relations like
+  %   dependent types, type state, or resource environments.
+  % \end{abstract}
 
   \maketitle
 
   \section{Introduction}
-  Formalizing metatheory of programming languages in a proof assistant 
-  requires to deal with variables, binders and substitution.
-
-  In most languages those constructs behave uniformly,
-  i.e. substitution is only concerned with variables and binders and
-  behaves homomorphic on all other syntax constructors.
-
-  Intrinsic typing 
-
-
+  In recent years intrinsic typing\cite{TODO} has become rather popular.
+  A consequence of intrinsic typing is that operations on terms
+  are also proofs that the operations preserve typing.
+  This often has the benefit of more concise code, as shared structure
+  between definitions and preservation lemmas does not need to be
+  repeated.
+  However, intrinsic typing also has three major drawbacks:
   \begin{enumerate}
-  \item DeBruijn
-  \item Intrinsic vs Extrinsic
-  \item Reduction under binder
+  \item
+    It is more difficult to judge whether a specification is correct,
+    because there is no clear separation between specification and proofs.
+    To understand the specification one has to additionally
+    understand the proofs, which can introduce significant cognitive overhead.
+    % For example specifying a small step semantics is directly intertwined
+    % with the proof of subject reduction.
+  \item
+    It is less uniform for object languages with multiple variable
+    sorts, e.g. type- and expression-variables. In such a scenario,
+    types are usually indexed by kinds and expressions by kinds and types.
+    This requires not only a type-in-type and expression-in-expression
+    substitution, but also a type-in-expression substitution, which causes
+    interactions between different types of substitutions introducing
+    additional complexity.
+    The duplication increases even more if one additionally introduces
+    kind-variables. Then a total of 6 different substitutions and
+    their interactions is required.
+    Unifying these substitutions to reduce repetition is difficult
+    with intrinsic typing due to the interdependence of definitions.
+  \item
+    It is less suitable for automation, because type preservation is baked
+    into the syntax definition and type preservation can become arbitrary complex
+    depending on the typing relation. This can prevent substitition
+    definition and lemmas from being derived, where otherwise it would be possible.
   \end{enumerate}
+  With extrinsic typing the major drawback is the duplication between
+  definitions and type preservation lemmas, which we found more
+  suitable to be eliminated by automation.
+
+  To combat those drawbacks, we went in the direction of intrinsically
+  scoped syntax in our search for a general, clean, and automated framework
+  for metatheory.
 
   \subsection{Structure}
   The rest of this paper will introduce our framework using System F
@@ -220,11 +333,19 @@
   values of the usual proof-relevant list-membership relation:
   \LibCode\KVariables
 
-  Contrary to the usual intrinsic typing, we limit the environment
-  \ACode{S} to sorts with index \ACode{\ACon{Var}}.
-  This ensures that it is impossible to construct kind variables, as
-  it is not possible to extend \ACode{S} with the sort of kinds
-  \ACode{\ACon{𝕜}}.
+  Note that there is no straightforward way to construct a
+  multi-sorted syntax with intrinsic typing: in a direct translation,
+  the type of terms \ACode{\ACon{\_⊢\_}} would be indexed by itself, which
+  most proof assistants forbid to avoid breaking logical consistency.
+  We conjecture that an encoding with universe codes is possible, as
+  it has been done for intrinsically typed languages with dependent
+  types, but those constructions come with their own drawbacks and complexity.
+
+  % Contrary to the usual intrinsic typing, we limit the environment
+  % \ACode{S} to sorts with index \ACode{\ACon{Var}}.
+  % This ensures that it is impossible to construct kind variables, as
+  % it is not possible to extend \ACode{S} with the sort of kinds
+  % \ACode{\ACon{𝕜}}.
 
   \subsection{A Structure for Multi-Sorted Syntax}
   The multi-sorted syntax makes it easy to define a structure for
@@ -484,8 +605,48 @@
   % \LibCode\KKitOpen
 
   \section{Map Composition}
-  In this section we extend our framework with the composition of
-  arbitrary maps.
+
+  % - Reason about multiple applications in terms of a single application
+  % - e.g. wk-cancels-⦅⦆ or dist-↑-⦅⦆, often important for induction hypothesis
+  % - Mcbride uses tactics
+  % - We introduce an abstraction similar to kits
+  % - ComposeKit has primitives for composition, ComposeTraversal has the property
+
+  %%%%%%%%%%
+
+  In this section, we extend our framework with a single composition
+  operator for arbitrary maps.
+
+  Composition \AField{\_·ₖ\_} equips our framework with the power to
+  reason about multiple maps \ACode{ϕ₁} and \ACode{ϕ₂} being applied
+  to a term in sequence, in terms of a single application:
+
+  The core property of composition is that applying two maps
+  \ACode{ϕ₁} and \ACode{ϕ₂} in sequence to a term \ACode{t}, is the same
+  as applying their composition \ACode{(ϕ₁ \AField{·ₖ} ϕ₂)} to \ACode{t}, i.e.
+  $$
+  \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}.
+  $$
+
+  %%%%%%%%%%
+
+  In this section, we extend our framework with a single composition
+  operator for arbitrary maps.
+
+  Composition \AField{\_·ₖ\_} equips our framework with the power to
+  reason about multiple maps \ACode{ϕ₁} and \ACode{ϕ₂} being applied
+  to a term in sequence:
+
+  \ACode{\AField{⋯-assoc} t ϕ₁ ϕ₂} \ \ : \ \ \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
+
+  For many lemmas, e.g. substitution-preserves-typing in System F,
+  it is necessary to apply an equality like \ACode{t ⋯ σ₁ ⋯ σ₂ ≡ t ⋯ σ₂' ⋯ σ₁'}
+  where the induction hypothesis requires \ACode{t' ⋯ σ₁'}.
+
+  %%%%%%%%%%
+
+  In this section, we extend our framework with a single composition
+  operator for arbitrary maps.
 
   Composition of substitutions is important for most language
   formalizations, as it allows to reason about the meaning of applying
@@ -642,26 +803,72 @@
   \AppCode\FComposeTraversal
 
   \section{Types \& Contexts}
-  \subsection{Library}
+  % To define typing contexts and a typing relation, we need to know
+  % which sorts of terms play the role of types for other sorts of terms.
+  % When modeling a typed language with multi-sorted syntax, both terms
+  % and types are represented as terms, but with different sorts.
+  % To define typing contexts and a typing relation, we need to record for each term
+  % from 
+  % describe terms, and ocan be mapped to 
+  % In a typed language,
+
+  In the context of multi-sorted syntax, the notation of a type can be
+  described as a mapping between sorts.
+  For System F, the expression sort \ACode{\ACon{𝕖}} maps to the type sort
+  \ACode{\ACon{𝕥}} and the sort \ACode{\ACon{𝕥}} maps to the kind sort
+  \ACode{\ACon{𝕜}}.
+  To teach our framework about types, we have to instantiate the following structure:
   \LibCode\KTypeSorts
+  For System F the instanciation is
+  \AppCode\FTypes
+  For a nicer interface, we define a type analogously to a term:
   \LibCode\KTypes
+
+  \subsection{Typing Context}
+  A typing context is then a function which maps variables to types.
+  As we want our framework to support dependent types, the types returned by
+  a typing context are allowed to use the domain of the 
+  To be able to deal with dependent types, the result types are only allowed
+  to refer to the variables that come before 
   \LibCode\KContextHelper
   \LibCode\KContexts
   \LibCode\KContextLookup
-  \subsection{System F}
-  \AppCode\FTypes
+
+  \LibCode\KVariableTyping
 
   \section{Typing}
-  % TODO move to typing section
-  The only drawback we found, is that types can now also be indexed
-  with free expression variables, even though types can never contain
-  free variables as assured by the variable constructor. However, this
-  only causes minor issues.
-
-  \subsection{Library}
-  \LibCode\KVariableTyping
+  Equipped with a notion of types and type context we are ready to define
+  the multi-sorted typing relation for System F, incorporating both
+  typing and kinding:
+  \AppCode\FTyping
+  The interesting cases are:
+  \begin{itemize}
+  \item
+    the variable typing constructor covers both expression- and
+    type-variables, analogously to the variable term constructor;
+  \item
+    the typing of the lambda abstraction \ACode{\ACon{⊢λ}} weakens the
+    type of the codomain \ACode{t₂}.
+    This is necessary, because with multi-sorted syntax, types could
+    also depend on expressions, so the sub typing derivation accounts for
+    another variable which is not used by the type.
+  \item
+    the kinding constructor \ACode{\ACon{⊢τ}} states that all types
+    have kind \ACode{\ACon{★}}. This is sufficient for System F as types
+    are automatically well-scoped due to intrinsic scoping.
+  \end{itemize}
+  To teach the framework about typing, we create a structure analogously to
+  \ACode{\ACon{Syntax}}:
   \LibCode\KTyping
+  and instanciate it for System F:
+  \AppCode\FTypingInst
+
+  Next we define \ACode{\ACon{TypingKit}}s, which are analog to
+  \ACode{\ACon{Kit}}s, but abstract about variable and term
+  \emph{typing}, instead of variables and terms, themselves.
+
   \LibCode\KTypingKit
+  \subsection{Library}
   \LibCode\KMapTyping
   \LibCode\KLiftTyping
   % \LibCode\KLiftTypingProof
@@ -672,21 +879,68 @@
   \LibCode\KTypingInstances
   % \LibCode\KTypingTraversalNotation
   \subsection{System F}
-  \AppCode\FTyping
-  \AppCode\FTypingInst
   \AppCode\FPreserve
   \AppCode\FTypingTraversal
 
   \section{Semantics}
-  % \AppCode\FValues
+  We define a standard small-step operational semantics for System F
+  with full reduction:
   \AppCode\FReduction
 
   \section{Subject Reduction}
+  Proving subject reduction is now straightforward:
   \AppCode\FSubjectReduction
   \AppCode\FSubjectReductionProofInteresting
+  We only listed the cases that do not follow directly from the
+  induction hypothesis:
+  \begin{itemize}
+  \item The beta-reduction rule for type-application, \ACode{\ACon{β-Λ}},
+    is a direct consequence of substitution preserves typing.
+    \ACode{⊢e₂} is the typing for \ACode{e₂}.
+    \ACode{⊢⦅ ⊢e₂ ⦆} is the substitution-typing for the singleton substitution 
+    \ACode{\AField{⦅ e₂ ⦆}}.
+    \ACode{\AField{⊢e₁ ⊢⋯ ⊢⦅ ⊢e₂ ⦆}} states that applying the singleton substitution
+    to \ACode{e₁} preserves typing.
+  \item The beta-reduction rule for value-application is almost the same,
+    but requires us to addionaly apply an equality to the type index.
+  \end{itemize}
+
   % \FSubjectReductionProofRest
 
   \section{Reflection \& Generics}
+  We used Agda's reflection mechanism\cite{TODO} to derive
+  instanciations related to all structures for untyped substitition,
+  i.e. \ACode{\ACon{Traversal}} and \ACode{\ACon{ComposeTraversal}}.
+
+  To gain insight into the class of object languages supported by our
+  reflection algorithm, we modeled a class of object languages using a
+  generic programming technique and instanciated the structures
+  generically. The class contains all object languages which:
+  \begin{enumerate}
+  \item Have a variable constructor of type TODO;
+  \item Uses subterms only directly (e.g. not in lists);
+  \item Subterms only extend the scope-context.
+  \end{enumerate}
+
+  Our reflection algorithm derives proofs with exactly the same
+  structure as the generic proof, giving high confidence that it covers
+  the same class of languages.
+
+  The formal definition of the generic class can be found in
+  Appendix~TODO and the actual implementation.
+
+  We were able to describe many languages in this shape, including
+  session types and type state.
+
+  We believe restriction 2 is purely technically and can be lifted
+  with a more sophisticated reflection algorithm, as parameterized
+  datastructures can also be inlined into the syntax definition as terms
+  of a new sort.
+
+  We believe restriction 3 can be lifted partially to allow for
+  example the encoding of linear types that requires context
+  splitting. This has already be done for intrinsical kits\cite{TODO}.
+
 
   \section{Beyond System F}
   \begin{itemize}

@@ -1,6 +1,6 @@
-module Paper.Kits where
+module Paper.Kits2 where
 
---! K >
+--! KXX >
 
 open import Data.Nat using (ℕ; zero; suc)
 open import Data.List using (List; []; _∷_; drop; _++_)
@@ -491,11 +491,11 @@ record Syntax : Set₁ where
 
           --! TypingKit {
           record TypingKit (K : Kit _∋/⊢_) : Set₁ where
-            private instance _ = K
-            --! [
             infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
             infixl  6  _∋↑/⊢↑_
-            --! ]
+
+            private instance _ = K
+
             field
               _∋/⊢_∶_      : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
               ∋/⊢∶-lookup  :  ∀ {Γ : Ctx S} (x : S ∋ s) →

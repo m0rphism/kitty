@@ -109,21 +109,28 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
     prefixes = []
     mode = "none"
     stop_command_on_empty_line = False
+    opt = ""
     def start_command(name, is_inline):
-        global mode, tgt, prefixes
+        global mode, tgt, prefixes, opt
         for p in prefixes:
             name = p + name
         commands.append(name)
         if mode == "hide":
             tgt += "\\end{code}\n"
         elif mode == "command":
-            print(f"ERROR: Line {line_num} starts a nested command:\n  {line}")
+            print(f"ERROR: Line {line_num+1} starts a nested command:\n  {line}")
         mode = "command"
         opt = "[inline]" if is_inline else ""
-        tgt += "\\newcommand*\\" + name + "{\\begin{code}" + opt + "\n"
+        tgt += "\\newcommand*\\" + name + "{"
+        tgt += "\\begin{AgdaAlign}"
+        tgt += "\\begin{AgdaSuppressSpace}"
+        tgt += "\\begin{code}" + opt + "\n"
     def stop_command():
         global mode, tgt, prefixes
-        tgt += "\\end{code}}\n"
+        tgt += "\\end{code}"
+        tgt += "\\end{AgdaSuppressSpace}"
+        tgt += "\\end{AgdaAlign}"
+        tgt += "}\n"
         mode = "none"
     for line_num, line in enumerate(src.splitlines()):
         l = line.strip()
@@ -145,11 +152,26 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
                 prefixes.append(l.split(" ", 1)[0])
             elif "<" in l:
                 prefixes.pop()
+            elif "[" in l:
+                if mode == "command":
+                    mode = "hide"
+                    tgt += "\\end{code}\n"
+                    tgt += "\\begin{code}[hide]\n"
+                else:
+                    print(f"ERROR: Line {line_num+1} starts a hiding block outside of a command:\n  {line}")
+                    sys.exit(1)
+            elif "]" in l:
+                if mode == "hide":
+                    mode = "command"
+                    tgt += "\\end{code}\n"
+                    tgt += "\\begin{code}" + opt + "\n"
+                else:
+                    print(f"ERROR: Line {line_num+1} stops a hiding block outside of hiding mode:\n  {line}")
             else:
                 name = l.split(" ", 1)[0]
                 start_command(name, is_inline)
                 stop_command_on_empty_line = True
-                # print(f"ERROR: Line {line_num} contains invalid agdatex command:\n  {line}")
+                # print(f"ERROR: Line {line_num+1} contains invalid agdatex command:\n  {line}")
         elif line.strip() == "":
             if mode == "command" and stop_command_on_empty_line:
                 stop_command_on_empty_line = False

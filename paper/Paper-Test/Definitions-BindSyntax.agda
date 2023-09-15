@@ -41,7 +41,7 @@ private variable
 
 open import Data.List using (_++_)
 
---! Syntax
+--! SyntaxDef
 data _⊢_ : List (Sort Var) → Sort st → Set where
   `_        : S ∋ s → S ⊢ s                -- Term and Type Variables
   `λ_       : S ⊢ 𝕓 𝕖 𝕖 → S ⊢ 𝕖          -- Term Abstraction
@@ -61,15 +61,15 @@ variable
 
 -- Substitution & Lemmas -------------------------------------------------------
 
---! Terms {
-terms : Terms
-terms = record
+--! Syntax {
+fsyntax : Syntax
+fsyntax = record
   { Sort         = Sort
   ; _⊢_          = _⊢_
   ; `_           = `_
   ; `-injective  = λ { refl → refl } }
 
-open Terms terms hiding (Sort; _⊢_; `_)
+open Syntax fsyntax hiding (Sort; _⊢_; `_)
 --! }
 
 --! TraversalOp

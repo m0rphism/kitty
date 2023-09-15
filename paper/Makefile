@@ -8,19 +8,12 @@ EXTRA_FILES=$(wildcard *.bib *.cls *.sty *.tex)
 SRCS=$(wildcard $(SRC_DIR)/*.agda)
 TGTS=$(patsubst $(SRC_DIR)/%.agda,$(CACHE_DIR)/$(SRC_DIR)/%.tex,$(SRCS))
 
-.PHONY: all paper
+.PHONY: all paper fast fast2
 
 all: paper
 
 # Run pdflatex only once
 fast: $(FAST_PDF)
-
-# FIXME: workaround for make suddenly always rerunning agdatex...
-fast2: $(MAIN_TEX)
-	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex
-	cp -f $(EXTRA_FILES) $(CACHE_DIR)/
-	cd $(CACHE_DIR); pdflatex main.tex
-	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
 
 # Run pdflatex, then bibtex, then two times pdflatex
 paper: $(FAST_PDF)
@@ -34,4 +27,5 @@ $(FAST_PDF): $(TGTS) $(MAIN_TEX)
 	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
 
 $(TGTS): $(SRCS)
+	echo $(TGTS)
 	./agdatex.py -o $(CACHE_DIR) $(SRCS)

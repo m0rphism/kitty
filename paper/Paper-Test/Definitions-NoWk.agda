@@ -1,6 +1,6 @@
-module Paper.Definitions where
+module Paper.Definitions-NoWk where
 
---! F >
+--! FXX >
 
 open import Paper.Kits
 open import Data.List using (List; []; _∷_)
@@ -40,7 +40,7 @@ data _⊢_ : List (Sort Var) → Sort st → Set where
   ∀[α∶_]_   : S ⊢ 𝕜 → (𝕥 ∷ S) ⊢ 𝕥 → S ⊢ 𝕥  -- Univ Quant
   _·_       : S ⊢ 𝕖 → S ⊢ 𝕖 → S ⊢ 𝕖        -- Expr Application
   _∙_       : S ⊢ 𝕖 → S ⊢ 𝕥 → S ⊢ 𝕖        -- Type Application
-  _⇒_       : S ⊢ 𝕥 → S ⊢ 𝕥 → S ⊢ 𝕥        -- Function Type
+  _⇒_       : S ⊢ 𝕥 → (𝕖 ∷ S) ⊢ 𝕥 → S ⊢ 𝕥   -- Function Type
   ★         : S ⊢ 𝕜                        -- Type Kind
 
 private variable
@@ -82,7 +82,7 @@ _⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ �
 (∀[α∶ t₁ ] t₂)  ⋯ ϕ = ∀[α∶ t₁ ⋯ ϕ ] (t₂ ⋯ (ϕ ↑ 𝕥))
 (t₁ · t₂)       ⋯ ϕ = (t₁ ⋯ ϕ) · (t₂ ⋯ ϕ)
 (t₁ ∙ t₂)       ⋯ ϕ = (t₁ ⋯ ϕ) ∙ (t₂ ⋯ ϕ)
-(t₁ ⇒ t₂)       ⋯ ϕ = (t₁ ⋯ ϕ) ⇒ (t₂ ⋯ ϕ)
+(t₁ ⇒ t₂)       ⋯ ϕ = (t₁ ⋯ ϕ) ⇒ (t₂ ⋯ (ϕ ↑ 𝕖))
 ★               ⋯ ϕ = ★
 
 --! TraversalId
@@ -104,17 +104,21 @@ _⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ �
   t₂ ⋯ id        ≡⟨ ⋯-id t₂ ⟩
   t₂             ∎)
 ⋯-id (t₁ ∙ t₂)       = cong₂ _∙_ (⋯-id t₁) (⋯-id t₂)
-⋯-id (t₁ ⇒ t₂)       = cong₂ _⇒_ (⋯-id t₁) (⋯-id t₂)
+⋯-id (t₁ ⇒ t₂)       = cong₂ _⇒_ (⋯-id t₁) (
+  t₂ ⋯ (id ↑ 𝕖)  ≡⟨ cong (t₂ ⋯_) (~-ext id↑~id) ⟩
+  t₂ ⋯ id        ≡⟨ ⋯-id t₂ ⟩
+  t₂             ∎)
 ⋯-id ★               = refl
 
---! Traversal
-SystemF-Traversal : Traversal
-SystemF-Traversal = record
+--! Traversal {
+traversal : Traversal
+traversal = record
   { _⋯_    = _⋯_
   ; ⋯-var  = λ x ϕ → refl
   ; ⋯-id   = ⋯-id }
 
-open Traversal SystemF-Traversal hiding (_⋯_; ⋯-id)
+open Traversal traversal hiding (_⋯_; ⋯-id)
+--! }
 
 --! Assoc
 ⋯-assoc :
@@ -150,23 +154,29 @@ open Traversal SystemF-Traversal hiding (_⋯_; ⋯-id)
 ⋯-assoc (t₁ ∙ t₂)      ϕ₁ ϕ₂ =
   cong₂ _∙_ (⋯-assoc t₁ ϕ₁ ϕ₂) (⋯-assoc t₂ ϕ₁ ϕ₂)
 ⋯-assoc (t₁ ⇒ t₂)      ϕ₁ ϕ₂ =
-  cong₂ _⇒_ (⋯-assoc t₁ ϕ₁ ϕ₂) (⋯-assoc t₂ ϕ₁ ϕ₂)
+  cong₂ _⇒_ (⋯-assoc t₁ ϕ₁ ϕ₂) (
+    (t₂ ⋯ (ϕ₁ ↑ 𝕖)) ⋯ (ϕ₂ ↑ 𝕖)
+      ≡⟨ ⋯-assoc t₂ (ϕ₁ ↑ 𝕖) (ϕ₂ ↑ 𝕖) ⟩
+    t₂ ⋯ ((ϕ₁ ↑ 𝕖) ·ₖ (ϕ₂ ↑ 𝕖))
+      ≡⟨ cong (t₂ ⋯_) (sym (~-ext (dist-↑-· 𝕖 ϕ₁ ϕ₂))) ⟩
+    t₂ ⋯ ((ϕ₁ ·ₖ ϕ₂) ↑ 𝕖)
+      ∎)
 ⋯-assoc ★              ϕ₁ ϕ₂ = refl
 
---! ComposeTraversal
-SystemF-CTraversal : ComposeTraversal
-SystemF-CTraversal = record { ⋯-assoc = ⋯-assoc }
+--! ComposeTraversal {
+compose-traversal : ComposeTraversal
+compose-traversal = record { ⋯-assoc = ⋯-assoc }
 
-open ComposeTraversal SystemF-CTraversal hiding (⋯-assoc)
+open ComposeTraversal compose-traversal hiding (⋯-assoc)
+--! }
 
 -- Type System -----------------------------------------------------------------
 
 --! Types
-SystemF-Types : Types
-SystemF-Types = record
-  { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → _ , 𝕜 } }
+types : Types
+types = record { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → _ , 𝕜 } }
 
-open Types SystemF-Types
+open Types types
 
 private variable
   Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx S
@@ -178,13 +188,14 @@ data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
          Γ ∋ x ∶ T →
          Γ ⊢ ` x ∶ T
   ⊢λ  :  ∀ {e : (𝕖 ∷ S) ⊢ 𝕖} →
-         (t₁ ∷ₜ Γ) ⊢ e ∶ (wk _ t₂) →
+         (t₁ ∷ₜ Γ) ⊢ e ∶ t₂ →
          Γ ⊢ λx e ∶ t₁ ⇒ t₂
   ⊢Λ  :  (k ∷ₜ Γ) ⊢ e ∶ t₂ →
          Γ ⊢ Λα e ∶ ∀[α∶ k ] t₂
-  ⊢·  :  Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →
+  ⊢·  :  ∀ {t₂ : (𝕖 ∷ S) ⊢ 𝕥} →
+         Γ ⊢ e₁ ∶ t₁ ⇒ t₂ →
          Γ ⊢ e₂ ∶ t₁ →
-         Γ ⊢ e₁ · e₂ ∶ t₂
+         Γ ⊢ e₁ · e₂ ∶ t₂ ⋯ ⦅ e₂ ⦆
   ⊢∙  :  {Γ : Ctx S} →
          (k₂ ∷ₜ Γ) ⊢ t₁ ∶ k₁ →
          Γ ⊢ t₂ ∶ k₂ →
@@ -193,38 +204,37 @@ data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
   ⊢τ  :  Γ ⊢ t ∶ ★
 
 --! TypingInst
-SystemF-Typing : Typing
-SystemF-Typing = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
+typing : Typing
+typing = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 
-open Typing SystemF-Typing hiding (_⊢_∶_; ⊢`) 
+open Typing typing hiding (_⊢_∶_; ⊢`) 
 
 --! Preserve
 _⊢⋯_ :
   ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
     ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
     ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
-    ⦃ TK : TypingKit K ⦄
+    ⦃ TK : TypingKit K W C₁ C₂ ⦄
     {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
     {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
   Γ₁ ⊢ e ∶ t →
   Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
 ⊢` ⊢x ⊢⋯ ⊢ϕ = ⊢`/id (⊢ϕ _ _ ⊢x)
-⊢λ {t₂ = t₂} ⊢e ⊢⋯ ⊢ϕ = ⊢λ (subst  (_ ⊢ _ ∶_)
-                                   (sym (⋯-↑-wk t₂ _ _))
-                                   (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)))
+⊢λ {t₂ = t₂} ⊢e ⊢⋯ ⊢ϕ = ⊢λ (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _))
 ⊢Λ ⊢e ⊢⋯ ⊢ϕ = ⊢Λ (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _))
-⊢· ⊢e₁ ⊢e₂ ⊢⋯ ⊢ϕ = ⊢· (⊢e₁ ⊢⋯ ⊢ϕ) (⊢e₂ ⊢⋯ ⊢ϕ)
+⊢· ⊢e₁ ⊢e₂ ⊢⋯ ⊢ϕ = subst (_ ⊢ _ ∶_) {!!} (⊢· (⊢e₁ ⊢⋯ ⊢ϕ) (⊢e₂ ⊢⋯ ⊢ϕ))
 ⊢∙ {t₁ = t₁} {t₂ = t₂} ⊢t₁ ⊢t₂ ⊢e₁ ⊢⋯ ⊢ϕ =
   subst  (_ ⊢ _ ∶_) (sym (dist-↑-⦅⦆-⋯ t₁ t₂ _))
          (⊢∙ (⊢t₁ ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)) (⊢t₂ ⊢⋯ ⊢ϕ) (⊢e₁ ⊢⋯ ⊢ϕ))
 ⊢τ ⊢⋯ ⊢ϕ = ⊢τ
 
---! TypingTraversal
-SystemF-TTraversal : TypingTraversal
-SystemF-TTraversal = record { _⊢⋯_ = _⊢⋯_ }
+--! TypingTraversal {
+typing-traversal : TypingTraversal
+typing-traversal = record { _⊢⋯_ = _⊢⋯_ }
 
-open TypingTraversal SystemF-TTraversal hiding (_⊢⋯_)
+open TypingTraversal typing-traversal hiding (_⊢⋯_)
+--! }
 
 -- Semantics -------------------------------------------------------------------
 
@@ -257,7 +267,7 @@ data _↪_ : S ⊢ s → S ⊢ s → Set where
 subject-reduction : Γ ⊢ e ∶ t → e ↪ e' → Γ ⊢ e' ∶ t
 --! SubjectReductionProofInteresting
 subject-reduction (⊢· {t₂ = t₂} (⊢λ ⊢e₁) ⊢e₂) β-λ =
-  subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆-⋯ t₂ _) (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆ₛ)
+  ⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆ₛ
 subject-reduction (⊢∙ ⊢t₁ ⊢t₂ (⊢Λ ⊢e₁)) β-Λ =
   ⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢t₂ ⦆ₛ
 --! SubjectReductionProofRest
@@ -268,7 +278,8 @@ subject-reduction (⊢Λ ⊢e) (ξ-Λ e↪e') =
 subject-reduction (⊢· ⊢e₁ ⊢e₂) (ξ-·₁ e₁↪e₁') =
   ⊢· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (⊢· ⊢e₁ ⊢e₂) (ξ-·₂ e₂↪e₂') =
-  ⊢· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
+  {!⊢· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')!}
+  -- ⊢· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')
 subject-reduction (⊢∙ ⊢t₁ ⊢t₂ ⊢e₁) (ξ-∙₁ e₁↪e₁') =
   ⊢∙ ⊢t₁ ⊢t₂ (subject-reduction ⊢e₁ e₁↪e₁')
 

@@ -483,19 +483,21 @@ record Syntax : Set₁ where
         record Typing : Set₁ where
           infix   4  _⊢_∶_
           field
-            _⊢_∶_ : ∀ {s : Sort st} → Ctx S → S ⊢ s → S ∶⊢ s → Set
+            _⊢_∶_ : ∀ {S t} {s : Sort t} → Ctx S → S ⊢ s → S ∶⊢ s → Set
 
-            ⊢` : ∀ {Γ : Ctx S} {x : S ∋ s} {t} →
+            ⊢` : ∀ {S s} {Γ : Ctx S} {x : S ∋ s} {t} →
                 Γ ∋ x ∶ t → Γ ⊢ ` x ∶ t
         --! }
 
           --! TypingKit {
-          record TypingKit (K : Kit _∋/⊢_) : Set₁ where
-            private instance _ = K
-            --! [
+          record TypingKit
+              (K : Kit _∋/⊢_) (W : WkKit K)
+              (C₁ : ComposeKit K Kᵣ K) (C₂ : ComposeKit K K K) : Set₁ where
             infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
             infixl  6  _∋↑/⊢↑_
-            --! ]
+
+            private instance _ = K; _ = W; _ = C₁; _ = C₂
+
             field
               _∋/⊢_∶_      : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
               ∋/⊢∶-lookup  :  ∀ {Γ : Ctx S} (x : S ∋ s) →
@@ -517,9 +519,7 @@ record Syntax : Set₁ where
               → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
 
             --! LiftTyping
-            _∋↑/⊢↑_ :
-              ⦃ W : WkKit K ⦄ ⦃ C₁ : ComposeKit K Kᵣ K ⦄
-              {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} →
+            _∋↑/⊢↑_ : {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} →
               Γ₂             ∋*/⊢* ϕ       ∶ Γ₁ →
               (t : S₁ ∶⊢ s) →
               ((t ⋯ ϕ) ∷ₜ Γ₂) ∋*/⊢* (ϕ ↑ s) ∶ (t ∷ₜ Γ₁)
@@ -560,8 +560,10 @@ record Syntax : Set₁ where
 
           infixl  5  _∋*/⊢*[_]_∶_
           _∋*/⊢*[_]_∶_ :
-            ∀ {K : Kit _∋/⊢_} {S₁ S₂}
-            → Ctx S₂ → TypingKit K → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
+            ∀ {K : Kit _∋/⊢_} {W : WkKit K}
+              {C₁ : ComposeKit K Kᵣ K} {C₂ : ComposeKit K K K}
+              {S₁ S₂}
+            → Ctx S₂ → TypingKit K W C₁ C₂ → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
           Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ = Γ₂ ∋*/⊢* ϕ ∶ Γ₁ where instance _ = TK
           --! }
 
@@ -574,8 +576,7 @@ record Syntax : Set₁ where
                          ⦃ C₁ : ComposeKit K Kᵣ K ⦄
                          ⦃ C₂ : ComposeKit K K K ⦄
                          ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
-                         -- ⦃ TK : TypingKit K W C₁ C₂ ⦄
-                         ⦃ TK : TypingKit K ⦄
+                         ⦃ TK : TypingKit K W C₁ C₂ ⦄
                          {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
                          {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
                       Γ₁ ⊢ e ∶ t →
@@ -585,7 +586,7 @@ record Syntax : Set₁ where
 
             --! TypingInstances {
             instance
-              TKᵣ : TypingKit Kᵣ
+              TKᵣ : TypingKit Kᵣ Wᵣ Cᵣ Cᵣ
               TKᵣ = record
                 { _∋/⊢_∶_     = _∋_∶_
                 ; ∋/⊢∶-lookup = λ x → refl
@@ -593,7 +594,7 @@ record Syntax : Set₁ where
                 ; ⊢`/id       = ⊢`
                 ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl } }
 
-              TKₛ : TypingKit Kₛ
+              TKₛ : TypingKit Kₛ Wₛ Cₛ Cₛ
               TKₛ = record
                 { _∋/⊢_∶_     = _⊢_∶_
                 ; ∋/⊢∶-lookup = λ x → ⊢` refl
