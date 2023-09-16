@@ -130,9 +130,9 @@
 
   With \emph{intrinsic typing}, the definitions of syntax and typing
   are merged into a single definition of well-typed terms.
-  Consequently, operations on terms have to map
-  well-typed terms to well-typed terms proving that the
-  operations preserve typing.
+  Consequently, the definition of an operation on terms also acts
+  as a type preservation lemma for that operation, as it has to
+  map well-typed terms to well-typed terms.
   For example, the definition of substitution
   also acts as a proof that substitution preserves typing, and the
   definition of a small-step semantics also acts as a proof for subject
@@ -145,6 +145,8 @@
   are kept separately: the syntax is defined first, and then typing is
   defined as a relation. Consequently, operations on terms and
   their type preservation lemmas are also separate entities.
+  However, hope is not lost for extrinsic typing to keep up with the
+  conciseness of intrinsic typing: 
   While extrinsic typing cannot eliminate the shared structure between
   definitions and preservation lemmas, it can automated by reflection
   or generic programming techniques, leaving only the preservation lemmas
