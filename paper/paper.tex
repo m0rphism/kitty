@@ -204,6 +204,7 @@
   \maketitle
 
   \section{Introduction}
+  \label{sec:introduction}
   In recent years intrinsic typing\cite{TODO} has become rather popular.
   A consequence of intrinsic typing is that operations on terms
   are also proofs that the operations preserve typing.
@@ -247,66 +248,103 @@
   for metatheory.
 
   \subsection{Structure}
+  \label{sec:introduction:structure}
   The rest of this paper will introduce our framework using System F
   as a running example for a type soundness proof.
 
   Code of the framework is displayed in gray boxes.
   Code of examples is written in yellow boxes.
-  Code of the System F formalization is written without boxes. This is
-  the only code a user of our framework has to write.
+  Code of the System F formalization is written without boxes. The
+  latter is the only code a user of our framework has to write.
 
-  In the paper we state all definitions and lemmas, but omit some proofs
-  in the interest of space. However the omitted proofs exclusively
-  depend on lemmas and definitions stated in this paper. The full code
-  from the paper can be found at TODO.
+  In this paper we present a simplified version of the actual
+  framework, focusing on the core concepts. We present all necessary
+  definitions and lemmas, but omit some proofs for the sake of
+  space. The omitted proofs can be found in Appendix~{TODO} and the
+  supplementary material. The full framework can be found at TODO.
 
-  In the paper we only show the part of the framework necessary for
-  the System F soundness proof. The actual implementation is more
-  general and complete and can be found at TODO.
+  The rest of this paper is structured as followed:
+  Section~\ref{sec:syntax} introduces the multi-sorted syntax and compares it to the
+  more common unsorted syntax.
+  Section~\ref{sec:maps} introduces multi-sorted substitutions and renamings, and
+  an abstraction to unify them.
+  Section~\ref{sec:composition} introduces composition of multi-sorted
+  substitions and renamings, and an abstraction to unify all four
+  compositions.
+  Section~\ref{sec:types} shows how to introduce the notion of types
+  for multi-sorted syntax and how to define typing contexts.
+  Section~\ref{sec:typing} shows how to define a multi-sorted typing relation,
+  and an abstraction to unify type preservattion lemmas for renamings and substitutions.
+  Section~\ref{sec:semantics} introduces a small-step operational semantics for System F.
+  Section~\ref{sec:subjectreduction} proves the subject reduction lemma for System F.
+  Section~\ref{sec:reflection} describes the class of object languages covered by
+  our reflection algorithm.
+  Section~\ref{sec:beyond} describes case studies of object languages beyond System F.
+  Section~\ref{sec:future} describes future work.
+  Section~\ref{sec:related} discusses related work.
+  Section~\ref{sec:conclusion} concludes.
 
   \subsection{Contributions}
+  \label{sec:introduction:contributions}
   \begin{enumerate}
   \item
-    a multi-sorted approach to extrinsic typing;
+    a novel approach for formalizing intrinsically-scoped syntax with
+    multiple variable sorts as a special kind of intrinsically-typed
+    syntax, we call \emph{multi-sorted syntax};
   \item
-    a multi-sorted extension of McBride's kits to unify renamings and substitutions and their metatheory;
+    an adaptation of McBride's kit-abstraction for unifying renamings
+    and substitutions to multi-sorted syntax;
   \item
-    an abstraction for composition and it's metatheory, unifying the four combinations of renamings and substitutions;
+    a novel abstraction for composition and it's metatheory, unifying
+    the four compositions between renamings and substitutions;
   \item
-    an abstraction for typing relations, unifying type preservation of renaming and substitution into a single lemma;
+    a novel abstraction for typing relations, unifying type
+    preservation of renaming and substitution;
   \item
-    an Agda-implementation featuring derived term-kits, representation
-    independence for substitutions and typing contexts, heterogeneous
-    equality, independence of functional extensionality, case studies
-    on System F, dependent lambda calculus, pattern matching, linear
-    types.
+    a formalized specification of a large class of object languages
+    for which substitution and lemmas can be derived generically.
+  \item
+    an implementation of the concepts as framework in Agda featuring
+    a reflection algorithm, representation independence for
+    substitutions and typing contexts, heterogeneous equality between
+    renamings and substitutions, and free of postulated axioms.
+  \item
+    three case studies using our approach to prove subject reduction
+    for System~F with subtyping, a dependently-typed lambda calculus, and
+    pattern matching.
   \end{enumerate}
 
-  \newpage
-
   \section{Syntax}
+  \label{sec:syntax}
   \subsection{Single-Sorted Syntax}
+  \label{sec:syntax:single}
   The following shows a typical intrinsically-scoped syntax of System F:
   \ExampleCode\FUnsortedSyntax
 
-  \texttt{Type}s are indexed by the number of free type variables \texttt{n}.
-  \texttt{Expr}essions are additionally indexed by the number of free expression variables \texttt{m}.
-  Variables \texttt{`\_} are represented as DeBruijn-indices, where \texttt{Fin n} is the type of \texttt{n} elements.
+  \ACode{\ACon{Type}}s are indexed by the number of free type
+  variables \ACode{n}.
+  \ACode{\ACon{Expr}}essions are additionally indexed by the number of
+  free expression variables \ACode{m}.
+  Variables \ACode{\ACon{`\_}} are represented as DeBruijn-indices, where
+  \ACode{\ACon{Fin} n} is the type of \ACode{n} elements.
 
   We identify two drawbacks with this style of syntax:
   \begin{enumerate}
-  \item the syntactic categories (\texttt{Kind}, \texttt{Type}, and \texttt{Expr})
+  \item
+    the syntactic categories (\ACode{\ACon{Kind}},
+    \ACode{\ACon{Type}}, and \ACode{\ACon{Expr}})
     have different types, which makes it difficult to treat them uniformly; and
   \item the different sorts of variables are modeled separately, which requires to define not just
     type-in-type and expression-in-expression substitution, but also type-in-expression substitution.
     Consequently, interaction lemmas between those substitutions are required.
     In general, this leads to a combinatory explosion of
     substitutions, e.g.\ adding kind variables would lead to a total of 6
-    different substitutions.
+    different substitutions and corresponding interaction lemmas.
   \end{enumerate}
   To avoid these drawbacks, we instead use a multi-sorted syntax.
 
   \subsection{Multi-Sorted Syntax}
+  \label{sec:syntax:multi}
   A multi-sorted syntax is defined by a single type of sort-indexed terms.
 
   A sort describes to which syntactic category a term belongs and is
@@ -319,7 +357,6 @@
   \ACode{s} and the sorts of its free variables \ACode{S}.
   For example, \ACode{\ACon{[𝕥, 𝕥] ⊢ 𝕖}} is the type of expressions
   (\ACode{\ACon{𝕖}}) with two free type-variables (\ACode{\ACon{𝕥}}).
-  \newpage
   \AppCode\FSyntax
   The notation \ACode{\ACon{\_⊢\_}} is often used for terms in
   intrinsically-typed languages. This is no accident: in effect, we
@@ -348,6 +385,7 @@
   % \ACode{\ACon{𝕜}}.
 
   \subsection{A Structure for Multi-Sorted Syntax}
+  \label{sec:syntax:structure}
   The multi-sorted syntax makes it easy to define a structure for
   syntaxes of arbitrary object-languages, i.e.\ syntaxes with
   arbitrary amounts of syntactic categories and variables:
@@ -360,7 +398,9 @@
   \AppCode\FSyntaxInst
 
   \section{Renamings \& Substitutions}
+  \label{sec:maps}
   \subsection{Multi-Sorted Renamings \& Substitutions}
+  \label{sec:maps:example}
   Working with a sort-indexed syntax allows us to define renamings and substitutions
   that replace all variables of all sorts simultaneously:
 
@@ -382,6 +422,7 @@
   substitution, because both are simply substitutions.
 
   \subsection{The Need for Renamings}
+  \label{sec:maps:renamings}
   A problem with mechanizing languages with DeBruijn-indices is that
   the operation of applying a substitution \ACode{σ} to a term
   \ACode{t} cannot be defined directly by structural recursion on
@@ -416,6 +457,7 @@
   to be defined and proved for both renamings and substitutions.
 
   \subsection{Unifying Renamings \& Substitutions}
+  \label{sec:maps:kits}
   To avoid the duplication between renamings and substitutions,
   McBride\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
   introduced an abstraction called \emph{kits}.\footnote{
@@ -605,6 +647,7 @@
   % \LibCode\KKitOpen
 
   \section{Map Composition}
+  \label{sec:composition}
 
   % - Reason about multiple applications in terms of a single application
   % - e.g. wk-cancels-⦅⦆ or dist-↑-⦅⦆, often important for induction hypothesis
@@ -679,6 +722,7 @@
   lemma.
 
   \subsection{An Examination of Composition}
+  \label{sec:composition:example}
   To motivate our abstraction for composition, we first look
   at the four compositions individually:
   \ExampleCode\KExFourComps
@@ -725,6 +769,7 @@
 
   
   \subsection{WkKits}
+  \label{sec:composition:wkkit}
 
   In the definition of \ACode{\ACon{Kit}} we required the axiom
   \ACode{\AField{wk-id/`}}, which captured the interaction between
@@ -756,6 +801,7 @@
   not require application code.
 
   \subsection{Composition}
+  \label{sec:composition:ckit}
 
   Using the \ACode{\ACon{WkKit}}, we then define
   the \ACode{\ACon{ComposeKit}} and \ACode{\ACon{ComposeTraversal}}
@@ -803,6 +849,7 @@
   \AppCode\FComposeTraversal
 
   \section{Types \& Contexts}
+  \label{sec:types}
   % To define typing contexts and a typing relation, we need to know
   % which sorts of terms play the role of types for other sorts of terms.
   % When modeling a typed language with multi-sorted syntax, both terms
@@ -837,6 +884,7 @@
   \LibCode\KVariableTyping
 
   \section{Typing}
+  \label{sec:typing}
   Equipped with a notion of types and type context we are ready to define
   the multi-sorted typing relation for System F, incorporating both
   typing and kinding:
@@ -905,12 +953,22 @@
   \AppCode\FPreserve
   \AppCode\FTypingTraversal
 
+  As the \ACode{\ACon{Traversal}} and  \ACode{\ACon{ComposeTraversal}} instances
+  can be generally derived via reflection,
+  the \ACode{\AField{\_⊢⋯\_}} lemma is in fact the only lemma that
+  has to been proved manually for subject reduction.
+  From this single lemma follows type preservation for all operations
+  of both renamings and substitutions for all sorts of variables
+  simultaneously.
+
   \section{Semantics}
+  \label{sec:semantics}
   We define a standard small-step operational semantics for System F
   with full reduction:
   \AppCode\FReduction
 
   \section{Subject Reduction}
+  \label{sec:subjectreduction}
   Proving subject reduction is now straightforward:
   \AppCode\FSubjectReduction
   \AppCode\FSubjectReductionProofInteresting
@@ -931,6 +989,7 @@
   % \FSubjectReductionProofRest
 
   \section{Reflection \& Generics}
+  \label{sec:reflection}
   We used Agda's reflection mechanism\cite{TODO} to derive
   instanciations related to all structures for untyped substitition,
   i.e. \ACode{\ACon{Traversal}} and \ACode{\ACon{ComposeTraversal}}.
@@ -966,6 +1025,7 @@
 
 
   \section{Beyond System F}
+  \label{sec:beyond}
   \begin{itemize}
   \item
     Binders with multiple variables are supported and even pattern
@@ -975,19 +1035,26 @@
   \end{itemize}
 
   \section{Future Work}
+  \label{sec:future}
   \begin{itemize}
   \item
     Enabling more object languages by allowing subterms with less
     restrictions on the form of \ACode{S}.
+  \item
+    Providing abstractions not just for type-preservation, but also
+    for different kinds of semantics, e.g. confluence or lemmas related
+    to denotational semantics.
   \end{itemize}
 
   \section{Related Work}
+  \label{sec:related}
   Autosubst \cite{DBLP:conf/cpp/StarkSK19, DBLP:conf/itp/SchaferTS15}.
   Kits \cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}.
   Kits linear \cite{DBLP:journals/corr/abs-2005-02247}.
   Universe \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
 
   \section{Conclusion}
+  \label{sec:conclusion}
 
   % \bibliographystyle{ACM-Reference-Format}
   \bibliography{paper}
