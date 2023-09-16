@@ -84,6 +84,7 @@
 \newcommand*\ADef[1]{\AgdaFunction{#1}}
 
 \begin{document}
+
   \begin{abstract}
     Formalizing a typed programming language in a proof assistant
     requires to choose representations for variables and typing.
@@ -118,99 +119,26 @@
     calculus with pattern matching.
   \end{abstract}
 
-  % \begin{abstract}
-  %   Formalizing a typed programming language in a proof assistant
-  %   requires to choose between an extrinsic and an intrinsic
-  %   representation of typing.
-  %   \emph{Extrinsic} typing means to separately define a set of
-  %   untyped terms and a typing relation.
-  %   \emph{Intrinsic} typing means to directly define a set of well-typed terms,
-  %   incorporating the typing relation into the syntax definition.
-
-  %   One consequence of intrinsic typing is that operations on terms
-  %   are also proofs that the operations preserve typing.
-  %   This often leads to less code, as shared structure between
-  %   definitions and preservation lemmas does not need to be repeated,
-  %   but has the drawback that specification and proofs are
-  %   intertwined, making it more difficult to check if a specification is
-  %   correct.
-  % \end{abstract}
-
-  % \begin{abstract}
-  %   Formalizing a typed programming language in a proof assistant
-  %   requires to choose between an extrinsic and intrinsic representation of typing.
-  %   For extrinsic typing, 
-  %   There are two approaches to formalizing the syntax of typed object languages
-  %   in proof assistants. The extrinsic approach defines
-  %   object terms and typing relation separately, whereas the
-  %   instrinsic approach only defines well-typed terms.
-
-  %   This paper describes an Agda framework for deriving substitution
-  %   operations and lemmas for syntaxes with extrinsic typing,
-  %   intrinsic scoping, and DeBruijn Indices as variable representation.
-
-  %   This paper describes an Agda framework for formalizing programming
-  %   languages with extrinsic typing, intrinsic scoping, and DeBruijn
-  %   Indices as variable representation. The key feature of the
-  %   framework 
-  %   all sorts of object variables.
-  %   Agda's reflection mechanism is used to derive 
-  %   substitution properties for a
-  %   large class of syntaxes and only requires user code for to prove that the 
-
-  %   framework is to deal with multiple sorts of variables in a uniform way
-  % \end{abstract}
-
-  % \begin{abstract}
-  %   Variable binding and substitution are central concepts in the formalization
-  %   of programming languages in proof assistants. 
-  %   % Many different representations of variables have been developed with different
-  %   % trade-offs on proof simplicity, clarity, and reduction of boilerplate.
-  %   A common approach is to represent variables as DeBruijn Indices
-  %   and to define substitution in terms of variable renamings for the sake
-  %   of structural induction.
-  % \end{abstract}
-
-  % \begin{abstract}
-  %   Variable binding and substitution are a long-standing nuisance for mechanized
-  %   metatheory of programming languages. A common approach is to represent
-  %   variables as DeBruijn Indices, where substitution is defined in terms of
-  %   variable renaming. If a language has $n$ different kinds of variables, and
-  %   $m$ different kinds of terms, we potentially need to define both
-  %   renaming and substitution for all $m\cdot n$ combinations and prove the
-  %   theory of those operations both in isolation and with respect to each other.
-
-  %   % McBride introduced kits to define both substitution and renaming by a
-  %   % single term traversal for intrinsically typed terms.\cite{mcbride2005kits}
-
-  %   We propose a technique to derive the implementation and metatheory of
-  %   renaming and substitution for all $m\cdot n$ combinations of variables and terms
-  %   from a single term traversal and three simple lemmas for extrinsically typed
-  %   but intrinsically scoped terms.
-  %   We demonstrate this technique by formalizing type soundness of System F with
-  %   very parallel substitutions, which replace both type and term variables at
-  %   once, enabling a single substitution-preserves-typing lemma.
-  %   We provide a well-documented implementation of the technique as an Agda
-  %   library.
-
-  %   As the technique is based on extrinsic typing, the metatheory of renaming
-  %   and substitution is decoupled from type preservation.
-  %   This has the downside, that type preservation of renaming and substitution
-  %   are not for free, but also the upside, that the library can be directly
-  %   instantiated for object languages with non-standard typing relations like
-  %   dependent types, type state, or resource environments.
-  % \end{abstract}
-
   \maketitle
 
   \section{Introduction}
   \label{sec:introduction}
-  In recent years intrinsic typing\cite{TODO} has become rather popular.
-  A consequence of intrinsic typing is that operations on terms
-  are also proofs that the operations preserve typing.
-  This often has the benefit of more concise code, as shared structure
-  between definitions and preservation lemmas does not need to be
-  repeated.
+
+  Formalizing a typed programming language in a proof assistant
+  requires to choose between an extrinsic and intrinsic representation
+  of typing.
+
+  With \emph{intrinsic typing}, the definitions of syntax and typing
+  are merged into a single definition of well-typed terms.
+  Consequently, operations on terms have to map
+  well-typed terms to well-typed terms proving that they preserve typing.
+  For example, in an intrinsic setting, the definition of substitution
+  also acts as a proof that substitution preserves typing, and the
+  definition of a small-step semantics also acts as a proof for subject
+  reduction.
+  When working without library support, this often has the benefit of
+  more concise code, as shared structure between definitions and
+  preservation lemmas does not need to be repeated.
   However, intrinsic typing also has three major drawbacks:
   \begin{enumerate}
   \item
@@ -249,6 +177,7 @@
 
   \subsection{Structure}
   \label{sec:introduction:structure}
+
   The rest of this paper will introduce our framework using System F
   as a running example for a type soundness proof.
 
