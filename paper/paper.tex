@@ -132,13 +132,26 @@
   are merged into a single definition of well-typed terms.
   Consequently, operations on terms have to map
   well-typed terms to well-typed terms proving that they preserve typing.
-  For example, in an intrinsic setting, the definition of substitution
+  For example, the definition of substitution
   also acts as a proof that substitution preserves typing, and the
   definition of a small-step semantics also acts as a proof for subject
   reduction.
-  When working without library support, this often has the benefit of
-  more concise code, as shared structure between definitions and
-  preservation lemmas does not need to be repeated.
+  When working without library support, intrinsic typing often has the
+  benefit of more concise code, as shared structure between definitions
+  and preservation lemmas does not need to be repeated.
+
+  With \emph{extrinsic typing}, the definitions of syntax and typing
+  are kept separately: the syntax is defined first, and then typing is
+  defined as a relation. Consequently, operations on terms and
+  their type preservation lemmas are also separate entities.
+
+  However, when working with library support, this is less of a benefit.
+  Most operations, like substitution, have a generic definition and
+  metatheory across languages, which can be derived automatically via
+  reflection or generic programming techniques.
+  Only by adding a typing-relation 
+
+
   However, intrinsic typing also has three major drawbacks:
   \begin{enumerate}
   \item
