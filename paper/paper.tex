@@ -231,7 +231,7 @@
   Section~\ref{sec:subjectreduction} proves the subject reduction lemma for System F.
   Section~\ref{sec:reflection} describes the class of object languages covered by
   our reflection algorithm.
-  Section~\ref{sec:beyond} describes case studies of object languages beyond System F.
+  Section~\ref{sec:casestudies} describes case studies of object languages beyond System F.
   Section~\ref{sec:future} describes future work.
   Section~\ref{sec:related} discusses related work.
   Section~\ref{sec:conclusion} concludes.
@@ -976,14 +976,53 @@
   splitting. This has already be done for intrinsical kits\cite{TODO}.
 
 
-  \section{Beyond System F}
-  \label{sec:beyond}
+  \section{Case Studies}
+  \label{sec:casestudies}
   \begin{itemize}
   \item
-    Binders with multiple variables are supported and even pattern
-    matching can be encoded.
+    For lambda calculus with dependent function types, the framework
+    just works out of the box for both deriving and instanciating the
+    \ACode{\ACon{TypingTraversal}}. Additionally, having the
+    \ACode{\ACon{ComposeKit}} abstraction turned out to be useful
+    to prove confluence, allowing to unify certain lemmas, which
+    otherwise need to be proved for both renamings and substitutions,
+    e.g. that for two terms \ACode{t} and \ACode{t'}
+    with \ACode{t \ACon{↪} t'} it follows that \ACode{(t \AField{⋯} ϕ)
+    \ACon{↪} (t' \AField{⋯} ϕ)} for any map \ACode{ϕ}.
   \item
-    Heterogenous equality
+    For System F with subtyping the main challenges are how to represent
+    subtyping constraints and how to deal with the fact that
+    substitution preserves typing is not generally true, as type variables
+    have subtyping bounds that need to be respected.
+    Instead of defining typing contexts and type preservation lemmas independent
+    of our framework, we found a way that still allows us to benefit
+    from the typing machinery.
+    When binding a type variable with a subtyping constraint \ACode{α <: t},
+    we first bind the type variable as \ACode{α : ★}, and then bind the constraint
+    with a dummy name \ACode{\_ ∶ (α <: t)}. This description is
+    similar to first-class constraints, but restricted enough to be
+    isomorphic to the original formalization.
+    With that encoding substitution preserves typing is generally true again, enabling
+    the use of the framework's typing contexts and \ACode{\ACon{TypingKit}} machinery.
+    Replacing a type variable \ACode{α <: t} with a type \ACode{t'}
+    which is not a subtype of \ACode{t'}, the resulting term is still
+    well-typed, but in a context with an insatisfiable constraint.
+  \item
+    Object language with pattern matching pose an interesting problem.
+    A clause \ACode{p ⇒ e} in a match-expression consists of a pattern
+    \ACode{p} and a continuation expression \ACode{e}.
+    The pattern \ACode{p} can bind arbitrary many variables in subpatterns,
+    which are then available as free variables in \ACode{e}.
+    % The challenge is to track the sorts of variables bound by a pattern,
+    % to make them available to \ACode{e} by extending \ACode{e}'s sort
+    % context correspondingly.
+    To track the sorts of variables bound by a pattern, one can define
+    the sort of patterns to contain the sorts of the variables that it binds:
+    % 𝕡 : List (Sort Var) → Sort NoVar
+    The syntax for variable patterns and clauses can then be specified as:
+    % varpat : S ⊢ 𝕡 [ 𝕖 ]  -- pattern binding an expression variable
+    % pairpat : S ⊢ 𝕡 S₁ → S ⊢ 𝕡 S₂ → S ⊢ 𝕡 (S₁ ++ S₂)
+    % clause : S ⊢ 𝕡 S' → (S' ++ S) ⊢ 𝕖 → S ⊢ 𝕔
   \end{itemize}
 
   \section{Future Work}
