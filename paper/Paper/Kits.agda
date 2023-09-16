@@ -275,14 +275,14 @@ record Syntax : Set₁ where
                   ((ϕ₁ ·ₖ ϕ₂) ↑ s) ~ ((ϕ₁ ↑ s) ·ₖ (ϕ₂ ↑ s))
       --! DistLiftComposeProof
       dist-↑-· s ϕ₁ ϕ₂ s₁ x@zero = `/id-injective (
-        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₖ ϕ₂) ↑ s))       ≡⟨⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (id/` zero)                  ≡⟨ `/`-is-` ⦃ K₁⊔K₂ ⦄ zero ⟩
-        ` zero                                      ≡⟨ sym (`/`-is-` ⦃ K₂ ⦄ zero) ⟩
-        `/id ⦃ K₂ ⦄ (id/` zero)                     ≡⟨⟩
-        `/id ⦃ K₂ ⦄ (zero & (ϕ₂ ↑ s))               ≡⟨ sym (&/⋯-& (id/` zero) (ϕ₂ ↑ s)) ⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (id/` zero &/⋯ (ϕ₂ ↑ s))     ≡⟨⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ s) &/⋯ (ϕ₂ ↑ s))  ≡⟨⟩
-        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ s) ·ₖ (ϕ₂ ↑ s))) ∎
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₖ ϕ₂) ↑ s))        ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (id/` zero)                   ≡⟨ `/`-is-` ⦃ K₁⊔K₂ ⦄ zero ⟩
+        ` zero                                       ≡⟨ sym (`/`-is-` ⦃ K₂ ⦄ zero) ⟩
+        `/id ⦃ K₂ ⦄ (id/` zero)                      ≡⟨⟩
+        `/id ⦃ K₂ ⦄ (zero & (ϕ₂ ↑ s))                ≡⟨ sym (&/⋯-& (id/` zero) (ϕ₂ ↑ s)) ⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (id/` zero &/⋯ (ϕ₂ ↑ s))      ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & (ϕ₁ ↑ s) &/⋯ (ϕ₂ ↑ s))   ≡⟨⟩
+        `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ↑ s) ·ₖ (ϕ₂ ↑ s)))  ∎
         )
       dist-↑-· s ϕ₁ ϕ₂ s₁ x@(suc y) = `/id-injective (
         `/id ⦃ K₁⊔K₂ ⦄ (x & ((ϕ₁ ·ₖ ϕ₂) ↑ s))        ≡⟨⟩
@@ -406,8 +406,8 @@ record Syntax : Set₁ where
       dist-↑-⦅⦆ {s = s} ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ x/t ϕ sx x@zero = `/id-injective (
           `/id ⦃ K ⦄ (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                ≡⟨⟩
           `/id ⦃ K ⦄ (x/t &/⋯ ϕ)                              ≡⟨⟩
-          `/id ⦃ K ⦄ (zero & ⦅ (x/t &/⋯ ϕ) ⦆)                    ≡⟨ sym (&/⋯-& ⦃ C₂ ⦄ zero ⦅ (x/t &/⋯ ϕ) ⦆) ⟩
-          `/id ⦃ K ⦄ (id/` ⦃ K₂ ⦄ zero &/⋯ ⦅ (x/t &/⋯ ϕ) ⦆)      ≡⟨⟩
+          `/id ⦃ K ⦄ (zero & ⦅ (x/t &/⋯ ϕ) ⦆)                 ≡⟨ sym (&/⋯-& ⦃ C₂ ⦄ zero ⦅ (x/t &/⋯ ϕ) ⦆) ⟩
+          `/id ⦃ K ⦄ (id/` ⦃ K₂ ⦄ zero &/⋯ ⦅ (x/t &/⋯ ϕ) ⦆)   ≡⟨⟩
           `/id ⦃ K ⦄ (x & ((ϕ ↑ s) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆))  ∎)
       dist-↑-⦅⦆ {s = s} ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ x/t ϕ sx x@(suc y) = `/id-injective (
           `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                ≡⟨⟩
@@ -427,10 +427,10 @@ record Syntax : Set₁ where
         t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆
       --! DistLiftSingleTraverseProof
       dist-↑-⦅⦆-⋯ t x/t ϕ =
-        t ⋯ ⦅ x/t ⦆ ⋯ ϕ                  ≡⟨ ⋯-assoc t ⦅ x/t ⦆ ϕ ⟩
-        t ⋯ (⦅ x/t ⦆ ·ₖ ϕ)               ≡⟨ cong (t ⋯_) (~-ext (dist-↑-⦅⦆ x/t ϕ)) ⟩
-        t ⋯ ((ϕ ↑ _) ·ₖ ⦅ (x/t &/⋯ ϕ) ⦆) ≡⟨ sym (⋯-assoc t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
-        t ⋯ (ϕ ↑ _) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆    ∎
+        t ⋯ ⦅ x/t ⦆ ⋯ ϕ                   ≡⟨ ⋯-assoc t ⦅ x/t ⦆ ϕ ⟩
+        t ⋯ (⦅ x/t ⦆ ·ₖ ϕ)                ≡⟨ cong (t ⋯_) (~-ext (dist-↑-⦅⦆ x/t ϕ)) ⟩
+        t ⋯ ((ϕ ↑ _) ·ₖ ⦅ (x/t &/⋯ ϕ) ⦆)  ≡⟨ sym (⋯-assoc t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
+        t ⋯ (ϕ ↑ _) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆     ∎
 
       --! TypeSorts
       record Types : Set₁ where
@@ -524,11 +524,11 @@ record Syntax : Set₁ where
               ((t ⋯ ϕ) ∷ₜ Γ₂) ∋*/⊢* (ϕ ↑ s) ∶ (t ∷ₜ Γ₁)
             --! LiftTypingProof
             _∋↑/⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
-              subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_)
-                    (t ⋯ ϕ ⋯ weakenᵣ s                  ≡⟨ ⋯-↑-wk t ϕ s ⟩
-                     t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)            ≡⟨⟩
-                     wk-telescope (t ∷ₜ Γ₁) zero ⋯ (ϕ ↑ s) ∎)
-                    (id/⊢` {x = zero} {Γ = (t ⋯ ϕ) ∷ₜ Γ₂} refl)
+              subst (  ((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
+                    (  t ⋯ ϕ ⋯ weakenᵣ s                      ≡⟨ ⋯-↑-wk t ϕ s ⟩
+                       t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)                ≡⟨⟩
+                       wk-telescope (t ∷ₜ Γ₁) zero ⋯ (ϕ ↑ s)  ∎ )
+                    (  id/⊢` {x = zero} {Γ = (t ⋯ ϕ) ∷ₜ Γ₂} refl )
             _∋↑/⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@(suc y) _ refl =
               subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (suc y & (ϕ ↑ s)) ∶_)
                     (wk-telescope Γ₁ y ⋯ ϕ ⋯ weakenᵣ s         ≡⟨ ⋯-↑-wk _ ϕ s ⟩
