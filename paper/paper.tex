@@ -131,19 +131,27 @@
   With \emph{intrinsic typing}, the definitions of syntax and typing
   are merged into a single definition of well-typed terms.
   Consequently, operations on terms have to map
-  well-typed terms to well-typed terms proving that they preserve typing.
+  well-typed terms to well-typed terms proving that the
+  operations preserve typing.
   For example, the definition of substitution
   also acts as a proof that substitution preserves typing, and the
   definition of a small-step semantics also acts as a proof for subject
   reduction.
-  When working without library support, intrinsic typing often has the
-  benefit of more concise code, as shared structure between definitions
-  and preservation lemmas does not need to be repeated.
+  This often has the benefit of more concise code, as shared structure
+  between definitions and preservation lemmas does not need to be
+  repeated.
 
   With \emph{extrinsic typing}, the definitions of syntax and typing
   are kept separately: the syntax is defined first, and then typing is
   defined as a relation. Consequently, operations on terms and
   their type preservation lemmas are also separate entities.
+  While extrinsic typing cannot eliminate the shared structure between
+  definitions and preservation lemmas, it can automated by reflection
+  or generic programming techniques, leaving only the preservation lemmas
+  to be proven by the programmer. While typing can be arbitrary complex,
+  the definition and metatheory of untyped substitution behaves the same
+  across languages.
+
 
   However, when working with library support, this is less of a benefit.
   Most operations, like substitution, have a generic definition and
