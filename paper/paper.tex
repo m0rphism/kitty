@@ -124,6 +124,72 @@
   \section{Introduction}
   \label{sec:introduction}
 
+  Formalizing programming languages in proof assistants quickly gets
+  repetitive. Almost every programming language supports variables
+  with static binding, and hence requires numerous definitions and
+  lemmas related to variable substitution.
+
+  Additionally, repetition can also occur within a single formalization.
+  This can be seen with polymorphic languages, where multiple sorts
+  of variables are present.
+  Consider for example System F, which supports both expression- and
+  type-variables.
+  With a naive approach, the whole substitution machinery needs to be
+  duplicated three times! We need to substitute expression-variables in
+  expressions, type-variables in types, but we also need to substitute
+  type-variables in expressions.
+  Even worse, having two substitutions acting on expressions, requires
+  to also prove lemmas about their interactions.
+  If we would additionally introduce kind-variables, we would end up
+  with a total of six duplications of the substition machinery and
+  corresponding interaction lemmas!
+  
+  Further repetition can be introduced by the choice of variable
+  representation. For example, for de Bruijn indices, substitution is
+  usually defined in terms of renamings to allow for structural
+  induction.
+  With a naive approach, this would again double the amount of
+  substitution machinery, as all definitions and lemmas need to be
+  made first for renamings and then again for substitutions.
+
+  Even more repetition is introduced by having a typed language,
+  where for each substitution (and renaming) operation, we need to prove
+  that the operation preserves typing, again doubling the repetition.
+
+  % In summary, to have enough substitution machinery to prove subject
+  % reduction for a language with expression-, type-, and
+  % kind-variables one can end up with a total of 24
+  % repetitions for each definition related to substitution, not counting
+  % the interaction lemmas between different substitutions that are
+  % acting on the same syntactic categories!
+  In summary, formalizing a language with expression-, type-, and
+  kind-variables with a naive approach can end up with a total of 24
+  repetitions for each definition related to substitution, not counting
+  the interaction lemmas between different substitutions that are
+  acting on the same syntactic categories!
+
+  In our framework we address those repetitions as followed:
+  \begin{itemize}
+  \item
+    Instead of requiring a separate substitution for each sort of variable,
+    we define a multi-sorted substitution which replaces all variables
+    of all sorts simultaneously and can be applied to terms of all syntactic categories.
+    This not only unifies many different definitions, removing redundancy on the way,
+    but also eliminates the need for interaction lemmas.
+  \item
+    We use de Bruijn indices, but unify renamings and typings using the Kit abstraction.
+    We further developed a Kit-like abstraction to also unify
+    compositions of renamings and substitutions.
+  \end{itemize}
+  
+  
+
+  A close examination of the formalizations reveals that variable
+  substitution behaves uniformly across languages, in the sense that
+  the behavior of substitution is completely determined by the positions
+  of variable bindings and variable uses.
+
+
   Formalizing a typed programming language in a proof assistant
   requires to choose between an extrinsic and intrinsic representation
   of typing.
@@ -131,7 +197,7 @@
   With \emph{intrinsic typing}, the definitions of syntax and typing
   are merged into a single definition of well-typed terms.
   Consequently, the definition of an operation on terms also acts
-  as a type preservation lemma for that operation, as it has to
+  as a proof of type preservation for that operation, as it has to
   map well-typed terms to well-typed terms.
   For example, the definition of substitution
   also acts as a proof that substitution preserves typing, and the
@@ -145,58 +211,71 @@
   are kept separately: the syntax is defined first, and then typing is
   defined as a relation. Consequently, operations on terms and
   their type preservation lemmas are also separate entities.
-  However, hope is not lost for extrinsic typing to keep up with the
-  conciseness of intrinsic typing: 
-  While extrinsic typing cannot eliminate the shared structure between
-  definitions and preservation lemmas, it can automated by reflection
-  or generic programming techniques, leaving only the preservation lemmas
-  to be proven by the programmer. While typing can be arbitrary complex,
-  the definition and metatheory of untyped substitution behaves the same
-  across languages.
+  This has the benefit that specification and proofs are kept strictly separate,
+  allowing a human to judge whether a specification is correct without also
+  having to understand the proofs.
+  % To understand the specification of intrinsic typing one has to
+  % additionally understand the proofs, which can introduce significant
+  % cognitive overhead.
+
+  For our substition framework, we choose to work with extrinsic
+  typing for a different reason.
+
+  % For substitution, this separation brings an opportunity for automation:
+  % free from the arbitrary complexity of typing relations,
+  % the definitions and lemmas of substitution for untyped terms
+  % behaves uniformly across object languages, and can be derived
+  % completely.
+
+  % While extrinsic typing cannot eliminate the shared structure between
+  % definitions and preservation lemmas, it can automated by reflection
+  % or generic programming techniques, leaving only the preservation lemmas
+  % to be proven by the programmer. While typing can be arbitrary complex,
+  % the definition and metatheory of untyped substitution behaves the same
+  % across languages.
+
+  % However, when working with library support, this is less of a benefit.
+  % Most operations, like substitution, have a generic definition and
+  % metatheory across languages, which can be derived automatically via
+  % reflection or generic programming techniques.
+  % Only by adding a typing-relation 
 
 
-  However, when working with library support, this is less of a benefit.
-  Most operations, like substitution, have a generic definition and
-  metatheory across languages, which can be derived automatically via
-  reflection or generic programming techniques.
-  Only by adding a typing-relation 
+  % However, intrinsic typing also has three major drawbacks:
+  % \begin{enumerate}
+  % \item
+  %   It is more difficult to judge whether a specification is correct,
+  %   because there is no clear separation between specification and proofs.
+  %   To understand the specification one has to additionally
+  %   understand the proofs, which can introduce significant cognitive overhead.
+  %   % For example specifying a small step semantics is directly intertwined
+  %   % with the proof of subject reduction.
+  % \item
+  %   It is less uniform for object languages with multiple variable
+  %   sorts, e.g. type- and expression-variables. In such a scenario,
+  %   types are usually indexed by kinds and expressions by kinds and types.
+  %   This requires not only a type-in-type and expression-in-expression
+  %   substitution, but also a type-in-expression substitution, which causes
+  %   interactions between different types of substitutions introducing
+  %   additional complexity.
+  %   The duplication increases even more if one additionally introduces
+  %   kind-variables. Then a total of 6 different substitutions and
+  %   their interactions is required.
+  %   Unifying these substitutions to reduce repetition is difficult
+  %   with intrinsic typing due to the interdependence of definitions.
+  % \item
+  %   It is less suitable for automation, because type preservation is baked
+  %   into the syntax definition and type preservation can become arbitrary complex
+  %   depending on the typing relation. This can prevent substitition
+  %   definition and lemmas from being derived, where otherwise it would be possible.
+  % \end{enumerate}
+  % With extrinsic typing the major drawback is the duplication between
+  % definitions and type preservation lemmas, which we found more
+  % suitable to be eliminated by automation.
 
-
-  However, intrinsic typing also has three major drawbacks:
-  \begin{enumerate}
-  \item
-    It is more difficult to judge whether a specification is correct,
-    because there is no clear separation between specification and proofs.
-    To understand the specification one has to additionally
-    understand the proofs, which can introduce significant cognitive overhead.
-    % For example specifying a small step semantics is directly intertwined
-    % with the proof of subject reduction.
-  \item
-    It is less uniform for object languages with multiple variable
-    sorts, e.g. type- and expression-variables. In such a scenario,
-    types are usually indexed by kinds and expressions by kinds and types.
-    This requires not only a type-in-type and expression-in-expression
-    substitution, but also a type-in-expression substitution, which causes
-    interactions between different types of substitutions introducing
-    additional complexity.
-    The duplication increases even more if one additionally introduces
-    kind-variables. Then a total of 6 different substitutions and
-    their interactions is required.
-    Unifying these substitutions to reduce repetition is difficult
-    with intrinsic typing due to the interdependence of definitions.
-  \item
-    It is less suitable for automation, because type preservation is baked
-    into the syntax definition and type preservation can become arbitrary complex
-    depending on the typing relation. This can prevent substitition
-    definition and lemmas from being derived, where otherwise it would be possible.
-  \end{enumerate}
-  With extrinsic typing the major drawback is the duplication between
-  definitions and type preservation lemmas, which we found more
-  suitable to be eliminated by automation.
-
-  To combat those drawbacks, we went in the direction of intrinsically
-  scoped syntax in our search for a general, clean, and automated framework
-  for metatheory.
+  % To combat those drawbacks, we went in the direction of intrinsically
+  % scoped syntax in our search for a general, clean, and automated framework
+  % for metatheory.
 
   \subsection{Structure}
   \label{sec:introduction:structure}
@@ -269,7 +348,7 @@
 
   \section{Syntax}
   \label{sec:syntax}
-  \subsection{Single-Sorted Syntax}
+  \subsection{Unsorted Syntax}
   \label{sec:syntax:single}
   The following shows a typical intrinsically-scoped syntax of System F:
   \ExampleCode\FUnsortedSyntax
@@ -1040,10 +1119,58 @@
 
   \section{Related Work}
   \label{sec:related}
+
+  The kit abstraction for unifying renamings and substitutions
+  appeared first in an unpublished article by
+  McBride\cite{unpublished:mcbride2005kits}, and then later in
+  Benton et al.\cite{DBLP:journals/jar/BentonHKM12}. 
+  Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} propose an
+  extension to kits that supports substructural types via resource
+  vectors.
+  In all three cases they are formulated for intrinsic typing.
+
+  \emph{Autosubst}\cite{DBLP:conf/itp/SchaferTS15}
+  is a Coq framework, which derives parallel substitution definitions and
+  lemmas for languages from annotated Coq syntax definitions using
+  extrinsic typing, extrinsic scoping, and de Bruijn indices.
+  The framework is implemented in Coq's tactic language LTAC and comes
+  with a decision procedure for all assumption-free, equational
+  substitution-lemmas.
+  The implementation of Autosubst deals with multiple variable sorts
+  by generating multiple substitutions and corresponding interaction lemmas.
+  Autosubst does not provide any machinery for type preservation and
+  does not unify renaming and substitution.
+  % Assumes fun-ext.
+
+  \emph{Autosubst 2}\cite{DBLP:conf/cpp/StarkSK19} is a standalone
+  code generator, which translates second-order HOAS specifications into
+  mutual inductive term sorts. Compared to Autosubst 1, it features
+  mutually recursive object languages, intrinsically scoping, and
+  vectorized substitutions.
+  They also define and prove lemmas for all four compositions.
+  The generated syntax consists of multiple term types, indexed by
+  different amounts of free variables as shown in Section~\ref{sec:syntax}.
+  % Does not assume fun-ext.
+
+  Allais et al.\cite{DBLP:conf/cpp/Allais0MM17} propose a powerful
+  abstraction for denotational semantics and proving semantic fusion
+  lemmas.
+  In later work\cite{DBLP:journals/pacmpl/AllaisA0MM18}, they use
+  generic programming to instanciate this abstraction for a class of
+  object languages comparable to ours.
+  They demonstrate how both renaming and substitutions can be
+  described as semantics and how the four composition laws follow from
+  their generic fusion laws.
+  They do not show how to work with multiple variable sorts, how to
+  abstract over the compositions, and how to abstract over typing in
+  an extrinsically typed scenario.
+
   Autosubst \cite{DBLP:conf/cpp/StarkSK19, DBLP:conf/itp/SchaferTS15}.
   Kits \cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}.
   Kits linear \cite{DBLP:journals/corr/abs-2005-02247}.
   Universe \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
+
+  Abstract binding trees
 
   \section{Conclusion}
   \label{sec:conclusion}
