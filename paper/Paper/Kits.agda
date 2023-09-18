@@ -244,10 +244,10 @@ record Syntax : Set₁ where
     --! ComposeKit {
     record ComposeKit  (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_)
                        (K₁⊔K₂ : Kit _∋/⊢_) : Set where
-      infixl  8  _&/⋯_
-
       private instance _ = K₁; _ = K₂; _ = K₁⊔K₂
-
+      --! [
+      infixl  8  _&/⋯_
+      --! ]
       field
         _&/⋯_     :  S₁ ∋/⊢[ K₁ ] s → S₁ –[ K₂ ]→ S₂ → S₂ ∋/⊢[ K₁⊔K₂ ] s
         &/⋯-⋯     :  (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
@@ -354,9 +354,7 @@ record Syntax : Set₁ where
         Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → ComposeKit Kᵣ K₂ K₂
         Cᵣ = record
           { _&/⋯_     = _&_
-          ; &/⋯-⋯     = λ x ϕ →
-            `/id (x & ϕ) ≡⟨ sym (⋯-var x ϕ) ⟩
-            (` x) ⋯ ϕ    ∎
+          ; &/⋯-⋯     = λ x ϕ → sym (⋯-var x ϕ)
           ; &/⋯-wk-↑  = λ x ϕ → refl }
 
         Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄

@@ -136,8 +136,8 @@
   type-variables.
   With a naive approach, the whole substitution machinery needs to be
   duplicated three times! We need to substitute expression-variables in
-  expressions, type-variables in types, but we also need to substitute
-  type-variables in expressions.
+  expressions, type-variables in types, but also type-variables in
+  expressions.
   Even worse, having two substitutions acting on expressions, requires
   to also prove lemmas about their interactions.
   If we would additionally introduce kind-variables, we would end up
@@ -152,9 +152,9 @@
   substitution machinery, as all definitions and lemmas need to be
   made first for renamings and then again for substitutions.
 
-  Even more repetition is introduced by having a typed language,
-  where for each substitution (and renaming) operation, we need to prove
-  that the operation preserves typing, again doubling the repetition.
+  Similarly, for a typed language formalized via extrinsic typing we
+  need type preservation lemmas for each substitution and renaming
+  operation, which again doubles the repetition.
 
   % In summary, to have enough substitution machinery to prove subject
   % reduction for a language with expression-, type-, and
@@ -162,6 +162,12 @@
   % repetitions for each definition related to substitution, not counting
   % the interaction lemmas between different substitutions that are
   % acting on the same syntactic categories!
+  If one is not careful, a formalization with three sorts of variables
+  can easily end up with 24 definitions for each operation related
+  to substitution, which usually includes at least a substitution type, and
+  operations for application, extension, weakening, lifting, singleton
+  substitution, extensional equality, and an identity substitution.
+
   In summary, formalizing a language with expression-, type-, and
   kind-variables with a naive approach can end up with a total of 24
   repetitions for each definition related to substitution, not counting
@@ -971,7 +977,7 @@
   \ACode{\ACon{Traversal}}, but instead of defining the application of
   maps, it defines the type preservation of applying maps:
   \LibCode\KTypingTraversal
-  Given a variable/term \ACode{e} with typing \ACode{⊢e} and
+  Given a term \ACode{e} with typing \ACode{⊢e} and
   a renaming/substitution \ACode{ϕ} with typing \ACode{⊢ϕ},
   the term \ACode{⊢e \AField{⊢⋯} ⊢ϕ} is a typing for \ACode{e \AField{⋯} ϕ}.
 
@@ -1110,7 +1116,7 @@
 
   The kit abstraction for unifying renamings and substitutions
   appeared first in an unpublished manuscript by
-  McBride\cite{unpublished:mcbride2005kits}, and then later in
+  McBride\cite{unpublished:mcbride2005kits}, and later in
   Benton et al.\cite{DBLP:journals/jar/BentonHKM12}. 
   Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} propose an
   extension to kits that supports substructural types via resource
