@@ -312,8 +312,8 @@
   Section~\ref{sec:reflection} describes the class of object languages covered by
   our reflection algorithm.
   Section~\ref{sec:casestudies} describes case studies of object languages beyond System F.
-  Section~\ref{sec:future} describes future work.
   Section~\ref{sec:related} discusses related work.
+  Section~\ref{sec:future} describes future work.
   Section~\ref{sec:conclusion} concludes.
 
   \subsection{Contributions}
@@ -1105,23 +1105,11 @@
     % clause : S ⊢ 𝕡 S' → (S' ++ S) ⊢ 𝕖 → S ⊢ 𝕔
   \end{itemize}
 
-  \section{Future Work}
-  \label{sec:future}
-  \begin{itemize}
-  \item
-    Enabling more object languages by allowing subterms with less
-    restrictions on the form of \ACode{S}.
-  \item
-    Providing abstractions not just for type-preservation, but also
-    for different kinds of semantics, e.g. confluence or lemmas related
-    to denotational semantics.
-  \end{itemize}
-
   \section{Related Work}
   \label{sec:related}
 
   The kit abstraction for unifying renamings and substitutions
-  appeared first in an unpublished article by
+  appeared first in an unpublished manuscript by
   McBride\cite{unpublished:mcbride2005kits}, and then later in
   Benton et al.\cite{DBLP:journals/jar/BentonHKM12}. 
   Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} propose an
@@ -1140,7 +1128,6 @@
   by generating multiple substitutions and corresponding interaction lemmas.
   Autosubst does not provide any machinery for type preservation and
   does not unify renaming and substitution.
-  % Assumes fun-ext.
 
   \emph{Autosubst 2}\cite{DBLP:conf/cpp/StarkSK19} is a standalone
   code generator, which translates second-order HOAS specifications into
@@ -1150,27 +1137,42 @@
   They also define and prove lemmas for all four compositions.
   The generated syntax consists of multiple term types, indexed by
   different amounts of free variables as shown in Section~\ref{sec:syntax}.
-  % Does not assume fun-ext.
 
   Allais et al.\cite{DBLP:conf/cpp/Allais0MM17} propose a powerful
-  abstraction for denotational semantics and proving semantic fusion
-  lemmas.
+  abstraction for denotational semantics and semantic fusion lemmas.
   In later work\cite{DBLP:journals/pacmpl/AllaisA0MM18}, they use
   generic programming to instanciate this abstraction for a class of
   object languages comparable to ours.
-  They demonstrate how both renaming and substitutions can be
-  described as semantics and how the four composition laws follow from
-  their generic fusion laws.
+  They demonstrate how both renamings and substitutions can be
+  described as semantics and how the four composition lemmas follow from
+  their generic fusion lemma.
+  They do cover an abstraction to unify renamings and substitutions.
   They do not show how to work with multiple variable sorts, how to
   abstract over the compositions, and how to abstract over typing in
   an extrinsically typed scenario.
-
-  Autosubst \cite{DBLP:conf/cpp/StarkSK19, DBLP:conf/itp/SchaferTS15}.
-  Kits \cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}.
-  Kits linear \cite{DBLP:journals/corr/abs-2005-02247}.
-  Universe \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
+  However, we believe that their framework is general enough such that
+  our concepts can also be transferred to their framework.
 
   Abstract binding trees
+
+  \section{Future Work}
+  \label{sec:future}
+  \begin{itemize}
+  \item
+    Enabling more object languages by allowing subterms with less
+    restrictions on the form of \ACode{S}, allowing recursive
+    occurences in container types like lists and finite functions, and
+    adding support for substructural types as in
+    \cite{DBLP:journals/corr/abs-2005-02247}.
+  \item
+    Incorporating a decision procedure for equational
+    substitution-lemmas based on $\sigma$-calculus as in Autosubst
+    \cite{DBLP:conf/itp/SchaferTS15, DBLP:conf/cpp/StarkSK19}.
+  \item
+    Developing abstractions and derived lemmas beyond substition and
+    type preservation, e.g. for confluence or denotational semantics
+    as in \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
+  \end{itemize}
 
   \section{Conclusion}
   \label{sec:conclusion}
