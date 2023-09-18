@@ -144,7 +144,7 @@
   with a total of six duplications of the substition machinery and
   corresponding interaction lemmas!
   
-  Further repetition can be introduced by the choice of variable
+  Further repetition can occur due to the choice of variable
   representation. For example, for de Bruijn indices, substitution is
   usually defined in terms of renamings to allow for structural
   induction.
@@ -181,6 +181,7 @@
   using a single lemma. For System F, our framework allows to prove
   subject reduction with only a single handwritten lemma for type
   preservation.
+
   Compared to many other approaches, we do not derive substitutions
   for each of the variable sorts and syntactic categories, but instead
   use a novel approach for defining syntax, which directly supports
@@ -189,6 +190,10 @@
   By further unifying renamings and substitutions, we gain the ability
   to talk abstractly about any kind of renaming or substitution that
   can occur in the formalization.
+  Having unified the untyped substitution machinery, we build further
+  abstractions to similarly unify typing and type preservation lemmas.
+  Our reflection algorithm instanciates those abstractions
+  
   Together with abstractions to unify renamings and substitutions,
   this allows us to create an abstraction that is general enough to
   prove type preservation for all sub
@@ -1136,9 +1141,9 @@
   \section{Related Work}
   \label{sec:related}
 
-  Frameworks for programming languages metatheory can be broadly
-  categorized by representation of variable bindings, representation
-  of typing and scoping, and requirements on the meta-language.
+  Frameworks for programming language metatheory can be broadly
+  categorized by representation of variable bindings and
+  representation of typing and scoping.
 
   Variable bindings have been represented as de Bruijn indices, de
   Bruijn levels, names, locally nameless, locally named, shifted names,
@@ -1178,8 +1183,6 @@
   substitution-lemmas.
   The implementation of Autosubst deals with multiple variable sorts
   by generating multiple substitutions and corresponding interaction lemmas.
-  Autosubst does not provide any machinery for type preservation and
-  does not unify renaming and substitution.
 
   \emph{Autosubst 2}\cite{DBLP:conf/cpp/StarkSK19} is a standalone
   code generator, which translates second-order HOAS specifications into
@@ -1189,6 +1192,12 @@
   They also define and prove lemmas for all four compositions.
   The generated syntax consists of multiple term types, indexed by
   different amounts of free variables as shown in Section~\ref{sec:syntax}.
+
+  Both works do not provide machinery for type preservation and
+  do not unify renaming and substitution (although the latter is listed as
+  future work). We believe it should be possible to translate their
+  decision procedure from vectorized substitutions to the setting of
+  our multi-sorted substitutions.
 
   Abstract binding trees
 
@@ -1208,6 +1217,13 @@
   an extrinsically typed scenario.
   However, we believe that their framework is general enough such that
   our concepts can also be transferred to their framework.
+
+  This work is orthogonal but compatible to our approach.
+  We can instantiate the system using our syntax type system,
+  but then the semantics abstraction would work with terms
+  which are untyped with respect to the actual type system.
+  We think it is worthwile to explore if their semantics abstraction
+  can also be generalized to multi-sorted typing relations.
 
 
   \section{Future Work}
