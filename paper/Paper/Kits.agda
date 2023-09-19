@@ -97,7 +97,7 @@ record Syntax : Set₁ where
 
     --! Eq
     _~_ : (ϕ₁ ϕ₂ : S₁ →ₖ S₂) → Set
-    _~_ ϕ₁ ϕ₂ = ∀ s (x : _ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
+    _~_ {S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
 
     -- _~_ {S₁ = S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
 
@@ -106,7 +106,7 @@ record Syntax : Set₁ where
       ~-ext : ∀ {ϕ₁ ϕ₂ : S₁ →ₖ S₂} → ϕ₁ ~ ϕ₂ → ϕ₁ ≡ ϕ₂
 
     --! IdLift
-    id↑~id : (id ↑ s) ~ id {s ∷ S}
+    id↑~id : (id {S} ↑ s) ~ id {s ∷ S}
     --! IdLiftProof
     id↑~id s zero    = refl
     id↑~id s (suc x) =

@@ -428,9 +428,9 @@
   \item the different sorts of variables are modeled separately, which requires to define not just
     type-in-type and expression-in-expression substitution, but also type-in-expression substitution.
     Consequently, interaction lemmas between those substitutions are required.
-    In general, this leads to a combinatory explosion of
-    substitutions, e.g.\ adding kind variables would lead to a total of 6
-    different substitutions and corresponding interaction lemmas.
+    % In general, this leads to a combinatory explosion of
+    % substitutions, e.g.\ adding kind variables would lead to a total of 6
+    % different substitutions and corresponding interaction lemmas.
   \end{enumerate}
   To avoid these drawbacks, we instead use a multi-sorted syntax.
 
@@ -467,7 +467,8 @@
   most proof assistants forbid to avoid breaking logical consistency.
   We conjecture that an encoding with universe codes is possible, as
   it has been done for intrinsically typed languages with dependent
-  types, but those constructions come with their own drawbacks and complexity.
+  types\cite{TODO}, but those constructions come with additional
+  complexity and are less suitable to automation.
 
   % Contrary to the usual intrinsic typing, we limit the environment
   % \ACode{S} to sorts with index \ACode{\ACon{Var}}.
@@ -477,9 +478,9 @@
 
   \subsection{A Structure for Multi-Sorted Syntax}
   \label{sec:syntax:structure}
-  The multi-sorted syntax makes it easy to define a structure for
-  syntaxes of arbitrary object-languages, i.e.\ syntaxes with
-  arbitrary amounts of syntactic categories and variables:
+  The regularity of the multi-sorted syntax makes it easy to define a
+  structure for syntaxes of arbitrary object-languages, i.e.\ syntaxes
+  with arbitrary amounts of syntactic categories and variables:
   \LibCode\KSyntax
   The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
@@ -605,7 +606,8 @@
     Injecting a variable and then shifting it, is the same as injecting a shifted variable.
   \end{itemize}
 
-  Building on the operations and axioms, we derive further operations:\footnote{
+  Building on the operations and axioms of a \ACode{\ACon{Kit}}, we
+  derive further operations:\footnote{
     The definitions are included directly in the record module of the
     Kit, so they are implicitly parameterized over a kit.
   }
@@ -624,7 +626,8 @@
     A map can be extended by a new variable or term:
     \LibCode\KExt
   \item 
-    A map can be shifted, as the Kit provides the necessary \ACode{\AField{wk}} operation:
+    A map can be shifted, as the \ACode{\ACon{Kit}} provides the
+    necessary \ACode{\AField{wk}} operation:
     \LibCode\KWkm
   \item 
     A map can be lifted, which is the operation necessary to
@@ -656,7 +659,7 @@
   \end{itemize}
 
   We also specify notation, which makes it less cumbersome
-  to explicitly pass a particular Kit to those definitions:
+  to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
   \begin{itemize}
   \item \ACode{S \ADef{∋/⊢[} K \ADef{]} s} is \ACode{S ∋/⊢ s} for some \ACode{\ACon{Kit}} \ACode{K}; and
   \item \ACode{S \ADef{–[} K \ADef{]→} s} is \ACode{S \ADef{→ₖ} s} for some \ACode{\ACon{Kit}} \ACode{K}.
@@ -665,16 +668,16 @@
   The operation of applying a map to a term depends on the concrete
   structure of a term, so we define a structure for it:
   \LibCode\KTraversal
-  The fields of this structure are:
+  The fields of this structure have the following meaning:
   \begin{itemize}
   \item
     \ACode{t \AField{⋯} ϕ} applies the map \ACode{ϕ} (a renaming or
     substitution) to the term \ACode{t}.
   \item
     \ACode{\AField{⋯-var}} states that applying a map \ACode{ϕ} to a variable
-    term \ACode{\AField{`} x}, is the same as applying \ACode{ϕ} to
-    the variable \ACode{x}, and then converting the result from \ACode{S₂ ∋/⊢ S}
-    to \ACode{S₂ ⊢ S} via \ACode{\AField{id/`}}.
+    term\\ \ACode{\AField{`} x}, is the same as applying \ACode{ϕ} to
+    the variable \ACode{x}, and then converting the result to a term
+    via \ACode{\AField{id/`}}.
   \item
     \ACode{\AField{⋯-id}} states that applying the identity map
     \ACode{id} to a term does not change the term.
@@ -716,20 +719,36 @@
     we get back a variable and need to apply the variable constructor
     \ACode{\ACon{`\_}} to it. If \ACode{ϕ} is a substitution,
     we get back a term that we can use directly.
-    Hence, the use of \ACode{`/id}.
+    This is exactly what \ACode{\AField{`/id}} does.
   \item 
     In cases where the operation needs to go under a binder, like
     \ACode{(\ACon{λx} e) \ADef{⋯} ϕ}, we lift the map using \AField{\_↑\_} before
     we apply it to the subterm to account for the bound variable.
   \end{itemize}
 
-
+  Then we prove that applying an identity map does not change the term:
   \AppCode\FTraversalId
   \AppCode\FTraversalIdProofInteresting
+  The interesting cases are:
+  \begin{itemize}
+  \item
+    the variable case \ACode{\ACon{`} x}, where we need to combine the
+    \ACon{\AField{id/`}} from the identity map, with the \ACon{\AField{`/id}}
+    from the traversal operation using \ACon{\AField{`/`-is-`}}.
+  \item
+    the lambda abstraction case \ACode{\ACon{λx} e}, where the
+    traversal lifts the identity over its binder. Here
+    \ACon{\AField{id↑-id}} is used to state that this lifted identity
+    map is still the identity.
+  \item
+    all other cases are analogous and hence omitted.
+  \end{itemize}
+
+  Finally, we instanciate the \ACode{\ACon{Traversal}} structure:
   % \LibCode\FTraversalIdProofRest
   \AppCode\FTraversal
   
-  \ExampleCode\FExampleTrav
+  % \ExampleCode\FExampleTrav
 
 
 
