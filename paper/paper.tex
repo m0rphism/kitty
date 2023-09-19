@@ -561,7 +561,7 @@
   % A \ACode{Kit} is a structure that captures the commonalities
   % between variables and terms:
   A \ACode{Kit} is a structure that allows to abstract over whether
-  something is a term or a variable. The intention is to instanciate
+  something is a term or a variable. The intention is to instantiate
   this structure exactly twice (once for variables and once for terms),
   and then write definitions, which are parameterized over a kit and
   consequently can be used for both variables and terms.
@@ -571,7 +571,7 @@
   the form \ACode{x/y}, where \ACode{x} is the name we choose for the
   variable instance, and \ACode{y} is the name we choose for the term
   instance.
-  For example the parameter type \ACode{\_∋/⊢\_} will be instanciated
+  For example the parameter type \ACode{\_∋/⊢\_} will be instantiated
   to \ACode{\ACon{\_∋\_}} for the variable kit, and to \ACode{\AField{\_⊢\_}} for the
   term kit.
 
@@ -579,9 +579,9 @@
   \begin{itemize}
   \item 
     \ACode{\AField{id/`}} converts a variable \ACode{S \ACon{∋} s} into a
-    \ACode{S \AField{∋/⊢} s}. For the variable kit, \ACode{S ∋/⊢ s} is instanciated to \ACode{S \ACon{∋} s}, so this
+    \ACode{S \AField{∋/⊢} s}. For the variable kit, \ACode{S ∋/⊢ s} is instantiated to \ACode{S \ACon{∋} s}, so this
     operation is the identity. For the term kit, \ACode{S ∋/⊢ s} is
-    instanciated to \ACode{S \AField{⊢} s}, so this operation is the
+    instantiated to \ACode{S \AField{⊢} s}, so this operation is the
     variable constructor \ACode{\AField{`\_}}.
   \item 
     \ACode{\AField{`/id}} converts a \ACode{S ∋/⊢ s} into a term \ACode{S \AField{⊢} s}
@@ -705,11 +705,13 @@
   % After the definition of the term-kit we are then allowed to apply
   % both renamings and substitutions as both kits defined.
 
-  Note that all definitions so far are library code. To make them
-  available for our System F example, all we need to do is
-  to create an instance of \ACode{\ACon{Traversal}}.
+  \subsection{Instantiation for System F}
+  In this subsection, we show how to instantiate the
+  \ACode{\ACon{Traversal}} abstraction for System F.
+  In practice, this is done by our reflection algorithm automatically,
+  but it can be instructive to see what happens under the hood.
 
-  We start with the operation of applying a map to a term:
+  First, we define the operation of applying a map to a term:
   \AppCode\FTraversalOp
   The interesting cases are those with variables and binders:
   \begin{itemize}
@@ -744,7 +746,7 @@
     all other cases are analogous and hence omitted.
   \end{itemize}
 
-  Finally, we instanciate the \ACode{\ACon{Traversal}} structure:
+  Finally, we instantiate the \ACode{\ACon{Traversal}} structure:
   % \LibCode\FTraversalIdProofRest
   \AppCode\FTraversal
 
@@ -767,7 +769,7 @@
   their types.
 
   This prevented us to define a useful lemma, which also needs to
-  be instanciated separately for variables and terms: the counterpiece
+  be instantiated separately for variables and terms: the counterpiece
   to \ACode{\AField{wk-id/`}}, which we call \ACode{\AField{wk-`/id}}.
 
   Recall that \ACode{\AField{wk-id/`}} explains the
@@ -938,7 +940,7 @@
   and \ACode{\ACon{Traversal}} from before:
   the library provides a \ACode{\ACon{ComposeKit}} for each of the
   four compositions, whereas the \ACode{\ACon{ComposeTraversal}}
-  structure needs to be instanciated by the application with
+  structure needs to be instantiated by the application with
   lemmas parameterized over arbitrary \ACode{\ACon{ComposeKit}}s.
   This gives the user a composition operation
   \ACode{\AField{\_·ₖ\_}} between arbitrary maps and corresponding
@@ -1020,10 +1022,19 @@
     \LibCode\KComposeKitInstancesConcrete
   \end{itemize}
 
-  Finally, we instantiate the \ACode{\ACon{ComposeTraversal}} for
-  System F:
+  \subsection{Instantiation for System F}
+  In this subsection, we show how to instantiate the
+  \ACode{\ACon{ComposeTraversal}} abstraction for System F.
+  In practice, this is done by our reflection algorithm automatically,
+  but it can be instructive to see what happens under the hood.
+
   \AppCode\FFusion
   \AppCode\FFusionProofInteresting
+  The interesting cases are:
+  \begin{itemize}
+  \item 
+  \end{itemize}
+
   % \AppCode\FFusionProofRest
   \AppCode\FComposeTraversal
 
@@ -1045,7 +1056,7 @@
   \ACode{\ACon{𝕜}}.
   To teach our framework about types, we have to instantiate the following structure:
   \LibCode\KTypeSorts
-  For System F the instanciation is
+  For System F the instantiation is
   \AppCode\FTypes
   For a nicer interface, we define a type analogously to a term:
   \LibCode\KTypes
@@ -1087,7 +1098,7 @@
   To teach the framework about typing, we create a structure analogously to
   \ACode{\ACon{Syntax}}:
   \LibCode\KTyping
-  and instanciate it for System F:
+  and instantiate it for System F:
   \AppCode\FTypingInst
 
   Next we define \ACode{\ACon{TypingKit}}s, which are analog to
@@ -1122,23 +1133,33 @@
   a renaming/substitution \ACode{ϕ} with typing \ACode{⊢ϕ},
   the term \ACode{⊢e \AField{⊢⋯} ⊢ϕ} is a typing for \ACode{e \AField{⋯} ϕ}.
 
-  Given a \ACode{\ACon{TypingTraversal}}, we can easily instanciate the
+  Given a \ACode{\ACon{TypingTraversal}}, we can easily instantiate the
   \ACode{\ACon{TypingKits}} for variables and terms:
   \LibCode\KTypingInstances
   % \LibCode\KTypingTraversalNotation
 
-  We are then ready to create a \ACode{\ACon{TypingTraversal}}
-  instance for System F:
+  \subsection{Instantiation for System F}
+  In this subsection, we show how to instantiate the
+  \ACode{\ACon{TypingTraversal}} abstraction for System F.
+  This is the only structure that is \emph{not} instantiated
+  automatically via reflection, as typing relations can be arbitrary
+  complex in general.
+
   \AppCode\FPreserve
+  The interesting parts of the proof are:
+  \begin{itemize}
+  \item 
+  \end{itemize}
+
   \AppCode\FTypingTraversal
 
-  As the \ACode{\ACon{Traversal}} and  \ACode{\ACon{ComposeTraversal}} instances
-  can be generally derived via reflection,
-  the \ACode{\AField{\_⊢⋯\_}} lemma is in fact the only lemma that
-  has to been proved manually for subject reduction.
-  From this single lemma follows type preservation for all operations
-  of both renamings and substitutions for all sorts of variables
-  simultaneously.
+  % As the \ACode{\ACon{Traversal}} and  \ACode{\ACon{ComposeTraversal}} instances
+  % can be generally derived via reflection,
+  % the \ACode{\AField{\_⊢⋯\_}} lemma is in fact the only lemma that
+  % has to been proved manually for subject reduction.
+  % From this single lemma follows type preservation for all operations
+  % of both renamings and substitutions for all sorts of variables
+  % simultaneously.
 
   \section{Subject Reduction}
   \label{sec:subjectreduction}
@@ -1169,12 +1190,12 @@
   \section{Reflection \& Generics}
   \label{sec:reflection}
   We used Agda's reflection mechanism\cite{TODO} to derive
-  instanciations related to all structures for untyped substitition,
+  instantiations related to all structures for untyped substitition,
   i.e. \ACode{\ACon{Traversal}} and \ACode{\ACon{ComposeTraversal}}.
 
   To gain insight into the class of object languages supported by our
   reflection algorithm, we modeled a class of object languages using a
-  generic programming technique and instanciated the structures
+  generic programming technique and instantiated the structures
   generically. The class contains all object languages which:
   \begin{enumerate}
   \item Have a variable constructor of type TODO;
@@ -1207,7 +1228,7 @@
   \begin{itemize}
   \item
     For lambda calculus with dependent function types, the framework
-    just works out of the box for both deriving and instanciating the
+    just works out of the box for both deriving and instantiating the
     \ACode{\ACon{TypingTraversal}}. Additionally, having the
     \ACode{\ACon{ComposeKit}} abstraction turned out to be useful
     to prove confluence, allowing to unify certain lemmas, which
@@ -1319,7 +1340,7 @@
   Allais et al.\cite{DBLP:conf/cpp/Allais0MM17} propose a powerful
   abstraction for denotational semantics and semantic fusion lemmas.
   In later work\cite{DBLP:journals/pacmpl/AllaisA0MM18}, they use
-  generic programming to instanciate this abstraction for a class of
+  generic programming to instantiate this abstraction for a class of
   object languages comparable to ours.
   They demonstrate how both renamings and substitutions can be
   described as semantics and how the four composition lemmas follow from
