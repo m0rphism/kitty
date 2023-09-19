@@ -138,7 +138,7 @@
   duplicated three times! We need to substitute expression-variables in
   expressions, type-variables in types, but also type-variables in
   expressions.
-  Even worse, having two substitutions acting on expressions, requires
+  Even worse, having two substitutions acting on expressions requires
   to also prove lemmas about their interactions.
   If we would additionally introduce kind-variables, we would end up
   with a total of six duplications of the substition machinery and
@@ -169,8 +169,8 @@
   application, extension, weakening, lifting, singleton substitution,
   extensional equality, and an identity substitution - and this is not
   counting the slightly changed copies of interaction lemmas!
-
   Clearly, this situation is in need of automation.
+
   Our framework approaches this problem using a combination of
   abstractions and reflection in the context of extrinsically typed,
   intrinsically scoped syntax with de Bruijn indices.
@@ -190,13 +190,38 @@
   By further unifying renamings and substitutions, we gain the ability
   to talk abstractly about any kind of renaming or substitution that
   can occur in the formalization.
-  Having unified the untyped substitution machinery, we build further
-  abstractions to similarly unify typing and type preservation lemmas.
-  Our reflection algorithm instanciates those abstractions
+  This generality is key to then define abstractions for typing and
+  type preservation on the same level of generality, allowing to prove
+  type preservation for renamings and substitutions of all variable
+  sorts and syntactic categories in a single lemma for many typing
+  relations, including those of our case studies.
+
+  % TODO: avoiding interaction lemmas
+
+  % By using extrinsic typing, we clearly separate the definitions and
+  % lemmas of untyped substitutions from typing and type preservation.
+  % This is useful, because the former can be derived for virtually any
+  % object language, while the latter cannot, as typing relations can
+  % be arbitrarily complex.
+
+  % This does not only separate specification from proofs, making it
+  % easier for a human to verify if a specification is correct without
+  % understanding the proofs, but also separates things which can be
+  % derived for virtually any object language, from things which cannot.
+
+  % This allows untyped substitution to be derived for virtually all
+  % object languages, while still allowing for general abstractions
+  % for type preservation to be built on top, which cannot be proved
+  % automatically in general, as typing relations can become arbitrarily
+  % complex.
   
-  Together with abstractions to unify renamings and substitutions,
-  this allows us to create an abstraction that is general enough to
-  prove type preservation for all sub
+  
+
+  % The class of supported typing relations is currently limited to 
+  % a subclass of the classical tertiary relations between typing
+  % context, term, and type, but strong enough work for our three case studies
+  % of System F with subtyping, lambda calculus with dependent function
+  % types, and pattern matching.
 
   % Choosing an extrinsic typing approach might seem counter intuitive,
   % as separating 
@@ -325,8 +350,8 @@
   framework, focusing on the core concepts. We present all necessary
   definitions and lemmas, but omit some proofs for the sake of
   space. The omitted proofs can be found in Appendix~\ref{sec:proofs}
-  and in the supplementary material. The full framework can be found at
-  TODO.
+  and in the supplementary material.
+  The full framework is available online.\footnote{See supplementary material. In the final version here will be a link to github.}
 
   The rest of this paper is structured as followed:
   Section~\ref{sec:syntax} introduces the multi-sorted syntax and compares it to the
@@ -340,13 +365,13 @@
   for multi-sorted syntax and how to define typing contexts.
   Section~\ref{sec:typing} shows how to define a multi-sorted typing relation,
   and an abstraction to unify type preservattion lemmas for renamings and substitutions.
-  Section~\ref{sec:semantics} introduces a small-step operational semantics for System F.
-  Section~\ref{sec:subjectreduction} proves the subject reduction lemma for System F.
+  Section~\ref{sec:subjectreduction} introduces a small-step
+  operational semantics for System F and proves subject reduction.
   Section~\ref{sec:reflection} describes the class of object languages covered by
   our reflection algorithm.
-  Section~\ref{sec:casestudies} describes case studies of object languages beyond System F.
+  Section~\ref{sec:casestudies} discusses our case studies.
   Section~\ref{sec:related} discusses related work.
-  Section~\ref{sec:future} describes future work.
+  Section~\ref{sec:future} discusses future work.
   Section~\ref{sec:conclusion} concludes.
 
   \subsection{Contributions}
@@ -357,8 +382,9 @@
     multiple variable sorts as a special kind of intrinsically-typed
     syntax, we call \emph{multi-sorted syntax};
   \item
-    an adaptation of McBride's kit-abstraction for unifying renamings
-    and substitutions to multi-sorted syntax;
+    an adaptation of McBride's
+    kit-abstraction\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
+    for unifying renamings and substitutions to multi-sorted syntax;
   \item
     a novel abstraction for composition and it's metatheory, unifying
     the four compositions between renamings and substitutions;
@@ -369,10 +395,10 @@
     a formalized specification of a large class of object languages
     for which substitution and lemmas can be derived generically.
   \item
-    an implementation of the concepts as framework in Agda featuring
+    an implementation as an Agda framework featuring
     a reflection algorithm, representation independence for
     substitutions and typing contexts, heterogeneous equality between
-    renamings and substitutions, and free of postulated axioms.
+    renamings and substitutions, and absence of postulated axioms.
   \item
     three case studies using our approach to prove subject reduction
     for System~F with subtyping, a dependently-typed lambda calculus, and
@@ -1026,14 +1052,13 @@
   of both renamings and substitutions for all sorts of variables
   simultaneously.
 
-  \section{Semantics}
-  \label{sec:semantics}
+  \section{Subject Reduction}
+  \label{sec:subjectreduction}
+
   We define a standard small-step operational semantics for System F
   with full reduction:
   \AppCode\FReduction
 
-  \section{Subject Reduction}
-  \label{sec:subjectreduction}
   Proving subject reduction is now straightforward:
   \AppCode\FSubjectReduction
   \AppCode\FSubjectReductionProofInteresting
