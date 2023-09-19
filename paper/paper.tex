@@ -867,7 +867,7 @@
   \ACode{\AField{⋯-fusion}} lemmas between a renaming and a substitution, which in
   turn depend on the \ACode{\AField{⋯-fusion}} lemma between two renamings.
 
-  Benton et al.\cite{DBLP:journals/jar/BentonHKM12} addresses this
+  Previous work on kits\cite{DBLP:journals/jar/BentonHKM12} addresses this
   issue by duplicating the definitions and using tactics to reduce
   boilerplate in proofs.
   In contrast, we define structures similar to \ACode{\ACon{Kit}} and
@@ -917,11 +917,10 @@
   \ACode{\ACon{ComposeKit}},
   which provides an operation \ACode{\AField{\_\&/⋯\_}} that unifies
   \ACode{\ADef{\_\&\_}} and \ACode{\ADef{\_⋯\_}}. This allows us to
-  define a general composition in the spirit of:
+  define a general composition, which informally can be described as:
   \ExampleCode\KComposition
   We then define a \ACode{\ACon{ComposeTraversal}}, which consists of the
   \ACode{\AField{⋯-fusion}} lemma for general maps.
-
   Just like a \ACode{\ACon{Traversal}} allowed us to bootstrap the two
   \ACode{\ACon{Kit}} instances, the \ACode{\ACon{ComposeTraversal}} allows
   us to bootstrap the four \ACode{\ACon{ComposeKit}} instances.
@@ -933,22 +932,6 @@
   
   \subsection{An Abstraction for Composition}
   \label{sec:composition:ckit}
-
-  Using the \ACode{\ACon{WkKit}}, we then define
-  the \ACode{\ACon{ComposeKit}} and \ACode{\ACon{ComposeTraversal}}
-  structures, which serve analogous purposes to \ACode{\ACon{Kit}}
-  and \ACode{\ACon{Traversal}} from before:
-  the library provides a \ACode{\ACon{ComposeKit}} for each of the
-  four compositions, whereas the \ACode{\ACon{ComposeTraversal}}
-  structure needs to be instantiated by the application with
-  lemmas parameterized over arbitrary \ACode{\ACon{ComposeKit}}s.
-  This gives the user a composition operation
-  \ACode{\AField{\_·ₖ\_}} between arbitrary maps and corresponding
-  lemmas, instead of multiple definitions and lemmas about concrete
-  maps, enabling us to reason on a more abstract level and to avoid
-  further boilerplate.
-
-
 
   \LibCode\KComposeKit
 
@@ -1037,9 +1020,9 @@
     provided by the \ACode{\ACon{ComposeKit}}.
   \item
     bindings, where the traversal operation \ACode{\AField{\_⋯\_}}
-    needs to lift the map via \ACode{\ADef{\_↑\_}}, requiring us to
+    needs to lift the map via \ACode{\AField{\_↑\_}}, requiring us to
     distribute the lifting over the composition using
-    \ACode{\ADef{dist-↑-·}}.
+    \ACode{\AField{dist-↑-·}}.
   \end{itemize}
 
   % \AppCode\FFusionProofRest
