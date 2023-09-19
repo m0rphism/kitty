@@ -1032,7 +1032,14 @@
   \AppCode\FFusionProofInteresting
   The interesting cases are:
   \begin{itemize}
-  \item 
+  \item
+    variables, where we need to use the \ACode{\AField{\&/⋯-⋯}} lemma
+    provided by the \ACode{\ACon{ComposeKit}}.
+  \item
+    bindings, where the traversal operation \ACode{\AField{\_⋯\_}}
+    needs to lift the map via \ACode{\ADef{\_↑\_}}, requiring us to
+    distribute the lifting over the composition using
+    \ACode{\ADef{dist-↑-·}}.
   \end{itemize}
 
   % \AppCode\FFusionProofRest
