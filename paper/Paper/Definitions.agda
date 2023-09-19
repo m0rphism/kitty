@@ -110,9 +110,12 @@ _⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ �
 --! Traversal
 SystemF-Traversal : Traversal
 SystemF-Traversal = record
-  { _⋯_    = _⋯_
-  ; ⋯-var  = λ x ϕ → refl
-  ; ⋯-id   = ⋯-id }
+  { _⋯_ = _⋯_ ; ⋯-id = ⋯-id ; ⋯-var = λ x ϕ → refl }
+
+-- SystemF-Traversal = record
+--   { _⋯_    = _⋯_
+--   ; ⋯-var  = λ x ϕ → refl
+--   ; ⋯-id   = ⋯-id }
 
 open Traversal SystemF-Traversal hiding (_⋯_; ⋯-id)
 
