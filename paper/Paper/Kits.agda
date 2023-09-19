@@ -315,7 +315,7 @@ record Syntax : Set₁ where
     --! ComposeTraversal {
     record ComposeTraversal : Set₁ where
       field
-        ⋯-assoc :
+        ⋯-fusion :
           ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
             ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
             (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
@@ -344,9 +344,9 @@ record Syntax : Set₁ where
                → t ⋯ ϕ ⋯ weakenᵣ s ≡ t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)
       --! CommLiftWeakenTraverseProof
       ⋯-↑-wk t ϕ s =
-        t ⋯ ϕ ⋯ weakenᵣ s           ≡⟨ ⋯-assoc t ϕ (weakenᵣ s) ⟩
+        t ⋯ ϕ ⋯ weakenᵣ s           ≡⟨ ⋯-fusion t ϕ (weakenᵣ s) ⟩
         t ⋯ (ϕ ·ₖ weakenᵣ s)        ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ s)) ⟩
-        t ⋯ (weakenᵣ s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-assoc t (weakenᵣ s) (ϕ ↑ s)) ⟩
+        t ⋯ (weakenᵣ s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-fusion t (weakenᵣ s) (ϕ ↑ s)) ⟩
         t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)     ∎
 
       --! ComposeKitInstances {
@@ -388,7 +388,7 @@ record Syntax : Set₁ where
         t ⋯ weakenᵣ s ⋯ ⦅ x/t ⦆ ≡ t
       --! WeakenCancelsSingleTraverseProof
       wk-cancels-⦅⦆-⋯ t x/t =
-        t ⋯ weakenᵣ _ ⋯ ⦅ x/t ⦆     ≡⟨ ⋯-assoc t (weakenᵣ _) ⦅ x/t ⦆ ⟩
+        t ⋯ weakenᵣ _ ⋯ ⦅ x/t ⦆     ≡⟨ ⋯-fusion t (weakenᵣ _) ⦅ x/t ⦆ ⟩
         t ⋯ (weakenᵣ _ ·ₖ ⦅ x/t ⦆)  ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
         t ⋯ id                      ≡⟨ ⋯-id t ⟩
         t                           ∎
@@ -425,9 +425,9 @@ record Syntax : Set₁ where
         t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆
       --! DistLiftSingleTraverseProof
       dist-↑-⦅⦆-⋯ t x/t ϕ =
-        t ⋯ ⦅ x/t ⦆ ⋯ ϕ                   ≡⟨ ⋯-assoc t ⦅ x/t ⦆ ϕ ⟩
+        t ⋯ ⦅ x/t ⦆ ⋯ ϕ                   ≡⟨ ⋯-fusion t ⦅ x/t ⦆ ϕ ⟩
         t ⋯ (⦅ x/t ⦆ ·ₖ ϕ)                ≡⟨ cong (t ⋯_) (~-ext (dist-↑-⦅⦆ x/t ϕ)) ⟩
-        t ⋯ ((ϕ ↑ _) ·ₖ ⦅ (x/t &/⋯ ϕ) ⦆)  ≡⟨ sym (⋯-assoc t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
+        t ⋯ ((ϕ ↑ _) ·ₖ ⦅ (x/t &/⋯ ϕ) ⦆)  ≡⟨ sym (⋯-fusion t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
         t ⋯ (ϕ ↑ _) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆     ∎
 
       --! TypeSorts
