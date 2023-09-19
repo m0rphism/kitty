@@ -819,16 +819,17 @@
 
   %%%%%%%%%%
 
-  In this section, we extend our framework with a single composition
-  operator for arbitrary maps.
+  In this section, we extend our framework with an abstraction that
+  allows the composition of arbitrary maps.
 
-  The core property of composition is that applying two maps
-  \ACode{ϕ₁} and \ACode{ϕ₂} in sequence to a term \ACode{t}, is the same
-  as applying their composition \ACode{(ϕ₁ \AField{·ₖ} ϕ₂)} to \ACode{t}, i.e.
+  The core property of composition, which we call
+  \ACode{\AField{⋯-fusion}}, states that applying two maps \ACode{ϕ₁}
+  and \ACode{ϕ₂} in sequence to a term \ACode{t}, is the same as
+  applying their composition \ACode{(ϕ₁ \AField{·ₖ} ϕ₂)} to \ACode{t},
+  i.e.
   $$
   \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
   $$
-  We call this property \ACode{\AField{⋯-fusion}}.
   This property equips our framework with the power to
   reason about the application of multiple maps in terms of
   the application of a single map.
@@ -888,7 +889,7 @@
     If we compose two maps \ACode{ϕ₁} and \ACode{ϕ₂}, then the
     resulting map is a renaming, iff both \ACode{ϕ₁} and \ACode{ϕ₂} are
     renamings.
-    In other words, 
+    In other words:
     if \ACode{ϕ₁} is a \ACode{K₁}-map and \ACode{ϕ₂} is a \ACode{K₂}-map,
     then the result is a \ACode{(K₁ ⊔ K₂)}-map, where \ACode{⊔} refers to the
     lattice for \ACode{\{ \ADef{Kᵣ} , \ADef{Kₛ} \}}
@@ -896,8 +897,8 @@
   \item
     All four compositions first apply \ACode{ϕ₁} to \ACode{x},
     and then apply \ACode{ϕ₂} to the result.
-    If \ACode{ϕ₁} is a renaming, this result is another variable, but
-    if \ACode{ϕ₁} is a substitution, this result is a term.
+    If \ACode{ϕ₁} is a renaming, then this result is another variable, but
+    if \ACode{ϕ₁} is a substitution, then this result is a term.
   \end{enumerate}
   With the \ACode{\ACon{Kit}} abstraction, we can easily abstract over
   \ACode{ϕ₂} being a renaming or a substitution:
@@ -948,29 +949,79 @@
 
 
   \LibCode\KComposeKit
-  \LibCode\KComposition
-  \LibCode\KComposeKitAp
-  % \LibCode\KComposeKitApProof
-  \LibCode\KDistLiftCompose
-  % \LibCode\KDistLiftComposeProof
-  \LibCode\KComposeKitNotation
-  \LibCode\KComposeTraversal
-  \LibCode\KCommLiftWeaken
-  % \LibCode\KCommLiftWeakenProof
-  \LibCode\KCommLiftWeakenTraverse
-  % \LibCode\KCommLiftWeakenTraverseProof
-  \LibCode\KComposeKitInstances
-  \LibCode\KComposeKitInstancesConcrete
-  \LibCode\KWeakenCancelsSingle
-  % \LibCode\KWeakenCancelsSingleProof
-  \LibCode\KWeakenCancelsSingleTraverse
-  % \LibCode\KWeakenCancelsSingleTraverseProof
-  \LibCode\KDistLiftSingle
-  % \LibCode\KDistLiftSingleProof
-  \LibCode\KDistLiftSingleTraverse
-  % \LibCode\KDistLiftSingleTraverseProof
 
-  \subsection{System F}
+  Similar as for the \ACode{\ACon{Kit}}, we derive further definitions
+  from the the axioms of a \ACode{\ACon{ComposeKit}}:
+  \begin{itemize}
+  \item
+    We define map composition as motivated by the previous subsection:
+    \LibCode\KComposition
+  \item
+    We show that the \ACode{\AField{\_\&/⋯\_}} operator behaves like
+    \ACode{\AField{\_\&\_}} when applied to variables:
+    \LibCode\KComposeKitAp
+    % \LibCode\KComposeKitApProof
+
+    % The \ACode{\AField{`/id}} on the left side is from \ACode{K₁⊔K₂}, whereas
+    % the \ACode{\AField{`/id}} on the right side is from \ACode{K₂}.
+  \item
+    We show that lifting \ACode{\AField{\_↑\_}} distributes over
+    composition:
+    \LibCode\KDistLiftCompose
+    % \LibCode\KDistLiftComposeProof
+  \end{itemize}
+  To make it easier to explicitly specify a \ACode{\ACon{ComposeKit}},
+  we define the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}
+  to stand for \ACode{ϕ₁ \ADef{·ₖ} ϕ₂} for some
+  \ACode{\ACon{ComposeKit}} \ACode{C}.
+  % \LibCode\KComposeKitNotation
+
+  We then define the \ACode{\ACon{ComposeTraversal}} structure,
+  which provides the \ACode{\ACon{⋯-fusion}} for the compositions
+  described by arbitrary \ACode{\ACon{ComposeKit}}s:
+  \LibCode\KComposeTraversal
+
+  Similar as for the \ACode{\ACon{Traversal}}, we derive further
+  definitions from the the axiom of a \ACode{\ACon{ComposeTraversal}}:
+  \begin{itemize}
+  \item 
+    A map \ACode{ϕ} followed by a weakening is equivalent to a
+    weakening followed by \ACode{ϕ} that has been lifted over the weakened
+    variable:
+    \LibCode\KCommLiftWeaken
+    % \LibCode\KCommLiftWeakenProof
+    By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the same
+    statement for multiple map applications:
+    \LibCode\KCommLiftWeakenTraverse
+    % \LibCode\KCommLiftWeakenTraverseProof
+  \item 
+    A weakening followed by a singleton substitution cancel each other out:
+    \LibCode\KWeakenCancelsSingle
+    % \LibCode\KWeakenCancelsSingleProof
+    By applying \ACode{\AField{⋯-fusion}} and \ACode{\AField{⋯-id}} to
+    this lemma, we get the same statement for multiple map applications:
+    \LibCode\KWeakenCancelsSingleTraverse
+    % \LibCode\KWeakenCancelsSingleTraverseProof
+  \item 
+    A singleton substitution followed by some map \ACode{ϕ} is the same
+    as \ACode{ϕ} lifted over the variable of the singleton substitution
+    followed by the singleton substitution with \ACode{ϕ} applied to its term:
+    \LibCode\KDistLiftSingle
+    % \LibCode\KDistLiftSingleProof
+    By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the
+    same statement for multiple map applications:
+    \LibCode\KWeakenCancelsSingleTraverse
+    \LibCode\KDistLiftSingleTraverse
+    % \LibCode\KDistLiftSingleTraverseProof
+  \item 
+    Given the \ACode{\ADef{⋯-↑-wk}} lemma, we can define the four
+    \ACode{\ACon{ComposeKit}} instances:
+    \LibCode\KComposeKitInstances
+    \LibCode\KComposeKitInstancesConcrete
+  \end{itemize}
+
+  Finally, we instantiate the \ACode{\ACon{ComposeTraversal}} for
+  System F to make the composition machinery available:
   \AppCode\FFusion
   \AppCode\FFusionProofInteresting
   % \AppCode\FFusionProofRest

@@ -209,9 +209,9 @@ record Syntax : Set₁ where
 
       Wₛ : WkKit Kₛ
       Wₛ = record { wk-`/id = λ s t → refl }
+    --! }
 
     open WkKit ⦃ … ⦄ public
-    --! }
 
     module ExamplesX where
       private variable ⦃ K ⦄ : Kit _∋/⊢_
