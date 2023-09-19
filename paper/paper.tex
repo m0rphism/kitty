@@ -755,6 +755,59 @@
   % \LibCode\KKitOpenInst
   % \LibCode\KKitOpen
 
+  \subsection{Extension Kits}
+  \label{sec:maps:wkkit}
+
+  % Before we define \ACode{\ACon{ComposeKit}} and
+  % \ACode{\ACon{ComposeTraversal}}, we need one more ingredient.
+
+  As we defined the \ACode{\ACon{Kit}} structure before the
+  \ACode{\ACon{Traversal}} structure, the fields of
+  \ACode{\ACon{Kit}} could not use the \ACode{\ACon{\_⋯\_}} function in
+  their types.
+
+  This prevented us to define a useful lemma, which also needs to
+  be instanciated separately for variables and terms: the counterpiece
+  to \ACode{\AField{wk-id/`}}, which we call \ACode{\AField{wk-`/id}}.
+
+  Recall that \ACode{\AField{wk-id/`}} explains the
+  \ACode{\AField{wk}} function of an arbitrary \ACode{\ACon{Kit}} by how it acts on
+  \emph{variables}:
+  \ExampleCode{\KWkId}
+
+  Similarly, the \ACode{\AField{wk-`/id}} lemma
+  explains the \ACode{\AField{wk}} function of an
+  arbitrary \ACode{\ACon{Kit}} by how it acts on \emph{terms}:
+  \ExampleCode{\KIdWk}
+
+  This lemma is useful for proving extensional equalities between maps
+  involving weakening, where \ACode{\AField{`/id-injective}} allows to
+  add \ACode{\AField{`/id}} on both sides of the equation, such that
+  \AField{wk-`/id} can be used to make further progress.
+
+  To prove \AField{wk-`/id}, we define a structure
+  \ACode{\ACon{WkKit}}, which extends a regular \ACode{\ACon{Kit}} with
+  the \AField{wk-`/id} lemma:
+  \LibCode\KWkKit
+
+  We then create exactly two instances of the \ACode{\ACon{WkKit}} for
+  the variable and term \ACode{\ACon{Kit}}, respectively. 
+  \LibCode\KWkKitInstances
+
+  As the variable and term \ACode{\ACon{Kit}}s are the only two \ACode{\ACon{Kit}}s,
+  and both have \ACode{\ACon{WkKit}} instances, it is always safe to assume that
+  a \ACode{\ACon{Kit}} also supports the \ACode{\ACon{WkKit}} extension.
+
+  % Note that we have exactly two instances for \ACode{\ACon{Kit}}s
+  % and both of them have a \ACode{\ACon{WkKit}} instance. Consequently,
+  % whenever we abstract over a \ACode{\ACon{Kit}}, we can also safely assume
+  % that it has a \ACode{\ACon{WkKit}} instance, without restricting the
+  % lemmas usage.
+
+  % Both the structure and the instances are part of the library and do
+  % not require application code.
+
+
   \section{Map Composition}
   \label{sec:composition}
 
@@ -875,49 +928,7 @@
   % \ACode{\ACon{ComposeTraversal}} and \ACode{\AField{⋯-fusion}} are analogous to
   % \ACode{\ACon{ComposeTraversal}} and \ACode{\AField{\_⋯\_}}.
   
-  \subsection{WkKits}
-  \label{sec:composition:wkkit}
-
-  Before we define \ACode{\ACon{ComposeKit}} and
-  \ACode{\ACon{ComposeTraversal}}, we need one more ingredient.
-
-  In the definition of \ACode{\ACon{Kit}} we required the axiom
-  \ACode{\AField{wk-id/`}}, which captured the interaction between
-  \ACode{\AField{wk}} and \ACode{\AField{id/`}}:
-  \ExampleCode{\KWkId}
-  Injecting a variable with \ACode{\AField{id/`}} and then shifting it,
-  is the same as injecting a shifted variable.
-
-  Now that we have defined the \ACode{\ACon{Traversal}} structure, we
-  can formulate a similar interaction between
-  \ACode{\AField{wk}} and \ACode{\AField{`/id}}:
-  \ExampleCode{\KIdWk}
-  Shifting a variable/term \ACode{x/t} with \ACode{\AField{wk}} and then injecting
-  it to a term, is the same as injecting \ACode{x/t} to a term and then applying
-  a shifting renaming.
-  Instead of explaining \ACode{\AField{wk}} through its action on variables,
-  this lemma explains \ACode{\AField{wk}} through its action on terms.
-
-  As this lemma depends on map application \ACode{\ADef{\_⋯\_}} being
-  already defined, we cannot add it to the original \ACode{\ACon{Kit}}
-  structure, but need to define a new structure for it, which we call
-  a \ACode{\ACon{WkKit}}:
-  \LibCode\KWkKit
-
-  We then create exactly two instances of the \ACode{\ACon{WkKit}} for
-  the variable and term kit, respectively. 
-  \LibCode\KWkKitInstances
-
-  % Note that we have exactly two instances for \ACode{\ACon{Kit}}s
-  % and both of them have a \ACode{\ACon{WkKit}} instance. Consequently,
-  % whenever we abstract over a \ACode{\ACon{Kit}}, we can also safely assume
-  % that it has a \ACode{\ACon{WkKit}} instance, without restricting the
-  % lemmas usage.
-
-  Both the structure and the instances are part of the library and do
-  not require application code.
-
-  \subsection{Composition}
+  \subsection{An Abstraction for Composition}
   \label{sec:composition:ckit}
 
   Using the \ACode{\ACon{WkKit}}, we then define
