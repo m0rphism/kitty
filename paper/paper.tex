@@ -860,19 +860,26 @@
   To fill this gap, we introduce a new abstraction that we call a
   \ACode{\ACon{ComposeKit}},
   which provides an operation \ACode{\AField{\_\&/⋯\_}} that unifies
-  \ACode{\ADef{\_\&\_}} and \ACode{\ADef{\_⋯\_}}, allowing us
-  to define a general composition in the spirit of:
+  \ACode{\ADef{\_\&\_}} and \ACode{\ADef{\_⋯\_}}. This allows us to
+  define a general composition in the spirit of:
   \ExampleCode\KComposition
+  We then define a \ACode{\ACon{ComposeTraversal}}, which consists of the
+  \ACode{\AField{⋯-fusion}} lemma for general maps.
+
+  Just like a \ACode{\ACon{Traversal}} allowed us to bootstrap the two
+  \ACode{\ACon{Kit}} instances, the \ACode{\ACon{ComposeTraversal}} allows
+  us to bootstrap the four \ACode{\ACon{ComposeKit}} instances.
 
   % \ACode{\ACon{ComposeKit}} and \ACode{\ADef{\_·ₖ\_}} are analogous to
   % \ACode{\ACon{Kit}} and \ACode{\ADef{\_→ₖ\_}}, whereas
   % \ACode{\ACon{ComposeTraversal}} and \ACode{\AField{⋯-fusion}} are analogous to
   % \ACode{\ACon{ComposeTraversal}} and \ACode{\AField{\_⋯\_}}.
   
-
-  
   \subsection{WkKits}
   \label{sec:composition:wkkit}
+
+  Before we define \ACode{\ACon{ComposeKit}} and
+  \ACode{\ACon{ComposeTraversal}}, we need one more ingredient.
 
   In the definition of \ACode{\ACon{Kit}} we required the axiom
   \ACode{\AField{wk-id/`}}, which captured the interaction between
@@ -888,7 +895,8 @@
   Shifting a variable/term \ACode{x/t} with \ACode{\AField{wk}} and then injecting
   it to a term, is the same as injecting \ACode{x/t} to a term and then applying
   a shifting renaming.
-  
+  Instead of explaining \ACode{\AField{wk}} through its action on variables,
+  this lemma explains \ACode{\AField{wk}} through its action on terms.
 
   As this lemma depends on map application \ACode{\ADef{\_⋯\_}} being
   already defined, we cannot add it to the original \ACode{\ACon{Kit}}
@@ -899,6 +907,12 @@
   We then create exactly two instances of the \ACode{\ACon{WkKit}} for
   the variable and term kit, respectively. 
   \LibCode\KWkKitInstances
+
+  % Note that we have exactly two instances for \ACode{\ACon{Kit}}s
+  % and both of them have a \ACode{\ACon{WkKit}} instance. Consequently,
+  % whenever we abstract over a \ACode{\ACon{Kit}}, we can also safely assume
+  % that it has a \ACode{\ACon{WkKit}} instance, without restricting the
+  % lemmas usage.
 
   Both the structure and the instances are part of the library and do
   not require application code.

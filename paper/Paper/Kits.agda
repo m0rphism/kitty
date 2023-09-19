@@ -198,9 +198,8 @@ record Syntax : Set₁ where
     record WkKit (K : Kit _∋/⊢_): Set₁ where
       private instance _ = K
       field
-        wk-`/id :
-          ∀ s {S s'} (x/t : S ∋/⊢ s')
-          → `/id x/t ⋯ weakenᵣ s ≡ `/id (wk s x/t)
+        wk-`/id :  ∀ s {S s'} (x/t : S ∋/⊢ s') →
+                   `/id x/t ⋯ weakenᵣ s ≡ `/id (wk s x/t)
     --! }
 
     --! WkKitInstances {
