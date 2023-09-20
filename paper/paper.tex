@@ -919,11 +919,6 @@
   \ACode{\ADef{\_\&\_}} and \ACode{\ADef{\_⋯\_}}. This allows us to
   define a general composition, which informally can be described as:
   \ExampleCode\KComposition
-  We then define a \ACode{\ACon{ComposeTraversal}}, which consists of the
-  \ACode{\AField{⋯-fusion}} lemma for general maps.
-  Just like a \ACode{\ACon{Traversal}} allowed us to bootstrap the two
-  \ACode{\ACon{Kit}} instances, the \ACode{\ACon{ComposeTraversal}} allows
-  us to bootstrap the four \ACode{\ACon{ComposeKit}} instances.
 
   % \ACode{\ACon{ComposeKit}} and \ACode{\ADef{\_·ₖ\_}} are analogous to
   % \ACode{\ACon{Kit}} and \ACode{\ADef{\_→ₖ\_}}, whereas
@@ -933,16 +928,30 @@
   \subsection{An Abstraction for Composition}
   \label{sec:composition:ckit}
 
-  The \ACode{\ACon{ComposeKit}} abstraction provides the
-  \ACode{\AField{\_\&/⋯\_}} operation, necessary for defining
-  composition, and two lemmas about its behavior:
+  In this subsection, we define the \ACode{\ACon{ComposeKit}}
+  abstraction, which provides the \ACode{\AField{\_\&/⋯\_}} operation
+  that is necessary for defining composition, and the
+  \ACode{\ACon{ComposeTraversal}}, which provides the
+  \ACode{\AField{⋯-fusion}} lemma for general maps.
+
+  Similarly as it was the case for \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}},
+  the \ACode{\ACon{ComposeTraversal}} needs to be instantiated for
+  abstract \ACode{\ACon{ComposeKit}}s, which then provides the actual
+  four \ACode{\ACon{ComposeKit}} instances. This allows us to break
+  the dependencies between the different \ACode{\AField{⋯-fusion}} lemmas,
+  similar to how \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}} allowed
+  us to break the dependency between traversals with renamings and substitutions.
+
+  For this purpose, the \ACode{\ACon{ComposeKit}} abstraction, needs
+  to satisfy two requirements:
+  it needs to provide us with enough machinery to define composition, but also
+  it needs to provide us with enough axioms that we are able to instanciate
+  the \ACode{\ACon{ComposeTraversal}}. It is defined as followed:
   \LibCode\KComposeKit
   The \ACode{\AField{\_\&/⋯\_}} operation takes a variable or term
   (according to \ACode{K₁}) and a renaming or substitution
   (according to \ACode{K₂}) and performs the map traversal returning
   a variable or term (according to \ACode{K₁⊔K₂}).
-  We later define four instances for \ACode{\ACon{ComposeKit}}, where
-  \ACode{K₁} and \ACode{K₂} can each be either the variable or term kit.
   The third parameter \ACode{K₁⊔K₂} can be seen as a functional
   dependency and is completely determined by the choice of \ACode{K₁}
   and \ACode{K₂}.
@@ -1020,17 +1029,33 @@
     \LibCode\KDistLiftSingleTraverse
     % \LibCode\KDistLiftSingleTraverseProof
   \item 
-    Given the \ACode{\ADef{⋯-↑-wk}} lemma, we can define the four
-    \ACode{\ACon{ComposeKit}} instances:
+    We define \ACode{\ACon{ComposeKit}} instances for each of the four
+    combinations between renamings and substitutions:
     \LibCode\KComposeKitInstances
+    Interestingly, the \ACode{\ADef{Cₛ}} instance has another
+    \ACode{\ADef{ComposeKit}} parameter.
+    This allows us to first use \ACode{\ADef{Cᵣ}} as an argument,
+    which yields the \ACode{\ADef{ComposeKit}} between substitutions
+    and renamings, and then use this resulting \ACode{\ADef{ComposeKit}}
+    as an argument for the case with two substitutions.
+    As shown below, Agda's instance resolution is up for the task:
+
+    % To get the \ACode{\ADef{ComposeKit}} between substitutions and
+    % renamings, the argument \ACode{\ADef{Cᵣ}} is used.
+    % The resulting \ACode{\ADef{ComposeKit}} is then again used as an argument
+    % for \ACode{\ADef{Cₛ}} to yield the \ACode{\ADef{ComposeKit}}
+    % between two substitutions. As shown below, Agda's instance
+    % resolution is up for the task:
     \LibCode\KComposeKitInstancesConcrete
+
   \end{itemize}
 
   \subsection{Instantiation for System F}
   In this subsection, we show how to instantiate the
   \ACode{\ACon{ComposeTraversal}} abstraction for System F.
   In practice, this is done by our reflection algorithm automatically,
-  but it can be instructive to see what happens under the hood.
+  but it can be instructive to see, as it motivates the axioms of the
+  \ACode{\ACon{ComposeKit}}.
 
   \AppCode\FFusion
   \AppCode\FFusionProofInteresting
