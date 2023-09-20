@@ -1090,42 +1090,64 @@
   For System F, the expression sort \ACode{\ACon{𝕖}} maps to the type sort
   \ACode{\ACon{𝕥}} and the sort \ACode{\ACon{𝕥}} maps to the kind sort
   \ACode{\ACon{𝕜}}.
-  To teach our framework about types, we have to instantiate the following structure:
+  The following structure is used to teach our framework about types:
   \LibCode\KTypeSorts
   For System F the instantiation is
   \AppCode\FTypes
-  For a nicer interface, we define a type analogously to a term:
+  There are two things to discuss:
+  \begin{enumerate}
+  \item
+    The \ACode{\AField{↑ᵗ}} function maps a sort of arbitrary sort type,
+    to a sort of a potentially different sort type, which is expressed
+    by the use of an existential.
+    For System F we require this generality, as the sort
+    \ACode{\ACon{𝕥}} can have variables, whereas its corresponding type
+    sort \ACode{\ACon{𝕜}} cannot.
+  \item
+    Some sorts, like \ACode{\ACon{𝕜}}, do not have corresponding type
+    sorts, but we still need to provide one, as \ACode{\AField{↑ᵗ}} is a
+    total function.
+    For such sorts, we can simply use arbitrary sort types, as the
+    formalization will never use them.
+  \end{enumerate}
+  To hide the existential, we define \ACode{S \ACon{∶⊢} s}, which represents
+  the type for a term \ACode{S \ACon{⊢} s}.
   \LibCode\KTypes
 
   \subsection{Typing Context}
-  A typing context is then a function which maps variables to types.
-  As we want our framework to support dependent types, the types returned by
-  a typing context are allowed to use the domain of the 
-  To be able to deal with dependent types, the result types are only allowed
-  to refer to the variables that come before 
-  \LibCode\KContextHelper
-  \LibCode\KContexts
-  \LibCode\KContextLookup
+  Equipped with a notion of types, we define a typing context as a
+  function that maps variables to types of the same sort.
 
+  As we want our framework to support dependent types, we allow a type returned
+  by the typing context to use all variables bound previously in the typing context.
+  This is achieved by the \ACode{drop-∈} function, which cuts of all
+  sorts from \ACode{S} that are at smaller or equal positions than a variable \ACode{x}.
+
+  % \LibCode\KContextHelper
+  \LibCode\KContexts
+  To use a type returned from a typing context, it needs to be
+  weakened appropriately through the \ACode{\ADef{wk-telescope}} function:
+  \LibCode\KContextLookup
+  We then define a variable typing as followed:
   \LibCode\KVariableTyping
 
   \section{Typing}
   \label{sec:typing}
-  Equipped with a notion of types and type context we are ready to define
+  Equipped with a notion of types and type context, we are ready to define
   the multi-sorted typing relation for System F, incorporating both
   typing and kinding:
   \AppCode\FTyping
   The interesting cases are:
   \begin{itemize}
   \item
-    the variable typing constructor covers both expression- and
+    the variable typing constructor, which covers both expression- and
     type-variables, analogously to the variable term constructor;
   \item
-    the typing of the lambda abstraction \ACode{\ACon{⊢λ}} weakens the
-    type of the codomain \ACode{t₂}.
-    This is necessary, because with multi-sorted syntax, types could
-    also depend on expressions, so the sub typing derivation accounts for
-    another variable which is not used by the type.
+    the typing \ACode{\ACon{⊢λ}} of the lambda abstraction, which
+    weakens the type of the codomain \ACode{t₂}.
+    This is necessary, because multi-sorted syntax allows types
+    to depend on expressions, so the typing derivation for \ACode{e}
+    has to account for a variable, which is not used by the type.
   \item
     the kinding constructor \ACode{\ACon{⊢τ}} states that all types
     have kind \ACode{\ACon{★}}. This is sufficient for System F as types
@@ -1134,18 +1156,28 @@
   To teach the framework about typing, we create a structure analogously to
   \ACode{\ACon{Syntax}}:
   \LibCode\KTyping
-  and instantiate it for System F:
+  The instantiation for System F is straightforward:
   \AppCode\FTypingInst
 
-  Next we define \ACode{\ACon{TypingKit}}s, which are analog to
-  \ACode{\ACon{Kit}}s, but abstract about variable and term
-  \emph{typing}, instead of variables and terms, themselves.
+  \subsection{An Abstraction for Type Preservation}
+  By now, the reader probably knows what comes next: we build an
+  abstraction to unify type preservation for renamings and substitutions,
+  eliminating the dependencies by yet another type of kits.
+
+  We start with \ACode{\ACon{TypingKit}}s, which abstract over
+  variable and term \emph{typing}, and then define a
+  \ACode{\ACon{TypingTraversal}}, which provides substitution
+  preserves typing for all \ACode{\ACon{TypingKit}}s.
   \LibCode\KTypingKit
+  The operations are completely analog to those of a \ACode{\ACon{Kit}}, but talk
+  about typing instead of terms.
   Building on the fields of a \ACode{\ACon{TypingKit}}, we define further operations:
   \begin{itemize}
   \item
     Using the variable/term typing, we can define a renaming/substitution typing:
     \LibCode\KMapTyping
+    \ACode{Γ₂ \ADef{∋*/⊢*} ϕ \ADef{∶} Γ₁} states that \ACode{ϕ} is a map that takes
+    terms in \ACode{Γ₁} to terms in \ACode{Γ₂}.
   \item 
     Lifting a map preserves its typing:
     \LibCode\KLiftTyping
@@ -1168,6 +1200,10 @@
   Given a term \ACode{e} with typing \ACode{⊢e} and
   a renaming/substitution \ACode{ϕ} with typing \ACode{⊢ϕ},
   the term \ACode{⊢e \AField{⊢⋯} ⊢ϕ} is a typing for \ACode{e \AField{⋯} ϕ}.
+  The large amount of kit-parameters does not impose any restriction,
+  as both our \ACode{\ACon{Kit}}s support the \ACode{\ACon{WkKit}}
+  extension and can be composed arbitrarily. They only make the previously
+  built machinery available to the proof of \ACode{\AField{\_⊢⋯\_}}.
 
   Given a \ACode{\ACon{TypingTraversal}}, we can easily instantiate the
   \ACode{\ACon{TypingKits}} for variables and terms:
@@ -1184,9 +1220,20 @@
   \AppCode\FPreserve
   The interesting parts of the proof are:
   \begin{itemize}
-  \item 
+  \item
+    There is a strong similarity to the instantiation of
+    map traversal \ACode{\AField{\_⋯\_}}. Where \ACode{\AField{\_⋯\_}}
+    used \ACode{\AField{`/id}} or \ACode{\AField{\_↑\_}}, we now use their
+    preservation lemmas \ACode{\AField{⊢`/id}} or \ACode{\AField{\_∋↑/⊢↑\_}}.
+  \item
+    The lambda typing constructor \ACode{\ACon{⊢λ}} weakens the type \ACode{t₂} to
+    shield it from expression-substitution, requiring us to use the
+    \ACode{\AField{⋯-↑-wk}} lemma.
+  \item
+    The type application constructor \ACode{\ACon{⊢∙}} substitutes \ACode{t₁} into \ACode{t₂},
+    requiring us to use the \ACode{\AField{dist-↑-⦅⦆}} lemma.
   \end{itemize}
-
+  Finally, we instantiate the \ACode{\ACon{TypingTraversal}} structure:
   \AppCode\FTypingTraversal
 
   % As the \ACode{\ACon{Traversal}} and  \ACode{\ACon{ComposeTraversal}} instances
@@ -1200,32 +1247,28 @@
   \section{Subject Reduction}
   \label{sec:subjectreduction}
 
-  We define a standard small-step operational semantics for System F
-  with full reduction:
+  To finish our running example, we define a standard small-step
+  operational semantics for System F with full reduction and prove subject reduction:
   \AppCode\FReduction
-
-  Proving subject reduction is now straightforward:
+  \vspace{0mm}
   \AppCode\FSubjectReduction
   \AppCode\FSubjectReductionProofInteresting
-  We only listed the cases that do not follow directly from the
-  induction hypothesis:
+  We only listed the cases for $\beta$-reduction, as the other cases
+  follow directly from the induction hypothesis:
   \begin{itemize}
   \item The beta-reduction rule for type-application, \ACode{\ACon{β-Λ}},
     is a direct consequence of substitution preserves typing.
-    \ACode{⊢e₂} is the typing for \ACode{e₂}.
-    \ACode{⊢⦅ ⊢e₂ ⦆} is the substitution-typing for the singleton substitution 
-    \ACode{\AField{⦅ e₂ ⦆}}.
-    \ACode{\AField{⊢e₁ ⊢⋯ ⊢⦅ ⊢e₂ ⦆}} states that applying the singleton substitution
-    to \ACode{e₁} preserves typing.
   \item The beta-reduction rule for value-application is almost the same,
-    but requires us to addionaly apply an equality to the type index.
+    but requires us to additionally show that the type is not affected by the
+    expression substitution. This is a direct consequence of the weakening
+    used in \ACode{\ACon{⊢λ}}.
   \end{itemize}
 
   % \FSubjectReductionProofRest
 
   \section{Reflection \& Generics}
   \label{sec:reflection}
-  We used Agda's reflection mechanism\cite{TODO} to derive
+  We used Agda's reflection mechanism to derive
   instantiations related to all structures for untyped substitition,
   i.e. \ACode{\ACon{Syntax}}, \ACode{\ACon{Traversal}} and
   \ACode{\ACon{ComposeTraversal}}.
@@ -1233,11 +1276,13 @@
   To gain insight into the class of object languages supported by our
   reflection algorithm, we have formalized a class of object languages
   using a generic programming technique and instantiated the structures
-  generically. Informally, this class contains all object languages which
+  generically. Informally, this class contains all object languages described
+  via multi-sorted syntax, which
   \begin{enumerate}
-  \item have a variable constructor of type TODO;
+  \item have a variable constructor of type
+    \ACode{S \ACon{∋} s \AKw{→} S \ACon{⊢} s};
   \item use subterms only directly (e.g. not in lists);
-  \item only extend the scope-context of subterms.
+  \item only extend the scope-context of subterms, but never modify it.
   \end{enumerate}
 
   Our reflection algorithm derives proofs with exactly the same
@@ -1247,10 +1292,7 @@
   The formal definition of the generic class can be found in
   Appendix~\ref{sec:generic-class} and the actual implementation.
 
-  We were able to describe many languages in this shape, including
-  session types and type state.
-
-  We believe restriction 2 is purely technically and can be lifted
+  We believe restriction 2 is purely technical and can be lifted
   with a more sophisticated reflection algorithm, as parameterized
   datastructures can also be inlined into the syntax definition as terms
   of a new sort.
@@ -1262,51 +1304,51 @@
 
   \section{Case Studies}
   \label{sec:casestudies}
+  Using our full implementation of the framework, we proved subject
+  reduction for the following object languages:
   \begin{itemize}
   \item
     For lambda calculus with dependent function types, the framework
     just works out of the box for both deriving and instantiating the
-    \ACode{\ACon{TypingTraversal}}. Additionally, having the
-    \ACode{\ACon{ComposeKit}} abstraction turned out to be useful
-    to prove confluence, allowing to unify certain lemmas, which
-    otherwise need to be proved for both renamings and substitutions,
-    e.g. that for two terms \ACode{t} and \ACode{t'}
-    with \ACode{t \ACon{↪} t'} it follows that \ACode{(t \AField{⋯} ϕ)
-    \ACon{↪} (t' \AField{⋯} ϕ)} for any map \ACode{ϕ}.
+    \ACode{\ACon{TypingTraversal}}.
+    Furthermore, the \ACode{\ACon{ComposeKit}} abstraction turned out
+    to be useful to prove confluence, allowing to unify certain
+    lemmas, which otherwise need to be proved for both renamings and
+    substitutions.
+    % e.g. that for two terms \ACode{t} and \ACode{t'}
+    % with \ACode{t \ACon{↪} t'} it follows that \ACode{(t \AField{⋯} ϕ)
+    % \ACon{↪} (t' \AField{⋯} ϕ)} for any map \ACode{ϕ}.
   \item
     For System F with subtyping the main challenges are how to represent
     subtyping constraints and how to deal with the fact that
     substitution preserves typing is not generally true, as type variables
     have subtyping bounds that need to be respected.
-    Instead of defining typing contexts and type preservation lemmas independent
-    of our framework, we found a way that still allows us to benefit
-    from the typing machinery.
-    When binding a type variable with a subtyping constraint \ACode{α <: t},
-    we first bind the type variable as \ACode{α : ★}, and then bind the constraint
-    with a dummy name \ACode{\_ ∶ (α <: t)}. This description is
+    While it would be possible to use our framework only to derive
+    untyped substitution and define typing contexts and type preservation
+    lemmas by hand, we found an encoding, which still allows us to use the
+    the \ACode{\ACon{TypingKit}} abstraction.
+    Instead of binding a type variable with a subtyping constraint
+    \ACode{α <: t}, we first bind the type variable as \ACode{α : ★}, and
+    then bind the constraint as \ACode{c ∶ (α <: t)}. This description is
     similar to first-class constraints, but restricted enough to be
-    isomorphic to the original formalization.
-    With that encoding substitution preserves typing is generally true again, enabling
-    the use of the framework's typing contexts and \ACode{\ACon{TypingKit}} machinery.
-    Replacing a type variable \ACode{α <: t} with a type \ACode{t'}
-    which is not a subtype of \ACode{t'}, the resulting term is still
-    well-typed, but in a context with an insatisfiable constraint.
+    isomorphic to the original formalization, as constraint variables
+    cannot be accesses by the user.
+    With that encoding substitution preserves typing is generally true
+    again, enabling the use of the framework's typing contexts and
+    \ACode{\ACon{TypingKit}} machinery.
+    When replacing a type variable \ACode{α <: t} with a type \ACode{t'},
+    which is not a subtype of \ACode{t'}, then the resulting term is still
+    well-typed, but in a context with an unsatisfiable constraint.
   \item
-    Object language with pattern matching pose an interesting problem.
-    A clause \ACode{p ⇒ e} in a match-expression consists of a pattern
-    \ACode{p} and a continuation expression \ACode{e}.
-    The pattern \ACode{p} can bind arbitrary many variables in subpatterns,
-    which are then available as free variables in \ACode{e}.
-    % The challenge is to track the sorts of variables bound by a pattern,
-    % to make them available to \ACode{e} by extending \ACode{e}'s sort
-    % context correspondingly.
-    To track the sorts of variables bound by a pattern, one can define
-    the sort of patterns to contain the sorts of the variables that it binds:
-    % 𝕡 : List (Sort Var) → Sort NoVar
-    The syntax for variable patterns and clauses can then be specified as:
-    % varpat : S ⊢ 𝕡 [ 𝕖 ]  -- pattern binding an expression variable
-    % pairpat : S ⊢ 𝕡 S₁ → S ⊢ 𝕡 S₂ → S ⊢ 𝕡 (S₁ ++ S₂)
-    % clause : S ⊢ 𝕡 S' → (S' ++ S) ⊢ 𝕖 → S ⊢ 𝕔
+    Object languages with pattern matching can be encoded by adding
+    the sorts of the variables bound by a pattern to the pattern sort
+    \ACode{\ACon{𝕡}} itself:
+    \begin{quote}
+    \ACode{\ACon{𝕡} \AKw{:} \ACon{List (Sort Var)} \AKw{→} \ACon{Sort NoVar}} 
+    \end{quote}
+    This allows the clause of a \ACode{\ACon{match}} expression to
+    read the bound variables from the pattern sort and make them
+    available as free variables in its body expression.
   \end{itemize}
 
   \section{Related Work}

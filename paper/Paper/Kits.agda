@@ -454,9 +454,6 @@ record Syntax : Set₁ where
         Ctx : List (Sort Var) → Set
         Ctx S = ∀ s → (x : S ∋ s) → drop-∈ x S ∶⊢ s
 
-        -- []ₜ : Ctx []
-        -- []ₜ _ ()
-
         _∷ₜ_ : S ∶⊢ s → Ctx S → Ctx (s ∷ S)
         (t ∷ₜ Γ) _ zero     = t
         (t ∷ₜ Γ) _ (suc x)  = Γ _ x
@@ -534,9 +531,9 @@ record Syntax : Set₁ where
                     (∋wk/⊢wk _ _ _ _ (⊢ϕ y _ refl))
 
             --! SingleTyping
-            ⊢⦅_⦆ : ∀ {s S} {Γ : Ctx S} {t : S ∋/⊢ s} {T : S ∶⊢ s}
-              → Γ ∋/⊢ t ∶ T 
-              → Γ ∋*/⊢* ⦅ t ⦆ ∶ (T ∷ₜ Γ)
+            ⊢⦅_⦆ :  ∀ {s S} {Γ : Ctx S} {x/t : S ∋/⊢ s} {T : S ∶⊢ s} →
+                    Γ ∋/⊢ x/t ∶ T →
+                    Γ ∋*/⊢* ⦅ x/t ⦆ ∶ (T ∷ₜ Γ)
             --! SingleTypingProof
             ⊢⦅_⦆ {s} {S} {Γ} {t} {T} ⊢x/t x@zero _ refl =
               subst (Γ ∋/⊢ t ∶_)
