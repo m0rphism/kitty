@@ -196,7 +196,6 @@
   sorts and syntactic categories in a single lemma for many typing
   relations, including those of our case studies.
 
-  % TODO: avoiding interaction lemmas
 
   % By using extrinsic typing, we clearly separate the definitions and
   % lemmas of untyped substitutions from typing and type preservation.
@@ -371,8 +370,7 @@
   our reflection algorithm.
   Section~\ref{sec:casestudies} discusses our case studies.
   Section~\ref{sec:related} discusses related work.
-  Section~\ref{sec:future} discusses future work.
-  Section~\ref{sec:conclusion} concludes.
+  Section~\ref{sec:future} concludes with future work.
 
   \subsection{Contributions}
   \label{sec:introduction:contributions}
@@ -750,8 +748,6 @@
   Finally, we instantiate the \ACode{\ACon{Traversal}} structure:
   % \LibCode\FTraversalIdProofRest
   \AppCode\FTraversal
-
-  % TODO note that its derived
   
   % \subsection{Unused}
   % \ExampleCode\FExampleTrav
@@ -1354,20 +1350,22 @@
   \section{Related Work}
   \label{sec:related}
 
-  Frameworks for programming language metatheory can be broadly
-  categorized by representation of variable bindings and
-  representation of typing and scoping.
+  % Frameworks for programming language metatheory can be broadly
+  % categorized by representation of variable bindings and
+  % representation of typing and scoping.
 
-  Variable bindings have been represented as de Bruijn indices, de
-  Bruijn levels, names, locally nameless, locally named, shifted names,
-  nominal techniques, (parameterized) higher order abstract syntax.
+  % Variable bindings have been represented as de Bruijn indices, de
+  % Bruijn levels, names, locally nameless, locally named, shifted names,
+  % nominal techniques, (parameterized) higher order abstract syntax.
 
-  Typing and scoping can be both extrinsic, both intrinsic, or
-  extrinsically typed and intrinsically scoped.
+  % Typing and scoping can be both extrinsic, both intrinsic, or
+  % extrinsically typed and intrinsically scoped.
 
   As the amount of related work is rather large, we focus on work that
-  is more closely related to ours and refer to other papers for the
-  broader picture. In particular, we discuss abstractions for renamings
+  is closely related to ours and refer to other papers for the
+  broader
+  picture\cite{DBLP:conf/cpp/StarkSK19,DBLP:journals/pacmpl/AllaisA0MM18}. In
+  particular, we discuss abstractions for renamings
   and substitutions, comparable extrinsically typed approaches, but also
   intrinsically typed approaches that could be used as a basis for
   multi-sorted syntax, which as mentioned before is intrinsically typed
@@ -1383,7 +1381,7 @@
   extension to kits that supports substructural types via resource
   vectors.
   In all three cases kits are formulated for intrinsic typing
-  and scenarios with polymorphism are not considered.
+  and scenarios with polymorphism are not yet considered.
 
   \subsection{Extrinsically Typed Approaches}
 
@@ -1402,17 +1400,21 @@
   mutual inductive term sorts. Compared to Autosubst 1, it features
   mutually recursive object languages, intrinsically scoping, and
   vectorized substitutions.
-  They also define and prove lemmas for all four compositions.
-  The generated syntax consists of multiple term types, indexed by
-  different amounts of free variables as shown in Section~\ref{sec:syntax}.
+  Compared to our work, the syntax they generate takes the form of
+  what we described as \emph{unsorted syntax} in
+  Section~\ref{sec:syntax}, i.e. different syntactic categories are
+  described by different types with different amount of indices for
+  variable counts. To eliminate the need for interaction lemmas, they
+  define the notion of \emph{vectorized substitution}, which combines
+  the individual substitutions by putting them in a vector.
+  
+  Both works do not provide machinery for type preservation and do not
+  unify renaming and substitution (although the latter is listed as
+  future work). We believe their amazing work of creating a decision
+  procedure for vectorized substitutions should also translate to our
+  setting with multi-sorted substitutions.
 
-  Both works do not provide machinery for type preservation and
-  do not unify renaming and substitution (although the latter is listed as
-  future work). We believe it should be possible to translate their
-  decision procedure from vectorized substitutions to the setting of
-  our multi-sorted substitutions.
-
-  Abstract binding trees
+  % Abstract binding trees
 
   \subsection{Intrinsically Typed Approaches}
 
@@ -1422,25 +1424,24 @@
   generic programming to instantiate this abstraction for a class of
   object languages comparable to ours.
   They demonstrate how both renamings and substitutions can be
-  described as semantics and how the four composition lemmas follow from
-  their generic fusion lemma.
-  They do cover an abstraction to unify renamings and substitutions.
-  They do not show how to work with multiple variable sorts, how to
-  abstract over the compositions, and how to abstract over typing in
-  an extrinsically typed scenario.
-  However, we believe that their framework is general enough such that
-  our concepts can also be transferred to their framework.
+  described as semantics, how the four composition lemmas follow from
+  their generic fusion lemma, and also provide an abstraction to unify
+  renamings and substitutions.
+  They show how to use their framework for both intrinsic and
+  extrinsic typing, but have not yet explored the realm of polymorphism.
 
-  This work is orthogonal but compatible to our approach.
-  We can instantiate the system using our syntax type system,
-  but then the semantics abstraction would work with terms
-  which are untyped with respect to the actual type system.
+  This work is orthogonal, but compatible to our approach.
+  We can instantiate their system using the hidden intrinsic type
+  system of our multi-sorted syntax, but unfortunately then their
+  semantics abstraction would only work with terms, which are untyped
+  with respect to the actual extrinsic type system.
   We think it is worthwile to explore if their semantics abstraction
   can also be generalized to multi-sorted typing relations.
 
 
   \section{Future Work}
   \label{sec:future}
+  We want to focus our future work in the following directions:
   \begin{itemize}
   \item
     Enabling more object languages by allowing subterms with less
@@ -1461,9 +1462,7 @@
     type preservation, e.g. for confluence or denotational semantics
     as in \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
   \end{itemize}
-
-  \section{Conclusion}
-  \label{sec:conclusion}
+  \vspace{10mm}
 
   % \bibliographystyle{ACM-Reference-Format}
   \bibliography{paper}
