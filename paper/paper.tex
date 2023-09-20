@@ -112,8 +112,8 @@
     The key insights behind the framework are the use of multi-sorted syntax
     definitions, which enable parallel substitutions that replace
     all variables of all sorts simultaneously, and
-    abstractions that unify the definitions, compositions, and typings
-    of multi-sorted renamings and substitutions.
+    abstractions that unify the definitions, compositions, typings,
+    and type preservation lemmas of multi-sorted renamings and substitutions.
     Case studies have been conducted to prove subject reduction for
     System F with subtyping, dependently typed lambda calculus, and lambda
     calculus with pattern matching.
@@ -364,7 +364,7 @@
   Section~\ref{sec:types} shows how to introduce the notion of types
   for multi-sorted syntax and how to define typing contexts.
   Section~\ref{sec:typing} shows how to define a multi-sorted typing relation,
-  and an abstraction to unify type preservattion lemmas for renamings and substitutions.
+  and an abstraction to unify type preservation lemmas for renamings and substitutions.
   Section~\ref{sec:subjectreduction} introduces a small-step
   operational semantics for System F and proves subject reduction.
   Section~\ref{sec:reflection} describes the class of object languages covered by
@@ -393,14 +393,14 @@
     preservation of renaming and substitution;
   \item
     a formalized specification of a large class of object languages
-    for which substitution and lemmas can be derived generically.
+    for which untyped substitution and lemmas can be derived generically.
   \item
     an implementation as an Agda framework featuring
     a reflection algorithm, representation independence for
     substitutions and typing contexts, heterogeneous equality between
     renamings and substitutions, and absence of postulated axioms.
   \item
-    three case studies using our approach to prove subject reduction
+    three case studies in using our approach to prove subject reduction
     for System~F with subtyping, a dependently-typed lambda calculus, and
     pattern matching.
   \end{enumerate}
@@ -602,7 +602,8 @@
     \ACode{\AField{`/id}} and \ACode{\AField{id/`}} are injective. This property
     follows easily, as both the identity function and the variable
     constructor are injective.
-  \item \ACode{\AField{wk-id/`}} characterizes the behaviour of the \ACode{\AField{wk}} function.
+  \item \ACode{\AField{wk-id/`}} characterizes the behaviour of the
+    \ACode{\AField{wk}} function by how it acts on variables.
     Injecting a variable and then shifting it, is the same as injecting a shifted variable.
   \end{itemize}
 
@@ -765,7 +766,7 @@
 
   As we defined the \ACode{\ACon{Kit}} structure before the
   \ACode{\ACon{Traversal}} structure, the fields of
-  \ACode{\ACon{Kit}} could not use the \ACode{\ACon{\_⋯\_}} function in
+  \ACode{\ACon{Kit}} could not use the \ACode{\AField{\_⋯\_}} function in
   their types.
 
   This prevented us to define a useful lemma, which also needs to
@@ -833,7 +834,7 @@
   \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
   $$
   This property equips our framework with the power to
-  reason about the application of multiple maps in terms of
+  reason about the application of multiple maps by reasoning about
   the application of a single map.
   As such it forms the basis for all lemmas involving multiple maps,
   e.g.\ that applying a weakening and then a singleton
@@ -874,11 +875,10 @@
   \ACode{\ACon{Traversal}}, which allow us to abstract over all four
   compositions and use the same trick as before to eliminate the
   dependencies.
-  This has the benefit, that we can prove lemmas about
-  the composition of arbitrary maps, which enable us later to unify type
-  preservation of all substitution and renaming operations into a single
-  lemma.
-  % TODO: clarify
+  While composition can be dervied, this has the benefit, that
+  we've gained a new level of generality, which enables us in the next
+  sections to unify type preservation of all substitution and renaming
+  operations into one lemma.
 
   \subsection{An Examination of Composition}
   \label{sec:composition:example}
@@ -933,10 +933,31 @@
   \subsection{An Abstraction for Composition}
   \label{sec:composition:ckit}
 
+  The \ACode{\ACon{ComposeKit}} abstraction provides the
+  \ACode{\AField{\_\&/⋯\_}} operation, necessary for defining
+  composition, and two lemmas about its behavior:
   \LibCode\KComposeKit
+  The \ACode{\AField{\_\&/⋯\_}} operation takes a variable or term
+  (according to \ACode{K₁}) and a renaming or substitution
+  (according to \ACode{K₂}) and performs the map traversal returning
+  a variable or term (according to \ACode{K₁⊔K₂}).
+  We later define four instances for \ACode{\ACon{ComposeKit}}, where
+  \ACode{K₁} and \ACode{K₂} can each be either the variable or term kit.
+  The third parameter \ACode{K₁⊔K₂} can be seen as a functional
+  dependency and is completely determined by the choice of \ACode{K₁}
+  and \ACode{K₂}.
+
+  The \ACode{\AField{\&/⋯-⋯}} lemma describes the behavior of
+  \ACode{\AField{\_\&/⋯\_}} in terms of \ACode{\AField{\_⋯\_}}, allowing
+  subsequent lemmas to make use of the lemmas we previously proved
+  about \ACode{\AField{\_⋯\_}}.
+
+  The \ACode{\AField{\&/⋯-wk-↑}} lemma states that applying a map and then
+  weakening is the same as weakening first and then lifting the map over
+  the variable introduced by the weakening.
 
   Similar as for the \ACode{\ACon{Kit}}, we derive further definitions
-  from the the axioms of a \ACode{\ACon{ComposeKit}}:
+  from the axioms of a \ACode{\ACon{ComposeKit}}:
   \begin{itemize}
   \item
     We define map composition as motivated by the previous subsection:
@@ -962,12 +983,12 @@
   % \LibCode\KComposeKitNotation
 
   We then define the \ACode{\ACon{ComposeTraversal}} structure,
-  which provides the \ACode{\ACon{⋯-fusion}} for the compositions
+  which provides the \ACode{\AField{⋯-fusion}} lemma for the compositions
   described by arbitrary \ACode{\ACon{ComposeKit}}s:
   \LibCode\KComposeTraversal
 
   Similar as for the \ACode{\ACon{Traversal}}, we derive further
-  definitions from the the axiom of a \ACode{\ACon{ComposeTraversal}}:
+  definitions from the axiom of a \ACode{\ACon{ComposeTraversal}}:
   \begin{itemize}
   \item 
     A map \ACode{ϕ} followed by a weakening is equivalent to a
@@ -1039,7 +1060,7 @@
   % describe terms, and ocan be mapped to 
   % In a typed language,
 
-  In the context of multi-sorted syntax, the notation of a type can be
+  In the context of multi-sorted syntax, the notion of a type can be
   described as a mapping between sorts.
   For System F, the expression sort \ACode{\ACon{𝕖}} maps to the type sort
   \ACode{\ACon{𝕥}} and the sort \ACode{\ACon{𝕥}} maps to the kind sort
@@ -1181,16 +1202,17 @@
   \label{sec:reflection}
   We used Agda's reflection mechanism\cite{TODO} to derive
   instantiations related to all structures for untyped substitition,
-  i.e. \ACode{\ACon{Traversal}} and \ACode{\ACon{ComposeTraversal}}.
+  i.e. \ACode{\ACon{Syntax}}, \ACode{\ACon{Traversal}} and
+  \ACode{\ACon{ComposeTraversal}}.
 
   To gain insight into the class of object languages supported by our
-  reflection algorithm, we modeled a class of object languages using a
-  generic programming technique and instantiated the structures
-  generically. The class contains all object languages which:
+  reflection algorithm, we have formalized a class of object languages
+  using a generic programming technique and instantiated the structures
+  generically. Informally, this class contains all object languages which
   \begin{enumerate}
-  \item Have a variable constructor of type TODO;
-  \item Uses subterms only directly (e.g. not in lists);
-  \item Subterms only extend the scope-context.
+  \item have a variable constructor of type TODO;
+  \item use subterms only directly (e.g. not in lists);
+  \item only extend the scope-context of subterms.
   \end{enumerate}
 
   Our reflection algorithm derives proofs with exactly the same
@@ -1210,7 +1232,7 @@
 
   We believe restriction 3 can be lifted partially to allow for
   example the encoding of linear types that requires context
-  splitting. This has already be done for intrinsical kits\cite{TODO}.
+  splitting.
 
 
   \section{Case Studies}
