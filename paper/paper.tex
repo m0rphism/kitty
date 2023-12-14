@@ -150,7 +150,7 @@
   induction.
   With a naive approach, this would again double the amount of
   substitution machinery, as all definitions and lemmas need to be
-  made first for renamings and then again for substitutions.
+  written first for renamings and then again for substitutions.
 
   Similarly, for a typed language formalized via extrinsic typing we
   need type preservation lemmas for each substitution and renaming
@@ -463,10 +463,10 @@
   multi-sorted syntax with intrinsic typing: in a direct translation,
   the type of terms \ACode{\ACon{\_⊢\_}} would be indexed by itself, which
   most proof assistants forbid to avoid breaking logical consistency.
-  We conjecture that an encoding with universe codes is possible, as
-  it has been done for intrinsically typed languages with dependent
-  types\cite{TODO}, but those constructions come with additional
-  complexity and are less suitable to automation.
+  We conjecture that an encoding might be possible, as it has been
+  done for intrinsically typed languages with dependent
+  types\cite{DBLP:conf/popl/AltenkirchK16}, but those constructions come
+  with additional complexity and are less suitable to automation.
 
   % Contrary to the usual intrinsic typing, we limit the environment
   % \ACode{S} to sorts with index \ACode{\ACon{Var}}.
@@ -648,7 +648,7 @@
   \item
     For simplicity we postulate functional extensionality:\footnote{
       The actual implementation does \emph{not} use any postulates.
-      The workaround is explained in Appendix~\ref{sec:fun-ext}.
+      % The workaround is explained in Appendix~\ref{sec:fun-ext}.
     }
     \LibCode\KFunExt
   \item
@@ -931,9 +931,9 @@
   \ACode{\AField{⋯-fusion}} lemma for general maps.
 
   Similarly as it was the case for \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}},
-  the \ACode{\ACon{ComposeTraversal}} needs to be instantiated for
-  abstract \ACode{\ACon{ComposeKit}}s, which then provides the actual
-  four \ACode{\ACon{ComposeKit}} instances. This allows us to break
+  the lemma of the \ACode{\ACon{ComposeTraversal}} needs to be proved for
+  an abstract \ACode{\ACon{ComposeKit}} and in return defines the
+  four concrete \ACode{\ACon{ComposeKit}} instances for us. This allows us to break
   the dependencies between the different \ACode{\AField{⋯-fusion}} lemmas,
   similar to how \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}} allowed
   us to break the dependency between traversals with renamings and substitutions.
@@ -988,8 +988,8 @@
   % \LibCode\KComposeKitNotation
 
   We then define the \ACode{\ACon{ComposeTraversal}} structure,
-  which provides the \ACode{\AField{⋯-fusion}} lemma for the compositions
-  described by arbitrary \ACode{\ACon{ComposeKit}}s:
+  which provides the \ACode{\AField{⋯-fusion}} lemma for arbitrary
+  \ACode{\ACon{ComposeKit}}s:
   \LibCode\KComposeTraversal
 
   Similar as for the \ACode{\ACon{Traversal}}, we derive further
@@ -1014,10 +1014,7 @@
     \LibCode\KWeakenCancelsSingleTraverse
     % \LibCode\KWeakenCancelsSingleTraverseProof
   \item 
-    A singleton substitution followed by some map \ACode{ϕ} is the same
-    as \ACode{ϕ} lifted over the variable of the singleton substitution
-    followed by the singleton substitution with \ACode{ϕ} applied to
-    its content:
+    A singleton map can be swapped with any map \ACode{ϕ}:
     \LibCode\KDistLiftSingle
     % \LibCode\KDistLiftSingleProof
     By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the
@@ -1068,7 +1065,7 @@
   \end{itemize}
 
   % \AppCode\FFusionProofRest
-  \AppCode\FComposeTraversal
+  % \AppCode\FComposeTraversal
 
   \section{Types \& Contexts}
   \label{sec:types}
@@ -1129,7 +1126,7 @@
 
   \section{Typing}
   \label{sec:typing}
-  Equipped with a notion of types and type context, we are ready to define
+  Now that we have a notion of types and type context, we are ready to define
   the multi-sorted typing relation for System F, incorporating both
   typing and kinding:
   \AppCode\FTyping
@@ -1147,7 +1144,7 @@
   \item
     the kinding constructor \ACode{\ACon{⊢τ}} states that all types
     have kind \ACode{\ACon{★}}. This is sufficient for System F as types
-    are automatically well-scoped due to intrinsic scoping.
+    are automatically well-typed due to intrinsic scoping.
   \end{itemize}
   To teach the framework about typing, we create a structure analogously to
   \ACode{\ACon{Syntax}}:
@@ -1162,10 +1159,10 @@
 
   We start with \ACode{\ACon{TypingKit}}s, which abstract over
   variable and term \emph{typing}, and then define a
-  \ACode{\ACon{TypingTraversal}}, which provides substitution
-  preserves typing for all \ACode{\ACon{TypingKit}}s.
+  \ACode{\ACon{TypingTraversal}}, which provides
+  substitution-preserves-typing for all \ACode{\ACon{TypingKit}}s.
   \LibCode\KTypingKit
-  The operations are completely analog to those of a \ACode{\ACon{Kit}}, but talk
+  The operations are completely analogous to those of a \ACode{\ACon{Kit}}, but talk
   about typing instead of terms.
   Building on the fields of a \ACode{\ACon{TypingKit}}, we define further operations:
   \begin{itemize}
@@ -1249,15 +1246,15 @@
   \vspace{0mm}
   \AppCode\FSubjectReduction
   \AppCode\FSubjectReductionProofInteresting
-  We only listed the cases for $\beta$-reduction, as the other cases
+  We only list the cases for $\beta$-reduction, as the other cases
   follow directly from the induction hypothesis:
   \begin{itemize}
-  \item The beta-reduction rule for type-application, \ACode{\ACon{β-Λ}},
-    is a direct consequence of substitution preserves typing.
-  \item The beta-reduction rule for value-application is almost the same,
+  \item The $\beta$-reduction rule for type-application, \ACode{\ACon{β-Λ}},
+    is a direct consequence of substitution-preserves-typing.
+  \item The $\beta$-reduction rule for value-application is almost the same,
     but requires us to additionally show that the type is not affected by the
-    expression substitution. This is a direct consequence of the weakening
-    used in \ACode{\ACon{⊢λ}}.
+    expression substitution.
+    % This is a direct consequence of the weakening used in \ACode{\ACon{⊢λ}}.
   \end{itemize}
 
   % \FSubjectReductionProofRest
@@ -1286,7 +1283,8 @@
   the same class of languages.
 
   The formal definition of the generic class can be found in
-  Appendix~\ref{sec:generic-class} and the actual implementation.
+  the supplementary material.
+  % Appendix~\ref{sec:generic-class} and the actual implementation.
 
   We believe restriction 2 is purely technical and can be lifted
   with a more sophisticated reflection algorithm, as parameterized
@@ -1333,7 +1331,7 @@
     again, enabling the use of the framework's typing contexts and
     \ACode{\ACon{TypingKit}} machinery.
     When replacing a type variable \ACode{α <: t} with a type \ACode{t'},
-    which is not a subtype of \ACode{t'}, then the resulting term is still
+    which is not a subtype of \ACode{t}, then the resulting term is still
     well-typed, but in a context with an unsatisfiable constraint.
   \item
     Object languages with pattern matching can be encoded by adding
@@ -1454,15 +1452,14 @@
     the \ACode{\ACon{TypingTraversal}} abstraction and identifying
     a subclass for which it can be derived.
   \item
-    Incorporating a decision procedure for equational
-    substitution-lemmas based on $\sigma$-calculus as in Autosubst
+    Developing a decision procedure for equational
+    substitution lemmas based on $\sigma$-calculus as in Autosubst
     \cite{DBLP:conf/itp/SchaferTS15, DBLP:conf/cpp/StarkSK19}.
   \item
     Developing abstractions and derived lemmas beyond substition and
     type preservation, e.g. for confluence or denotational semantics
     as in \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
   \end{itemize}
-  \vspace{10mm}
 
   % \bibliographystyle{ACM-Reference-Format}
   \bibliography{paper}
@@ -1525,19 +1522,19 @@
   % \AppCode\FSubjectReductionProofInteresting
 
 
-  \section{Generic Class of Object Languages}
-  \label{sec:generic-class}
+  % \section{Generic Class of Object Languages}
+  % \label{sec:generic-class}
 
 
-  \section{System F with Reflection}
-  \label{sec:reflection-example}
+  % \section{System F with Reflection}
+  % \label{sec:reflection-example}
 
 
-  \section{Map Equality Without Functional Extensionality}
-  \label{sec:fun-ext}
+  % \section{Map Equality Without Functional Extensionality}
+  % \label{sec:fun-ext}
 
 
-  \section{Features of the Actual Implementation}
-  \label{sec:features}
+  % \section{Features of the Actual Implementation}
+  % \label{sec:features}
 
 \end{document}
