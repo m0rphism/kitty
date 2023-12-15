@@ -18,7 +18,6 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; module ≡-Reasoning)
 open import Relation.Nullary using (¬_)
-open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
@@ -36,7 +35,6 @@ open Kit ⦃ … ⦄
 open SubWithLaws 𝕊
 open Sub SubWithLaws-Sub
 open SubCompose 𝕊C
-open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 open ComposeKit ⦃ … ⦄
 
@@ -86,11 +84,13 @@ record ComposeTraversal : Set (lsuc ℓ) where
       ∀ (t : S ⊢ s) S' →
       wk* S' t ≡ t ⋯ᵣ wkₖ* S' id
   wk*-wkₖ* {S} {s} t [] =
+    let open ≡-Reasoning in
     wk* [] t     ≡⟨⟩
     t            ≡⟨ sym (⋯-id t) ⟩
     t ⋯ᵣ id      ≡⟨ ~-cong-⋯ t (~-sym (wkₖ*-[] id)) ⟩
     t ⋯ᵣ wkn* [] ∎
   wk*-wkₖ* {S} {s} t (S' ▷ s') =
+    let open ≡-Reasoning in
     wk* (S' ▷ s') t                ≡⟨⟩
     wk s' (wk* S' t)               ≡⟨ cong (wk s') (wk*-wkₖ* t S') ⟩
     wk s' (t ⋯ᵣ wkₖ* S' id)        ≡⟨⟩
@@ -111,6 +111,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (t : S₁ ⊢ s') (ϕ : S₁ –[ K₁ ]→ S₂)
     → t ⋯ wkn ⦃ K = K₂ ⦄ ⋯ (ϕ ↑ s) ≡ t ⋯ ϕ ⋯ wkn ⦃ K = K₂ ⦄
   dist-↑-f ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K₁⊔K₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ t ϕ =
+    let open ≡-Reasoning in
     (t ⋯ wkn) ⋯ (ϕ ↑ _)       ≡⟨ ⋯-assoc t wkn (ϕ ↑ _)  ⟩
     t ⋯ (wkn ·[ C₂ ] (ϕ ↑ _)) ≡⟨ ~-cong-⋯ t (~-sym (↑-wk ϕ _)) ⟩
     t ⋯ (ϕ ·[ C₁ ] wkn)       ≡⟨ sym (⋯-assoc t ϕ wkn) ⟩
@@ -164,6 +165,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
     → ((ϕ₁ ·ₖ ϕ₂) ·ₖ ϕ₃) ~ (ϕ₁ ·ₖ (ϕ₂ ·ₖ ϕ₃))
   ·-assoc ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K₃ ⦄ ⦃ K₁₂ ⦄ ⦃ K₂₃ ⦄ ⦃ K₁₂,₃ ⦄ ⦃ K₁,₂₃ ⦄ ⦃ C₁₂ ⦄ ⦃ C₁₂,₃ ⦄ ⦃ C₂₃ ⦄ ⦃ C₁,₂₃ ⦄
           {S₁} {S₂} {S₃} {S₄} ϕ₁ ϕ₂ ϕ₃ = mk-~ λ s x →
+    let open ≡-Reasoning in
     `/id (x & ((ϕ₁ ·ₖ ϕ₂) ·ₖ ϕ₃))                     ≡⟨ sym (⋯-var x ((ϕ₁ ·ₖ ϕ₂) ·ₖ ϕ₃)) ⟩
     ` x ⋯ ((ϕ₁ ·ₖ ϕ₂) ·ₖ ϕ₃)                          ≡⟨ sym (⋯-assoc (` x) (ϕ₁ ·ₖ ϕ₂) ϕ₃) ⟩
     ` x ⋯ (ϕ₁ ·ₖ ϕ₂) ⋯ ϕ₃                             ≡⟨ sym (cong (_⋯ ϕ₃) (⋯-assoc (` x) ϕ₁ ϕ₂)) ⟩
@@ -189,12 +191,14 @@ record ComposeTraversal : Set (lsuc ℓ) where
       {S₁} {S₂} (ϕ : S₁ –[ K₁ ]→ S₂) S
     → (ϕ ·[ C₁ ] wkn* S) ~ (wkn* S ·[ C₂ ] (ϕ ↑* S))
   ↑*-wk* ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K₁⊔K₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ {S₁ = S₁} {S₂} ϕ [] =
+    let open ~-Reasoning in
     (ϕ ·[ C₁ ] wkn* [])         ~⟨ ~-cong-· ~-refl (wkₖ*-[] id) ⟩
     (ϕ ·[ C₁ ] id)              ~⟨ ·-idʳ ϕ ⟩
     ϕ                           ~⟨ ~-sym (·-idˡ ϕ) ⟩
     (id ·[ C₂ ] ϕ)              ~⟨ ~-sym (~-cong-· (wkₖ*-[] id) (↑*-[] ϕ)) ⟩
-    (wkn* [] ·[ C₂ ] (ϕ ↑* [])) ~∎
+    (wkn* [] ·[ C₂ ] (ϕ ↑* [])) ∎
   ↑*-wk* ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K₁⊔K₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ ⦃ C₁₁ ⦄ ⦃ C₂₂ ⦄ ⦃ C₃₃ ⦄ ⦃ Cx₁ ⦄ ⦃ Cx₂ ⦄ {S₁ = S₁} {S₂} ϕ (S ▷ s) =
+    let open ~-Reasoning in
     (ϕ ·[ C₁ ] wkₖ* (S ▷ s) id)                          ~⟨ ~-cong-· ~-refl (wkₖ*-▷ S s id) ⟩
     (ϕ ·[ C₁ ] wkₖ s (wkₖ* S id))                        ~⟨ ~-cong-· ~-refl (wk-ϕ-id (wkₖ* S id)) ⟩
     (ϕ ·[ C₁ ] (wkₖ* S id ·[ C₂₂ ] wkₖ s id))            ~⟨ ~-sym (·-assoc ϕ (wkₖ* S id) (wkₖ s id)) ⟩
@@ -204,7 +208,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
     (wkₖ* S id ·[ Cx₂ ] (wkₖ s id ·[ C₂ ] (ϕ ↑* S) ↑ s)) ~⟨ ~-sym (·-assoc (wkₖ* S id) (wkₖ s id) ((ϕ ↑* S) ↑ s)) ⟩
     ((wkₖ* S id ·[ C₂₂ ] wkₖ s id) ·[ C₂ ] (ϕ ↑* S) ↑ s) ~⟨ ~-cong-· (~-sym (wk-ϕ-id (wkₖ* S id))) ~-refl ⟩
     (wkₖ s (wkₖ* S id) ·[ C₂ ] ((ϕ ↑* S) ↑ s))           ~⟨ ~-sym (~-cong-· (wkₖ*-▷ S s id) (↑*-▷ S s ϕ)) ⟩
-    (wkₖ* (S ▷ s) id ·[ C₂ ] (ϕ ↑* (S ▷ s)))             ~∎
+    (wkₖ* (S ▷ s) id ·[ C₂ ] (ϕ ↑* (S ▷ s)))             ∎
 
   dist-↑*-f :
     ∀ {_∋/⊢₁_ : VarScoped} ⦃ K₁ : Kit _∋/⊢₁_ ⦄
@@ -223,6 +227,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (t : S₁ ⊢ s) (ϕ : S₁ –[ K₁ ]→ S₂)
     → t ⋯ wkₖ* ⦃ K = K₂ ⦄ S id ⋯ (ϕ ↑* S) ≡ t ⋯ ϕ ⋯ wkₖ* ⦃ K = K₂ ⦄ S id
   dist-↑*-f {S = S} ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K₁⊔K₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ t ϕ =
+    let open ≡-Reasoning in
     (t ⋯ wkₖ* S id) ⋯ (ϕ ↑* S)       ≡⟨ ⋯-assoc t (wkₖ* S id) (ϕ ↑* S)  ⟩
     t ⋯ (wkₖ* S id ·[ C₂ ] (ϕ ↑* S)) ≡⟨ ~-cong-⋯ t (~-sym (↑*-wk* ϕ S)) ⟩
     t ⋯ (ϕ ·[ C₁ ] wkₖ* S id)        ≡⟨ sym (⋯-assoc t ϕ (wkₖ* S id)) ⟩
@@ -240,7 +245,9 @@ record ComposeTraversal : Set (lsuc ℓ) where
       ⦃ C₃ : ComposeKit K₂ K₂ K₂ ⦄
       {S₁ S₂ s} (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
     (⦅ x/t ⦆ ·[ C₁ ] ϕ) ~ ((ϕ ↑ s) ·[ C₂ ] ⦅ x/t &/⋯[ C₁ ] ϕ ⦆)
-  dist-↑-⦅⦆-· ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ ⦃ W ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ ⦃ C₃ ⦄ {S₁} {S₂} {s} x/t ϕ = mk-~ λ where
+  dist-↑-⦅⦆-· ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ ⦃ W ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ ⦃ C₃ ⦄ {S₁} {S₂} {s} x/t ϕ =
+    let open ≡-Reasoning in
+    mk-~ λ where
     sx x@(here refl) →
       `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                        ≡⟨ cong `/id (&-·ₖ-&/⋯ ⦅ x/t ⦆ ϕ x) ⟩
       `/id (x & ⦅ x/t ⦆ &/⋯ ϕ)                              ≡⟨ cong (λ ■ → `/id (■ &/⋯ ϕ)) (use-~-hom (⦅⦆-,ₖ x/t) _ x) ⟩
@@ -303,6 +310,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (ϕ : S₁ –[ K ]→ S₂)
     → t ⋯ ϕ ⋯ wknᵣ ≡ t ⋯ wknᵣ ⋯ (ϕ ↑ s)
   &/⋯-wk-↑ₛ {_} {S₁} {S₂} {st} {s} {sx} t ϕ =
+    let open ≡-Reasoning in
     t ⋯ ϕ ⋯ wkₖ ⦃ K = Kᵣ ⦄ _ id          ≡⟨ ⋯-assoc t ϕ (wkₖ ⦃ K = Kᵣ ⦄ _ id) ⟩
     t ⋯ (ϕ ·ₖ wkₖ ⦃ K = Kᵣ ⦄ _ id)       ≡⟨ ~-cong-⋯ t (↑-wk ϕ _) ⟩
     t ⋯ (wkₖ ⦃ K = Kᵣ ⦄ _ id ·ₖ (ϕ ↑ s)) ≡⟨ sym (⋯-assoc t (wkₖ ⦃ K = Kᵣ ⦄ _ id) (ϕ ↑ s)) ⟩
@@ -371,6 +379,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (t : S₁ ⊢ s') (ϕ : S₁ –[ K₂ ]→ S₂) (x/t : S₂ ∋/⊢[ K₂ ] s)
     → t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ (ϕ ,ₖ x/t) ≡ t ⋯ ϕ
   wk-cancels-,ₖ ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ C = C ⦄ t ϕ x/t =
+    let open ≡-Reasoning in
     t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ (ϕ ,ₖ x/t)        ≡⟨ ⋯-assoc ⦃ 𝔸 = C ⦄ t (wkₖ _ id) (ϕ ,ₖ x/t) ⟩
     t ⋯ (wkn ⦃ K = K₁ ⦄ ·[ C ] (ϕ ,ₖ x/t)) ≡⟨ ~-cong-⋯ _ (wk-cancels-,ₖ-· ⦃ C = C ⦄ ϕ x/t) ⟩
     t ⋯ ϕ                                  ∎
@@ -438,6 +447,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (t : (s ∷ S₁) ⊢ s') (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
     t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ x/t &/⋯[ C₁ ] ϕ ⦆
   dist-⦅⦆-⋯ ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ ⦃ W ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ {S₁} {S₂} {s} {st} {s'} t x/t ϕ =
+    let open ≡-Reasoning in
     t ⋯ ⦅ x/t ⦆ ⋯ ϕ                           ≡⟨ ⋯-assoc t ⦅ x/t ⦆ ϕ ⟩
     t ⋯ (⦅ x/t ⦆ ·[ C₁ ] ϕ)                   ≡⟨ ~-cong-⋯ t (dist-↑-⦅⦆-· x/t ϕ) ⟩
     t ⋯ ((ϕ ↑ s) ·[ C₂ ] ⦅ x/t &/⋯[ C₁ ] ϕ ⦆) ≡⟨ sym (⋯-assoc t (ϕ ↑ s) ⦅ x/t &/⋯[ C₁ ] ϕ ⦆) ⟩
@@ -470,6 +480,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (t : (S₁ ▷ s) ⊢ s') (t' : S₁ ⊢ s) (ϕ : S₁ –[ K ]→ S₂) →
     t ⋯ ⦅ t' ⦆ₛ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ t' ⋯ ϕ ⦆ₛ
   dist-⦅⦆ₛ-⋯ ⦃ K ⦄ ⦃ W ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ ⦃ C₃ ⦄ {S₁} {S₂} {s} {st} {s'} t t' ϕ =
+    let open ≡-Reasoning in
     t ⋯ ⦅ t' ⦆ₛ ⋯ ϕ                   ≡⟨ dist-⦅⦆-⋯ ⦃ C₁ = C₁ ⦄ t t' ϕ ⟩
     t ⋯ (ϕ ↑ s) ⋯ ⦅ t' &/⋯[ C₁ ] ϕ ⦆ₛ ≡⟨ cong (λ ■ → t ⋯ ϕ ↑ s ⋯ ⦅ ■ ⦆ₛ) (&/⋯-⋯ ⦃ C₁ ⦄ t' ϕ) ⟩
     t ⋯ (ϕ ↑ s) ⋯ ⦅ t' ⋯ ϕ ⦆ₛ         ∎
@@ -503,6 +514,7 @@ record ComposeTraversal : Set (lsuc ℓ) where
       (t : S ⊢ s') (x/t : S ∋/⊢[ K₂ ] s) →
     t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ ⦅ x/t ⦆ ≡ t
   wk-cancels-⦅⦆ ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ t x/t =
+    let open ≡-Reasoning in
     t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ ⦅ x/t ⦆             ≡⟨ ~-cong-⋯ (t ⋯ wkn ⦃ K = K₁ ⦄) (⦅⦆-,ₖ x/t) ⟩
     t ⋯ wkn ⦃ K = K₁ ⦄ ⋯ (wkₖ* [] id ,ₖ x/t) ≡⟨ wk-cancels-,ₖ t (wkₖ* [] id) x/t ⟩
     t ⋯ wkₖ* [] id                           ≡⟨ ~-cong-⋯ t (wkₖ*-[] id) ⟩

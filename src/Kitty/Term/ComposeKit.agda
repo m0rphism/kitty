@@ -17,7 +17,6 @@ open import Data.List.Relation.Unary.Any using (here; there)
 open import Level using (Level; _⊔_) renaming (suc to lsuc; zero to lzero)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; trans; cong; cong₂; subst; subst₂; module ≡-Reasoning)
 open import Relation.Nullary using (¬_)
-open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
@@ -32,7 +31,6 @@ open KitHomotopy H
 open Kit ⦃ … ⦄
 open SubWithLaws 𝕊
 open Sub SubWithLaws-Sub
-open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
 private variable
@@ -92,16 +90,18 @@ record ComposeKit (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_) (K₁⊔K�
     ∀ {S₁} {S₂} {s} (x : S₁ ∋ s) (ϕ : S₁ –[ K₂ ]→ S₂) 
     → id/` ⦃ K₁ ⦄ x &/⋯ ϕ ≡ ι-∋/⊢ (x & ϕ)
   &/⋯-& {S₁} {S₂} {s} x ϕ = `/id-injective (
-      `/id (id/` x &/⋯ ϕ)             ≡⟨ &/⋯-⋯ (id/` x) ϕ ⟩
-      `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ        ≡⟨ cong (_⋯ ϕ) (id/`/id ⦃ K₁ ⦄ x) ⟩
-      ` x ⋯ ϕ                         ≡⟨ ⋯-var ⦃ K₂ ⦄ x ϕ ⟩
-      `/id ⦃ K₂ ⦄ (x & ϕ)             ≡⟨ ι-`/id (x & ϕ) ⟩
-      `/id ⦃ K₁⊔K₂ ⦄  (ι-∋/⊢ (x & ϕ)) ∎)
+    let open ≡-Reasoning in
+    `/id (id/` x &/⋯ ϕ)             ≡⟨ &/⋯-⋯ (id/` x) ϕ ⟩
+    `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ        ≡⟨ cong (_⋯ ϕ) (id/`/id ⦃ K₁ ⦄ x) ⟩
+    ` x ⋯ ϕ                         ≡⟨ ⋯-var ⦃ K₂ ⦄ x ϕ ⟩
+    `/id ⦃ K₂ ⦄ (x & ϕ)             ≡⟨ ι-`/id (x & ϕ) ⟩
+    `/id ⦃ K₁⊔K₂ ⦄  (ι-∋/⊢ (x & ϕ)) ∎)
 
   &/⋯-wk :
     ∀ ⦃ W₁ : KitT K₁ ⦄ ⦃ W₂ : KitT K₂ ⦄ {s' s} (x/t : S₁ ∋/⊢[ K₁ ] s)
     → x/t &/⋯ wkₖ ⦃ K = K₂ ⦄ s' id ≡ ι-∋/⊢ (wk s' x/t)
   &/⋯-wk {S₁} ⦃ W ⦄ {s'} {s} x/t = `/id-injective (
+    let open ≡-Reasoning in
     `/id (x/t &/⋯ wkₖ ⦃ K = K₂ ⦄ s' id) ≡⟨ &/⋯-⋯ x/t (wkₖ ⦃ K = K₂ ⦄ s' id) ⟩
     `/id x/t ⋯ wkₖ ⦃ K = K₂ ⦄ s' id     ≡⟨ ⋯-x/t-wk x/t ⟩
     `/id (wk s' x/t)                     ≡⟨ ι-`/id (wk s' x/t) ⟩

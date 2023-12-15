@@ -11,7 +11,6 @@ module Kitty.Term.KitHomotopy
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Level using () renaming (suc to lsuc)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
-open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
@@ -25,7 +24,6 @@ open Traversal T
 open Kit ⦃ … ⦄
 open Sub ⦃ … ⦄
 open SubWithLaws 𝕊
-open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
 private instance _ = Kᵣ; _ = Kₛ
@@ -67,6 +65,7 @@ record KitHomotopy : Set (lsuc ℓ) where
       {s} {S}
     → wkₖ ⦃ K = K₁ ⦄ s id ~ wkₖ ⦃ K = K₂ ⦄ s (id {S = S})
   wk~wk ⦃ K₁ ⦄ ⦃ K₂ ⦄ {s} {S} = mk-~ λ sx x →
+    let open ≡-Reasoning in
     `/id ⦃ K₁ ⦄ (x & wkₖ    s id) ≡⟨ cong (`/id ⦃ K₁ ⦄) (&-wkₖ-wk id x) ⟩
     `/id ⦃ K₁ ⦄ (wk _ (x & id))   ≡⟨ cong (λ ■ → `/id ⦃ K₁ ⦄ (wk ⦃ K₁ ⦄ _ ■)) (&-id x) ⟩
     `/id ⦃ K₁ ⦄ (wk _ (id/` x ))  ≡⟨ cong (`/id ⦃ K₁ ⦄) (wk-id/` _ x) ⟩
@@ -84,9 +83,10 @@ record KitHomotopy : Set (lsuc ℓ) where
       {S} {s'} {s} (x/t : S ∋/⊢[ K₁ ] s)
     → (`/id x/t ⋯ wkₖ ⦃ K = K₂ ⦄ _ id) ≡ `/id (wk s' x/t)
   ⋯-x/t-wk ⦃ K₁ ⦄ ⦃ K₂ ⦄ {S} {s'} {s} x/t =
-    `/id x/t ⋯ wkₖ ⦃ K = K₂ ⦄ _ id   ≡⟨ ~-cong-⋯ (`/id x/t) wk~wk ⟩
-    `/id x/t ⋯ wkₖ ⦃ K = Kᵣ ⦄ _ id ≡⟨ wk-`/id _ x/t ⟩
-    `/id (wk s' x/t)                  ∎
+    let open ≡-Reasoning in
+    `/id x/t ⋯ wkₖ ⦃ K = K₂ ⦄ _ id  ≡⟨ ~-cong-⋯ (`/id x/t) wk~wk ⟩
+    `/id x/t ⋯ wkₖ ⦃ K = Kᵣ ⦄ _ id  ≡⟨ wk-`/id _ x/t ⟩
+    `/id (wk s' x/t)                ∎
 
   ⊑ₖ-⊤ :
     ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
@@ -97,6 +97,7 @@ record KitHomotopy : Set (lsuc ℓ) where
     ; ι-id/`   = id/`/id ⦃ K ⦄
     ; ι-`/id   = λ {S} {s} x/t → refl
     ; ι-wk     = λ {s'} {s} {S} x/t →
+        let open ≡-Reasoning in
         `/id (wk _ x/t) ≡⟨ sym (⋯-x/t-wk x/t) ⟩
         wk _ (`/id x/t) ∎
     }
@@ -108,6 +109,7 @@ record KitHomotopy : Set (lsuc ℓ) where
     let sub'⁻¹ = subst (_⊢ s) (++-assoc S' S S₂) in
     t ⋯ ϕ ↑* S ↑* S' ≡ sub'⁻¹ (sub t ⋯ ϕ ↑* (S ▷▷ S'))
   ⋯-↑*-▷▷ ⦃ K ⦄ ⦃ W ⦄ {S₁} {S₂} {st} {s} S S' t ϕ =
+    let open ≡-Reasoning in
     let sub₁⁻¹ = subst (_⊢ s) (sym (++-assoc S' S S₁)) in
     let sub₁   = subst (_⊢ s) (++-assoc S' S S₁) in
     let sub₂   = subst (_⊢ s) (++-assoc S' S S₂) in

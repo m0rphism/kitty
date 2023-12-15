@@ -10,7 +10,6 @@ module Kitty.Term.KitT
 
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; subst; subst₂; cong; module ≡-Reasoning)
-open ≡-Reasoning
 
 open import Kitty.Term.Prelude
 open import Kitty.Term.Kit 𝕋
@@ -23,7 +22,6 @@ open Traversal T
 open Kit ⦃ … ⦄
 open SubWithLaws 𝕊
 open Sub SubWithLaws-Sub
-open ~-Reasoning
 open _⊑ₖ_ ⦃ … ⦄
 
 private instance _ = Kᵣ; _ = Kₛ
@@ -44,6 +42,7 @@ module Private where
     ∀ {S} {s} {sx} {x : S ∋ sx}
     → ` x ⋯ wkₖ ⦃ K = Kᵣ ⦄ s id ≡ ` there x
   wkₖ-⋯ᵣ {S} {s} {sx} {x} =
+    let open ≡-Reasoning in
     ` x ⋯ wkₖ ⦃ K = Kᵣ ⦄ s id   ≡⟨ ⋯-var x (wkₖ ⦃ K = Kᵣ ⦄ s id) ⟩
     ` (x & wkₖ ⦃ K = Kᵣ ⦄ s id) ≡⟨ cong `_ (&-wkₖ-wk id x) ⟩
     ` (there (x & id))            ≡⟨ cong (λ ■ → ` there ■) (&-id x) ⟩
@@ -72,6 +71,7 @@ module Private where
     → ` x₁ ≡ `/id x/t₂
     → ` there x₁ ≡ `/id (wk s x/t₂)
   ~-wkᵣ ⦃ K₂ ⦄ {S} {s} {sx} {x₁} {x/t₂} eq =
+    let open ≡-Reasoning in
     ` there x₁                          ≡⟨ sym (id/`/id ⦃ K₂ ⦄ (there x₁)) ⟩
     `/id ⦃ K₂ ⦄ (id/` (there x₁))       ≡⟨ cong (`/id ⦃ K₂ ⦄) (sym (wk-id/` ⦃ K₂ ⦄ s x₁)) ⟩
     `/id ⦃ K₂ ⦄ (wk ⦃ K₂ ⦄ s (id/` x₁)) ≡⟨ cong (λ ■ → `/id ⦃ K₂ ⦄ (wk ⦃ K₂ ⦄ s ■))
@@ -88,6 +88,7 @@ module Private where
     → t₁ ≡ `/id x/t₂
     → wk s t₁ ≡ `/id (wk s x/t₂)
   ~-wkₛ ⦃ K₂ ⦄ ⦃ KK₂ ⦄ {S} {s} {sx} {_} {x/t₂} refl =
+    let open ≡-Reasoning in
     wk s (`/id x/t₂)                  ≡⟨⟩
     `/id x/t₂ ⋯ wkₖ ⦃ K = Kᵣ ⦄ s id ≡⟨ KitK.wkₖ-⋯ KK₂ ⟩
     `/id ⦃ K₂ ⦄ (wk s x/t₂)           ∎
@@ -139,6 +140,7 @@ private instance _ = Wᵣ; _ = Wₛ
   ϕ ~ ϕ' →
   wkₖ s ϕ ~ wkₖ s ϕ'
 ~-cong-wk ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ W₁ ⦄ ⦃ W₂ ⦄ {S₁} {S₂} {s} {ϕ} {ϕ'} ϕ~ϕ' = mk-~ λ sx x →
+  let open ≡-Reasoning in
   `/id ⦃ K₁ ⦄ (x & wkₖ _ ϕ)   ≡⟨ cong `/id (&-wkₖ-wk ϕ x) ⟩
   `/id ⦃ K₁ ⦄ (wk _ (x & ϕ))  ≡⟨ ~-wk (use-~ ϕ~ϕ' _ x) ⟩
   `/id ⦃ K₂ ⦄ (wk _ (x & ϕ')) ≡⟨ cong `/id (sym (&-wkₖ-wk ϕ' x)) ⟩
@@ -152,15 +154,17 @@ open ~-Reasoning
   ϕ ~ ϕ' →
   wkₖ* S ϕ ~ wkₖ* S ϕ'
 ~-cong-wk* {S = []} {ϕ} {ϕ'} ϕ~ϕ' =
+  let open ~-Reasoning in
   wkₖ* [] ϕ  ~⟨ wkₖ*-[] ϕ ⟩
   ϕ          ~⟨ ϕ~ϕ' ⟩
   ϕ'         ~⟨ ~-sym (wkₖ*-[] ϕ') ⟩
-  wkₖ* [] ϕ' ~∎
+  wkₖ* [] ϕ' ∎
 ~-cong-wk* {S = S ▷ s} {ϕ} {ϕ'} ϕ~ϕ' =
+  let open ~-Reasoning in
   wkₖ* (S ▷ s) ϕ    ~⟨ wkₖ*-▷ S s ϕ ⟩
   wkₖ s (wkₖ* S ϕ)  ~⟨ ~-cong-wk (~-cong-wk* ϕ~ϕ') ⟩
   wkₖ s (wkₖ* S ϕ') ~⟨ ~-sym (wkₖ*-▷ S s ϕ') ⟩
-  wkₖ* (S ▷ s) ϕ'   ~∎
+  wkₖ* (S ▷ s) ϕ'   ∎
 
 ~-cong-↑ :
   ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄
@@ -169,10 +173,11 @@ open ~-Reasoning
   ϕ ~ ϕ' →
   (ϕ ↑ s) ~ (ϕ' ↑ s)
 ~-cong-↑ ⦃ K₁ ⦄ ⦃ K₂ ⦄ {S₁} {S₂} {s} {ϕ} {ϕ'} ϕ~ϕ' =
+  let open ~-Reasoning in
   (ϕ ↑ s)                        ~⟨ ↑-,ₖ ϕ s ⟩
   (wkₖ _ ϕ  ,ₖ id/` (here refl)) ~⟨ ~-cong-,ₖ (~-cong-wk ϕ~ϕ') (~ₓ-refl ⦃ K₁ ⦄ ⦃ K₂ ⦄) ⟩
   (wkₖ _ ϕ' ,ₖ id/` (here refl)) ~⟨ ~-sym (↑-,ₖ ϕ' s) ⟩
-  (ϕ' ↑ s)                       ~∎
+  (ϕ' ↑ s)                       ∎
 
 ~-cong-↑* :
   ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄
@@ -181,15 +186,17 @@ open ~-Reasoning
   ϕ ~ ϕ' →
   (ϕ ↑* S) ~ (ϕ' ↑* S)
 ~-cong-↑* {S = []}    {ϕ = ϕ} {ϕ' = ϕ'} ϕ~ϕ' =
+  let open ~-Reasoning in
   (ϕ ↑* [])  ~⟨ ↑*-[] ϕ ⟩
   ϕ          ~⟨ ϕ~ϕ' ⟩
   ϕ'         ~⟨ ~-sym (↑*-[] ϕ') ⟩
-  (ϕ' ↑* []) ~∎
+  (ϕ' ↑* []) ∎
 ~-cong-↑* {S = S ▷ s} {ϕ = ϕ} {ϕ' = ϕ'} ϕ~ϕ' =
+  let open ~-Reasoning in
   (ϕ ↑* (S ▷ s))  ~⟨ ↑*-▷ S s ϕ ⟩
   (ϕ ↑* S) ↑ s    ~⟨ ~-cong-↑ (~-cong-↑* ϕ~ϕ') ⟩
   (ϕ' ↑* S) ↑ s   ~⟨ ~-sym (↑*-▷ S s ϕ') ⟩
-  (ϕ' ↑* (S ▷ s)) ~∎
+  (ϕ' ↑* (S ▷ s)) ∎
 
 open import Data.List.Properties using (++-assoc)
 ↑*-▷▷ :
@@ -197,21 +204,23 @@ open import Data.List.Properties using (++-assoc)
   let sub = subst₂ (_–[ K ]→_) (++-assoc S' S S₁) (++-assoc S' S S₂) in
   ϕ ↑* S ↑* S' ~ sub (ϕ ↑* (S ▷▷ S'))
 ↑*-▷▷ ⦃ K ⦄ {S₁} {S₂} ϕ S [] =
+  let open ~-Reasoning in
   let sub = subst₂ (_–[ K ]→_) (++-assoc [] S S₁) (++-assoc [] S S₂) in
   ϕ ↑* S ↑* []         ~⟨ ↑*-[] (ϕ ↑* S) ⟩
-  ϕ ↑* (S ▷▷ [])       ~⟨⟩
-  sub (ϕ ↑* (S ▷▷ [])) ~∎
+  ϕ ↑* (S ▷▷ [])       ≡⟨⟩
+  sub (ϕ ↑* (S ▷▷ [])) ∎
 ↑*-▷▷ ⦃ K ⦄ {S₁} {S₂} ϕ S (S' ▷ s') =
+  let open ~-Reasoning in
   let sub = subst₂ (_–[ K ]→_) (++-assoc (S' ▷ s') S S₁) (++-assoc (S' ▷ s') S S₂) in
   let sub' = subst₂ (_–[ K ]→_) (++-assoc S' S S₁) (++-assoc S' S S₂) in
   ϕ ↑* S ↑* (S' ▷ s')         ~⟨ ↑*-▷ S' s' (ϕ ↑* S) ⟩
   (ϕ ↑* S ↑* S') ↑ s'         ~⟨ ~-cong-↑ (↑*-▷▷ ϕ S S') ⟩
-  sub' (ϕ ↑* (S ▷▷ S')) ↑ s'  ~≡⟨ dist-subst₂'
+  sub' (ϕ ↑* (S ▷▷ S')) ↑ s'  ≡⟨ dist-subst₂'
                                    (λ S → S ▷ s') (λ S → S ▷ s') (_↑ s')
                                    (++-assoc S' S S₁) (++-assoc (S' ▷ s') S S₁ )
                                    (++-assoc S' S S₂) (++-assoc (S' ▷ s') S S₂)
                                    (ϕ ↑* (S ▷▷ S')) ⟩
   sub (ϕ ↑* (S ▷▷ S') ↑ s')   ~⟨ ~-sym (~-cong-subst₂ _ _ (↑*-▷ (S ▷▷ S') s' ϕ)) ⟩
-  sub (ϕ ↑* ((S ▷▷ S') ▷ s')) ~⟨⟩
-  sub (ϕ ↑* (S ▷▷ (S' ▷ s'))) ~∎
+  sub (ϕ ↑* ((S ▷▷ S') ▷ s')) ≡⟨⟩
+  sub (ϕ ↑* (S ▷▷ (S' ▷ s'))) ∎
 
