@@ -23,11 +23,10 @@ data SortTy : Set where Var NoVar : SortTy
 
 --! Syntax
 record Syntax : Set₁ where
-  field
-    Sort         : SortTy → Set
-    _⊢_          : ∀ {st} → List (Sort Var) → Sort st → Set
-    `_           : ∀ {S} {s : Sort Var} → S ∋ s → S ⊢ s
-    `-injective  : ∀ {S s} {x y : S ∋ s} → ` x ≡ ` y → x ≡ y
+  field  Sort         : SortTy → Set
+         _⊢_          : ∀ {st} → List (Sort Var) → Sort st → Set
+         `_           : ∀ {S} {s : Sort Var} → S ∋ s → S ⊢ s
+         `-injective  : ∀ {S s} {x y : S ∋ s} → ` x ≡ ` y → x ≡ y
 
   private variable
     st                         : SortTy

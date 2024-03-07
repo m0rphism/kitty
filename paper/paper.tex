@@ -556,50 +556,50 @@
   A substitution \ACode{S₁ \ADef{→ₛ} S₂} maps variables from \ACode{S₁} to
   terms with free variables from \ACode{S₂}.
 
-  For example, the substitution, which replaces the term variable 0 with the
-  identity function and the type variable 1 with the bottom type, is defined
-  as followed:
-  \ExampleCode\FExampleSub
+  % For example, the substitution, which replaces the term variable 0 with the
+  % identity function and the type variable 1 with the bottom type, is defined
+  % as followed:
+  % \ExampleCode\FExampleSub
 
   This representation has the benefit that there is no combinatory
   explosion of substitutions and renamings, e.g.\ no extra lemmas have to be
   proved between an expression-in-expression and a type-in-expression
   substitution, because both are simply substitutions.
 
-  \subsection{The Need for Renamings}
-  \label{sec:maps:renamings}
-  A problem with mechanizing languages with DeBruijn-indices is that
-  the operation of applying a substitution \ACode{σ} to a term
-  \ACode{t} cannot be defined directly by structural recursion on
-  \ACode{t}.
-  If \ACode{t} is a term like \ACode{\ACon{λx} e},
-  where the subterm \ACode{e} is under a binder, then the variables
-  in \ACode{e} are shifted, i.e.\ the variable \ACode{\ACon{zero}} refers
-  to the variable from the binder, whereas a variable \ACode{\ACon{suc} x}
-  refers to the variable \ACode{x} from outside of the binder.
-  As the terms contained in \ACode{σ} may themselves contain free variables,
-  they need to be shifted, too, before they can be substituted
-  for variables in \ACode{e}. 
-  Shifting the variables in a term is itself a substitution, which maps
-  each variable \ACode{x} to the term \ACode{\ACon{`} (\ACon{suc} x)}.
-  However, applying this shifting substitution to the terms in
-  \ACode{σ} is not structurally recursive, as the terms in \ACode{σ}
-  are not subterms of \ACode{\ACon{λx} e}.
+  % \subsection{The Need for Renamings}
+  % \label{sec:maps:renamings}
+  % A problem with mechanizing languages with DeBruijn-indices is that
+  % the operation of applying a substitution \ACode{σ} to a term
+  % \ACode{t} cannot be defined directly by structural recursion on
+  % \ACode{t}.
+  % If \ACode{t} is a term like \ACode{\ACon{λx} e},
+  % where the subterm \ACode{e} is under a binder, then the variables
+  % in \ACode{e} are shifted, i.e.\ the variable \ACode{\ACon{zero}} refers
+  % to the variable from the binder, whereas a variable \ACode{\ACon{suc} x}
+  % refers to the variable \ACode{x} from outside of the binder.
+  % As the terms contained in \ACode{σ} may themselves contain free variables,
+  % they need to be shifted, too, before they can be substituted
+  % for variables in \ACode{e}. 
+  % Shifting the variables in a term is itself a substitution, which maps
+  % each variable \ACode{x} to the term \ACode{\ACon{`} (\ACon{suc} x)}.
+  % However, applying this shifting substitution to the terms in
+  % \ACode{σ} is not structurally recursive, as the terms in \ACode{σ}
+  % are not subterms of \ACode{\ACon{λx} e}.
 
-  The usual workaround is to first define renamings,
-  i.e.\ substitutions that replace variables with variables.
-  In contrast to general substitutions, renamings can be easily
-  shifted: they only contain variables \ACode{x}, which can be
-  shifted by simply taking their successor \ACode{\ACon{suc} x}.
-  As the shifting substitution is a renaming, we can then define substitution,
-  where we apply the shifting \emph{renaming} to the terms in \ACode{σ} when
-  the substitution needs to go under a binder.
+  % The usual workaround is to first define renamings,
+  % i.e.\ substitutions that replace variables with variables.
+  % In contrast to general substitutions, renamings can be easily
+  % shifted: they only contain variables \ACode{x}, which can be
+  % shifted by simply taking their successor \ACode{\ACon{suc} x}.
+  % As the shifting substitution is a renaming, we can then define substitution,
+  % where we apply the shifting \emph{renaming} to the terms in \ACode{σ} when
+  % the substitution needs to go under a binder.
 
-  % The usual workaround is to define renamings first and use them
-  % to weaken the terms in substitutions when going under binders.
-  While this keeps lemmas simple (requiring only structural induction),
-  it duplicates the amount of work as all operations and lemmas have
-  to be defined and proved for both renamings and substitutions.
+  % % The usual workaround is to define renamings first and use them
+  % % to weaken the terms in substitutions when going under binders.
+  % While this keeps lemmas simple (requiring only structural induction),
+  % it duplicates the amount of work as all operations and lemmas have
+  % to be defined and proved for both renamings and substitutions.
 
   \subsection{Unifying Renamings \& Substitutions}
   \label{sec:maps:kits}
@@ -1300,25 +1300,25 @@
   % of both renamings and substitutions for all sorts of variables
   % simultaneously.
 
-  \section{Subject Reduction}
-  \label{sec:subjectreduction}
+  % \section{Subject Reduction}
+  % \label{sec:subjectreduction}
 
-  To finish our running example, we define a standard small-step
-  operational semantics for System F with full reduction and prove subject reduction:
-  \AppCode\FReduction
-  \vspace{0mm}
-  \AppCode\FSubjectReduction
-  \AppCode\FSubjectReductionProofInteresting
-  We only list the cases for $\beta$-reduction, as the other cases
-  follow directly from the induction hypothesis:
-  \begin{itemize}
-  \item The $\beta$-reduction rule for type-application, \ACode{\ACon{β-Λ}},
-    is a direct consequence of substitution-preserves-typing.
-  \item The $\beta$-reduction rule for value-application is almost the same,
-    but requires us to additionally show that the type is not affected by the
-    expression substitution.
-    % This is a direct consequence of the weakening used in \ACode{\ACon{⊢λ}}.
-  \end{itemize}
+  % To finish our running example, we define a standard small-step
+  % operational semantics for System F with full reduction and prove subject reduction:
+  % \AppCode\FReduction
+  % \vspace{0mm}
+  % \AppCode\FSubjectReduction
+  % \AppCode\FSubjectReductionProofInteresting
+  % We only list the cases for $\beta$-reduction, as the other cases
+  % follow directly from the induction hypothesis:
+  % \begin{itemize}
+  % \item The $\beta$-reduction rule for type-application, \ACode{\ACon{β-Λ}},
+  %   is a direct consequence of substitution-preserves-typing.
+  % \item The $\beta$-reduction rule for value-application is almost the same,
+  %   but requires us to additionally show that the type is not affected by the
+  %   expression substitution.
+  %   % This is a direct consequence of the weakening used in \ACode{\ACon{⊢λ}}.
+  % \end{itemize}
 
   % \FSubjectReductionProofRest
 

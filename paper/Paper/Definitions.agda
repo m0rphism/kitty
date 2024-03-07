@@ -66,11 +66,7 @@ module Example1 where
 
 --! SyntaxInst
 SystemF-Syntax : Syntax
-SystemF-Syntax = record
-  { Sort         = Sort
-  ; _⊢_          = _⊢_
-  ; `_           = `_
-  ; `-injective  = λ { refl → refl } }
+SystemF-Syntax = record { Sort = Sort ; _⊢_  = _⊢_ ; `_ = `_ ; `-injective  = λ { refl → refl } }
 
 open Syntax SystemF-Syntax hiding (Sort; _⊢_; `_)
 
