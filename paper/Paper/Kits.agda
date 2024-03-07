@@ -449,28 +449,25 @@ record Syntax : Set₁ where
         _∋_∶_ : Ctx S → S ∋ s → S ∶⊢ s → Set
         Γ ∋ x ∶ t = wk-telescope Γ x ≡ t
 
-        --! Typing {
+        --! Typing
         record Typing : Set₁ where
-          infix   4  _⊢_∶_
-          field
-            _⊢_∶_ : ∀ {s : Sort st} → Ctx S → S ⊢ s → S ∶⊢ s → Set
+          field  _⊢_∶_  : ∀ {s : Sort st} → Ctx S → S ⊢ s → S ∶⊢ s → Set
+                 ⊢`     : ∀ {Γ : Ctx S} {x : S ∋ s} {t} → Γ ∋ x ∶ t → Γ ⊢ ` x ∶ t
 
-            ⊢` : ∀ {Γ : Ctx S} {x : S ∋ s} {t} → Γ ∋ x ∶ t → Γ ⊢ ` x ∶ t
-        --! }
+          infix 4 _⊢_∶_
 
           --! TypingKit {
           record TypingKit (K : Kit _∋/⊢_) : Set₁ where
-            private instance _ = K
             --! [
+            private instance _ = K
             infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
             infixl  6  _∋↑/⊢↑_
             --! ]
-            field
-              _∋/⊢_∶_      : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
-              id/⊢`        : ∀ {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋ x ∶ t → Γ ∋/⊢ id/` x ∶ t
-              ⊢`/id        : ∀ {e : S ∋/⊢ s} {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋/⊢ e ∶ t → Γ ⊢ `/id e ∶ t
-              ∋wk/⊢wk      : ∀ (Γ : Ctx S) (t' : S ∶⊢ s) (e : S ∋/⊢ s') (t : S ∶⊢ s') →
-                             Γ ∋/⊢ e ∶ t → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weakenᵣ _)
+            field  _∋/⊢_∶_      : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
+                   id/⊢`        : ∀ {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋ x ∶ t → Γ ∋/⊢ id/` x ∶ t
+                   ⊢`/id        : ∀ {e : S ∋/⊢ s} {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋/⊢ e ∶ t → Γ ⊢ `/id e ∶ t
+                   ∋wk/⊢wk      : ∀ (Γ : Ctx S) (t' : S ∶⊢ s) (e : S ∋/⊢ s') (t : S ∶⊢ s') →
+                                  Γ ∋/⊢ e ∶ t → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weakenᵣ _)
           --! }
 
             --! MapTyping
