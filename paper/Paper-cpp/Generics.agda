@@ -90,31 +90,31 @@ module WithSort(Sort : SortTy → Set) where
     open Traversal KT hiding (_⋯_; ⋯-id; ⋯-var) public
 
     mutual
-      ⋯-fusion :
+      ⋯-assoc :
         ∀ {_∋/⊢₁_ _∋/⊢₂_ _∋/⊢_ : Scoped}
           ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
           ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
           (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
         → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
-      ⋯-fusion (`var x)  ϕ₁ ϕ₂ = sym (&/⋯-⋯ (ϕ₁ _ x) ϕ₂)
-      ⋯-fusion (`con e') ϕ₁ ϕ₂ = cong `con (⋯-fusion' e' ϕ₁ ϕ₂)
+      ⋯-assoc (`var x)  ϕ₁ ϕ₂ = sym (&/⋯-⋯ (ϕ₁ _ x) ϕ₂)
+      ⋯-assoc (`con e') ϕ₁ ϕ₂ = cong `con (⋯-assoc' e' ϕ₁ ϕ₂)
 
-      ⋯-fusion' :
+      ⋯-assoc' :
         ∀ {d'} {_∋/⊢₁_ _∋/⊢₂_ _∋/⊢_ : Scoped}
           ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
           ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
           (t : ⟦ d' ⟧ (Tm d) S₁ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
         → (t ⋯' ϕ₁) ⋯' ϕ₂ ≡ t ⋯' (ϕ₁ ·ₖ ϕ₂)
-      ⋯-fusion' {d' = `σ A d'}     (a , D')  ϕ₁ ϕ₂ = cong (a ,_) (⋯-fusion' D' ϕ₁ ϕ₂)
-      ⋯-fusion' {d' = `X S' M' d'} (e₁ , e₂) ϕ₁ ϕ₂ = cong₂ _,_ (trans (⋯-fusion e₁ (ϕ₁ ↑* S') (ϕ₂ ↑* S'))
+      ⋯-assoc' {d' = `σ A d'}     (a , D')  ϕ₁ ϕ₂ = cong (a ,_) (⋯-assoc' D' ϕ₁ ϕ₂)
+      ⋯-assoc' {d' = `X S' M' d'} (e₁ , e₂) ϕ₁ ϕ₂ = cong₂ _,_ (trans (⋯-assoc e₁ (ϕ₁ ↑* S') (ϕ₂ ↑* S'))
                                                                     (cong (e₁ ⋯_) (sym (~-ext (dist-↑*-· S' ϕ₁ ϕ₂)))) )
-                                                              (⋯-fusion' e₂ ϕ₁ ϕ₂)
-      ⋯-fusion' {d' = `■ M'}       (refl , refl) ϕ₁ ϕ₂ = refl
+                                                              (⋯-assoc' e₂ ϕ₁ ϕ₂)
+      ⋯-assoc' {d' = `■ M'}       (refl , refl) ϕ₁ ϕ₂ = refl
 
     CT : ComposeTraversal
-    CT = record { ⋯-fusion = ⋯-fusion }
+    CT = record { ⋯-assoc = ⋯-assoc }
 
-    open ComposeTraversal CT public hiding (⋯-fusion)
+    open ComposeTraversal CT public hiding (⋯-assoc)
 
     module WithTypes (types : Types) where
       open Types types

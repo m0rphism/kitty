@@ -8,23 +8,26 @@ EXTRA_FILES=$(wildcard *.bib *.cls *.sty *.tex)
 SRCS=$(wildcard $(SRC_DIR)/*.agda)
 TGTS=$(patsubst $(SRC_DIR)/%.agda,$(CACHE_DIR)/$(SRC_DIR)/%.tex,$(SRCS))
 
-.PHONY: all paper fast fast2
+.PHONY: all paper fast agda
 
 all: paper
 
 # Run pdflatex only once
-fast: $(FAST_PDF)
+# fast: $(FAST_PDF)
 
 # Run pdflatex, then bibtex, then two times pdflatex
 paper: $(FAST_PDF)
 	cd $(CACHE_DIR); bibtex main; pdflatex main.tex; pdflatex main.tex
 	cp $(CACHE_DIR)/main.pdf $(MAIN_PDF)
 
-$(FAST_PDF): $(TGTS) $(MAIN_TEX)
+# $(FAST_PDF): $(MAIN_TEX)
+fast: $(MAIN_TEX)
 	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex
 	cp -f $(EXTRA_FILES) $(CACHE_DIR)/
 	cd $(CACHE_DIR); pdflatex main.tex
 	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
+
+agda: $(TGTS)
 
 $(TGTS): $(SRCS)
 	echo $(TGTS)

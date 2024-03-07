@@ -1,55 +1,24 @@
-% PAGE LIMIT: 16
-
 % \documentclass[sigplan, screen]{acmart}
 % \documentclass[sigplan, screen, anonymous, review, authordraft]{acmart}
 % \documentclass[sigplan,10pt,anonymous,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
-% \documentclass[sigplan,10pt, anonymous]{acmart}
-\documentclass[a4paper,UKenglish,cleveref, autoref, thm-restate]{lipics-v2021}
+\documentclass[sigplan,10pt, anonymous]{acmart}
 
 \usepackage{agda-unicode}
 \usepackage{agda-generated}
 \AgdaNoSpaceAroundCode{}
 
-% \bibliographystyle{ACM-Reference-Format}
-\bibliographystyle{plainurl}% the mandatory bibstyle
+\bibliographystyle{ACM-Reference-Format}
 
 \title{Abstractions for Multi-Sorted Substitutions}
-\author{Hannes Saffrich}{University of Freiburg, Germany}{saffrich@informatik.uni-freiburg.de}{https://orcid.org/0009-0004-7014-754X}{}
-\authorrunning{H. Saffrich}
-\Copyright{CC-BY}
-\keywords{Agda, Metatheory, Framework}
-% \relatedversion{} %optional, e.g. full version hosted on arXiv, HAL, or other respository/website
-%\relatedversiondetails[linktext={opt. text shown instead of the URL}, cite=DBLP:books/mk/GrayR93]{Classification (e.g. Full Version, Extended Version, Previous Version}{URL to related version} %linktext and cite are optional
-% \acknowledgements{I want to thank \dots}%optional
 
-%\nolinenumbers %uncomment to disable line numbering
-
-
-
-%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\EventEditors{John Q. Open and Joan R. Access}
-\EventNoEds{2}
-\EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
-\EventShortTitle{CVIT 2016}
-\EventAcronym{CVIT}
-\EventYear{2016}
-\EventDate{December 24--27, 2016}
-\EventLocation{Little Whinging, United Kingdom}
-\EventLogo{}
-\SeriesVolume{42}
-\ArticleNo{23}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-% \author{Hannes Saffrich}
-% \orcid{0000-0002-1825-0097}                 %% \orcid is optional
-% \affiliation{
-%   % \department{Department1}                %% \department is recommended
-%   \institution{University of Freiburg}      %% \institution is required
-%   \country{Germany}                         %% \country is recommended
-% }
-% \email{saffrich@informatik.uni-freiburg.de} %% \email is recommended
+\author{Hannes Saffrich}
+\orcid{0000-0002-1825-0097}                 %% \orcid is optional
+\affiliation{
+  % \department{Department1}                %% \department is recommended
+  \institution{University of Freiburg}      %% \institution is required
+  \country{Germany}                         %% \country is recommended
+}
+\email{saffrich@informatik.uni-freiburg.de} %% \email is recommended
 
 % \author{Peter Thiemann}
 % \orcid{0000-0002-9000-1239}                 %% \orcid is optional
@@ -59,30 +28,6 @@
 %   \country{Germany}                         %% \country is recommended
 % }
 % \email{thiemann@informatik.uni-freiburg.de} %% \email is recommended
-
-\begin{CCSXML}
-<ccs2012>
-   <concept>
-       <concept_id>10003752.10003790.10011740</concept_id>
-       <concept_desc>Theory of computation~Type theory</concept_desc>
-       <concept_significance>500</concept_significance>
-       </concept>
-   <concept>
-       <concept_id>10011007.10011006.10011039.10011040</concept_id>
-       <concept_desc>Software and its engineering~Syntax</concept_desc>
-       <concept_significance>500</concept_significance>
-       </concept>
-   <concept>
-       <concept_id>10003752.10003790.10002990</concept_id>
-       <concept_desc>Theory of computation~Logic and verification</concept_desc>
-       <concept_significance>500</concept_significance>
-       </concept>
- </ccs2012>
-\end{CCSXML}
-
-\ccsdesc[500]{Theory of computation~Type theory}
-\ccsdesc[500]{Software and its engineering~Syntax}
-\ccsdesc[500]{Theory of computation~Logic and verification}
 
 \usepackage{tcolorbox}
 
@@ -140,8 +85,6 @@
 
 \begin{document}
 
-  \maketitle
-
   \begin{abstract}
     Formalizing a typed programming language in a proof assistant
     requires to choose representations for variables and typing.
@@ -175,6 +118,8 @@
     System F with subtyping, dependently typed lambda calculus, and lambda
     calculus with pattern matching.
   \end{abstract}
+
+  \maketitle
 
   \section{Introduction}
   \label{sec:introduction}
@@ -405,7 +350,7 @@
   definitions and lemmas, but omit some proofs for the sake of
   space. The omitted proofs can be found in Appendix~\ref{sec:proofs}
   and in the supplementary material.
-  The full framework is available online.\footnote{See supplementary material. In the final version, this text will be replaced by a link to github.}
+  The full framework is available online.\footnote{See supplementary material. In the final version here will be a link to github.}
 
   The rest of this paper is structured as followed:
   Section~\ref{sec:syntax} introduces the multi-sorted syntax and compares it to the
@@ -661,7 +606,7 @@
   \end{itemize}
 
   Building on the operations and axioms of a \ACode{\ACon{Kit}}, we
-  define the usual operations for renamings and substitutions:\footnote{
+  derive further operations:\footnote{
     The definitions are included directly in the record module of the
     Kit, so they are implicitly parameterized over a kit.
   }
@@ -729,7 +674,7 @@
     substitution) to the term \ACode{t}.
   \item
     \ACode{\AField{⋯-var}} states that applying a map \ACode{ϕ} to a variable
-    term \ACode{\AField{`} x}, is the same as applying \ACode{ϕ} to
+    term\\ \ACode{\AField{`} x}, is the same as applying \ACode{ϕ} to
     the variable \ACode{x}, and then converting the result to a term
     via \ACode{\AField{id/`}}.
   \item
@@ -1185,14 +1130,6 @@
   the multi-sorted typing relation for System F, incorporating both
   typing and kinding:
   \AppCode\FTyping
-
-  % \begin{minipage}[b]{0.5\linewidth}
-  % \AppCode\FTypingI
-  % \end{minipage}
-  % \begin{minipage}[b]{0.5\linewidth}
-  % \AppCode\FTypingII
-  % \end{minipage}
-
   The interesting cases are:
   \begin{itemize}
   \item

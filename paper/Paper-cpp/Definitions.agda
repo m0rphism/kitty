@@ -109,7 +109,8 @@ _⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ �
 
 --! Traversal
 SystemF-Traversal : Traversal
-SystemF-Traversal = record { _⋯_ = _⋯_ ; ⋯-id = ⋯-id ; ⋯-var = λ x ϕ → refl }
+SystemF-Traversal = record
+  { _⋯_ = _⋯_ ; ⋯-id = ⋯-id ; ⋯-var = λ x ϕ → refl }
 
 -- SystemF-Traversal = record
 --   { _⋯_    = _⋯_
@@ -165,7 +166,8 @@ open ComposeTraversal SystemF-CTraversal hiding (⋯-fusion)
 
 --! Types
 SystemF-Types : Types
-SystemF-Types = record { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → _ , 𝕜 } }
+SystemF-Types = record
+  { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → _ , 𝕜 } }
 
 open Types SystemF-Types
 
@@ -202,7 +204,8 @@ open Typing SystemF-Typing hiding (_⊢_∶_; ⊢`)
 --! Preserve
 _⊢⋯_ :
   ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TypingKit K ⦄
-    ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄ ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
+    ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
+    ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
     {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
     {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
   Γ₁ ⊢ e ∶ t →

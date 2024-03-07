@@ -34,6 +34,12 @@ ap.add_argument("-r", "--root", metavar="PATH",
 ap.add_argument("-i", "--index", metavar="PATH",
                 help="Write the list of generated macros to this file.")
 
+ap.add_argument("-v", "--verbose", action='store_true',
+                     help="Turn on verbosity")
+
+ap.add_argument("-n", "--noop", action='store_true',
+                    help="No action: dry run")
+
 ap.add_argument("sources", metavar="SRC_PATH", nargs="+",
                 help="Path to an annotated .agda-file.")
 
@@ -62,6 +68,8 @@ else:
 
 root = root.absolute()
 
+if args.verbose:
+    print (f"VERBOSE: root = {root}")
 
 # Check if sources are relative to project root
 
@@ -73,6 +81,8 @@ for p in args.sources:
         print(f"ERROR: Source path '{p}' is not relative to root '{root}'.")
         sys.exit(1)
 
+if args.verbose:
+    print (f"VERBOSE: src_paths = {src_paths}")
 
 # Create temporary directory
 
@@ -83,6 +93,11 @@ else:
     tmp_root_obj = tempfile.TemporaryDirectory(prefix="agdatex")
     tmp_root = Path(tmp_root_obj.name)
 
+if args.verbose:
+    print (f"VERBOSE: tmp_root = {tmp_root}")
+
+if args.noop:
+    sys.exit("[no harm done]")
 
 # Copy project root to temporary directory
 
@@ -132,6 +147,15 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
         tgt += "\\end{AgdaAlign}"
         tgt += "}\n"
         mode = "none"
+    def latexname(name: str) -> bool:
+        return name.isascii() and name.isalpha()
+    def asciify(name: str) -> str:
+        return ''.join( (c if latexname(c) else 'X') for c in name )
+    def checked_latex_ident(name: str, line_num: int) -> str:
+        if not latexname(name):
+            print(f"WARNING: Illegal characters in '{name}' in line {line_num} replaced by X")
+            name = asciify(name)
+        return name
     for line_num, line in enumerate(src.splitlines()):
         l = line.strip()
         if l.startswith("--!") or l.startswith("-- !"):
@@ -144,12 +168,13 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
             if is_inline:
                 l = l[1:].strip()
             if "{" in l:
-                name = l.split(" ", 1)[0]
+                name = checked_latex_ident(l.split(" ", 1)[0], line_num)
                 start_command(name, is_inline)
             elif "}" in l:
                 stop_command()
             elif ">" in l:
-                prefixes.append(l.split(" ", 1)[0])
+                pref = checked_latex_ident(l.split(" ", 1)[0], line_num)
+                prefixes.append(pref)
             elif "<" in l:
                 prefixes.pop()
             elif "[" in l:
@@ -168,7 +193,7 @@ for src_path, tgt_path in zip(src_paths, tgt_paths):
                 else:
                     print(f"ERROR: Line {line_num+1} stops a hiding block outside of hiding mode:\n  {line}")
             else:
-                name = l.split(" ", 1)[0]
+                name = checked_latex_ident(l.split(" ", 1)[0], line_num)
                 start_command(name, is_inline)
                 stop_command_on_empty_line = True
                 # print(f"ERROR: Line {line_num+1} contains invalid agdatex command:\n  {line}")
