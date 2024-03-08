@@ -4,7 +4,6 @@ module Kitty.Term.MultiSub (𝕋 : Terms) where
 
 open import Data.List.Properties using (++-assoc)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; cong₂; subst; subst₂; sym; module ≡-Reasoning)
-open ≡-Reasoning
 open import Data.List using (List; []; _∷_; _++_)
 open import Data.Unit using (⊤; tt)
 open import Level using (_⊔_; 0ℓ; Level) renaming (suc to lsuc)
@@ -64,10 +63,12 @@ f ↑*' (S ▷ s) = f ↑*' S ↑ s
     {S₁} {S₂} {ϕ : S₁ –[ K ]→ S₂} S →
   ϕ ↑*' S ~ ϕ ↑* S
 ↑*'~↑* ⦃ 𝕊 ⦄ ⦃ K ⦄ {S₁} {S₂} {ϕ} [] = mk-~ λ mx x →
+  let open ≡-Reasoning in
   `/id (x & ϕ ↑*' []) ≡⟨⟩
   `/id (x & ϕ)        ≡⟨ sym (use-~ (↑*-[] ϕ) _ x) ⟩
   `/id (x & ϕ ↑*  [])  ∎
 ↑*'~↑* ⦃ 𝕊 ⦄ ⦃ K ⦄ {S₁} {S₂} {ϕ} (S ▷ s) = mk-~ λ mx x →
+  let open ≡-Reasoning in
   `/id (x & ϕ ↑*' (S ▷ s))  ≡⟨⟩
   `/id (x & ϕ ↑*' S ↑ s)    ≡⟨ use-~ (~-cong-↑' (↑*'~↑* S)) _ x ⟩
   `/id (x & ϕ ↑*  S ↑ s)    ≡⟨ sym (use-~ (↑*-▷ S s ϕ) _ x) ⟩
@@ -95,6 +96,7 @@ dist-↑*'-▷▷ :
     f ↑*' S' ↑*' S'' ≡ sub (f ↑*' (S' ▷▷ S''))
 dist-↑*'-▷▷ {ℓ} {S₁} {S₂} S' []        f = refl
 dist-↑*'-▷▷ {ℓ} {S₁} {S₂} ⦃ 𝕊 ⦄ ⦃ K ⦄ S' (S'' ▷ s) f =
+  let open ≡-Reasoning in
   let sub = subst₂ (_–[ K ]→_) (cong (_∷_ s) (++-assoc S'' S' S₁))
                                (cong (_∷_ s) (++-assoc S'' S' S₂)) in
   let sub'' = subst₂ (λ x y → (x ▷ s) –[ K ]→ (y ▷ s)) (++-assoc S'' S' S₁)
@@ -104,6 +106,7 @@ dist-↑*'-▷▷ {ℓ} {S₁} {S₂} ⦃ 𝕊 ⦄ ⦃ K ⦄ S' (S'' ▷ s) f =
   f ↑*' S' ↑*' (S'' ▷ s)         ≡⟨⟩
   f ↑*' S' ↑*' S'' ↑ s           ≡⟨ cong (_↑ s) (dist-↑*'-▷▷ S' S'' f) ⟩
   sub' (f ↑*' (S' ▷▷ S'')) ↑ s  ≡⟨ dist-subst₂ (λ ■ → _↑_ ⦃ SubWithLaws-Sub ⦃ 𝕊 ⦄ ⦄ ⦃ K ⦄ ■ s) (++-assoc S'' S' S₁) (++-assoc S'' S' S₂) (f ↑*' (S' ▷▷ S'')) ⟩
+  let open ≡-Reasoning in
   sub'' (f ↑*' (S' ▷▷ S'') ↑ s) ≡⟨ comm-subst₂ (_▷ s) (_▷ s) (++-assoc S'' S' S₁) (++-assoc S'' S' S₂) (f ↑*' (S' ▷▷ S'') ↑ s) ⟩
   sub (f ↑*' (S' ▷▷ S'') ↑ s)   ≡⟨⟩
   sub (f ↑*' (S' ▷▷ (S'' ▷ s))) ∎
@@ -114,11 +117,13 @@ dist-↑**-▷▷ :
   → let sub = subst₂ (_–[ Ks ]→*_) (++-assoc S'' S' S₁) (++-assoc S'' S' S₂) in
     f ↑** S' ↑** S'' ≡ sub (f ↑** (S' ▷▷ S''))
 dist-↑**-▷▷ {S₁} {S₂} {Ks = Ks} S' []        f =
+  let open ≡-Reasoning in
   f ↑** S' ↑** []  ≡⟨ ↑**-[] (f ↑** S') ⟩
   f ↑** S'         ≡⟨⟩
   f ↑** (S' ▷▷ []) ∎
 dist-↑**-▷▷ {ℓ} {S₁} {.S₁} S' (S'' ▷ s) []       = subst-[]-flip (λ (_ , Ks) S₂ S₁ → S₁ –[ Ks ]→ S₂) (cong (_∷_ s) (++-assoc S'' S' S₁))
 dist-↑**-▷▷ {ℓ} {S₁} {S₂} {Kp@(_ , K) ∷ Ks}  S' (S'' ▷ s) (_∷_ {a₁ = .S₂} {a₂ = y} f fs) =
+  let open ≡-Reasoning in
   let sub = subst₂ (_–[ Kp ∷ Ks ]→*_) (++-assoc (S'' ▷ s) S' S₁)
                                      (++-assoc (S'' ▷ s) S' S₂) in
   let sub₁ = subst₂ (_–[ K ]→_) (cong (_∷_ s) (++-assoc S'' S' y))
@@ -149,6 +154,81 @@ module TraversalOps (_⋯_ : ∀ {ℓ} {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/
   _≈ₜ_ : ∀ ⦃ 𝕊 : Sub ℓ ⦄ {Ks₁ Ks₂ : List KitPkg} {S₁ S₂} → (f : S₁ –[ Ks₁ ]→* S₂) → (g : S₁ –[ Ks₂ ]→* S₂) → Set
   _≈ₜ_ {S₁ = S₁} f g = ∀ {S₁'} {st} {s : Sort st} (t : (S₁ ▷▷ S₁') ⊢ s) → t ⋯* (f ↑** S₁') ≡ t ⋯* (g ↑** S₁')
 
+  test' : ∀ ⦃ 𝕊 : SubWithLaws ℓ ⦄
+          {_∋/⊢₁_ : List (Sort Var) → Sort Var → Set} ⦃ K₁ : Kit _∋/⊢₁_ ⦄
+          {_∋/⊢₂_ : List (Sort Var) → Sort Var → Set} ⦃ K₂ : Kit _∋/⊢₂_ ⦄
+          {S₁ S₂} → (f : S₁ –[ K₁ ]→ S₂) → (g : S₁ –[ K₂ ]→ S₂) →
+    (∀       {s} (x : S₁ ∋ s) → (` x) ⋯ f ≡ (` x) ⋯ g) →
+    (∀ {S₁'} {s} (x : (S₁ ▷▷ S₁') ∋ s) → (` x) ⋯ (f ↑*' S₁') ≡ (` x) ⋯ (g ↑*' S₁'))
+  test' f g f≈g {[]} x = f≈g x
+  test' f g f≈g {S₁' ▷ s₁'} x@(here refl) =
+    {!!}
+  test' f g f≈g {S₁' ▷ s₁'} x@(there x') =
+    let f~g = let open ~-Reasoning in
+              begin
+                f
+              ~⟨ {!!} ⟩
+                g
+              ∎
+    in
+    let open ≡-Reasoning in
+    begin
+      ((` x) ⋯ (f ↑*' (S₁' ▷ s₁')))
+    ≡⟨ {!!} ⟩
+      `/id (x & (f ↑*' (S₁' ▷ s₁')))
+    ≡⟨ refl ⟩
+      `/id (x & (f ↑*' S₁' ↑ s₁'))
+    ≡⟨ cong `/id (&-↑-there (f ↑*' S₁') x') ⟩
+      `/id (wk s₁' (x' & (f ↑*' S₁')))
+    ≡⟨ {! !} ⟩
+      `/id (x & (g ↑*' (S₁' ▷ s₁')))
+    ≡⟨ {!!} ⟩
+      ((` x) ⋯ (g ↑*' (S₁' ▷ s₁')))
+    ∎
+  -- test' f g f≈g {S₁} x =
+  --   let f~g = let open ~-Reasoning in
+  --             begin
+  --               f
+  --             ~⟨ {!!} ⟩
+  --               g
+  --             ∎
+  --   in
+  --   let open ≡-Reasoning in
+  --   begin
+  --     ((` x) ⋯ (f ↑*' S₁))
+  --   ≡⟨ {!!} ⟩
+  --     `/id (x & (f ↑*' S₁))
+  --   ≡⟨ {! !} ⟩
+  --     `/id (x & (g ↑*' S₁))
+  --   ≡⟨ {!!} ⟩
+  --     ((` x) ⋯ (g ↑*' S₁))
+  --   ∎
+
+  test : ∀ ⦃ 𝕊 : SubWithLaws ℓ ⦄ {Ks₁ Ks₂ : List KitPkg} {S₁ S₂} → (f : S₁ –[ Ks₁ ]→* S₂) → (g : S₁ –[ Ks₂ ]→* S₂) →
+    (∀       {s} (x : S₁ ∋ s) → (` x) ⋯* f ≡ (` x) ⋯* g) →
+    (∀ {S₁'} {s} (x : (S₁ ▷▷ S₁') ∋ s) → (` x) ⋯* (f ↑** S₁') ≡ (` x) ⋯* (g ↑** S₁'))
+  -- test f g f≈g x = {!!}
+  test f g f≈g {[]} x =
+    let open ≡-Reasoning in
+    begin
+      ((` x) ⋯* f ↑** [])
+    ≡⟨ cong ((` x) ⋯*_) (↑**-[] f) ⟩
+      ((` x) ⋯* f)
+    ≡⟨ f≈g x ⟩
+      ((` x) ⋯* g)
+    ≡˘⟨ cong ((` x) ⋯*_) (↑**-[] g) ⟩
+      ((` x) ⋯* g ↑** [])
+    ∎
+  test f g f≈g {S₁' ▷ s₁'} x =
+    let open ≡-Reasoning in
+    begin
+      (` x) ⋯* f ↑** (S₁' ▷ s₁')
+    ≡˘⟨ cong (` x ⋯*_) (dist-↑**-▷▷ S₁' (s₁' ∷ []) f) ⟩
+      (` x) ⋯* ((f ↑** S₁') ↑** (s₁' ∷ []))
+    ≡⟨ {!!} ⟩
+      (` x) ⋯* g ↑** (S₁' ▷ s₁')
+    ∎
+
   subst-⋯ :
     ∀ ⦃ 𝕊 : Sub ℓ ⦄ {Ks : List KitPkg} {S₁ S₂ S₁' S₂'} {st} {s : Sort st}
       (f : S₁ –[ Ks ]→* S₂) (t : S₁' ⊢ s)
@@ -168,6 +248,7 @@ module TraversalOps (_⋯_ : ∀ {ℓ} {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/
       let sub₂ = subst (_⊢ _) (++-assoc S'' S' S₂) in
     ((` x) ⋯* ((f ↑** S') ↑** S'')) ≡ sub₂ ((` sub₁ x) ⋯* (f ↑** (S' ▷▷ S'')))
   lemy {Ks = Ks} {S₁} {S₂} {S'} {S''} f s x =
+    let open ≡-Reasoning in
     let sub∋₁⁻¹ = subst (_∋ _) (sym (++-assoc S'' S' S₁)) in
     let sub⊢₂ = subst (_⊢ _) (++-assoc S'' S' S₂) in
     let sub⊢₂⁻¹ = subst (_⊢ _) (sym (++-assoc S'' S' S₂)) in
@@ -191,6 +272,7 @@ module TraversalOps (_⋯_ : ∀ {ℓ} {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/
     → (∀ {S₁'} {S₁''} {s} (x : (S₁ ▷▷ S₁' ▷▷ S₁'') ∋ s)
         → ((` x) ⋯* ((f ↑** S₁') ↑** S₁'')) ≡ ((` x) ⋯* ((g ↑** S₁') ↑** S₁'')))
   ≈↑** {Ks₁} {Ks₂} {S₁ = S₁} {S₂ = S₂} f g f~g {S₁' = S₁'} {S₁'' = S₁''} x =
+    let open ≡-Reasoning in
     let sub₁ = subst (_∋ _) (sym (++-assoc S₁'' S₁' S₁)) in
     let sub₂ = subst (_⊢ _) (++-assoc S₁'' S₁' S₂) in
     ((` x) ⋯* ((f ↑** S₁') ↑** S₁'')) ≡⟨ lemy f _ x ⟩

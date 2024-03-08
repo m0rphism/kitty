@@ -40,8 +40,7 @@ record Syntax : Set₁ where
   variable _∋/⊢_  _∋/⊢₁_ _∋/⊢₂_ : Scoped
 
   --! Kit {
-  record Kit  (_∋/⊢_ : List (Sort Var) → Sort Var → Set)
-              : Set where
+  record Kit (_∋/⊢_ : List (Sort Var) → Sort Var → Set) : Set where
     field
       -- Operations
       id/`            : S ∋ s → S ∋/⊢ s
