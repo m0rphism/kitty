@@ -16,12 +16,12 @@ all: paper
 # fast: $(FAST_PDF)
 
 # Run pdflatex, then bibtex, then two times pdflatex
-paper: $(FAST_PDF)
+paper: $(FAST_PDF) agda
 	cd $(CACHE_DIR); bibtex main; pdflatex main.tex; pdflatex main.tex
 	cp $(CACHE_DIR)/main.pdf $(MAIN_PDF)
 
 # $(FAST_PDF): $(MAIN_TEX)
-fast: $(MAIN_TEX)
+fast: $(MAIN_TEX) agda
 	cp $(MAIN_TEX) $(CACHE_DIR)/main.tex
 	cp -f $(EXTRA_FILES) $(CACHE_DIR)/
 	cd $(CACHE_DIR); pdflatex main.tex

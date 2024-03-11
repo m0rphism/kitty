@@ -11,3 +11,4 @@ presentation/*.pdf
 *.swo
 .#*
 *.log
+.agdatex-hashes.json
