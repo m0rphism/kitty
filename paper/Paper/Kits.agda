@@ -104,12 +104,14 @@ record Syntax : Set₁ where
 
     --! Eq
     _~_ : (ϕ₁ ϕ₂ : S₁ →ₖ S₂) → Set
-    _~_ {S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
+    _~_ {S₁} ϕ₁ ϕ₂ =  ∀ s (x : S₁ ∋ s) →
+                      ϕ₁ s x ≡ ϕ₂ s x
 
     -- _~_ {S₁ = S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
 
     --! FunExt
-    postulate ~-ext : ∀ {ϕ₁ ϕ₂ : S₁ →ₖ S₂} → ϕ₁ ~ ϕ₂ → ϕ₁ ≡ ϕ₂
+    postulate ~-ext : ∀ {ϕ₁ ϕ₂ : S₁ →ₖ S₂}
+                → ϕ₁ ~ ϕ₂ → ϕ₁ ≡ ϕ₂
 
     --! IdLift
     id↑~id : (id {S} ↑ s) ~ id {s ∷ S}
@@ -144,10 +146,9 @@ record Syntax : Set₁ where
 
   --! Traversal {
   record Traversal : Set₁ where
-    field
-      _⋯_    : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ → S₂ ⊢ s
-      ⋯-var  : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (x : S₁ ∋ s) (ϕ : S₁ –[ K ]→ S₂) → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
-      ⋯-id   : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (t : S ⊢ s) → t ⋯ id ⦃ K ⦄ ≡ t
+    field  _⋯_    : ∀ ⦃ K : Kit _∋/⊢_ ⦄ → S₁ ⊢ s → S₁ –[ K ]→ S₂ → S₂ ⊢ s
+           ⋯-var  : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (x : S₁ ∋ s) (ϕ : S₁ –[ K ]→ S₂) → (` x) ⋯ ϕ ≡ `/id (x & ϕ)
+           ⋯-id   : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (t : S ⊢ s) → t ⋯ id ⦃ K ⦄ ≡ t
     --! }
 
     infixl   5  _⋯_

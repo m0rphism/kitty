@@ -465,14 +465,6 @@
   The following shows a typical intrinsically-scoped syntax of System F:
   \ExampleCode\FUnsortedSyntax
 
-  an implementation as an Agda framework featuring
-  a reflection algorithm, representation independence for
-  substitutions and typing contexts, heterogeneous equality between
-  renamings and substitutions, and absence of postulated axioms.
-  \begin{code}
-fooo
-  \end{code}
-
   \ACode{\ACon{Type}}s are indexed by the number of free type
   variables \ACode{n}.
   \ACode{\ACon{Expr}}essions are additionally indexed by the number of
@@ -539,9 +531,11 @@ fooo
 
   \subsection{A Structure for Multi-Sorted Syntax}
   \label{sec:syntax:structure}
+  % The regularity of the multi-sorted syntax makes it easy to define a
+  % structure for syntaxes of arbitrary object-languages, i.e.\ syntaxes
+  % with arbitrary amounts of syntactic categories and variables:
   The regularity of the multi-sorted syntax makes it easy to define a
-  structure for syntaxes of arbitrary object-languages, i.e.\ syntaxes
-  with arbitrary amounts of syntactic categories and variables:
+  structure for arbitrary syntaxes, i.e. with arbitrarily many syntactic categories and variable types:
   \LibCode\KSyntax
   The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
@@ -613,12 +607,12 @@ fooo
   \label{sec:maps:kits}
   To avoid the duplication between renamings and substitutions,
   McBride\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
-  introduced an abstraction called \emph{kits}.\footnote{
-    While kits were originally formulated for intrinsically-typed languages,
-    they nicely extend to our extrinsically-typed multi-sorted syntax, whose
-    sort-indexing is a form of intrinsic typing.
-  }
-
+  introduced the \emph{Kit} abstraction.%
+  % \footnote{
+  %   While kits were originally formulated for intrinsically-typed languages,
+  %   they nicely extend to our extrinsically-typed multi-sorted syntax, whose
+  %   sort-indexing is a form of intrinsic typing.
+  % }
   % A \ACode{Kit} is a structure that captures the commonalities
   % between variables and terms:
   A \ACode{Kit} is a structure that allows to abstract over whether
@@ -636,7 +630,7 @@ fooo
   to \ACode{\ACon{\_∋\_}} for the variable kit, and to \ACode{\AField{\_⊢\_}} for the
   term kit.
 
-  A kit provides the following operations:
+  A kit consists of the following components:
   \begin{itemize}
   \item 
     \ACode{\AField{id/`}} converts a variable \ACode{S \ACon{∋} s} into a
@@ -652,76 +646,63 @@ fooo
     The new, unused variable \ACode{\ACon{zero}} can assume any sort \ACode{s'}.
     For variables, \ACode{\AField{wk}} is the successor \ACode{\ACon{suc}}.
     For terms, \ACode{\AField{wk}} means applying a shifting renaming to the term.
-  \end{itemize}
-
-  The operations need to satisfy the following properties:
-  \begin{itemize}
   \item \ACode{\AField{`/`-is-`}} states that converting a variable first to a ``variable-or-term'' and
     then further to a term is the same as converting it directly to a
     term using the variable constructor \ACode{\AField{`\_}}.
   \item \ACode{\AField{`/id-injective}} and \ACode{\AField{id/`-injective}} state that
-    \ACode{\AField{`/id}} and \ACode{\AField{id/`}} are injective. This property
-    follows easily, as both the identity function and the variable
-    constructor are injective.
+    \ACode{\AField{`/id}} and \ACode{\AField{id/`}} are injective.
+    % This property
+    % follows easily, as both the identity function and the variable
+    % constructor are injective.
   \item \ACode{\AField{wk-id/`}} characterizes the behaviour of the
-    \ACode{\AField{wk}} function by how it acts on variables.
-    Injecting a variable and then shifting it, is the same as injecting a shifted variable.
+    \ACode{\AField{wk}} function by how it acts on variables:
+    injecting a variable and then shifting it, is the same as injecting a shifted variable.
   \end{itemize}
 
-  Building on the operations and axioms of a \ACode{\ACon{Kit}}, we
-  define the usual operations for renamings and substitutions:\footnote{
+  \begin{figure}
+    \label{fig:map-ops}
+    \centering
+    \begin{minipage}[t]{0.5\linewidth}
+    \LibCode\KMap
+    \LibCode\KAp
+    \LibCode\KLiftAlt
+    \LibCode\KSingleAlt
+    \end{minipage}
+    \begin{minipage}[t]{0.4\linewidth}
+    \LibCode\KWeakenAlt
+    \LibCode\KEq
+    \LibCode\KFunExt
+    \LibCode\KId
+    \LibCode\KIdLift
+    \end{minipage}
+    \caption{Map Operations}
+  \end{figure}
+  Figure~\ref{fig:map-ops} shows the usual operations for renamings and substitutions
+  generalized to maps.\footnote{
     The definitions are included directly in the record module of the
     Kit, so they are implicitly parameterized over a kit.
   }
-  \begin{itemize}
-  \item 
-    We unify the definition of renamings \ACode{S₁ \ADef{→ᵣ} S₂} and
-    substitutions \ACode{S₁ \ADef{→ₛ} S₂}, which differ only in whether they
-    return variables or terms:
-    \LibCode\KMap
+  The type \ACode{S₁ \ADef{→ₖ} S₂} unifies
+    renamings \ACode{S₁ \ADef{→ᵣ} S₂} and
+    substitutions \ACode{S₁ \ADef{→ₛ} S₂}.
     We call a value of type \ACode{S₁ \ADef{→ₖ} S₂} a \emph{map} and
     use the meta-variable \ACode{ϕ} for it.
-  \item 
-    A map can be applied to a variable:
-    \LibCode\KAp
-  % \item 
-  %   A map can be extended by a new variable or term:
-  %   \LibCode\KExt
-  % \item 
-  %   A map can be shifted, as the \ACode{\ACon{Kit}} provides the
-  %   necessary \ACode{\AField{wk}} operation:
-  %   \LibCode\KWkm
-  \item 
-    A map can be lifted, which allows to
-    move a map under a binder of sort \ACode{s}:
-    % \LibCode\KLift
-    \LibCode\KLiftAlt
-  \item 
-    There is a singleton map, which replaces \ACode{\ACon{zero}} and decreases
-    all other variables by one:
-    \LibCode\KSingleAlt
-  \item 
-    There is a map which is equivalent to \ACode{\AField{wk}} on terms:
-    \LibCode\KWeakenAlt
-  \item
-    Maps have an extensional equality:
-    \LibCode\KEq
-  \item
-    For simplicity we postulate functional extensionality:\footnote{
+  The operation \ACode{ϕ \& x} applies a map to a variable.
+  The operation \ACode{ϕ ↑ s} lifts a map under a binder of sort \ACode{s}.
+  The operation \ACode{⦅ x/t ⦆} constructs a singleton map that replaces
+  \ACode{\ACon{zero}} with \ACode{x/t} and decreases all other variables by one.
+  The \ACode{\AField{weaken s}} map increases all variables by one.
+  The \ACode{ϕ₁ $\sim$ ϕ₂} type expresses extensional equality of maps.
+    For simplicity, we postulate functional extensionality \ACode{\~-ext}.\footnote{
       The actual implementation does \emph{not} use any postulates.
       % The workaround is explained in Appendix~\ref{sec:fun-ext}.
     }
-    \LibCode\KFunExt
-  \item 
-    There is an identity map:
-    \LibCode\KId
-  \item
-    Lifting the identity map is a (larger) identity map:
-    \LibCode\KIdLift
-    % \LibCode\KIdLiftProof
-  \end{itemize}
-  We also specify notation 
-  to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
+  There is an identity map \ACode{id}.
+  The lemma \ACode{id↑-id} states that a lifted identity map is again an identity map.
+
+  To make it easier to talk about a specific kit, we introduce the following notations:
+  % We also specify notation 
+  % to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
   % We also specify notation, which makes it less cumbersome
   % to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
   \begin{itemize}
@@ -729,7 +710,7 @@ fooo
      we write \ACode{(S \ADef{∋/⊢[} K \ADef{]} s)} for the \ACode{(S ∋/⊢ s)}
      of some specific \ACode{\ACon{Kit}} \ACode{K}; and
    \item
-     we write \ACode{(S \ADef{–[} K \ADef{]→} s)} for the \ACode{(S \ADef{→ₖ} s)}
+     we write \ACode{(S₁ \ADef{–[} K \ADef{]→} S₂)} for the \ACode{(S₁ \ADef{→ₖ} S₂)}
      of some specific \ACode{\ACon{Kit}} \ACode{K}.
   \end{itemize}
 
@@ -787,7 +768,7 @@ fooo
     In the variable case \ACode{(\ACon{`} x) \ADef{⋯} ϕ}, we first apply the map
     \ACode{ϕ} to the variable \ACode{x}. If \ACode{ϕ} is a renaming,
     we get back a variable and need to apply the variable constructor
-    \ACode{\ACon{`\_}} to it. If \ACode{ϕ} is a substitution,
+    \ACode{\ACon{`\_}}. If \ACode{ϕ} is a substitution,
     we get back a term that we can use directly.
     This is exactly what \ACode{\AField{`/id}} does.
   \item 
@@ -799,19 +780,17 @@ fooo
   Then we prove that applying an identity map does not change the term:
   \AppCode\FTraversalId
   \AppCode\FTraversalIdProofInteresting
-  The interesting cases are:
+  We only display and discuss the interesting cases:
   \begin{itemize}
   \item
-    the variable case \ACode{\ACon{`} x}, where we need to combine the
-    \ACon{\AField{id/`}} from the identity map, with the \ACon{\AField{`/id}}
-    from the traversal operation using \ACon{\AField{`/`-is-`}}.
+    in the variable case \ACode{\ACon{`} x}, the
+    \ACon{\AField{id/`}} from the identity map meets the \ACon{\AField{`/id}}
+    from the traversal operation, so we use \ACon{\AField{`/`-is-`}}.
   \item
-    the lambda abstraction case \ACode{\ACon{λx} e}, where the
-    traversal lifts the identity over its binder. Here
-    \ACon{\AField{id↑-id}} is used to state that this lifted identity
-    map is still the identity.
-  \item
-    all other cases are analogous and hence omitted.
+    in the lambda abstraction case \ACode{\ACon{λx} e}, the
+    traversal lifts the identity under its binder. Here
+    we need to use \ACon{\AField{id↑-id}} to show that a lifted identity
+    map is again an identity map.
   \end{itemize}
 
   Finally, we instantiate the \ACode{\ACon{Traversal}} structure:
@@ -833,7 +812,6 @@ fooo
   \ACode{\ACon{Traversal}} structure, the fields of
   \ACode{\ACon{Kit}} could not use the \ACode{\AField{\_⋯\_}} function in
   their types.
-
   This prevented us to define a useful lemma, which also needs to
   be instantiated separately for variables and terms: the counterpiece
   to \ACode{\AField{wk-id/`}}, which we call \ACode{\AField{wk-`/id}}.
