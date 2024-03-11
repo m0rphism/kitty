@@ -676,27 +676,25 @@
   \item 
     A map can be applied to a variable:
     \LibCode\KAp
-  \item 
-    A map can be extended by a new variable or term:
-    \LibCode\KExt
-  \item 
-    A map can be shifted, as the \ACode{\ACon{Kit}} provides the
-    necessary \ACode{\AField{wk}} operation:
-    \LibCode\KWkm
+  % \item 
+  %   A map can be extended by a new variable or term:
+  %   \LibCode\KExt
+  % \item 
+  %   A map can be shifted, as the \ACode{\ACon{Kit}} provides the
+  %   necessary \ACode{\AField{wk}} operation:
+  %   \LibCode\KWkm
   \item 
     A map can be lifted, which allows to
     move a map under a binder of sort \ACode{s}:
-    \LibCode\KLift
-  \item 
-    There is an identity map:
-    \LibCode\KId
+    % \LibCode\KLift
+    \LibCode\KLiftAlt
   \item 
     There is a singleton map, which replaces \ACode{\ACon{zero}} and decreases
     all other variables by one:
-    \LibCode\KSingle
+    \LibCode\KSingleAlt
   \item 
     There is a map which is equivalent to \ACode{\AField{wk}} on terms:
-    \LibCode\KWeaken
+    \LibCode\KWeakenAlt
   \item
     Maps have an extensional equality:
     \LibCode\KEq
@@ -706,14 +704,18 @@
       % The workaround is explained in Appendix~\ref{sec:fun-ext}.
     }
     \LibCode\KFunExt
+  \item 
+    There is an identity map:
+    \LibCode\KId
   \item
     Lifting the identity map is a (larger) identity map:
     \LibCode\KIdLift
     % \LibCode\KIdLiftProof
   \end{itemize}
-
-  We also specify notation, which makes it less cumbersome
+  We also specify notation 
   to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
+  % We also specify notation, which makes it less cumbersome
+  % to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
   \begin{itemize}
   \item
      we write \ACode{(S \ADef{∋/⊢[} K \ADef{]} s)} for the \ACode{(S ∋/⊢ s)}

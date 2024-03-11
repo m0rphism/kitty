@@ -63,6 +63,25 @@ record Syntax : Set₁ where
     _&_ : S₁ ∋ s → S₁ →ₖ S₂ → S₂ ∋/⊢ s
     x & ϕ = ϕ _ x 
 
+    --! Id
+    id : S →ₖ S
+    id s x = id/` x
+
+    module AltDefs where
+      --! SingleAlt
+      ⦅_⦆ : S ∋/⊢ s → (s ∷ S) →ₖ S
+      ⦅ x/t ⦆ _ zero     = x/t
+      ⦅ x/t ⦆ _ (suc x)  = id/` x
+
+      --! LiftAlt
+      _↑_ : S₁ →ₖ S₂ → ∀ s → (s ∷ S₁) →ₖ (s ∷ S₂)
+      (ϕ ↑ s) _ zero     = id/` zero
+      (ϕ ↑ s) _ (suc x)  = wk _ (ϕ _ x)
+
+      --! WeakenAlt
+      weaken : ∀ s → S →ₖ (s ∷ S)
+      weaken s _ x = wk _ (id/` x)
+
     --! Wkm
     wkm : ∀ s → S₁ →ₖ S₂ → S₁ →ₖ (s ∷ S₂)
     wkm s ϕ _ x = wk s (ϕ _ x)
@@ -80,10 +99,6 @@ record Syntax : Set₁ where
     ϕ ↑* []       = ϕ
     ϕ ↑* (s ∷ S)  = (ϕ ↑* S) ↑ s
       
-    --! Id
-    id : S →ₖ S
-    id s x = id/` x
-
     --! Single
     ⦅_⦆ : S ∋/⊢ s → (s ∷ S) →ₖ S
     ⦅ x/t ⦆ = x/t ∷ₖ id
