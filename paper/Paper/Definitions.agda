@@ -181,7 +181,6 @@ SystemF-Typing = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢` }
 
 open Typing SystemF-Typing hiding (_⊢_∶_; ⊢`) 
 
---! Preserve
 _⊢⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TKit K ⦄
          ⦃ C₁ : CKit K Kᵣ K ⦄ ⦃ C₂ : CKit K K K ⦄ ⦃ C₃ : CKit K Kₛ Kₛ ⦄
          {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
@@ -189,6 +188,7 @@ _⊢⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TKit K ⦄
        Γ₁ ⊢ e ∶ t →
        Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
        Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+--! Preserve
 ⊢` ⊢x                               ⊢⋯ ⊢ϕ = ⊢`/id (⊢ϕ _ _ ⊢x)
 ⊢λ {t₂ = t₂} ⊢e                     ⊢⋯ ⊢ϕ = ⊢λ (subst  (_ ⊢ _ ∶_) (sym (⋯-↑-wk t₂ _ _))
                                                        (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)))

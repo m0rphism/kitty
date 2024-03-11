@@ -534,26 +534,28 @@ record Syntax : Set₁ where
             infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
             instance
-            -- --! TypingInstances {
-            --   TKᵣ : TKit Kᵣ ; TKₛ : TKit Kₛ
-            --   TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_      ; ⊢`/id    = ⊢`
-            --                 ; id/⊢`    = λ ⊢x → ⊢x  ; ∋wk/⊢wk  = λ { Γ t' x t refl → refl } }
-            --   TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_  ; ⊢`/id    = λ ⊢x → ⊢x
-            --                 ; id/⊢`    = ⊢`     ; ∋wk/⊢wk  = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
-            -- --! }
+            --! TypingInstances {
+              TKᵣ : TKit Kᵣ ; TKₛ : TKit Kₛ
+              TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_      ; ⊢`/id    = ⊢`
+                            ; id/⊢`    = λ ⊢x → ⊢x  ; ∋wk/⊢wk  = λ { Γ t' x t refl → refl } }
+              TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_  ; ⊢`/id    = λ ⊢x → ⊢x
+                            ; id/⊢`    = ⊢`     ; ∋wk/⊢wk  = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
+            --! }
 
-              --! TypingInstancesI
-              TKᵣ : TKit Kᵣ
-              TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_
-                            ; id/⊢`    = λ ⊢x → ⊢x
-                            ; ⊢`/id    = ⊢`
-                            ; ∋wk/⊢wk  = λ { Γ t' x t refl → refl } }
-              --! TypingInstancesII
-              TKₛ : TKit Kₛ
-              TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_
-                            ; ⊢`/id    = λ ⊢x → ⊢x
-                            ; id/⊢`    = ⊢`
-                            ; ∋wk/⊢wk  = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
+              -- --! TypingInstancesI
+              -- TKᵣ : TKit Kᵣ
+              -- TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_
+              --               ; id/⊢`    = λ ⊢x → ⊢x
+              --               ; ⊢`/id    = ⊢`
+              --               ; ∋wk/⊢wk  = λ { Γ t' x t refl →
+              --                   refl } }
+              -- --! TypingInstancesII
+              -- TKₛ : TKit Kₛ
+              -- TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_
+              --               ; ⊢`/id    = λ ⊢x → ⊢x
+              --               ; id/⊢`    = ⊢`
+              --               ; ∋wk/⊢wk  = λ Γ t' e t ⊢e →
+              --                   ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
 
             --! TTraversalNotation {
             open TKit TKᵣ public using () renaming

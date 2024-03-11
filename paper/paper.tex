@@ -1276,15 +1276,15 @@
 
   Given a \ACode{\ACon{TTraversal}}, we can easily instantiate the
   \ACode{\ACon{TKits}} for variables and terms:
-  % \LibCode\KTypingInstances
+  \LibCode\KTypingInstances
 
-  \noindent
-  \begin{minipage}[t]{0.5\linewidth}
-  \LibCode\KTypingInstancesI
-  \end{minipage}
-  \begin{minipage}[t]{0.5\linewidth}
-  \LibCode\KTypingInstancesII
-  \end{minipage}
+  % \noindent
+  % \begin{minipage}[t]{0.5\linewidth}
+  % \LibCode\KTypingInstancesI
+  % \end{minipage}
+  % \begin{minipage}[t]{0.5\linewidth}
+  % \LibCode\KTypingInstancesII
+  % \end{minipage}
 
   % \LibCode\KTTraversalNotation
 
@@ -1296,6 +1296,7 @@
   complex in general.
 
   \AppCode\FPreserve
+  The type of \ACode{\ADef{\_⊢⋯\_}} is the same as in the record definition and hence omitted.
   The interesting parts of the proof are:
   \begin{itemize}
   \item
@@ -1311,8 +1312,8 @@
     The type application constructor \ACode{\ACon{⊢∙}} substitutes \ACode{t₁} into \ACode{t₂},
     requiring us to use \ACode{\AField{dist-↑-⦅⦆}}.
   \end{itemize}
-  Finally, we instantiate the \ACode{\ACon{TTraversal}} structure:
-  \AppCode\FTTraversal
+  % Finally, we instantiate the \ACode{\ACon{TTraversal}} structure:
+  % \AppCode\FTTraversal
 
   % As the \ACode{\ACon{Traversal}} and  \ACode{\ACon{CTraversal}} instances
   % can be generally derived via reflection,
