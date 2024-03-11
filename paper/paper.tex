@@ -465,6 +465,14 @@
   The following shows a typical intrinsically-scoped syntax of System F:
   \ExampleCode\FUnsortedSyntax
 
+  an implementation as an Agda framework featuring
+  a reflection algorithm, representation independence for
+  substitutions and typing contexts, heterogeneous equality between
+  renamings and substitutions, and absence of postulated axioms.
+  \begin{code}
+fooo
+  \end{code}
+
   \ACode{\ACon{Type}}s are indexed by the number of free type
   variables \ACode{n}.
   \ACode{\ACon{Expr}}essions are additionally indexed by the number of
@@ -885,10 +893,10 @@
   \ACode{\AField{⋯-fusion}}, states that applying two maps \ACode{ϕ₁}
   and \ACode{ϕ₂} in sequence to a term \ACode{t}, is the same as
   applying their composition \ACode{(ϕ₁~\AField{·ₖ}~ϕ₂)} to \ACode{t},
-  i.e.
-  $$
-  \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
-  $$
+  i.e. \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}.
+  % $$
+  % \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
+  % $$
   This property equips our framework with the power to
   reason about the application of multiple maps by reasoning about
   the application of a single map.
@@ -939,9 +947,17 @@
 
   \subsection{An Examination of Composition}
   \label{sec:composition:example}
-  To motivate our abstraction for composition, we first look
+  To motivate our abstraction, we first look
   at the four compositions individually:
-  \ExampleCode\KExFourComps
+
+  \noindent
+  \begin{minipage}[t]{0.60\linewidth}
+  \ExampleCode\KExFourCompsI
+  \end{minipage}
+  \begin{minipage}[t]{0.40\linewidth}
+  \ExampleCode\KExFourCompsII
+  \end{minipage}
+
   The definitions reveal two interesting properties:
   \begin{enumerate}
   \item
@@ -1183,10 +1199,29 @@
   sorts from \ACode{S} that are at smaller or equal positions than a variable \ACode{x}.
 
   % \LibCode\KContextHelper
-  \LibCode\KContexts
+  \noindent
+  \begin{minipage}{1.0\linewidth}
+    \begin{minipage}{0.5\linewidth}
+      \LibCode\KContexts
+      \vspace{3mm}
+    \end{minipage}
+    \begin{minipage}{0.5\linewidth}
+      \LibCode\KContextExt
+    \end{minipage}
+  \end{minipage}
+
   To use a type returned from a typing context, it needs to be
   weakened appropriately through the \ACode{\ADef{wk-telescope}} function:
-  \LibCode\KContextLookup
+
+  \noindent
+  \begin{minipage}{0.5\linewidth}
+    \LibCode\KContextLookupI
+  \end{minipage}
+  \begin{minipage}{0.5\linewidth}
+    \LibCode\KContextLookupII
+  \end{minipage}
+  % \LibCode\KContextLookup
+
   We then define a variable typing as followed:
   \LibCode\KVariableTyping
 

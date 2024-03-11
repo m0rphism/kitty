@@ -6,12 +6,10 @@ open import Data.Fin using (Fin; suc; zero)
 --! FUnsortedSyntax {
 data Kind : Set where
   ★ : Kind                                 -- Type Kind
-
 data Type (n : ℕ) : Set where
   `_       : Fin n → Type n                -- Type variable
   ∀[α∶_]_  : Kind → Type (suc n) → Type n  -- Universal quantification
   _⇒_      : Type n → Type n → Type n      -- Function type
-
 data Expr (n m : ℕ) : Set where
   `_   : Fin m → Expr n m                  -- Expression variable
   λx_  : Expr n (suc m) → Expr n m         -- Expression abstraction

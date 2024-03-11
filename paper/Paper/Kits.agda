@@ -15,8 +15,7 @@ infix  4  _∋_
 
 --! Variables
 data _∋_ {ℓ} {A : Set ℓ} : List A → A → Set ℓ where
-  zero  : ∀ {xs x} → (x ∷ xs) ∋ x
-  suc   : ∀ {xs x y} → xs ∋ x → (y ∷ xs) ∋ x
+  zero  : ∀ {xs x} → (x ∷ xs) ∋ x ; suc : ∀ {xs x y} → xs ∋ x → (y ∷ xs) ∋ x
 
 --! SortTy
 data SortTy : Set where Var NoVar : SortTy
@@ -41,17 +40,13 @@ record Syntax : Set₁ where
 
   --! Kit {
   record Kit (_∋/⊢_ : List (Sort Var) → Sort Var → Set) : Set where
-    field
-      -- Operations
-      id/`            : S ∋ s → S ∋/⊢ s
-      `/id            : S ∋/⊢ s → S ⊢ s
-      wk              : ∀ s' → S ∋/⊢ s → (s' ∷ S) ∋/⊢ s
-
-      -- Axioms
-      `/`-is-`        : ∀ (x : S ∋ s) → `/id (id/` x) ≡ ` x
-      id/`-injective  : id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
-      `/id-injective  :  ∀ {x/t₁ x/t₂ : S ∋/⊢ s} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
-      wk-id/`         :  ∀ s' (x : S ∋ s) → wk s' (id/` x) ≡ id/` (suc x)
+    field  id/`            : S ∋ s → S ∋/⊢ s
+           `/id            : S ∋/⊢ s → S ⊢ s
+           wk              : ∀ s' → S ∋/⊢ s → (s' ∷ S) ∋/⊢ s
+           `/`-is-`        : ∀ (x : S ∋ s) → `/id (id/` x) ≡ ` x
+           id/`-injective  : id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
+           `/id-injective  :  ∀ {x/t₁ x/t₂ : S ∋/⊢ s} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
+           wk-id/`         :  ∀ s' (x : S ∋ s) → wk s' (id/` x) ≡ id/` (suc x)
     --! }
 
     --! Map
@@ -202,12 +197,10 @@ record Syntax : Set₁ where
       field wk-`/id : ∀ s {S s'} (x/t : S ∋/⊢ s') → `/id x/t ⋯ weakenᵣ s ≡ `/id (wk s x/t)
     --! }
 
-    --! WkKitInstances {
     instance
-      Wᵣ : WkKit Kᵣ
+    --! WkKitInstances {
+      Wᵣ : WkKit Kᵣ ; Wₛ : WkKit Kₛ
       Wᵣ = record { wk-`/id = λ s x → ⋯-var x (weaken s) }
-
-      Wₛ : WkKit Kₛ
       Wₛ = record { wk-`/id = λ s t → refl }
     --! }
 
@@ -216,11 +209,12 @@ record Syntax : Set₁ where
     module ExamplesX where
       private variable ⦃ K ⦄ : Kit _∋/⊢_
 
-      --! ExFourComps
+      --! ExFourCompsI
       _ᵣ·ᵣ_  : (S₁ →ᵣ  S₂) → (S₂ →ᵣ  S₃) → (S₁ →ᵣ  S₃)
       _ᵣ·ₛ_  : (S₁ →ᵣ  S₂) → (S₂ →ₛ  S₃) → (S₁ →ₛ  S₃)
       _ₛ·ᵣ_  : (S₁ →ₛ  S₂) → (S₂ →ᵣ  S₃) → (S₁ →ₛ  S₃)
       _ₛ·ₛ_  : (S₁ →ₛ  S₂) → (S₂ →ₛ  S₃) → (S₁ →ₛ  S₃)
+      --! ExFourCompsII
       (ϕ₁  ᵣ·ᵣ  ϕ₂)  _ x = (x & ϕ₁)   &  ϕ₂
       (ϕ₁  ᵣ·ₛ  ϕ₂)  _ x = (x & ϕ₁)   &  ϕ₂
       (ϕ₁  ₛ·ᵣ  ϕ₂)  _ x = (x & ϕ₁)   ⋯  ϕ₂
@@ -310,10 +304,10 @@ record Syntax : Set₁ where
 
     --! CTraversal {
     record CTraversal : Set₁ where
-      field ⋯-fusion :
-              ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W₁ : WkKit K₁ ⦄
-                ⦃ C : CKit K₁ K₂ K ⦄ (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
-              (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
+      field  ⋯-fusion :
+               ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W₁ : WkKit K₁ ⦄
+                 ⦃ C : CKit K₁ K₂ K ⦄ (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
+               (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
     --! }
 
       --! CommLiftWeaken
@@ -340,13 +334,12 @@ record Syntax : Set₁ where
         t ⋯ (weakenᵣ s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-fusion t (weakenᵣ s) (ϕ ↑ s)) ⟩
         t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)     ∎
 
-      --! CKitInstances {
       instance
+      --! CKitInstances {
         Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → CKit Kᵣ K₂ K₂
         Cᵣ = record  { _&/⋯_     = _&_
                      ; &/⋯-⋯     = λ x ϕ → sym (⋯-var x ϕ)
                      ; &/⋯-wk-↑  = λ x ϕ → refl }
-
         Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ C : CKit K₂ Kᵣ K₂ ⦄ ⦃ W₂ : WkKit K₂ ⦄ → CKit Kₛ K₂ Kₛ
         Cₛ = record  { _&/⋯_     = _⋯_
                      ; &/⋯-⋯     = λ t ϕ → refl
@@ -432,23 +425,22 @@ record Syntax : Set₁ where
         drop-∈ e xs = drop (suc (depth e)) xs
         --! }
 
-        --! Contexts {
+        --! Contexts
         Ctx : List (Sort Var) → Set
         Ctx S = ∀ s → (x : S ∋ s) → drop-∈ x S ∶⊢ s
-
+        --! ContextExt
         _∷ₜ_ : S ∶⊢ s → Ctx S → Ctx (s ∷ S)
         (t ∷ₜ Γ) _ zero     = t
         (t ∷ₜ Γ) _ (suc x)  = Γ _ x
-        --! }
 
-        --! ContextLookup {
+        --! ContextLookupI
         wk-drop-∈ : (x : S ∋ s) → drop-∈ x S ⊢ s' → S ⊢ s'
         wk-drop-∈ zero     t = t ⋯ weakenᵣ _
         wk-drop-∈ (suc x)  t = wk-drop-∈ x t ⋯ weakenᵣ _
 
+        --! ContextLookupII
         wk-telescope : Ctx S → S ∋ s → S ∶⊢ s
         wk-telescope Γ x = wk-drop-∈ x (Γ _ x)
-        --! }
 
         infix   4  _∋_∶_
 
@@ -539,13 +531,11 @@ record Syntax : Set₁ where
 
             infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
-            --! TypingInstances {
             instance
-              TKᵣ : TKit Kᵣ
-              TKᵣ = record { _∋/⊢_∶_  = _∋_∶_      ; ⊢`/id    = ⊢`
-                           ; id/⊢`    = λ ⊢x → ⊢x  ; ∋wk/⊢wk  = λ { Γ t' x t refl → refl } }
-
-              TKₛ : TKit Kₛ
+            --! TypingInstances {
+              TKᵣ : TKit Kᵣ ; TKₛ : TKit Kₛ
+              TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_      ; ⊢`/id    = ⊢`
+                            ; id/⊢`    = λ ⊢x → ⊢x  ; ∋wk/⊢wk  = λ { Γ t' x t refl → refl } }
               TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_  ; ⊢`/id    = λ ⊢x → ⊢x
                             ; id/⊢`    = ⊢`     ; ∋wk/⊢wk  = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
             --! }
