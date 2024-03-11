@@ -184,9 +184,10 @@ record Syntax : Set₁ where
     -- Counterpart to wk-id/`
     --! WkKit {
     record WkKit (K : Kit _∋/⊢_): Set₁ where
+      --! [
       private instance _ = K
-      field
-        wk-`/id : ∀ s {S s'} (x/t : S ∋/⊢ s') → `/id x/t ⋯ weakenᵣ s ≡ `/id (wk s x/t)
+      --! ]
+      field wk-`/id : ∀ s {S s'} (x/t : S ∋/⊢ s') → `/id x/t ⋯ weakenᵣ s ≡ `/id (wk s x/t)
     --! }
 
     --! WkKitInstances {
@@ -229,16 +230,15 @@ record Syntax : Set₁ where
 
     --! ComposeKit {
     record ComposeKit  (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_) (K₁⊔K₂ : Kit _∋/⊢_) : Set where
-      private instance _ = K₁; _ = K₂; _ = K₁⊔K₂
       --! [
+      private instance _ = K₁; _ = K₂; _ = K₁⊔K₂
       infixl  8  _&/⋯_
       --! ]
-      field
-        _&/⋯_     :  S₁ ∋/⊢[ K₁ ] s → S₁ –[ K₂ ]→ S₂ → S₂ ∋/⊢[ K₁⊔K₂ ] s
-        &/⋯-⋯     :  (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
-                     `/id (x/t &/⋯ ϕ) ≡ `/id x/t ⋯ ϕ
-        &/⋯-wk-↑  :  (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
-                     wk s' (x/t &/⋯ ϕ) ≡ wk s' x/t &/⋯ (ϕ ↑ s')
+      field  _&/⋯_     :  S₁ ∋/⊢[ K₁ ] s → S₁ –[ K₂ ]→ S₂ → S₂ ∋/⊢[ K₁⊔K₂ ] s
+             &/⋯-⋯     :  (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
+                          `/id (x/t &/⋯ ϕ) ≡ `/id x/t ⋯ ϕ
+             &/⋯-wk-↑  :  (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
+                          wk s' (x/t &/⋯ ϕ) ≡ wk s' x/t &/⋯ (ϕ ↑ s')
       --! }
 
       --! Composition

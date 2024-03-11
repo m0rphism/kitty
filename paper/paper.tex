@@ -848,8 +848,8 @@
   the \AField{wk-`/id} lemma:
   \LibCode\KWkKit
 
-  We then create exactly two instances of the \ACode{\ACon{WkKit}} for
-  the variable and term \ACode{\ACon{Kit}}, respectively. 
+  We then create two instances of the \ACode{\ACon{WkKit}} for
+  the variable and term \ACode{\ACon{Kit}}, respectively:
   \LibCode\KWkKitInstances
 
   As the variable and term \ACode{\ACon{Kit}}s are the only two \ACode{\ACon{Kit}}s,
@@ -879,11 +879,10 @@
 
   In this section, we extend our framework with an abstraction that
   allows the composition of arbitrary maps.
-
   The core property of composition, which we call
   \ACode{\AField{⋯-fusion}}, states that applying two maps \ACode{ϕ₁}
   and \ACode{ϕ₂} in sequence to a term \ACode{t}, is the same as
-  applying their composition \ACode{(ϕ₁ \AField{·ₖ} ϕ₂)} to \ACode{t},
+  applying their composition \ACode{(ϕ₁~\AField{·ₖ}~ϕ₂)} to \ACode{t},
   i.e.
   $$
   \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
@@ -930,8 +929,9 @@
   \ACode{\ACon{Traversal}}, which allow us to abstract over all four
   compositions and use the same trick as before to eliminate the
   dependencies.
-  While composition can be dervied, this has the benefit, that
-  we've gained a new level of generality, which enables us in the next
+  % TODO
+  While composition can be derived, our approach has the benefit, that
+  we have gained a new level of generality, which enables us in the next
   sections to unify type preservation of all substitution and renaming
   operations into one lemma.
 
@@ -999,8 +999,8 @@
 
   For this purpose, the \ACode{\ACon{ComposeKit}} abstraction, needs
   to satisfy two requirements:
-  it needs to provide us with enough machinery to define composition, but also
-  it needs to provide us with enough axioms that we are able to instanciate
+  it needs to provide us with enough machinery to define composition, but
+  it also needs to provide us with enough axioms that we are able to instanciate
   the \ACode{\ACon{ComposeTraversal}}. It is defined as followed:
   \LibCode\KComposeKit
   The \ACode{\AField{\_\&/⋯\_}} operation takes a variable or term
