@@ -1014,14 +1014,14 @@
   \item
     We define map composition as motivated by the previous subsection:
     \LibCode\KComposition
-  \item
-    We show that the \ACode{\AField{\_\&/⋯\_}} operator behaves like
-    \ACode{\AField{\_\&\_}} when applied to variables:
-    \LibCode\KCKitAp
-    % \LibCode\KCKitApProof
+  % \item
+  %   We show that the \ACode{\AField{\_\&/⋯\_}} operator behaves like
+  %   \ACode{\AField{\_\&\_}} when applied to variables:
+  %   \LibCode\KCKitAp
+  %   % \LibCode\KCKitApProof
 
-    % The \ACode{\AField{`/id}} on the left side is from \ACode{K₁⊔K₂}, whereas
-    % the \ACode{\AField{`/id}} on the right side is from \ACode{K₂}.
+  %   % The \ACode{\AField{`/id}} on the left side is from \ACode{K₁⊔K₂}, whereas
+  %   % the \ACode{\AField{`/id}} on the right side is from \ACode{K₂}.
   \item
     We show that lifting \ACode{\AField{\_↑\_}} distributes over
     composition:
@@ -1034,13 +1034,13 @@
   \ACode{\ACon{CKit}} \ACode{C}.
   % \LibCode\KCKitNotation
 
-  We then define the \ACode{\ACon{CTraversal}} structure,
+  We then define a structure,
   which provides the \ACode{\AField{⋯-fusion}} lemma for arbitrary
   \ACode{\ACon{CKit}}s:
   \LibCode\KCTraversal
 
   Similar as for the \ACode{\ACon{Traversal}}, we derive further
-  definitions from the axiom of a \ACode{\ACon{CTraversal}}:
+  definitions from the axioms of a \ACode{\ACon{CTraversal}}:
   \begin{itemize}
   \item 
     A map \ACode{ϕ} followed by a weakening is equivalent to a
