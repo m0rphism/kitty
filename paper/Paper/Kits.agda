@@ -99,8 +99,7 @@ record Syntax : Set₁ where
     -- _~_ {S₁ = S₁} ϕ₁ ϕ₂ = ∀ s (x : S₁ ∋ s) → ϕ₁ s x ≡ ϕ₂ s x
 
     --! FunExt
-    postulate
-      ~-ext : ∀ {ϕ₁ ϕ₂ : S₁ →ₖ S₂} → ϕ₁ ~ ϕ₂ → ϕ₁ ≡ ϕ₂
+    postulate ~-ext : ∀ {ϕ₁ ϕ₂ : S₁ →ₖ S₂} → ϕ₁ ~ ϕ₂ → ϕ₁ ≡ ϕ₂
 
     --! IdLift
     id↑~id : (id {S} ↑ s) ~ id {s ∷ S}
@@ -159,19 +158,17 @@ record Syntax : Set₁ where
     instance
       --! KitVar
       Kᵣ : Kit _∋_
-      Kᵣ = record
-        { id/`            = λ x → x         ; `/id            = `_
-        ; wk              = λ s' x → suc x  ; `/`-is-`        = λ x → refl
-        ; id/`-injective  = λ eq → eq       ; `/id-injective  = `-injective
-        ; wk-id/`         = λ s' x → refl   }
+      Kᵣ = record  { id/`            = λ x → x         ; `/id            = `_
+                   ; wk              = λ s' x → suc x  ; `/`-is-`        = λ x → refl
+                   ; id/`-injective  = λ eq → eq       ; `/id-injective  = `-injective
+                   ; wk-id/`         = λ s' x → refl   }
 
       --! KitTerm
       Kₛ : Kit _⊢_
-      Kₛ = record
-        { id/`            = `_                                   ; `/id            = λ t → t
-        ; wk              = λ s' t → t ⋯ weaken ⦃ Kᵣ ⦄ s'        ; `/`-is-`        = λ x → refl
-        ; id/`-injective  = `-injective                          ; `/id-injective  = λ eq → eq
-        ; wk-id/`         = λ s' x → ⋯-var x (weaken ⦃ Kᵣ ⦄ s')  }
+      Kₛ = record  { id/`            = `_                                   ; `/id            = λ t → t
+                   ; wk              = λ s' t → t ⋯ weaken ⦃ Kᵣ ⦄ s'        ; `/`-is-`        = λ x → refl
+                   ; id/`-injective  = `-injective                          ; `/id-injective  = λ eq → eq
+                   ; wk-id/`         = λ s' x → ⋯-var x (weaken ⦃ Kᵣ ⦄ s')  }
 
     --! KitOpen
     open Kit Kᵣ public using () renaming 
@@ -341,10 +338,11 @@ record Syntax : Set₁ where
                      ; &/⋯-wk-↑  = λ t ϕ → ⋯-↑-wk t ϕ _ }
       --! }
 
-      --! CKitInstancesConcrete
+      --! CKitInstancesConcreteI
       Cᵣᵣ : CKit Kᵣ Kᵣ Kᵣ;  Cᵣᵣ = Cᵣ
-      Cᵣₛ : CKit Kᵣ Kₛ Kₛ;  Cᵣₛ = Cᵣ
       Cₛᵣ : CKit Kₛ Kᵣ Kₛ;  Cₛᵣ = Cₛ
+      --! CKitInstancesConcreteII
+      Cᵣₛ : CKit Kᵣ Kₛ Kₛ;  Cᵣₛ = Cᵣ
       Cₛₛ : CKit Kₛ Kᵣ Kₛ;  Cₛₛ = Cₛ
 
       --! WeakenCancelsSingle
@@ -529,12 +527,12 @@ record Syntax : Set₁ where
             --! TypingInstances {
             instance
               TKᵣ : TKit Kᵣ
-              TKᵣ = record { _∋/⊢_∶_     = _∋_∶_      ; ⊢`/id       = ⊢`
-                           ; id/⊢`       = λ ⊢x → ⊢x  ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl } }
+              TKᵣ = record { _∋/⊢_∶_  = _∋_∶_      ; ⊢`/id    = ⊢`
+                           ; id/⊢`    = λ ⊢x → ⊢x  ; ∋wk/⊢wk  = λ { Γ t' x t refl → refl } }
 
               TKₛ : TKit Kₛ
-              TKₛ = record  { _∋/⊢_∶_     = _⊢_∶_  ; ⊢`/id       = λ ⊢x → ⊢x
-                            ; id/⊢`       = ⊢`     ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
+              TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_  ; ⊢`/id    = λ ⊢x → ⊢x
+                            ; id/⊢`    = ⊢`     ; ∋wk/⊢wk  = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
             --! }
 
             --! TTraversalNotation {
