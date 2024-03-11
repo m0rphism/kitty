@@ -34,14 +34,14 @@ private variable
 
 --! Syntax
 data _⊢_ : List (Sort Var) → Sort st → Set where
-  `_        : S ∋ s → S ⊢ s                -- Expr and Type Var
-  λx_       : (𝕖 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Expr Abstraction
-  Λα_       : (𝕥 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Type Abstraction
-  ∀[α∶_]_   : S ⊢ 𝕜 → (𝕥 ∷ S) ⊢ 𝕥 → S ⊢ 𝕥  -- Univ Quant
-  _·_       : S ⊢ 𝕖 → S ⊢ 𝕖 → S ⊢ 𝕖        -- Expr Application
-  _∙_       : S ⊢ 𝕖 → S ⊢ 𝕥 → S ⊢ 𝕖        -- Type Application
-  _⇒_       : S ⊢ 𝕥 → S ⊢ 𝕥 → S ⊢ 𝕥        -- Function Type
-  ★         : S ⊢ 𝕜                        -- Type Kind
+  `_        : S ∋ s → S ⊢ s                -- Expression and type variables
+  λx_       : (𝕖 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Expression abstraction
+  Λα_       : (𝕥 ∷ S) ⊢ 𝕖 → S ⊢ 𝕖          -- Type abstraction
+  ∀[α∶_]_   : S ⊢ 𝕜 → (𝕥 ∷ S) ⊢ 𝕥 → S ⊢ 𝕥  -- Universal quantification
+  _·_       : S ⊢ 𝕖 → S ⊢ 𝕖 → S ⊢ 𝕖        -- Expression application
+  _∙_       : S ⊢ 𝕖 → S ⊢ 𝕥 → S ⊢ 𝕖        -- Type application
+  _⇒_       : S ⊢ 𝕥 → S ⊢ 𝕥 → S ⊢ 𝕥        -- Function type
+  ★         : S ⊢ 𝕜                        -- Type kind
 
 private variable
   e e₁ e₂ e₃ e' e₁' e₂'  : S ⊢ 𝕖
