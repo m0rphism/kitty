@@ -19,6 +19,7 @@ all: paper
 paper: $(FAST_PDF) agda
 	cd $(CACHE_DIR); bibtex main; pdflatex main.tex; pdflatex main.tex
 	cp $(CACHE_DIR)/main.pdf $(MAIN_PDF)
+	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
 
 # $(FAST_PDF): $(MAIN_TEX)
 fast: $(MAIN_TEX) agda
