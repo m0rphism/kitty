@@ -225,9 +225,10 @@ record Syntax : Set₁ where
       -- (σ₁  ₛ·ᵣ  ρ₂)  _ x = (x & σ₁)   ⋯  ρ₂
       -- (σ₁  ₛ·ₛ  σ₂)  _ x = (x & σ₁)   ⋯  σ₂
 
-      --! ExTwoComps
+      --! ExTwoCompsI
       _ᵣ·_  : (S₁ →ᵣ  S₂) → (S₂ –[ K ]→  S₃) → (S₁ –[ K ]→  S₃)
       _ₛ·_  : (S₁ →ₛ  S₂) → (S₂ –[ K ]→  S₃) → (S₁ →ₛ       S₃)
+      --! ExTwoCompsII
       (ϕ₁  ᵣ·  ϕ₂) _ x = (x & ϕ₁)  & ϕ₂
       (ϕ₁  ₛ·  ϕ₂) _ x = (x & ϕ₁)  ⋯ ϕ₂
 
