@@ -27,8 +27,11 @@ fast: $(MAIN_TEX)
 	cd $(CACHE_DIR); pdflatex main.tex
 	cp $(CACHE_DIR)/main.pdf $(FAST_PDF)
 
-agda: $(TGTS)
-
-$(TGTS): $(SRCS)
-	echo $(TGTS)
+agda:
 	./agdatex.py -o $(CACHE_DIR) $(SRCS)
+
+# agda: $(TGTS)
+
+# $(TGTS): $(SRCS)
+# 	echo $(TGTS)
+# 	./agdatex.py -o $(CACHE_DIR) $(SRCS)
