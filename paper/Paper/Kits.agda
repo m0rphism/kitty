@@ -228,8 +228,8 @@ record Syntax : Set₁ where
       -- (ρ₁  ᵣ·  ϕ₂) _ x = (x & ρ₁)  & ϕ₂
       -- (σ₁  ₛ·  ϕ₂) _ x = (x & σ₁)  ⋯ ϕ₂
 
-    --! ComposeKit {
-    record ComposeKit  (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_) (K₁⊔K₂ : Kit _∋/⊢_) : Set where
+    --! CKit {
+    record CKit  (K₁ : Kit _∋/⊢₁_) (K₂ : Kit _∋/⊢₂_) (K₁⊔K₂ : Kit _∋/⊢_) : Set where
       --! [
       private instance _ = K₁; _ = K₂; _ = K₁⊔K₂
       infixl  8  _&/⋯_
@@ -245,9 +245,9 @@ record Syntax : Set₁ where
       _·ₖ_ :  S₁ –[ K₁ ]→ S₂ → S₂ –[ K₂ ]→ S₃ → S₁ –[ K₁⊔K₂ ]→ S₃
       (ϕ₁ ·ₖ ϕ₂) _ x = (x & ϕ₁) &/⋯ ϕ₂ 
 
-      --! ComposeKitAp
+      --! CKitAp
       &/⋯-& :  ∀ (x : S₁ ∋ s) (ϕ : S₁ –[ K₂ ]→ S₂) → `/id (id/` ⦃ K₁ ⦄ x &/⋯ ϕ) ≡ `/id (x & ϕ)
-      --! ComposeKitApProof
+      --! CKitApProof
       &/⋯-& x ϕ = 
           `/id (id/` x &/⋯ ϕ)       ≡⟨ &/⋯-⋯ (id/` x) ϕ ⟩
           `/id ⦃ K₁ ⦄ (id/` x) ⋯ ϕ  ≡⟨ cong (_⋯ ϕ) (`/`-is-` ⦃ K₁ ⦄ x) ⟩
@@ -287,27 +287,26 @@ record Syntax : Set₁ where
         (((ϕ₁ ↑* S) ↑ s) ·ₖ ((ϕ₂ ↑* S) ↑ s)) sx x ≡⟨⟩
         ((ϕ₁ ↑* (s ∷ S)) ·ₖ (ϕ₂ ↑* (s ∷ S))) sx x ∎
 
-    --! ComposeKitNotation {
+    --! CKitNotation {
     _·[_]_ :  ∀ {K₁ : Kit _∋/⊢₁_} {K₂ : Kit _∋/⊢₂_} {K₁⊔K₂ : Kit _∋/⊢_} →
-              S₁ –[ K₁ ]→ S₂ → ComposeKit K₁ K₂ K₁⊔K₂ →
+              S₁ –[ K₁ ]→ S₂ → CKit K₁ K₂ K₁⊔K₂ →
               S₂ –[ K₂ ]→ S₃ → S₁ –[ K₁⊔K₂ ]→ S₃
-    ϕ₁ ·[ C ] ϕ₂ = ϕ₁ ·ₖ ϕ₂ where open ComposeKit C
+    ϕ₁ ·[ C ] ϕ₂ = ϕ₁ ·ₖ ϕ₂ where open CKit C
 
-    open ComposeKit ⦃ … ⦄ public
+    open CKit ⦃ … ⦄ public
     --! }
 
-    --! ComposeTraversal {
-    record ComposeTraversal : Set₁ where
+    --! CTraversal {
+    record CTraversal : Set₁ where
       field ⋯-fusion :
               ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W₁ : WkKit K₁ ⦄
-                ⦃ C : ComposeKit K₁ K₂ K ⦄ (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
+                ⦃ C : CKit K₁ K₂ K ⦄ (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
               (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
     --! }
 
       --! CommLiftWeaken
-      ↑-wk :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
-                 ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ (ϕ : S₁ –[ K ]→ S₂) s →
-              (ϕ ·ₖ weaken s) ~ (weaken s ·ₖ (ϕ ↑ s))
+      ↑-wk :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄ ⦃ C₂ : CKit Kᵣ K K ⦄
+                 (ϕ : S₁ –[ K ]→ S₂) s → (ϕ ·ₖ weaken s) ~ (weaken s ·ₖ (ϕ ↑ s))
       --! CommLiftWeakenProof
       ↑-wk {S₁} {S₂} ϕ s sx x = `/id-injective (
           `/id ((ϕ ·ₖ weakenᵣ s) sx x)        ≡⟨⟩
@@ -319,8 +318,7 @@ record Syntax : Set₁ where
           `/id ((weakenᵣ s ·ₖ (ϕ ↑ s)) sx x)  ∎)
 
       --! CommLiftWeakenTraverse
-      ⋯-↑-wk :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄
-                   ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit Kᵣ K K ⦄ 
+      ⋯-↑-wk :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄ ⦃ C₂ : CKit Kᵣ K K ⦄ 
                    (t : S₁ ⊢ s) (ϕ : S₁ –[ K ]→ S₂) s →
                 t ⋯ ϕ ⋯ weakenᵣ s ≡ t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)
       --! CommLiftWeakenTraverseProof
@@ -330,27 +328,24 @@ record Syntax : Set₁ where
         t ⋯ (weakenᵣ s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-fusion t (weakenᵣ s) (ϕ ↑ s)) ⟩
         t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)     ∎
 
-      --! ComposeKitInstances {
+      --! CKitInstances {
       instance
-        Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → ComposeKit Kᵣ K₂ K₂
-        Cᵣ = record
-          { _&/⋯_     = _&_
-          ; &/⋯-⋯     = λ x ϕ → sym (⋯-var x ϕ)
-          ; &/⋯-wk-↑  = λ x ϕ → refl }
+        Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → CKit Kᵣ K₂ K₂
+        Cᵣ = record  { _&/⋯_     = _&_
+                     ; &/⋯-⋯     = λ x ϕ → sym (⋯-var x ϕ)
+                     ; &/⋯-wk-↑  = λ x ϕ → refl }
 
-        Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ C : ComposeKit K₂ Kᵣ K₂ ⦄ ⦃ W₂ : WkKit K₂ ⦄ →
-              ComposeKit Kₛ K₂ Kₛ
-        Cₛ = record
-          { _&/⋯_     = _⋯_
-          ; &/⋯-⋯     = λ t ϕ → refl
-          ; &/⋯-wk-↑  = λ t ϕ → ⋯-↑-wk t ϕ _ }
+        Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ C : CKit K₂ Kᵣ K₂ ⦄ ⦃ W₂ : WkKit K₂ ⦄ → CKit Kₛ K₂ Kₛ
+        Cₛ = record  { _&/⋯_     = _⋯_
+                     ; &/⋯-⋯     = λ t ϕ → refl
+                     ; &/⋯-wk-↑  = λ t ϕ → ⋯-↑-wk t ϕ _ }
       --! }
 
-      --! ComposeKitInstancesConcrete
-      Cᵣᵣ : ComposeKit Kᵣ Kᵣ Kᵣ;  Cᵣᵣ = Cᵣ
-      Cᵣₛ : ComposeKit Kᵣ Kₛ Kₛ;  Cᵣₛ = Cᵣ
-      Cₛᵣ : ComposeKit Kₛ Kᵣ Kₛ;  Cₛᵣ = Cₛ
-      Cₛₛ : ComposeKit Kₛ Kᵣ Kₛ;  Cₛₛ = Cₛ
+      --! CKitInstancesConcrete
+      Cᵣᵣ : CKit Kᵣ Kᵣ Kᵣ;  Cᵣᵣ = Cᵣ
+      Cᵣₛ : CKit Kᵣ Kₛ Kₛ;  Cᵣₛ = Cᵣ
+      Cₛᵣ : CKit Kₛ Kᵣ Kₛ;  Cₛᵣ = Cₛ
+      Cₛₛ : CKit Kₛ Kᵣ Kₛ;  Cₛₛ = Cₛ
 
       --! WeakenCancelsSingle
       wk-cancels-⦅⦆ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (x/t : S ∋/⊢[ K ] s) → (weakenᵣ s ·[ Cᵣ ] ⦅ x/t ⦆) ~ id
@@ -373,7 +368,7 @@ record Syntax : Set₁ where
 
       --! DistLiftSingle
       dist-↑-⦅⦆ :  ∀  ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄
-                      ⦃ C₁ : ComposeKit K₁ K₂ K ⦄ ⦃ C₂ : ComposeKit K₂ K K ⦄
+                      ⦃ C₁ : CKit K₁ K₂ K ⦄ ⦃ C₂ : CKit K₂ K K ⦄
                       (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
                    (⦅ x/t ⦆ ·[ C₁ ] ϕ) ~ ((ϕ ↑ s) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆)
       --! DistLiftSingleProof
@@ -394,7 +389,7 @@ record Syntax : Set₁ where
 
       --! DistLiftSingleTraverse
       dist-↑-⦅⦆-⋯ :  ∀  ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ W₁ : WkKit K₁ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ W₂ : WkKit K₂ ⦄
-                        ⦃ K : Kit _∋/⊢_ ⦄ ⦃ C₁ : ComposeKit K₁ K₂ K ⦄ ⦃ C₂ : ComposeKit K₂ K K ⦄
+                        ⦃ K : Kit _∋/⊢_ ⦄ ⦃ C₁ : CKit K₁ K₂ K ⦄ ⦃ C₂ : CKit K₂ K K ⦄
                         (t : (s ∷ S₁) ⊢ s') (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
                      t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆
       --! DistLiftSingleTraverseProof
@@ -455,8 +450,8 @@ record Syntax : Set₁ where
 
           infix 4 _⊢_∶_
 
-          --! TypingKit {
-          record TypingKit (K : Kit _∋/⊢_) : Set₁ where
+          --! TKit {
+          record TKit (K : Kit _∋/⊢_) : Set₁ where
             --! [
             private instance _ = K
             infix   4  _∋/⊢_∶_  _∋*/⊢*_∶_
@@ -475,10 +470,9 @@ record Syntax : Set₁ where
               ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) → Γ₁ ∋ x ∶ t → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
 
             --! LiftTyping
-            _∋↑/⊢↑_ :
-              ⦃ W : WkKit K ⦄ ⦃ C₁ : ComposeKit K Kᵣ K ⦄
-              {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} →
-              Γ₂ ∋*/⊢* ϕ ∶ Γ₁ → (t : S₁ ∶⊢ s) → ((t ⋯ ϕ) ∷ₜ Γ₂) ∋*/⊢* (ϕ ↑ s) ∶ (t ∷ₜ Γ₁)
+            _∋↑/⊢↑_ :  ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄
+                       {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} →
+                       Γ₂ ∋*/⊢* ϕ ∶ Γ₁ → (t : S₁ ∶⊢ s) → ((t ⋯ ϕ) ∷ₜ Γ₂) ∋*/⊢* (ϕ ↑ s) ∶ (t ∷ₜ Γ₁)
             --! LiftTypingProof
             _∋↑/⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
               subst (  ((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
@@ -511,46 +505,42 @@ record Syntax : Set₁ where
                     (id/⊢` refl)
 
           --! TypingNotation {
-          open TypingKit ⦃ … ⦄ public
+          open TKit ⦃ … ⦄ public
 
           infixl  5  _∋*/⊢*[_]_∶_
           _∋*/⊢*[_]_∶_ :
             ∀ {K : Kit _∋/⊢_} {S₁ S₂}
-            → Ctx S₂ → TypingKit K → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
+            → Ctx S₂ → TKit K → S₁ –[ K ]→ S₂ → Ctx S₁ → Set
           Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ = Γ₂ ∋*/⊢* ϕ ∶ Γ₁ where instance _ = TK
           --! }
 
-          --! TypingTraversal
-          record TypingTraversal : Set₁ where
-            field
-              _⊢⋯_ : ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TypingKit K ⦄
-                        ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
-                        ⦃ C₃ : ComposeKit K Kₛ Kₛ ⦄
-                        {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
-                        {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
-                     Γ₁ ⊢ e ∶ t →
-                     Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
-                     Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
+          --! TTraversal
+          record TTraversal : Set₁ where
+            field _⊢⋯_ : ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TKit K ⦄
+                            ⦃ C₁ : CKit K Kᵣ K ⦄ ⦃ C₂ : CKit K K K ⦄ ⦃ C₃ : CKit K Kₛ Kₛ ⦄
+                            {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
+                            {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
+                         Γ₁ ⊢ e ∶ t →
+                         Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
+                         Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
 
             infixl  5  _⊢⋯_  _⊢⋯ᵣ_  _⊢⋯ₛ_
 
             --! TypingInstances {
             instance
-              TKᵣ : TypingKit Kᵣ
-              TKᵣ = record
-                { _∋/⊢_∶_     = _∋_∶_  ; id/⊢`       = λ ⊢x → ⊢x
-                ; ⊢`/id       = ⊢`     ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl } }
+              TKᵣ : TKit Kᵣ
+              TKᵣ = record { _∋/⊢_∶_     = _∋_∶_      ; ⊢`/id       = ⊢`
+                           ; id/⊢`       = λ ⊢x → ⊢x  ; ∋wk/⊢wk     = λ { Γ t' x t refl → refl } }
 
-              TKₛ : TypingKit Kₛ
-              TKₛ = record
-                { _∋/⊢_∶_     = _⊢_∶_      ; id/⊢`       = ⊢`
-                ; ⊢`/id       = λ ⊢x → ⊢x  ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
+              TKₛ : TKit Kₛ
+              TKₛ = record  { _∋/⊢_∶_     = _⊢_∶_  ; ⊢`/id       = λ ⊢x → ⊢x
+                            ; id/⊢`       = ⊢`     ; ∋wk/⊢wk     = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
             --! }
 
-            --! TypingTraversalNotation {
-            open TypingKit TKᵣ public using () renaming
+            --! TTraversalNotation {
+            open TKit TKᵣ public using () renaming
               (∋wk/⊢wk to ⊢wk; _∋*/⊢*_∶_ to _∋*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
-            open TypingKit TKₛ public using () renaming
+            open TKit TKₛ public using () renaming
               (∋wk/⊢wk to ∋wk; _∋*/⊢*_∶_ to _⊢*_∶_; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
 
             -- Renaming preserves typing

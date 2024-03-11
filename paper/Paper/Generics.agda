@@ -93,7 +93,7 @@ module WithSort(Sort : SortTy → Set) where
       ⋯-fusion :
         ∀ {_∋/⊢₁_ _∋/⊢₂_ _∋/⊢_ : Scoped}
           ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
-          ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
+          ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : CKit K₁ K₂ K ⦄
           (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
         → (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
       ⋯-fusion (`var x)  ϕ₁ ϕ₂ = sym (&/⋯-⋯ (ϕ₁ _ x) ϕ₂)
@@ -102,7 +102,7 @@ module WithSort(Sort : SortTy → Set) where
       ⋯-fusion' :
         ∀ {d'} {_∋/⊢₁_ _∋/⊢₂_ _∋/⊢_ : Scoped}
           ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄
-          ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : ComposeKit K₁ K₂ K ⦄
+          ⦃ W₁ : WkKit K₁ ⦄ ⦃ C : CKit K₁ K₂ K ⦄
           (t : ⟦ d' ⟧ (Tm d) S₁ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃)
         → (t ⋯' ϕ₁) ⋯' ϕ₂ ≡ t ⋯' (ϕ₁ ·ₖ ϕ₂)
       ⋯-fusion' {d' = `σ A d'}     (a , D')  ϕ₁ ϕ₂ = cong (a ,_) (⋯-fusion' D' ϕ₁ ϕ₂)
@@ -111,10 +111,10 @@ module WithSort(Sort : SortTy → Set) where
                                                               (⋯-fusion' e₂ ϕ₁ ϕ₂)
       ⋯-fusion' {d' = `■ M'}       (refl , refl) ϕ₁ ϕ₂ = refl
 
-    CT : ComposeTraversal
+    CT : CTraversal
     CT = record { ⋯-fusion = ⋯-fusion }
 
-    open ComposeTraversal CT public hiding (⋯-fusion)
+    open CTraversal CT public hiding (⋯-fusion)
 
     module WithTypes (types : Types) where
       open Types types

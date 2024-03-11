@@ -816,8 +816,8 @@
   \subsection{Extension Kits}
   \label{sec:maps:wkkit}
 
-  % Before we define \ACode{\ACon{ComposeKit}} and
-  % \ACode{\ACon{ComposeTraversal}}, we need one more ingredient.
+  % Before we define \ACode{\ACon{CKit}} and
+  % \ACode{\ACon{CTraversal}}, we need one more ingredient.
 
   As we defined the \ACode{\ACon{Kit}} structure before the
   \ACode{\ACon{Traversal}} structure, the fields of
@@ -873,7 +873,7 @@
   % - e.g. wk-cancels-⦅⦆ or dist-↑-⦅⦆, often important for induction hypothesis
   % - Mcbride uses tactics
   % - We introduce an abstraction similar to kits
-  % - ComposeKit has primitives for composition, ComposeTraversal has the property
+  % - CKit has primitives for composition, CTraversal has the property
 
   %%%%%%%%%%
 
@@ -969,40 +969,40 @@
   and \ACode{\ADef{\_⋯\_}}.
 
   To fill this gap, we introduce a new abstraction that we call a
-  \ACode{\ACon{ComposeKit}},
+  \ACode{\ACon{CKit}},
   which provides an operation \ACode{\AField{\_\&/⋯\_}} that unifies
   \ACode{\ADef{\_\&\_}} and \ACode{\ADef{\_⋯\_}}. This allows us to
   define a general composition, which informally can be described as:
   \ExampleCode\KComposition
 
-  % \ACode{\ACon{ComposeKit}} and \ACode{\ADef{\_·ₖ\_}} are analogous to
+  % \ACode{\ACon{CKit}} and \ACode{\ADef{\_·ₖ\_}} are analogous to
   % \ACode{\ACon{Kit}} and \ACode{\ADef{\_→ₖ\_}}, whereas
-  % \ACode{\ACon{ComposeTraversal}} and \ACode{\AField{⋯-fusion}} are analogous to
-  % \ACode{\ACon{ComposeTraversal}} and \ACode{\AField{\_⋯\_}}.
+  % \ACode{\ACon{CTraversal}} and \ACode{\AField{⋯-fusion}} are analogous to
+  % \ACode{\ACon{CTraversal}} and \ACode{\AField{\_⋯\_}}.
   
   \subsection{An Abstraction for Composition}
   \label{sec:composition:ckit}
 
-  In this subsection, we define the \ACode{\ACon{ComposeKit}}
+  In this subsection, we define the \ACode{\ACon{CKit}}
   abstraction, which provides the \ACode{\AField{\_\&/⋯\_}} operation
   that is necessary for defining composition, and the
-  \ACode{\ACon{ComposeTraversal}}, which provides the
+  \ACode{\ACon{CTraversal}}, which provides the
   \ACode{\AField{⋯-fusion}} lemma for general maps.
 
   Similarly as it was the case for \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}},
-  the lemma of the \ACode{\ACon{ComposeTraversal}} needs to be proved for
-  an abstract \ACode{\ACon{ComposeKit}} and in return defines the
-  four concrete \ACode{\ACon{ComposeKit}} instances for us. This allows us to break
+  the lemma of the \ACode{\ACon{CTraversal}} needs to be proved for
+  an abstract \ACode{\ACon{CKit}} and in return defines the
+  four concrete \ACode{\ACon{CKit}} instances for us. This allows us to break
   the dependencies between the different \ACode{\AField{⋯-fusion}} lemmas,
   similar to how \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}} allowed
   us to break the dependency between traversals with renamings and substitutions.
 
-  For this purpose, the \ACode{\ACon{ComposeKit}} abstraction, needs
+  For this purpose, the \ACode{\ACon{CKit}} abstraction, needs
   to satisfy two requirements:
   it needs to provide us with enough machinery to define composition, but
   it also needs to provide us with enough axioms that we are able to instanciate
-  the \ACode{\ACon{ComposeTraversal}}. It is defined as followed:
-  \LibCode\KComposeKit
+  the \ACode{\ACon{CTraversal}}. It is defined as followed:
+  \LibCode\KCKit
   The \ACode{\AField{\_\&/⋯\_}} operation takes a variable or term
   (according to \ACode{K₁}) and a renaming or substitution
   (according to \ACode{K₂}) and performs the map traversal returning
@@ -1021,7 +1021,7 @@
   the variable introduced by the weakening.
 
   Similar as for the \ACode{\ACon{Kit}}, we derive further definitions
-  from the axioms of a \ACode{\ACon{ComposeKit}}:
+  from the axioms of a \ACode{\ACon{CKit}}:
   \begin{itemize}
   \item
     We define map composition as motivated by the previous subsection:
@@ -1029,8 +1029,8 @@
   \item
     We show that the \ACode{\AField{\_\&/⋯\_}} operator behaves like
     \ACode{\AField{\_\&\_}} when applied to variables:
-    \LibCode\KComposeKitAp
-    % \LibCode\KComposeKitApProof
+    \LibCode\KCKitAp
+    % \LibCode\KCKitApProof
 
     % The \ACode{\AField{`/id}} on the left side is from \ACode{K₁⊔K₂}, whereas
     % the \ACode{\AField{`/id}} on the right side is from \ACode{K₂}.
@@ -1040,19 +1040,19 @@
     \LibCode\KDistLiftCompose
     % \LibCode\KDistLiftComposeProof
   \end{itemize}
-  To make it easier to explicitly specify a \ACode{\ACon{ComposeKit}},
+  To make it easier to explicitly specify a \ACode{\ACon{CKit}},
   we define the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}
   to stand for \ACode{ϕ₁ \ADef{·ₖ} ϕ₂} for some
-  \ACode{\ACon{ComposeKit}} \ACode{C}.
-  % \LibCode\KComposeKitNotation
+  \ACode{\ACon{CKit}} \ACode{C}.
+  % \LibCode\KCKitNotation
 
-  We then define the \ACode{\ACon{ComposeTraversal}} structure,
+  We then define the \ACode{\ACon{CTraversal}} structure,
   which provides the \ACode{\AField{⋯-fusion}} lemma for arbitrary
-  \ACode{\ACon{ComposeKit}}s:
-  \LibCode\KComposeTraversal
+  \ACode{\ACon{CKit}}s:
+  \LibCode\KCTraversal
 
   Similar as for the \ACode{\ACon{Traversal}}, we derive further
-  definitions from the axiom of a \ACode{\ACon{ComposeTraversal}}:
+  definitions from the axiom of a \ACode{\ACon{CTraversal}}:
   \begin{itemize}
   \item 
     A map \ACode{ϕ} followed by a weakening is equivalent to a
@@ -1081,33 +1081,33 @@
     \LibCode\KDistLiftSingleTraverse
     % \LibCode\KDistLiftSingleTraverseProof
   \item 
-    We define \ACode{\ACon{ComposeKit}} instances for each of the four
+    We define \ACode{\ACon{CKit}} instances for each of the four
     combinations between renamings and substitutions:
-    \LibCode\KComposeKitInstances
+    \LibCode\KCKitInstances
     Interestingly, the \ACode{\ADef{Cₛ}} instance has another
-    \ACode{\ADef{ComposeKit}} parameter.
+    \ACode{\ADef{CKit}} parameter.
     This allows us to first use \ACode{\ADef{Cᵣ}} as an argument,
-    which yields the \ACode{\ADef{ComposeKit}} between substitutions
-    and renamings, and then use this resulting \ACode{\ADef{ComposeKit}}
+    which yields the \ACode{\ADef{CKit}} between substitutions
+    and renamings, and then use this resulting \ACode{\ADef{CKit}}
     as an argument for the case with two substitutions.
     As shown below, Agda's instance resolution is up for the task:
 
-    % To get the \ACode{\ADef{ComposeKit}} between substitutions and
+    % To get the \ACode{\ADef{CKit}} between substitutions and
     % renamings, the argument \ACode{\ADef{Cᵣ}} is used.
-    % The resulting \ACode{\ADef{ComposeKit}} is then again used as an argument
-    % for \ACode{\ADef{Cₛ}} to yield the \ACode{\ADef{ComposeKit}}
+    % The resulting \ACode{\ADef{CKit}} is then again used as an argument
+    % for \ACode{\ADef{Cₛ}} to yield the \ACode{\ADef{CKit}}
     % between two substitutions. As shown below, Agda's instance
     % resolution is up for the task:
-    \LibCode\KComposeKitInstancesConcrete
+    \LibCode\KCKitInstancesConcrete
 
   \end{itemize}
 
   \subsection{Instantiation for System F}
   In this subsection, we show how to instantiate the
-  \ACode{\ACon{ComposeTraversal}} abstraction for System F.
+  \ACode{\ACon{CTraversal}} abstraction for System F.
   In practice, this is done by our reflection algorithm automatically,
   but it can be instructive to see, as it motivates the axioms of the
-  \ACode{\ACon{ComposeKit}}.
+  \ACode{\ACon{CKit}}.
 
   \AppCode\FFusion
   \AppCode\FFusionProofInteresting
@@ -1115,7 +1115,7 @@
   \begin{itemize}
   \item
     variables, where we need to use the \ACode{\AField{\&/⋯-⋯}} lemma
-    provided by the \ACode{\ACon{ComposeKit}}.
+    provided by the \ACode{\ACon{CKit}}.
   \item
     bindings, where the traversal operation \ACode{\AField{\_⋯\_}}
     needs to lift the map via \ACode{\AField{\_↑\_}}, requiring us to
@@ -1124,7 +1124,7 @@
   \end{itemize}
 
   % \AppCode\FFusionProofRest
-  % \AppCode\FComposeTraversal
+  % \AppCode\FCTraversal
 
   \section{Types \& Contexts}
   \label{sec:types}
@@ -1224,14 +1224,14 @@
   abstraction to unify type preservation for renamings and substitutions,
   eliminating the dependencies by yet another type of kits.
 
-  We start with \ACode{\ACon{TypingKit}}s, which abstract over
+  We start with \ACode{\ACon{TKit}}s, which abstract over
   variable and term \emph{typing}, and then define a
-  \ACode{\ACon{TypingTraversal}}, which provides
-  substitution-preserves-typing for all \ACode{\ACon{TypingKit}}s.
-  \LibCode\KTypingKit
+  \ACode{\ACon{TTraversal}}, which provides
+  substitution-preserves-typing for all \ACode{\ACon{TKit}}s.
+  \LibCode\KTKit
   The operations are completely analogous to those of a \ACode{\ACon{Kit}}, but talk
   about typing instead of terms.
-  Building on the fields of a \ACode{\ACon{TypingKit}}, we define further operations:
+  Building on the fields of a \ACode{\ACon{TKit}}, we define further operations:
   \begin{itemize}
   \item
     Using the variable/term typing, we can define a renaming/substitution typing:
@@ -1250,13 +1250,13 @@
   To make it easier to explicitly pass typing kits,
   we define the notation \ACode{Γ₂ \ADef{∋*/⊢*[} TK \ADef{]} ϕ \ADef{∶} Γ₁}
   to stand for \ACode{Γ₂ \ADef{∋*/⊢*} ϕ \ADef{∶} Γ₁} given some
-  \ACode{\ACon{TypingKit}} \ACode{TK}.
+  \ACode{\ACon{TKit}} \ACode{TK}.
   % \LibCode\KTypingNotation
 
-  We then define a \ACode{\ACon{TypingTraversal}} analogously to
+  We then define a \ACode{\ACon{TTraversal}} analogously to
   \ACode{\ACon{Traversal}}, but instead of defining the application of
   maps, it defines the type preservation of applying maps:
-  \LibCode\KTypingTraversal
+  \LibCode\KTTraversal
   Given a term \ACode{e} with typing \ACode{⊢e} and
   a renaming/substitution \ACode{ϕ} with typing \ACode{⊢ϕ},
   the term \ACode{⊢e \AField{⊢⋯} ⊢ϕ} is a typing for \ACode{e \AField{⋯} ϕ}.
@@ -1265,14 +1265,14 @@
   extension and can be composed arbitrarily. They only make the previously
   built machinery available to the proof of \ACode{\AField{\_⊢⋯\_}}.
 
-  Given a \ACode{\ACon{TypingTraversal}}, we can easily instantiate the
-  \ACode{\ACon{TypingKits}} for variables and terms:
+  Given a \ACode{\ACon{TTraversal}}, we can easily instantiate the
+  \ACode{\ACon{TKits}} for variables and terms:
   \LibCode\KTypingInstances
-  % \LibCode\KTypingTraversalNotation
+  % \LibCode\KTTraversalNotation
 
   \subsection{Instantiation for System F}
   In this subsection, we show how to instantiate the
-  \ACode{\ACon{TypingTraversal}} abstraction for System F.
+  \ACode{\ACon{TTraversal}} abstraction for System F.
   This is the only structure that is \emph{not} instantiated
   automatically via reflection, as typing relations can be arbitrary
   complex in general.
@@ -1291,12 +1291,12 @@
     \ACode{\AField{⋯-↑-wk}} lemma.
   \item
     The type application constructor \ACode{\ACon{⊢∙}} substitutes \ACode{t₁} into \ACode{t₂},
-    requiring us to use the \ACode{\AField{dist-↑-⦅⦆}} lemma.
+    requiring us to use \ACode{\AField{dist-↑-⦅⦆}}.
   \end{itemize}
-  Finally, we instantiate the \ACode{\ACon{TypingTraversal}} structure:
-  \AppCode\FTypingTraversal
+  Finally, we instantiate the \ACode{\ACon{TTraversal}} structure:
+  \AppCode\FTTraversal
 
-  % As the \ACode{\ACon{Traversal}} and  \ACode{\ACon{ComposeTraversal}} instances
+  % As the \ACode{\ACon{Traversal}} and  \ACode{\ACon{CTraversal}} instances
   % can be generally derived via reflection,
   % the \ACode{\AField{\_⊢⋯\_}} lemma is in fact the only lemma that
   % has to been proved manually for subject reduction.
@@ -1331,7 +1331,7 @@
   We used Agda's reflection mechanism to derive
   instantiations related to all structures for untyped substitition,
   i.e. \ACode{\ACon{Syntax}}, \ACode{\ACon{Traversal}} and
-  \ACode{\ACon{ComposeTraversal}}.
+  \ACode{\ACon{CTraversal}}.
 
   To gain insight into the class of object languages supported by our
   reflection algorithm, we have formalized a class of object languages
@@ -1371,8 +1371,8 @@
   \item
     For lambda calculus with dependent function types, the framework
     just works out of the box for both deriving and instantiating the
-    \ACode{\ACon{TypingTraversal}}.
-    Furthermore, the \ACode{\ACon{ComposeKit}} abstraction turned out
+    \ACode{\ACon{TTraversal}}.
+    Furthermore, the \ACode{\ACon{CKit}} abstraction turned out
     to be useful to prove confluence, allowing to unify certain
     lemmas, which otherwise need to be proved for both renamings and
     substitutions.
@@ -1387,7 +1387,7 @@
     While it would be possible to use our framework only to derive
     untyped substitution and define typing contexts and type preservation
     lemmas by hand, we found an encoding, which still allows us to use the
-    the \ACode{\ACon{TypingKit}} abstraction.
+    the \ACode{\ACon{TKit}} abstraction.
     Instead of binding a type variable with a subtyping constraint
     \ACode{α <: t}, we first bind the type variable as \ACode{α : ★}, and
     then bind the constraint as \ACode{c ∶ (α <: t)}. This description is
@@ -1396,7 +1396,7 @@
     cannot be accesses by the user.
     With that encoding substitution preserves typing is generally true
     again, enabling the use of the framework's typing contexts and
-    \ACode{\ACon{TypingKit}} machinery.
+    \ACode{\ACon{TKit}} machinery.
     When replacing a type variable \ACode{α <: t} with a type \ACode{t'},
     which is not a subtype of \ACode{t}, then the resulting term is still
     well-typed, but in a context with an unsatisfiable constraint.
@@ -1516,7 +1516,7 @@
     \cite{DBLP:journals/corr/abs-2005-02247}.
   \item
     Extending the class of typing relations covered by
-    the \ACode{\ACon{TypingTraversal}} abstraction and identifying
+    the \ACode{\ACon{TTraversal}} abstraction and identifying
     a subclass for which it can be derived.
   \item
     Developing a decision procedure for equational
@@ -1547,8 +1547,8 @@
   % \LibCode\FTraversalIdProofRest
 
   \subsection{Proofs for Section~\ref{sec:composition}}
-  \LibCode\KComposeKitAp
-  \LibCode\KComposeKitApProof
+  \LibCode\KCKitAp
+  \LibCode\KCKitApProof
 
   \LibCode\KDistLiftCompose
   \LibCode\KDistLiftComposeProof
