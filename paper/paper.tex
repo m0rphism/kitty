@@ -419,8 +419,8 @@
   for multi-sorted syntax and how to define typing contexts.
   Section~\ref{sec:typing} shows how to define a multi-sorted typing relation,
   and an abstraction to unify type preservation lemmas for renamings and substitutions.
-  Section~\ref{sec:subjectreduction} introduces a small-step
-  operational semantics for System F and proves subject reduction.
+  % Section~\ref{sec:subjectreduction} introduces a small-step
+  % operational semantics for System F and proves subject reduction.
   Section~\ref{sec:reflection} describes the class of object languages covered by
   our reflection algorithm.
   Section~\ref{sec:casestudies} discusses our case studies.
@@ -518,10 +518,10 @@
   multi-sorted syntax with intrinsic typing: in a direct translation,
   the type of terms \ACode{\ACon{\_⊢\_}} would be indexed by itself, which
   most proof assistants forbid to avoid breaking logical consistency.
-  We conjecture that an encoding might be possible, as it has been
-  done for intrinsically typed languages with dependent
-  types\cite{DBLP:conf/popl/AltenkirchK16}, but those constructions come
-  with additional complexity and are less suitable to automation.
+  % We conjecture that an encoding might be possible, as it has been
+  % done for intrinsically typed languages with dependent
+  % types\cite{DBLP:conf/popl/AltenkirchK16}, but those constructions come
+  % with additional complexity and are less suitable to automation.
 
   % Contrary to the usual intrinsic typing, we limit the environment
   % \ACode{S} to sorts with index \ACode{\ACon{Var}}.
@@ -638,7 +638,7 @@
     variable constructor \ACode{\AField{`\_}}.
   \item 
     \ACode{\AField{`/id}} converts a \ACode{S ∋/⊢ s} into a term \ACode{S \AField{⊢} s}
-    and is dual to the \ACode{\AField{id/`}} operation.
+    and is analogous to the \ACode{\AField{id/`}} operation.
   \item 
     \ACode{\AField{wk}} shifts the DeBruin-Indices in a \ACode{S ∋/⊢ s}.
     The new, unused variable \ACode{\ACon{zero}} can assume any sort \ACode{s'}.
@@ -684,7 +684,7 @@
     necessary \ACode{\AField{wk}} operation:
     \LibCode\KWkm
   \item 
-    A map can be lifted, which is the operation necessary to
+    A map can be lifted, which allows to
     move a map under a binder of sort \ACode{s}:
     \LibCode\KLift
   \item 
@@ -715,8 +715,12 @@
   We also specify notation, which makes it less cumbersome
   to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
   \begin{itemize}
-  \item \ACode{S \ADef{∋/⊢[} K \ADef{]} s} is \ACode{S ∋/⊢ s} for some \ACode{\ACon{Kit}} \ACode{K}; and
-  \item \ACode{S \ADef{–[} K \ADef{]→} s} is \ACode{S \ADef{→ₖ} s} for some \ACode{\ACon{Kit}} \ACode{K}.
+  \item
+     we write \ACode{(S \ADef{∋/⊢[} K \ADef{]} s)} for the \ACode{(S ∋/⊢ s)}
+     of some specific \ACode{\ACon{Kit}} \ACode{K}; and
+   \item
+     we write \ACode{(S \ADef{–[} K \ADef{]→} s)} for the \ACode{(S \ADef{→ₖ} s)}
+     of some specific \ACode{\ACon{Kit}} \ACode{K}.
   \end{itemize}
 
   The operation of applying a map to a term depends on the concrete
