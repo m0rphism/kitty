@@ -810,49 +810,31 @@
 
   As we defined the \ACode{\ACon{Kit}} structure before the
   \ACode{\ACon{Traversal}} structure, the fields of
-  \ACode{\ACon{Kit}} could not use the \ACode{\AField{\_⋯\_}} function in
+  \ACode{\ACon{Kit}} could not use map application \ACode{\AField{\_⋯\_}} in
   their types.
-  This prevented us to define a useful lemma, which also needs to
-  be instantiated separately for variables and terms: the counterpiece
-  to \ACode{\AField{wk-id/`}}, which we call \ACode{\AField{wk-`/id}}.
+  This prevented us to include another useful axiom into the
+  \ACode{\ACon{Kit}} structure. As this axiom also needs to be proved
+  separately for variables and terms, we define a new structure for
+  it which extends a \ACode{\ACon{Kit}}:
+  \LibCode\KWkKit
 
-  Recall that \ACode{\AField{wk-id/`}} explains the
-  \ACode{\AField{wk}} function of an arbitrary \ACode{\ACon{Kit}} by how it acts on
-  \emph{variables}:
-  \ExampleCode{\KWkId}
-
-  Similarly, the \ACode{\AField{wk-`/id}} lemma
-  explains the \ACode{\AField{wk}} function of an
-  arbitrary \ACode{\ACon{Kit}} by how it acts on \emph{terms}:
-  \ExampleCode{\KIdWk}
+  The \ACode{\AField{wk-`/id}} axiom
+  explains the \ACode{\AField{wk}} function by how it acts on \emph{terms}.
+  It is the counterpiece to the \ACode{\ACon{Kit}} axiom
+  \ACode{\AField{wk-id/`}}, which explains the \ACode{\AField{wk}}
+  function by how it acts on \emph{variables}.
 
   This lemma is useful for proving extensional equalities between maps
   involving weakening, where \ACode{\AField{`/id-injective}} allows to
   add \ACode{\AField{`/id}} on both sides of the equation, such that
   \AField{wk-`/id} can be used to make further progress.
 
-  To prove \AField{wk-`/id}, we define a structure
-  \ACode{\ACon{WkKit}}, which extends a regular \ACode{\ACon{Kit}} with
-  the \AField{wk-`/id} lemma:
-  \LibCode\KWkKit
-
-  We then create two instances of the \ACode{\ACon{WkKit}} for
-  the variable and term \ACode{\ACon{Kit}}, respectively:
+  The instantiations of the \ACode{\ACon{WkKit}} are straightforward:
   \LibCode\KWkKitInstances
 
   As the variable and term \ACode{\ACon{Kit}}s are the only two \ACode{\ACon{Kit}}s,
   and both have \ACode{\ACon{WkKit}} instances, it is always safe to assume that
   a \ACode{\ACon{Kit}} also supports the \ACode{\ACon{WkKit}} extension.
-
-  % Note that we have exactly two instances for \ACode{\ACon{Kit}}s
-  % and both of them have a \ACode{\ACon{WkKit}} instance. Consequently,
-  % whenever we abstract over a \ACode{\ACon{Kit}}, we can also safely assume
-  % that it has a \ACode{\ACon{WkKit}} instance, without restricting the
-  % lemmas usage.
-
-  % Both the structure and the instances are part of the library and do
-  % not require application code.
-
 
   \section{Map Composition}
   \label{sec:composition}
@@ -929,10 +911,10 @@
   at the four compositions individually:
 
   \noindent
-  \begin{minipage}[t]{0.60\linewidth}
+  \begin{minipage}[t]{0.65\linewidth}
   \ExampleCode\KExFourCompsI
   \end{minipage}
-  \begin{minipage}[t]{0.40\linewidth}
+  \begin{minipage}[t]{0.35\linewidth}
   \ExampleCode\KExFourCompsII
   \end{minipage}
 
@@ -957,10 +939,10 @@
   \ACode{ϕ₂} being a renaming or a substitution:
 
   \noindent
-  \begin{minipage}[t]{0.60\linewidth}
+  \begin{minipage}[t]{0.65\linewidth}
   \ExampleCode\KExTwoCompsI
   \end{minipage}
-  \begin{minipage}[t]{0.40\linewidth}
+  \begin{minipage}[t]{0.35\linewidth}
   \ExampleCode\KExTwoCompsII
   \end{minipage}
 
@@ -1003,7 +985,7 @@
   For this purpose, the \ACode{\ACon{CKit}} abstraction, needs
   to satisfy two requirements:
   it needs to provide us with enough machinery to define composition, but
-  it also needs to provide us with enough axioms that we are able to instanciate
+  it also needs to provide us with enough axioms that we are able to instantiate
   the \ACode{\ACon{CTraversal}}. It is defined as followed:
   \LibCode\KCKit
   The \ACode{\AField{\_\&/⋯\_}} operation takes a variable or term
