@@ -337,6 +337,15 @@ record Syntax : Set₁ where
         t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)     ∎
 
       instance
+      -- --! CKitInstances {
+      --   Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → CKit Kᵣ K₂ K₂
+      --   Cᵣ = record
+      --     { _&/⋯_ = _&_ ; &/⋯-⋯ = λ x ϕ → sym (⋯-var x ϕ) ; &/⋯-wk-↑  = λ x ϕ → refl }
+      --   Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ C : CKit K₂ Kᵣ K₂ ⦄ ⦃ W₂ : WkKit K₂ ⦄ → CKit Kₛ K₂ Kₛ
+      --   Cₛ = record
+      --     { _&/⋯_ = _⋯_ ; &/⋯-⋯ = λ t ϕ → refl ; &/⋯-wk-↑ = λ t ϕ → ⋯-↑-wk t ϕ _ }
+      -- --! }
+
       --! CKitInstances {
         Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → CKit Kᵣ K₂ K₂
         Cᵣ = record  { _&/⋯_     = _&_

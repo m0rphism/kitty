@@ -1046,28 +1046,38 @@
     A map \ACode{ϕ} followed by a weakening is equivalent to a
     weakening followed by \ACode{ϕ} that has been lifted over the weakened
     variable:
-    \LibCode\KCommLiftWeaken
-    % \LibCode\KCommLiftWeakenProof
-    By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the same
-    statement for multiple map applications:
     \LibCode\KCommLiftWeakenTraverse
-    % \LibCode\KCommLiftWeakenTraverseProof
+
+    % A map \ACode{ϕ} followed by a weakening is equivalent to a
+    % weakening followed by \ACode{ϕ} that has been lifted over the weakened
+    % variable:
+    % \LibCode\KCommLiftWeaken
+    % % \LibCode\KCommLiftWeakenProof
+    % By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the same
+    % statement for multiple map applications:
+    % \LibCode\KCommLiftWeakenTraverse
+    % % \LibCode\KCommLiftWeakenTraverseProof
   \item 
     A weakening followed by a singleton substitution cancel each other out:
-    \LibCode\KWeakenCancelsSingle
-    % \LibCode\KWeakenCancelsSingleProof
-    By applying \ACode{\AField{⋯-fusion}} and \ACode{\AField{⋯-id}} to
-    this lemma, we get the same statement for multiple map applications:
     \LibCode\KWeakenCancelsSingleTraverse
-    % \LibCode\KWeakenCancelsSingleTraverseProof
+
+    % A weakening followed by a singleton substitution cancel each other out:
+    % \LibCode\KWeakenCancelsSingle
+    % % \LibCode\KWeakenCancelsSingleProof
+    % By applying \ACode{\AField{⋯-fusion}} and \ACode{\AField{⋯-id}} to
+    % this lemma, we get the same statement for multiple map applications:
+    % \LibCode\KWeakenCancelsSingleTraverse
+    % % \LibCode\KWeakenCancelsSingleTraverseProof
   \item 
     A singleton map can be swapped with any map \ACode{ϕ}:
-    \LibCode\KDistLiftSingle
-    % \LibCode\KDistLiftSingleProof
-    By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the
-    same statement for multiple map applications:
     \LibCode\KDistLiftSingleTraverse
-    % \LibCode\KDistLiftSingleTraverseProof
+    % A singleton map can be swapped with any map \ACode{ϕ}:
+    % \LibCode\KDistLiftSingle
+    % % \LibCode\KDistLiftSingleProof
+    % By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the
+    % same statement for multiple map applications:
+    % \LibCode\KDistLiftSingleTraverse
+    % % \LibCode\KDistLiftSingleTraverseProof
   \item 
     We define \ACode{\ACon{CKit}} instances for each of the four
     combinations between renamings and substitutions:
@@ -1184,11 +1194,13 @@
   weakened appropriately through the \ACode{\ADef{wk-telescope}} function:
 
   \noindent
-  \begin{minipage}{0.55\linewidth}
-    \LibCode\KContextLookupI
-  \end{minipage}
-  \begin{minipage}{0.45\linewidth}
-    \LibCode\KContextLookupII
+  \begin{minipage}[t]{1.0\linewidth}
+    \begin{minipage}[t]{0.55\linewidth}
+      \LibCode\KContextLookupI
+    \end{minipage}
+    \begin{minipage}[t]{0.45\linewidth}
+      \LibCode\KContextLookupII
+    \end{minipage}
   \end{minipage}
   % \LibCode\KContextLookup
 
