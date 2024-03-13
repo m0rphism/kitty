@@ -850,15 +850,15 @@
 
   In this section, we extend our framework with an abstraction that
   allows the composition of arbitrary maps.
-  The core property of composition, which we call
-  \ACode{\AField{⋯-fusion}}, states that applying two maps \ACode{ϕ₁}
+  The core property of composition is the
+  \ACode{\AField{fusion}} lemma, which states that applying two maps \ACode{ϕ₁}
   and \ACode{ϕ₂} in sequence to a term \ACode{t}, is the same as
   applying their composition \ACode{(ϕ₁~\AField{·ₖ}~ϕ₂)} to \ACode{t},
   i.e. \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}.
   % $$
   % \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
   % $$
-  This property equips our framework with the power to
+  This property gives our framework the ability to
   reason about the application of multiple maps by reasoning about
   the application of a single map.
   As such it forms the basis for all lemmas involving multiple maps,
@@ -889,9 +889,9 @@
   As we defined substitution in terms of renamings, we need to
   consider all four compositions between renamings and substitutions.
   While the composition operations can be defined independently of each other,
-  the \ACode{\AField{⋯-fusion}} lemma for two substitutions, depends on the
-  \ACode{\AField{⋯-fusion}} lemmas between a renaming and a substitution, which in
-  turn depend on the \ACode{\AField{⋯-fusion}} lemma between two renamings.
+  the \ACode{\AField{fusion}} lemma for two substitutions, depends on the
+  \ACode{\AField{fusion}} lemmas between a renaming and a substitution, which in
+  turn depend on the \ACode{\AField{fusion}} lemma between two renamings.
 
   Previous work on kits\cite{DBLP:journals/jar/BentonHKM12} addresses this
   issue by duplicating the definitions and using tactics to reduce
@@ -962,7 +962,7 @@
 
   % \ACode{\ACon{CKit}} and \ACode{\ADef{\_·ₖ\_}} are analogous to
   % \ACode{\ACon{Kit}} and \ACode{\ADef{\_→ₖ\_}}, whereas
-  % \ACode{\ACon{CTraversal}} and \ACode{\AField{⋯-fusion}} are analogous to
+  % \ACode{\ACon{CTraversal}} and \ACode{\AField{fusion}} are analogous to
   % \ACode{\ACon{CTraversal}} and \ACode{\AField{\_⋯\_}}.
   
   \subsection{An Abstraction for Composition}
@@ -972,13 +972,13 @@
   abstraction, which provides the \ACode{\AField{\_\&/⋯\_}} operation
   that is necessary for defining composition, and the
   \ACode{\ACon{CTraversal}}, which provides the
-  \ACode{\AField{⋯-fusion}} lemma for general maps.
+  \ACode{\AField{fusion}} lemma for general maps.
 
   Similarly as it was the case for \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}},
   the lemma of the \ACode{\ACon{CTraversal}} needs to be proved for
   an abstract \ACode{\ACon{CKit}} and in return defines the
   four concrete \ACode{\ACon{CKit}} instances for us. This allows us to break
-  the dependencies between the different \ACode{\AField{⋯-fusion}} lemmas,
+  the dependencies between the different \ACode{\AField{fusion}} lemmas,
   similar to how \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}} allowed
   us to break the dependency between traversals with renamings and substitutions.
 
@@ -1032,7 +1032,7 @@
   % \LibCode\KCKitNotation
 
   We then define a structure,
-  which provides the \ACode{\AField{⋯-fusion}} lemma for arbitrary
+  which provides the \ACode{\AField{fusion}} lemma for arbitrary
   \ACode{\ACon{CKit}}s:
   \LibCode\KCTraversal
 
@@ -1050,7 +1050,7 @@
     % variable:
     % \LibCode\KCommLiftWeaken
     % % \LibCode\KCommLiftWeakenProof
-    % By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the same
+    % By applying \ACode{\AField{fusion}} to this lemma, we get the same
     % statement for multiple map applications:
     % \LibCode\KCommLiftWeakenTraverse
     % % \LibCode\KCommLiftWeakenTraverseProof
@@ -1061,7 +1061,7 @@
     % A weakening followed by a singleton substitution cancel each other out:
     % \LibCode\KWeakenCancelsSingle
     % % \LibCode\KWeakenCancelsSingleProof
-    % By applying \ACode{\AField{⋯-fusion}} and \ACode{\AField{⋯-id}} to
+    % By applying \ACode{\AField{fusion}} and \ACode{\AField{⋯-id}} to
     % this lemma, we get the same statement for multiple map applications:
     % \LibCode\KWeakenCancelsSingleTraverse
     % % \LibCode\KWeakenCancelsSingleTraverseProof
@@ -1071,7 +1071,7 @@
     % A singleton map can be swapped with any map \ACode{ϕ}:
     % \LibCode\KDistLiftSingle
     % % \LibCode\KDistLiftSingleProof
-    % By applying \ACode{\AField{⋯-fusion}} to this lemma, we get the
+    % By applying \ACode{\AField{fusion}} to this lemma, we get the
     % same statement for multiple map applications:
     % \LibCode\KDistLiftSingleTraverse
     % % \LibCode\KDistLiftSingleTraverseProof

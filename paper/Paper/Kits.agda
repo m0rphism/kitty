@@ -47,7 +47,7 @@ record Syntax : Set₁ where
            id/`-injective  : id/` x₁ ≡ id/` x₂ → x₁ ≡ x₂
            `/id-injective  :  ∀ {x/t₁ x/t₂ : S ∋/⊢ s} → `/id x/t₁ ≡ `/id x/t₂ → x/t₁ ≡ x/t₂
            wk-id/`         :  ∀ s' (x : S ∋ s) → wk s' (id/` x) ≡ id/` (suc x)
-    --! }
+    --! } 
 
     --! Map
     _→ₖ_ : List (Sort Var) → List (Sort Var) → Set
@@ -306,7 +306,7 @@ record Syntax : Set₁ where
 
     --! CTraversal {
     record CTraversal : Set₁ where
-      field  ⋯-fusion :
+      field  fusion :
                ∀ ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W₁ : WkKit K₁ ⦄
                  ⦃ C : CKit K₁ K₂ K ⦄ (t : S₁ ⊢ s) (ϕ₁ : S₁ –[ K₁ ]→ S₂) (ϕ₂ : S₂ –[ K₂ ]→ S₃) →
                (t ⋯ ϕ₁) ⋯ ϕ₂ ≡ t ⋯ (ϕ₁ ·ₖ ϕ₂)
@@ -331,9 +331,9 @@ record Syntax : Set₁ where
                 t ⋯ ϕ ⋯ weaken s ≡ t ⋯ weaken s ⋯ (ϕ ↑ s)
       --! CommLiftWeakenTraverseProof
       ⋯-↑-wk t ϕ s =
-        t ⋯ ϕ ⋯ weaken s           ≡⟨ ⋯-fusion t ϕ (weaken s) ⟩
+        t ⋯ ϕ ⋯ weaken s           ≡⟨ fusion t ϕ (weaken s) ⟩
         t ⋯ (ϕ ·ₖ weaken s)        ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ s)) ⟩
-        t ⋯ (weaken s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-fusion t (weaken s) (ϕ ↑ s)) ⟩
+        t ⋯ (weaken s ·ₖ (ϕ ↑ s))  ≡⟨ sym (fusion t (weaken s) (ϕ ↑ s)) ⟩
         t ⋯ weaken s ⋯ (ϕ ↑ s)     ∎
 
       instance
@@ -378,7 +378,7 @@ record Syntax : Set₁ where
                          t ⋯ weaken s ⋯ ⦅ x/t ⦆ ≡ t
       --! WeakenCancelsSingleTraverseProof
       wk-cancels-⦅⦆-⋯ t x/t =
-        t ⋯ weaken _ ⋯ ⦅ x/t ⦆     ≡⟨ ⋯-fusion t (weaken _) ⦅ x/t ⦆ ⟩
+        t ⋯ weaken _ ⋯ ⦅ x/t ⦆     ≡⟨ fusion t (weaken _) ⦅ x/t ⦆ ⟩
         t ⋯ (weaken _ ·ₖ ⦅ x/t ⦆)  ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
         t ⋯ id                     ≡⟨ ⋯-id t ⟩
         t                          ∎
@@ -411,9 +411,9 @@ record Syntax : Set₁ where
                      t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆
       --! DistLiftSingleTraverseProof
       dist-↑-⦅⦆-⋯ t x/t ϕ =
-        t ⋯ ⦅ x/t ⦆ ⋯ ϕ                   ≡⟨ ⋯-fusion t ⦅ x/t ⦆ ϕ ⟩
+        t ⋯ ⦅ x/t ⦆ ⋯ ϕ                   ≡⟨ fusion t ⦅ x/t ⦆ ϕ ⟩
         t ⋯ (⦅ x/t ⦆ ·ₖ ϕ)                ≡⟨ cong (t ⋯_) (~-ext (dist-↑-⦅⦆ x/t ϕ)) ⟩
-        t ⋯ ((ϕ ↑ _) ·ₖ ⦅ (x/t &/⋯ ϕ) ⦆)  ≡⟨ sym (⋯-fusion t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
+        t ⋯ ((ϕ ↑ _) ·ₖ ⦅ (x/t &/⋯ ϕ) ⦆)  ≡⟨ sym (fusion t (ϕ ↑ _) ⦅ x/t &/⋯ ϕ ⦆ ) ⟩
         t ⋯ (ϕ ↑ _) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆     ∎
 
       --! TypeSorts
