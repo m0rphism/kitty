@@ -301,6 +301,7 @@ record Syntax : Set₁ where
               S₂ –[ K₂ ]→ S₃ → S₁ –[ K₁⊔K₂ ]→ S₃
     ϕ₁ ·[ C ] ϕ₂ = ϕ₁ ·ₖ ϕ₂ where open CKit C
 
+
     open CKit ⦃ … ⦄ public
     --! }
 
@@ -471,7 +472,7 @@ record Syntax : Set₁ where
             --! [
             private instance _ = K
             infix   4  _∋/⊢_∶_  _∶_⇒ₖ_
-            infixl  6  _∋↑/⊢↑_
+            infixl  6  _⊢↑_
 
             --! ]
             field  _∋/⊢_∶_      : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
@@ -487,17 +488,17 @@ record Syntax : Set₁ where
               ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) → Γ₁ ∋ x ∶ t → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
 
             --! LiftTyping
-            _∋↑/⊢↑_ :  ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄
+            _⊢↑_ :  ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄
                        {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} →
                        ϕ ∶ Γ₁ ⇒ₖ Γ₂ → (t : S₁ ∶⊢ s) → (ϕ ↑ s) ∶ (t ∷ₜ Γ₁) ⇒ₖ ((t ⋯ ϕ) ∷ₜ Γ₂)
             --! LiftTypingProof
-            _∋↑/⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
+            _⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
               subst (  ((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
                     (  t ⋯ ϕ ⋯ weaken s                       ≡⟨ ⋯-↑-wk t ϕ s ⟩
                        t ⋯ weaken s ⋯ (ϕ ↑ s)                 ≡⟨⟩
                        wk-telescope (t ∷ₜ Γ₁) zero ⋯ (ϕ ↑ s)  ∎ )
                     (  id/⊢` {x = zero} {Γ = (t ⋯ ϕ) ∷ₜ Γ₂} refl )
-            _∋↑/⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@(suc y) _ refl =
+            _⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@(suc y) _ refl =
               subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (suc y & (ϕ ↑ s)) ∶_)
                     (wk-telescope Γ₁ y ⋯ ϕ ⋯ weaken s          ≡⟨ ⋯-↑-wk _ ϕ s ⟩
                      wk-telescope Γ₁ y ⋯ weaken s ⋯ (ϕ ↑ s)    ≡⟨⟩
