@@ -1074,142 +1074,142 @@
   % \LibCode\KCKitNotation
 
 
-  \subsection{An Abstraction for Composition}
-  \label{sec:composition:ckit}
+  % \subsection{An Abstraction for Composition}
+  % \label{sec:composition:ckit}
 
-  In this subsection, we define the \ACode{\ACon{CKit}}
-  abstraction, which provides the \ACode{\AField{\_\&/⋯\_}} operation
-  that is necessary for defining composition, and the
-  \ACode{\ACon{CTraversal}}, which provides the
-  \ACode{\AField{fusion}} lemma for general maps.
+  % In this subsection, we define the \ACode{\ACon{CKit}}
+  % abstraction, which provides the \ACode{\AField{\_\&/⋯\_}} operation
+  % that is necessary for defining composition, and the
+  % \ACode{\ACon{CTraversal}}, which provides the
+  % \ACode{\AField{fusion}} lemma for general maps.
 
-  Similarly as it was the case for \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}},
-  the lemma of the \ACode{\ACon{CTraversal}} needs to be proved for
-  an abstract \ACode{\ACon{CKit}} and in return defines the
-  four concrete \ACode{\ACon{CKit}} instances for us. This allows us to break
-  the dependencies between the different \ACode{\AField{fusion}} lemmas,
-  similar to how \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}} allowed
-  us to break the dependency between traversals with renamings and substitutions.
+  % Similarly as it was the case for \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}},
+  % the lemma of the \ACode{\ACon{CTraversal}} needs to be proved for
+  % an abstract \ACode{\ACon{CKit}} and in return defines the
+  % four concrete \ACode{\ACon{CKit}} instances for us. This allows us to break
+  % the dependencies between the different \ACode{\AField{fusion}} lemmas,
+  % similar to how \ACode{\ACon{Kit}} and \ACode{\ACon{Traversal}} allowed
+  % us to break the dependency between traversals with renamings and substitutions.
 
-  For this purpose, the \ACode{\ACon{CKit}} abstraction, needs
-  to satisfy two requirements:
-  it needs to provide us with enough machinery to define composition, but
-  it also needs to provide us with enough axioms that we are able to instantiate
-  the \ACode{\ACon{CTraversal}}. It is defined as followed:
-  \LibCode\KCKit
-  The \ACode{\AField{\_\&/⋯\_}} operation takes a variable or term
-  (according to \ACode{K₁}) and a renaming or substitution
-  (according to \ACode{K₂}) and performs the map traversal returning
-  a variable or term (according to \ACode{K₁⊔K₂}).
-  The third parameter \ACode{K₁⊔K₂} can be seen as a functional
-  dependency\cite{DBLP:conf/esop/Jones00} and is determined
-  by the choice of \ACode{K₁} and \ACode{K₂}.
+  % For this purpose, the \ACode{\ACon{CKit}} abstraction, needs
+  % to satisfy two requirements:
+  % it needs to provide us with enough machinery to define composition, but
+  % it also needs to provide us with enough axioms that we are able to instantiate
+  % the \ACode{\ACon{CTraversal}}. It is defined as followed:
+  % \LibCode\KCKit
+  % The \ACode{\AField{\_\&/⋯\_}} operation takes a variable or term
+  % (according to \ACode{K₁}) and a renaming or substitution
+  % (according to \ACode{K₂}) and performs the map traversal returning
+  % a variable or term (according to \ACode{K₁⊔K₂}).
+  % The third parameter \ACode{K₁⊔K₂} can be seen as a functional
+  % dependency\cite{DBLP:conf/esop/Jones00} and is determined
+  % by the choice of \ACode{K₁} and \ACode{K₂}.
 
-  The \ACode{\AField{\&/⋯-⋯}} lemma describes the behavior of
-  \ACode{\AField{\_\&/⋯\_}} in terms of \ACode{\AField{\_⋯\_}}, allowing
-  subsequent lemmas to make use of the lemmas that we have already proved
-  for \ACode{\AField{\_⋯\_}}.
+  % The \ACode{\AField{\&/⋯-⋯}} lemma describes the behavior of
+  % \ACode{\AField{\_\&/⋯\_}} in terms of \ACode{\AField{\_⋯\_}}, allowing
+  % subsequent lemmas to make use of the lemmas that we have already proved
+  % for \ACode{\AField{\_⋯\_}}.
 
-  The \ACode{\AField{\&/⋯-wk-↑}} lemma states that applying a map and then
-  weakening is the same as weakening first and then lifting the map over
-  the variable introduced by the weakening.
+  % The \ACode{\AField{\&/⋯-wk-↑}} lemma states that applying a map and then
+  % weakening is the same as weakening first and then lifting the map over
+  % the variable introduced by the weakening.
 
-  Similar as for the \ACode{\ACon{Kit}}, we derive further definitions
-  from the axioms of a \ACode{\ACon{CKit}}:
-  \begin{itemize}
-  \item
-    We define map composition as motivated by the previous subsection:
-    \LibCode\KComposition
+  % Similar as for the \ACode{\ACon{Kit}}, we derive further definitions
+  % from the axioms of a \ACode{\ACon{CKit}}:
+  % \begin{itemize}
   % \item
-  %   We show that the \ACode{\AField{\_\&/⋯\_}} operator behaves like
-  %   \ACode{\AField{\_\&\_}} when applied to variables:
-  %   \LibCode\KCKitAp
-  %   % \LibCode\KCKitApProof
+  %   We define map composition as motivated by the previous subsection:
+  %   \LibCode\KComposition
+  % % \item
+  % %   We show that the \ACode{\AField{\_\&/⋯\_}} operator behaves like
+  % %   \ACode{\AField{\_\&\_}} when applied to variables:
+  % %   \LibCode\KCKitAp
+  % %   % \LibCode\KCKitApProof
 
-  %   % The \ACode{\AField{`/id}} on the left side is from \ACode{K₁⊔K₂}, whereas
-  %   % the \ACode{\AField{`/id}} on the right side is from \ACode{K₂}.
-  \item
-    We show that lifting \ACode{\AField{\_↑\_}} distributes over
-    composition:
-    \LibCode\KDistLiftCompose
-    % \LibCode\KDistLiftComposeProof
-  \end{itemize}
-  % To make it easier to explicitly specify a \ACode{\ACon{CKit}},
-  % we define the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}
-  % to stand for \ACode{ϕ₁ \ADef{·ₖ} ϕ₂} for some
-  % \ACode{\ACon{CKit}} \ACode{C}.
-  % \LibCode\KCKitNotation
+  % %   % The \ACode{\AField{`/id}} on the left side is from \ACode{K₁⊔K₂}, whereas
+  % %   % the \ACode{\AField{`/id}} on the right side is from \ACode{K₂}.
+  % \item
+  %   We show that lifting \ACode{\AField{\_↑\_}} distributes over
+  %   composition:
+  %   \LibCode\KDistLiftCompose
+  %   % \LibCode\KDistLiftComposeProof
+  % \end{itemize}
+  % % To make it easier to explicitly specify a \ACode{\ACon{CKit}},
+  % % we define the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}
+  % % to stand for \ACode{ϕ₁ \ADef{·ₖ} ϕ₂} for some
+  % % \ACode{\ACon{CKit}} \ACode{C}.
+  % % \LibCode\KCKitNotation
 
-  We then define a structure,
-  which provides the \ACode{\AField{fusion}} lemma for arbitrary
-  \ACode{\ACon{CKit}}s:
-  \LibCode\KCTraversal
+  % We then define a structure,
+  % which provides the \ACode{\AField{fusion}} lemma for arbitrary
+  % \ACode{\ACon{CKit}}s:
+  % \LibCode\KCTraversal
 
-  Similar as for the \ACode{\ACon{Traversal}}, we derive further
-  definitions from the axioms of a \ACode{\ACon{CTraversal}}:
-  \begin{itemize}
-  \item 
-    A map \ACode{ϕ} followed by a weakening is equivalent to a
-    weakening followed by \ACode{ϕ} that has been lifted over the weakened
-    variable:
-    \LibCode\KCommLiftWeakenTraverse
+  % Similar as for the \ACode{\ACon{Traversal}}, we derive further
+  % definitions from the axioms of a \ACode{\ACon{CTraversal}}:
+  % \begin{itemize}
+  % \item 
+  %   A map \ACode{ϕ} followed by a weakening is equivalent to a
+  %   weakening followed by \ACode{ϕ} that has been lifted over the weakened
+  %   variable:
+  %   \LibCode\KCommLiftWeakenTraverse
 
-    % A map \ACode{ϕ} followed by a weakening is equivalent to a
-    % weakening followed by \ACode{ϕ} that has been lifted over the weakened
-    % variable:
-    % \LibCode\KCommLiftWeaken
-    % % \LibCode\KCommLiftWeakenProof
-    % By applying \ACode{\AField{fusion}} to this lemma, we get the same
-    % statement for multiple map applications:
-    % \LibCode\KCommLiftWeakenTraverse
-    % % \LibCode\KCommLiftWeakenTraverseProof
-  \item 
-    A weakening followed by a singleton substitution cancel each other out:
-    \LibCode\KWeakenCancelsSingleTraverse
+  %   % A map \ACode{ϕ} followed by a weakening is equivalent to a
+  %   % weakening followed by \ACode{ϕ} that has been lifted over the weakened
+  %   % variable:
+  %   % \LibCode\KCommLiftWeaken
+  %   % % \LibCode\KCommLiftWeakenProof
+  %   % By applying \ACode{\AField{fusion}} to this lemma, we get the same
+  %   % statement for multiple map applications:
+  %   % \LibCode\KCommLiftWeakenTraverse
+  %   % % \LibCode\KCommLiftWeakenTraverseProof
+  % \item 
+  %   A weakening followed by a singleton substitution cancel each other out:
+  %   \LibCode\KWeakenCancelsSingleTraverse
 
-    % A weakening followed by a singleton substitution cancel each other out:
-    % \LibCode\KWeakenCancelsSingle
-    % % \LibCode\KWeakenCancelsSingleProof
-    % By applying \ACode{\AField{fusion}} and \ACode{\AField{⋯-id}} to
-    % this lemma, we get the same statement for multiple map applications:
-    % \LibCode\KWeakenCancelsSingleTraverse
-    % % \LibCode\KWeakenCancelsSingleTraverseProof
-  \item 
-    A singleton map can be swapped with any map \ACode{ϕ}:
-    \LibCode\KDistLiftSingleTraverse
-    % A singleton map can be swapped with any map \ACode{ϕ}:
-    % \LibCode\KDistLiftSingle
-    % % \LibCode\KDistLiftSingleProof
-    % By applying \ACode{\AField{fusion}} to this lemma, we get the
-    % same statement for multiple map applications:
-    % \LibCode\KDistLiftSingleTraverse
-    % % \LibCode\KDistLiftSingleTraverseProof
-  \item 
-    We define \ACode{\ACon{CKit}} instances for each of the four
-    combinations between renamings and substitutions:
-    \LibCode\KCKitInstances
-    Interestingly, the \ACode{\ADef{Cₛ}} instance has another
-    \ACode{\ADef{CKit}} parameter.
-    This allows us to first use \ACode{\ADef{Cᵣ}} as an argument,
-    which yields the \ACode{\ADef{CKit}} between substitutions
-    and renamings, and then use this resulting \ACode{\ADef{CKit}}
-    as an argument for the case with two substitutions.
-    As shown below, Agda's instance resolution is up for the task:
+  %   % A weakening followed by a singleton substitution cancel each other out:
+  %   % \LibCode\KWeakenCancelsSingle
+  %   % % \LibCode\KWeakenCancelsSingleProof
+  %   % By applying \ACode{\AField{fusion}} and \ACode{\AField{⋯-id}} to
+  %   % this lemma, we get the same statement for multiple map applications:
+  %   % \LibCode\KWeakenCancelsSingleTraverse
+  %   % % \LibCode\KWeakenCancelsSingleTraverseProof
+  % \item 
+  %   A singleton map can be swapped with any map \ACode{ϕ}:
+  %   \LibCode\KDistLiftSingleTraverse
+  %   % A singleton map can be swapped with any map \ACode{ϕ}:
+  %   % \LibCode\KDistLiftSingle
+  %   % % \LibCode\KDistLiftSingleProof
+  %   % By applying \ACode{\AField{fusion}} to this lemma, we get the
+  %   % same statement for multiple map applications:
+  %   % \LibCode\KDistLiftSingleTraverse
+  %   % % \LibCode\KDistLiftSingleTraverseProof
+  % \item 
+  %   We define \ACode{\ACon{CKit}} instances for each of the four
+  %   combinations between renamings and substitutions:
+  %   \LibCode\KCKitInstances
+  %   Interestingly, the \ACode{\ADef{Cₛ}} instance has another
+  %   \ACode{\ADef{CKit}} parameter.
+  %   This allows us to first use \ACode{\ADef{Cᵣ}} as an argument,
+  %   which yields the \ACode{\ADef{CKit}} between substitutions
+  %   and renamings, and then use this resulting \ACode{\ADef{CKit}}
+  %   as an argument for the case with two substitutions.
+  %   As shown below, Agda's instance resolution is up for the task:
 
-    % To get the \ACode{\ADef{CKit}} between substitutions and
-    % renamings, the argument \ACode{\ADef{Cᵣ}} is used.
-    % The resulting \ACode{\ADef{CKit}} is then again used as an argument
-    % for \ACode{\ADef{Cₛ}} to yield the \ACode{\ADef{CKit}}
-    % between two substitutions. As shown below, Agda's instance
-    % resolution is up for the task:
-    \begin{minipage}[t]{0.5\linewidth}
-    \LibCode\KCKitInstancesConcreteI
-    \end{minipage}
-    \begin{minipage}[t]{0.5\linewidth}
-    \LibCode\KCKitInstancesConcreteII
-    \end{minipage}
+  %   % To get the \ACode{\ADef{CKit}} between substitutions and
+  %   % renamings, the argument \ACode{\ADef{Cᵣ}} is used.
+  %   % The resulting \ACode{\ADef{CKit}} is then again used as an argument
+  %   % for \ACode{\ADef{Cₛ}} to yield the \ACode{\ADef{CKit}}
+  %   % between two substitutions. As shown below, Agda's instance
+  %   % resolution is up for the task:
+  %   \begin{minipage}[t]{0.5\linewidth}
+  %   \LibCode\KCKitInstancesConcreteI
+  %   \end{minipage}
+  %   \begin{minipage}[t]{0.5\linewidth}
+  %   \LibCode\KCKitInstancesConcreteII
+  %   \end{minipage}
 
-  \end{itemize}
+  % \end{itemize}
 
   \subsection{Instantiation for System F}
   In this subsection, we show how to instantiate the
@@ -1424,7 +1424,7 @@
     There is a strong similarity to the instantiation of
     map traversal \ACode{\AField{\_⋯\_}}. Where \ACode{\AField{\_⋯\_}}
     used \ACode{\AField{`/id}} or \ACode{\AField{\_↑\_}}, we now use their
-    preservation lemmas \ACode{\AField{⊢`/id}} or \ACode{\AField{\_∋↑/⊢↑\_}}.
+    preservation lemmas \ACode{\AField{⊢`/id}} or \ACode{\AField{\_⊢↑\_}}.
   \item
     The lambda typing constructor \ACode{\ACon{⊢λ}} weakens the type \ACode{t₂} to
     shield it from expression-substitution, requiring us to use the

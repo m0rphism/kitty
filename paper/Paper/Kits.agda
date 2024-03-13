@@ -475,11 +475,11 @@ record Syntax : Set₁ where
             infixl  6  _⊢↑_
 
             --! ]
-            field  _∋/⊢_∶_      : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
-                   id/⊢`        : ∀ {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋ x ∶ t → Γ ∋/⊢ id/` x ∶ t
-                   ⊢`/id        : ∀ {e : S ∋/⊢ s} {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋/⊢ e ∶ t → Γ ⊢ `/id e ∶ t
-                   ∋wk/⊢wk      : ∀ (Γ : Ctx S) (t' : S ∶⊢ s) (e : S ∋/⊢ s') (t : S ∶⊢ s') →
-                                  Γ ∋/⊢ e ∶ t → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weaken _)
+            field  _∋/⊢_∶_  : Ctx S → S ∋/⊢ s → S ∶⊢ s → Set
+                   id/⊢`    : ∀ {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋ x ∶ t → Γ ∋/⊢ id/` x ∶ t
+                   ⊢`/id    : ∀ {e : S ∋/⊢ s} {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋/⊢ e ∶ t → Γ ⊢ `/id e ∶ t
+                   ⊢wk      : ∀ (Γ : Ctx S) (t' : S ∶⊢ s) (e : S ∋/⊢ s') (t : S ∶⊢ s') →
+                              Γ ∋/⊢ e ∶ t → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weaken _)
           --! }
 
             --! MapTyping
@@ -488,9 +488,8 @@ record Syntax : Set₁ where
               ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) → Γ₁ ∋ x ∶ t → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
 
             --! LiftTyping
-            _⊢↑_ :  ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄
-                       {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂} →
-                       ϕ ∶ Γ₁ ⇒ₖ Γ₂ → (t : S₁ ∶⊢ s) → (ϕ ↑ s) ∶ (t ∷ₜ Γ₁) ⇒ₖ ((t ⋯ ϕ) ∷ₜ Γ₂)
+            _⊢↑_ :  ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄ {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂}
+                    → ϕ ∶ Γ₁ ⇒ₖ Γ₂ → (t : S₁ ∶⊢ s) → (ϕ ↑ s) ∶ (t ∷ₜ Γ₁) ⇒ₖ ((t ⋯ ϕ) ∷ₜ Γ₂)
             --! LiftTypingProof
             _⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
               subst (  ((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
@@ -503,7 +502,7 @@ record Syntax : Set₁ where
                     (wk-telescope Γ₁ y ⋯ ϕ ⋯ weaken s          ≡⟨ ⋯-↑-wk _ ϕ s ⟩
                      wk-telescope Γ₁ y ⋯ weaken s ⋯ (ϕ ↑ s)    ≡⟨⟩
                      wk-telescope (t ∷ₜ Γ₁) (suc y) ⋯ (ϕ ↑ s)  ∎)
-                    (∋wk/⊢wk _ _ _ _ (⊢ϕ y _ refl))
+                    (⊢wk _ _ _ _ (⊢ϕ y _ refl))
 
             --! SingleTyping
             ⊢⦅_⦆ :  ∀ {s S} {Γ : Ctx S} {x/t : S ∋/⊢ s} {T : S ∶⊢ s} →
@@ -553,10 +552,10 @@ record Syntax : Set₁ where
             instance
             --! TypingInstances {
               TKᵣ : TKit Kᵣ ; TKₛ : TKit Kₛ
-              TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_      ; ⊢`/id    = ⊢`
-                            ; id/⊢`    = λ ⊢x → ⊢x  ; ∋wk/⊢wk  = λ { Γ t' x t refl → refl } }
-              TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_  ; ⊢`/id    = λ ⊢x → ⊢x
-                            ; id/⊢`    = ⊢`     ; ∋wk/⊢wk  = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
+              TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_      ; ⊢`/id  = ⊢`
+                            ; id/⊢`    = λ ⊢x → ⊢x  ; ⊢wk    = λ { Γ t' x t refl → refl } }
+              TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_  ; ⊢`/id  = λ ⊢x → ⊢x
+                            ; id/⊢`    = ⊢`     ; ⊢wk    = λ Γ t' e t ⊢e → ⊢e ⊢⋯ ⊢wk Γ t' }
             --! }
 
               -- --! TypingInstancesI
@@ -564,21 +563,21 @@ record Syntax : Set₁ where
               -- TKᵣ = record  { _∋/⊢_∶_  = _∋_∶_
               --               ; id/⊢`    = λ ⊢x → ⊢x
               --               ; ⊢`/id    = ⊢`
-              --               ; ∋wk/⊢wk  = λ { Γ t' x t refl →
+              --               ; ⊢wk  = λ { Γ t' x t refl →
               --                   refl } }
               -- --! TypingInstancesII
               -- TKₛ : TKit Kₛ
               -- TKₛ = record  { _∋/⊢_∶_  = _⊢_∶_
               --               ; ⊢`/id    = λ ⊢x → ⊢x
               --               ; id/⊢`    = ⊢`
-              --               ; ∋wk/⊢wk  = λ Γ t' e t ⊢e →
-              --                   ⊢e ⊢⋯ ∋wk/⊢wk Γ t' }
+              --               ; ⊢wk  = λ Γ t' e t ⊢e →
+              --                   ⊢e ⊢⋯ ⊢wk Γ t' }
 
             --! TTraversalNotation {
             open TKit TKᵣ public using () renaming
-              (∋wk/⊢wk to ⊢wk; _∶_⇒ₖ_ to _∶_⇒ᵣ_; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
+              (⊢wk to ⊢wkᵣ; _∶_⇒ₖ_ to _∶_⇒ᵣ_; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
             open TKit TKₛ public using () renaming
-              (∋wk/⊢wk to ∋wk; _∶_⇒ₖ_ to _∶_⇒ₛ_; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
+              (⊢wk to ⊢wkₛ; _∶_⇒ₖ_ to _∶_⇒ₛ_; ⊢⦅_⦆ to ⊢⦅_⦆ₛ)
 
             -- Renaming preserves typing
 
