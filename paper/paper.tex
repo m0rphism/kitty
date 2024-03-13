@@ -819,18 +819,17 @@
   separately for variables and terms, we define a new structure for
   it which extends a \ACode{\ACon{Kit}}:
   \LibCode\KWkKit
-
-  The \ACode{\AField{wk-`/id}} axiom
+  \noindent The \ACode{\AField{wk-`/id}} axiom
   explains the \ACode{\AField{wk}} function by how it acts on \emph{terms}.
   It is the counterpiece to the \ACode{\ACon{Kit}} axiom
   \ACode{\AField{wk-id/`}}, which explains the \ACode{\AField{wk}}
   function by how it acts on \emph{variables}.
-
+  %
   This lemma is useful for proving extensional equalities between maps
   involving weakening, where \ACode{\AField{`/id-injective}} allows to
   add \ACode{\AField{`/id}} on both sides of the equation, such that
   \AField{wk-`/id} can be used to make further progress.
-
+  %
   The instantiations of the \ACode{\ACon{WkKit}} are straightforward:
   \LibCode\KWkKitInstances
 
@@ -901,11 +900,10 @@
   \ACode{\ACon{Traversal}}, which allow us to abstract over all four
   compositions and use the same trick as before to eliminate the
   dependencies.
-  % TODO
-  While composition can be derived, our approach has the benefit, that
-  we have gained a new level of generality, which enables us in the next
-  sections to unify type preservation of all substitution and renaming
-  operations into one lemma.
+  With the help of a general map composition, we can prove lemmas
+  about the interactions of general maps, which is crucial for proving a
+  type preservation lemma for general map application instead of individual
+  lemmas for renamings and substitutions.
 
   \subsection{An Examination of Composition}
   \label{sec:composition:example}
@@ -934,8 +932,8 @@
   \item
     All four compositions first apply \ACode{ϕ₁} to \ACode{x},
     and then apply \ACode{ϕ₂} to the result.
-    If \ACode{ϕ₁} is a renaming, then this result is another variable, but
-    if \ACode{ϕ₁} is a substitution, then this result is a term.
+    If \ACode{ϕ₁} is a renaming, this result is another variable, but
+    if \ACode{ϕ₁} is a substitution, this result is a term.
   \end{enumerate}
   With the \ACode{\ACon{Kit}} abstraction, we can easily abstract over
   \ACode{ϕ₂} being a renaming or a substitution:
@@ -948,7 +946,7 @@
   \ExampleCode\KExTwoCompsII
   \end{minipage}
 
-  But to abstract over \ACode{ϕ₁}, the \ACode{\ACon{Kit}} abstraction
+  \noindent But to abstract over \ACode{ϕ₁}, the \ACode{\ACon{Kit}} abstraction
   is not sufficient: while it allows us to abstract over what we are applying, i.e.
   a renaming or a substitution, it does not allow us to
   abstract over what we are applying it to, i.e. a variable or a term.
@@ -956,10 +954,10 @@
   and \ACode{\ADef{\_⋯\_}}.
 
   To fill this gap, we introduce a new abstraction that we call a
-  \ACode{\ACon{CKit}},
+  \emph{compose kit} (\ACode{\ACon{CKit}}),
   which provides an operation \ACode{\AField{\_\&/⋯\_}} that unifies
   \ACode{\ADef{\_\&\_}} and \ACode{\ADef{\_⋯\_}}. This allows us to
-  define a general composition, which informally can be described as:
+  define a general composition as follows:
   \ExampleCode\KComposition
 
   % \ACode{\ACon{CKit}} and \ACode{\ADef{\_·ₖ\_}} are analogous to
@@ -1000,8 +998,8 @@
 
   The \ACode{\AField{\&/⋯-⋯}} lemma describes the behavior of
   \ACode{\AField{\_\&/⋯\_}} in terms of \ACode{\AField{\_⋯\_}}, allowing
-  subsequent lemmas to make use of the lemmas we previously proved
-  about \ACode{\AField{\_⋯\_}}.
+  subsequent lemmas to make use of the lemmas that we have already proved
+  for \ACode{\AField{\_⋯\_}}.
 
   The \ACode{\AField{\&/⋯-wk-↑}} lemma states that applying a map and then
   weakening is the same as weakening first and then lifting the map over
