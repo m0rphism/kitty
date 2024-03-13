@@ -197,7 +197,7 @@ _⊢⋯_ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ TK : TKit K ⦄
 ⊢∙ {t₁ = t₁} {t₂ = t₂} ⊢t₁ ⊢t₂ ⊢e₁  ⊢⋯ ⊢ϕ = subst  (_ ⊢ _ ∶_) (sym (dist-↑-⦅⦆-⋯ t₁ t₂ _))
                                                    (⊢∙  (⊢t₁ ⊢⋯ (⊢ϕ ⊢↑ _))
                                                         (⊢t₂ ⊢⋯ ⊢ϕ) (⊢e₁ ⊢⋯ ⊢ϕ))
-⊢τ ⊢⋯ ⊢ϕ = ⊢τ
+⊢τ                                  ⊢⋯ ⊢ϕ = ⊢τ
 
 --! TTraversal
 SystemF-TTraversal : TTraversal
