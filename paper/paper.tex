@@ -985,10 +985,9 @@
     a variable or term (according to \ACode{K₁⊔K₂}).
     From this operation we derive map composition \ACode{\ADef{\_·ₖ\_}} as
     shown in the previous subsection.
-    % TODO: use the notation def to the first time we use it?
-    We use the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}, if we need to
-    make it explicit that we are using the composition of some
-    specific \ACode{\ACon{CKit}} \ACode{C}.
+    % We use the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}, if we need to
+    % make it explicit that we are using the composition of some
+    % specific \ACode{\ACon{CKit}} \ACode{C}.
   \item 
     The \ACode{\AField{\&/⋯-⋯}} lemma describes the behavior of
     \ACode{\AField{\_\&/⋯\_}} in terms of \ACode{\AField{\_⋯\_}}, allowing
@@ -1135,10 +1134,10 @@
     \LibCode\KDistLiftCompose
     % \LibCode\KDistLiftComposeProof
   \end{itemize}
-  To make it easier to explicitly specify a \ACode{\ACon{CKit}},
-  we define the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}
-  to stand for \ACode{ϕ₁ \ADef{·ₖ} ϕ₂} for some
-  \ACode{\ACon{CKit}} \ACode{C}.
+  % To make it easier to explicitly specify a \ACode{\ACon{CKit}},
+  % we define the notation \ACode{ϕ₁ \ADef{·[} C \ADef{]} ϕ₂}
+  % to stand for \ACode{ϕ₁ \ADef{·ₖ} ϕ₂} for some
+  % \ACode{\ACon{CKit}} \ACode{C}.
   % \LibCode\KCKitNotation
 
   We then define a structure,
@@ -1367,7 +1366,7 @@
   \item
     Using the variable/term typing, we can define a renaming/substitution typing:
     \LibCode\KMapTyping
-    \ACode{Γ₂ \ADef{∋*/⊢*} ϕ \ADef{∶} Γ₁} states that \ACode{ϕ} is a map that takes
+    \ACode{ϕ \ADef{∶} Γ₁ \ADef{⇒ₖ} Γ₂} states that \ACode{ϕ} is a map that takes
     terms in \ACode{Γ₁} to terms in \ACode{Γ₂}.
   \item 
     Lifting a map preserves its typing:
@@ -1378,10 +1377,10 @@
     \LibCode\KSingleTyping
     % \LibCode\KSingleTypingProof
   \end{itemize}
-  To make it easier to explicitly pass typing kits,
-  we define the notation \ACode{Γ₂ \ADef{∋*/⊢*[} TK \ADef{]} ϕ \ADef{∶} Γ₁}
-  to stand for \ACode{Γ₂ \ADef{∋*/⊢*} ϕ \ADef{∶} Γ₁} given some
-  \ACode{\ACon{TKit}} \ACode{TK}.
+  % To make it easier to explicitly pass typing kits,
+  % we define the notation \ACode{ϕ \ADef{∶} Γ₁ \ADef{⇒[} TK \ADef{]} Γ₂}
+  % to stand for \ACode{ϕ \ADef{∶} Γ₁ \ADef{⇒ₖ} Γ₂} of some
+  % \ACode{\ACon{TKit}} \ACode{TK}.
   % \LibCode\KTypingNotation
 
   We then define a \ACode{\ACon{TTraversal}} analogously to
