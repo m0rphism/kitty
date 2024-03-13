@@ -1007,8 +1007,8 @@
   that works for any composition described by a \ACode{\ACon{CKit}}:
   \LibCode\KCTraversal
 
-  Given a \ACode{\ACon{CTraversal}}, we can prove the lemmas about interactions
-  of multiple maps, which are required for substitution preserves typing:
+  \noindent Given a \ACode{\ACon{CTraversal}}, we can prove the usual lemmas about interactions
+  of multiple maps:
   \begin{itemize}
   \item 
     A map \ACode{ϕ} followed by a weakening is equivalent to a
@@ -1026,7 +1026,7 @@
     % \LibCode\KCommLiftWeakenTraverse
     % % \LibCode\KCommLiftWeakenTraverseProof
   \item 
-    A weakening followed by a singleton substitution cancel each other out:
+    A weakening followed by a singleton substitution act as an identity map:
     \LibCode\KWeakenCancelsSingleTraverse
 
     % A weakening followed by a singleton substitution cancel each other out:
@@ -1221,11 +1221,11 @@
 
   \AppCode\FFusion
   \AppCode\FFusionProofInteresting
-  The interesting cases are:
+  We only show the interesting cases, which are:
   \begin{itemize}
   \item
     variables, where we need to use the \ACode{\AField{\&/⋯-⋯}} lemma
-    provided by the \ACode{\ACon{CKit}}.
+    provided by the \ACode{\ACon{CKit}}; and
   \item
     bindings, where the traversal operation \ACode{\AField{\_⋯\_}}
     needs to lift the map via \ACode{\AField{\_↑\_}}, requiring us to
@@ -1250,7 +1250,7 @@
   In the context of multi-sorted syntax, the notion of a type can be
   described as a mapping between sorts.
   For System F, the expression sort \ACode{\ACon{𝕖}} maps to the type sort
-  \ACode{\ACon{𝕥}} and the sort \ACode{\ACon{𝕥}} maps to the kind sort
+  \ACode{\ACon{𝕥}}, and the sort \ACode{\ACon{𝕥}} maps to the kind sort
   \ACode{\ACon{𝕜}}.
   The following structure is used to teach our framework about types:
   \LibCode\KTypeSorts
@@ -1282,7 +1282,7 @@
 
   As we want our framework to support dependent types, we allow a type returned
   by the typing context to use all variables bound previously in the typing context.
-  This is achieved by the \ACode{drop-∈} function, which cuts of all
+  This is achieved by the \ACode{drop-∈} function, which cuts off all
   sorts from \ACode{S} that are at smaller or equal positions than a variable \ACode{x}.
 
   % \LibCode\KContextHelper
