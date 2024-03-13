@@ -200,7 +200,7 @@ derive-⋯ 𝕋 ⋯-nm = runFreshT do
                               }) c-tel
 
     -- Remove `S₁` binding, since it's already bound on the outside
-    let c-tel'x = List.boolFilter
+    let c-tel'x = List.filterᵇ
           (λ { (x , _) → case x String.≟ "S₁" of λ { (yes _) → false; (no _) → true } })
           c-tel'
 
@@ -436,7 +436,7 @@ derive-⋯-↑-con 𝕋 ⋯-nm con-nm ⋯-↑-con-nm = runFreshT do
                             }) c-tel
 
   -- Remove `S₁` binding, since it's already bound on the outside
-  let c-tel'x = List.boolFilter
+  let c-tel'x = List.filterᵇ
         (λ { (x , _) → case x String.≟ "S₁" of λ { (yes _) → false; (no _) → true } })
         c-tel'
 
@@ -660,7 +660,7 @@ derive-⋯-↑ 𝕋 ⋯-nm ⋯-↑-nm = runFreshT do
                               }) c-tel
 
     -- Remove `S₁` binding, since it's already bound on the outside
-    let c-tel'x = List.boolFilter
+    let c-tel'x = List.filterᵇ
           (λ { (x , _) → case x String.≟ "S₁" of λ { (yes _) → false; (no _) → true } })
           c-tel'
 
