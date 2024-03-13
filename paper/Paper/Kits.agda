@@ -195,7 +195,7 @@ record Syntax : Set₁ where
       --! [
       private instance _ = K
       --! ]
-      field wk-`/id : ∀ s {S s'} (x/t : S ∋/⊢ s') → `/id x/t ⋯ weakenᵣ s ≡ `/id (wk s x/t)
+      field wk-`/id : ∀ s {S s'} (x/t : S ∋/⊢ s') → `/id x/t ⋯ weaken s ≡ `/id (wk s x/t)
     --! }
 
     instance
@@ -317,24 +317,24 @@ record Syntax : Set₁ where
                  (ϕ : S₁ –[ K ]→ S₂) s → (ϕ ·ₖ weaken s) ~ (weaken s ·ₖ (ϕ ↑ s))
       --! CommLiftWeakenProof
       ↑-wk {S₁} {S₂} ϕ s sx x = `/id-injective (
-          `/id ((ϕ ·ₖ weakenᵣ s) sx x)        ≡⟨⟩
-          `/id (x & ϕ &/⋯ weakenᵣ s)          ≡⟨ &/⋯-⋯ (x & ϕ) (weakenᵣ s) ⟩
-          `/id (`/id (x & ϕ) ⋯ weakenᵣ s)     ≡⟨ wk-`/id s (x & ϕ) ⟩
-          `/id (suc x & (ϕ ↑ s))              ≡⟨ sym (&/⋯-& (suc x) (ϕ ↑ s)) ⟩
-          `/id (suc x &/⋯ (ϕ ↑ s))            ≡⟨⟩
-          `/id (x & weakenᵣ s &/⋯ (ϕ ↑ s))    ≡⟨⟩
-          `/id ((weakenᵣ s ·ₖ (ϕ ↑ s)) sx x)  ∎)
+          `/id ((ϕ ·ₖ weaken s) sx x)        ≡⟨⟩
+          `/id (x & ϕ &/⋯ weaken s)          ≡⟨ &/⋯-⋯ (x & ϕ) (weaken s) ⟩
+          `/id (`/id (x & ϕ) ⋯ weaken s)     ≡⟨ wk-`/id s (x & ϕ) ⟩
+          `/id (suc x & (ϕ ↑ s))             ≡⟨ sym (&/⋯-& (suc x) (ϕ ↑ s)) ⟩
+          `/id (suc x &/⋯ (ϕ ↑ s))           ≡⟨⟩
+          `/id (x & weaken s &/⋯ (ϕ ↑ s))    ≡⟨⟩
+          `/id ((weaken s ·ₖ (ϕ ↑ s)) sx x)  ∎)
 
       --! CommLiftWeakenTraverse
       ⋯-↑-wk :  ∀  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄ ⦃ C₂ : CKit Kᵣ K K ⦄ 
                    (t : S₁ ⊢ s) (ϕ : S₁ –[ K ]→ S₂) s →
-                t ⋯ ϕ ⋯ weakenᵣ s ≡ t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)
+                t ⋯ ϕ ⋯ weaken s ≡ t ⋯ weaken s ⋯ (ϕ ↑ s)
       --! CommLiftWeakenTraverseProof
       ⋯-↑-wk t ϕ s =
-        t ⋯ ϕ ⋯ weakenᵣ s           ≡⟨ ⋯-fusion t ϕ (weakenᵣ s) ⟩
-        t ⋯ (ϕ ·ₖ weakenᵣ s)        ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ s)) ⟩
-        t ⋯ (weakenᵣ s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-fusion t (weakenᵣ s) (ϕ ↑ s)) ⟩
-        t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)     ∎
+        t ⋯ ϕ ⋯ weaken s           ≡⟨ ⋯-fusion t ϕ (weaken s) ⟩
+        t ⋯ (ϕ ·ₖ weaken s)        ≡⟨ cong (t ⋯_) (~-ext (↑-wk ϕ s)) ⟩
+        t ⋯ (weaken s ·ₖ (ϕ ↑ s))  ≡⟨ sym (⋯-fusion t (weaken s) (ϕ ↑ s)) ⟩
+        t ⋯ weaken s ⋯ (ϕ ↑ s)     ∎
 
       instance
       -- --! CKitInstances {
@@ -365,23 +365,23 @@ record Syntax : Set₁ where
       Cₛₛ : CKit Kₛ Kᵣ Kₛ;  Cₛₛ = Cₛ
 
       --! WeakenCancelsSingle
-      wk-cancels-⦅⦆ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (x/t : S ∋/⊢[ K ] s) → (weakenᵣ s ·[ Cᵣ ] ⦅ x/t ⦆) ~ id
+      wk-cancels-⦅⦆ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (x/t : S ∋/⊢[ K ] s) → (weaken s ·[ Cᵣ ] ⦅ x/t ⦆) ~ id
       --! WeakenCancelsSingleProof
       wk-cancels-⦅⦆ ⦃ K ⦄ x/t sx x = `/id-injective (
-          `/id ⦃ K ⦄ (x & (weakenᵣ _ ·[ Cᵣ ] ⦅ x/t ⦆))  ≡⟨⟩
-          `/id ⦃ K ⦄ (id/` (suc x) &/⋯ ⦅ x/t ⦆)         ≡⟨ &/⋯-& ⦃ Cᵣ ⦃ K ⦄ ⦄ (suc x) ⦅ x/t ⦆ ⟩
-          `/id ⦃ K ⦄ (id/` x)                           ≡⟨⟩
-          `/id ⦃ K ⦄ (x & id)                           ∎)
+          `/id ⦃ K ⦄ (x & (weaken _ ·[ Cᵣ ] ⦅ x/t ⦆))  ≡⟨⟩
+          `/id ⦃ K ⦄ (id/` (suc x) &/⋯ ⦅ x/t ⦆)        ≡⟨ &/⋯-& ⦃ Cᵣ ⦃ K ⦄ ⦄ (suc x) ⦅ x/t ⦆ ⟩
+          `/id ⦃ K ⦄ (id/` x)                          ≡⟨⟩
+          `/id ⦃ K ⦄ (x & id)                          ∎)
 
       --! WeakenCancelsSingleTraverse
       wk-cancels-⦅⦆-⋯ :  ∀ ⦃ K : Kit _∋/⊢_ ⦄ (t : S ⊢ s') (x/t : S ∋/⊢[ K ] s) →
-                         t ⋯ weakenᵣ s ⋯ ⦅ x/t ⦆ ≡ t
+                         t ⋯ weaken s ⋯ ⦅ x/t ⦆ ≡ t
       --! WeakenCancelsSingleTraverseProof
       wk-cancels-⦅⦆-⋯ t x/t =
-        t ⋯ weakenᵣ _ ⋯ ⦅ x/t ⦆     ≡⟨ ⋯-fusion t (weakenᵣ _) ⦅ x/t ⦆ ⟩
-        t ⋯ (weakenᵣ _ ·ₖ ⦅ x/t ⦆)  ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
-        t ⋯ id                      ≡⟨ ⋯-id t ⟩
-        t                           ∎
+        t ⋯ weaken _ ⋯ ⦅ x/t ⦆     ≡⟨ ⋯-fusion t (weaken _) ⦅ x/t ⦆ ⟩
+        t ⋯ (weaken _ ·ₖ ⦅ x/t ⦆)  ≡⟨ cong (t ⋯_) (~-ext (wk-cancels-⦅⦆ x/t)) ⟩
+        t ⋯ id                     ≡⟨ ⋯-id t ⟩
+        t                          ∎
 
       --! DistLiftSingle
       dist-↑-⦅⦆ :  ∀  ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄
@@ -399,7 +399,7 @@ record Syntax : Set₁ where
           `/id (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                ≡⟨⟩
           `/id (id/` ⦃ K₁ ⦄ y &/⋯ ϕ)                    ≡⟨ &/⋯-& ⦃ C₁ ⦄ y ϕ ⟩
           `/id (y & ϕ)                                  ≡⟨ sym (wk-cancels-⦅⦆-⋯ (`/id (y & ϕ)) (x/t &/⋯ ϕ)) ⟩
-          `/id (y & ϕ) ⋯ weakenᵣ s ⋯ ⦅ (x/t &/⋯ ϕ) ⦆    ≡⟨ cong (_⋯ ⦅ x/t &/⋯ ϕ ⦆) (wk-`/id s (y & ϕ)) ⟩
+          `/id (y & ϕ) ⋯ weaken s ⋯ ⦅ (x/t &/⋯ ϕ) ⦆     ≡⟨ cong (_⋯ ⦅ x/t &/⋯ ϕ ⦆) (wk-`/id s (y & ϕ)) ⟩
           `/id (wk s (y & ϕ)) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆         ≡⟨ sym (&/⋯-⋯ (wk s (y & ϕ)) ⦅ (x/t &/⋯ ϕ) ⦆) ⟩
           `/id (wk s (y & ϕ) &/⋯ ⦅ (x/t &/⋯ ϕ) ⦆)       ≡⟨⟩
           `/id (x & ((ϕ ↑ s) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆))  ∎)
@@ -446,8 +446,8 @@ record Syntax : Set₁ where
 
         --! ContextLookupI
         wk-drop-∈ : (x : S ∋ s) → drop-∈ x S ⊢ s' → S ⊢ s'
-        wk-drop-∈ zero     t = t ⋯ weakenᵣ _
-        wk-drop-∈ (suc x)  t = wk-drop-∈ x t ⋯ weakenᵣ _
+        wk-drop-∈ zero     t = t ⋯ weaken _
+        wk-drop-∈ (suc x)  t = wk-drop-∈ x t ⋯ weaken _
 
         --! ContextLookupII
         wk-telescope : Ctx S → S ∋ s → S ∶⊢ s
@@ -477,7 +477,7 @@ record Syntax : Set₁ where
                    id/⊢`        : ∀ {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋ x ∶ t → Γ ∋/⊢ id/` x ∶ t
                    ⊢`/id        : ∀ {e : S ∋/⊢ s} {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋/⊢ e ∶ t → Γ ⊢ `/id e ∶ t
                    ∋wk/⊢wk      : ∀ (Γ : Ctx S) (t' : S ∶⊢ s) (e : S ∋/⊢ s') (t : S ∶⊢ s') →
-                                  Γ ∋/⊢ e ∶ t → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weakenᵣ _)
+                                  Γ ∋/⊢ e ∶ t → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weaken _)
           --! }
 
             --! MapTyping
@@ -492,14 +492,14 @@ record Syntax : Set₁ where
             --! LiftTypingProof
             _∋↑/⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
               subst (  ((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
-                    (  t ⋯ ϕ ⋯ weakenᵣ s                      ≡⟨ ⋯-↑-wk t ϕ s ⟩
-                       t ⋯ weakenᵣ s ⋯ (ϕ ↑ s)                ≡⟨⟩
+                    (  t ⋯ ϕ ⋯ weaken s                       ≡⟨ ⋯-↑-wk t ϕ s ⟩
+                       t ⋯ weaken s ⋯ (ϕ ↑ s)                 ≡⟨⟩
                        wk-telescope (t ∷ₜ Γ₁) zero ⋯ (ϕ ↑ s)  ∎ )
                     (  id/⊢` {x = zero} {Γ = (t ⋯ ϕ) ∷ₜ Γ₂} refl )
             _∋↑/⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@(suc y) _ refl =
               subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (suc y & (ϕ ↑ s)) ∶_)
-                    (wk-telescope Γ₁ y ⋯ ϕ ⋯ weakenᵣ s         ≡⟨ ⋯-↑-wk _ ϕ s ⟩
-                     wk-telescope Γ₁ y ⋯ weakenᵣ s ⋯ (ϕ ↑ s)   ≡⟨⟩
+                    (wk-telescope Γ₁ y ⋯ ϕ ⋯ weaken s          ≡⟨ ⋯-↑-wk _ ϕ s ⟩
+                     wk-telescope Γ₁ y ⋯ weaken s ⋯ (ϕ ↑ s)    ≡⟨⟩
                      wk-telescope (t ∷ₜ Γ₁) (suc y) ⋯ (ϕ ↑ s)  ∎)
                     (∋wk/⊢wk _ _ _ _ (⊢ϕ y _ refl))
 
@@ -510,13 +510,13 @@ record Syntax : Set₁ where
             ⊢⦅_⦆ {s} {S} {Γ} {t} {T} ⊢x/t x@zero _ refl =
               subst (Γ ∋/⊢ t ∶_)
                     (T                                   ≡⟨ sym (wk-cancels-⦅⦆-⋯ T t) ⟩
-                     T ⋯ weakenᵣ _ ⋯ ⦅ t ⦆               ≡⟨⟩
+                     T ⋯ weaken _ ⋯ ⦅ t ⦆                ≡⟨⟩
                      wk-telescope (T ∷ₜ Γ) zero ⋯ ⦅ t ⦆  ∎)
                     ⊢x/t
             ⊢⦅_⦆ {s} {S} {Γ} {t} {T} ⊢x/t x@(suc y) _ refl =
               subst (Γ ∋/⊢ id/` y ∶_)
                     (wk-telescope Γ y                       ≡⟨ sym (wk-cancels-⦅⦆-⋯ _ t) ⟩
-                     wk-telescope Γ y ⋯ weakenᵣ _ ⋯ ⦅ t ⦆   ≡⟨⟩
+                     wk-telescope Γ y ⋯ weaken _ ⋯ ⦅ t ⦆    ≡⟨⟩
                      wk-telescope (T ∷ₜ Γ) (suc y) ⋯ ⦅ t ⦆  ∎)
                     (id/⊢` refl)
 

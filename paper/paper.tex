@@ -540,7 +540,7 @@
   The regularity of the multi-sorted syntax makes it easy to define a
   structure for arbitrary syntaxes, i.e. with arbitrarily many syntactic categories and variable types:
   \LibCode\KSyntax
-  The first three fields record the definitions of sorts, terms, and variable introduction.
+  \noindent The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
   \ACode{\AField{`\_}} is injective, which is trivially true for
   constructors. The instantiation for our System F syntax is
@@ -556,7 +556,7 @@
 
   \ExampleCode\FExampleSubRen
 
-  A renaming \ACode{S₁ \ADef{→ᵣ} S₂} maps variables from \ACode{S₁} to
+  \noindent A renaming \ACode{S₁ \ADef{→ᵣ} S₂} maps variables from \ACode{S₁} to
   variables from \ACode{S₂}.
   A substitution \ACode{S₁ \ADef{→ₛ} S₂} maps variables from \ACode{S₁} to
   terms with free variables from \ACode{S₂}.
@@ -680,8 +680,7 @@
     \caption{Map Operations}
     \label{fig:map-ops}
   \end{figure}
-  Figure~\ref{fig:map-ops} shows the usual operations for renamings and substitutions
-  generalized to maps.\footnote{
+  Figure~\ref{fig:map-ops} shows the usual operations for renamings and substitutions.\footnote{
     The definitions are included directly in the record module of the
     Kit, so they are implicitly parameterized over a kit.
   }
@@ -720,7 +719,7 @@
   The operation of applying a map to a term depends on the concrete
   structure of a term, so we define a structure for it:
   \LibCode\KTraversal
-  The fields of this structure have the following meaning:
+  \noindent The fields of this structure have the following meaning:
   \begin{itemize}
   \item
     \ACode{t \AField{⋯} ϕ} applies the map \ACode{ϕ} (a renaming or
