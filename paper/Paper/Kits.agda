@@ -387,7 +387,7 @@ record Syntax : Set₁ where
       dist-↑-⦅⦆ :  ∀  ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ W₂ : WkKit K₂ ⦄
                       ⦃ C₁ : CKit K₁ K₂ K ⦄ ⦃ C₂ : CKit K₂ K K ⦄
                       (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
-                   (⦅ x/t ⦆ ·[ C₁ ] ϕ) ~ ((ϕ ↑ s) ·[ C₂ ] ⦅ (x/t &/⋯ ϕ) ⦆)
+                   (⦅ x/t ⦆ ·[ C₁ ] ϕ) ~ ((ϕ ↑ s) ·[ C₂ ] ⦅ x/t &/⋯ ϕ ⦆)
       --! DistLiftSingleProof
       dist-↑-⦅⦆ {s = s} ⦃ K₁ ⦄ ⦃ K₂ ⦄ ⦃ K ⦄ ⦃ W₂ ⦄ ⦃ C₁ ⦄ ⦃ C₂ ⦄ x/t ϕ sx x@zero = `/id-injective (
           `/id ⦃ K ⦄ (x & (⦅ x/t ⦆ ·[ C₁ ] ϕ))                ≡⟨⟩
@@ -408,7 +408,7 @@ record Syntax : Set₁ where
       dist-↑-⦅⦆-⋯ :  ∀  ⦃ K₁ : Kit _∋/⊢₁_ ⦄ ⦃ W₁ : WkKit K₁ ⦄ ⦃ K₂ : Kit _∋/⊢₂_ ⦄ ⦃ W₂ : WkKit K₂ ⦄
                         ⦃ K : Kit _∋/⊢_ ⦄ ⦃ C₁ : CKit K₁ K₂ K ⦄ ⦃ C₂ : CKit K₂ K K ⦄
                         (t : (s ∷ S₁) ⊢ s') (x/t : S₁ ∋/⊢[ K₁ ] s) (ϕ : S₁ –[ K₂ ]→ S₂) →
-                     t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ (x/t &/⋯ ϕ) ⦆
+                     t ⋯ ⦅ x/t ⦆ ⋯ ϕ ≡ t ⋯ (ϕ ↑ s) ⋯ ⦅ x/t &/⋯ ϕ ⦆
       --! DistLiftSingleTraverseProof
       dist-↑-⦅⦆-⋯ t x/t ϕ =
         t ⋯ ⦅ x/t ⦆ ⋯ ϕ                   ≡⟨ fusion t ⦅ x/t ⦆ ϕ ⟩
