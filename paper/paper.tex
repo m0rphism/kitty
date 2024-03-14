@@ -416,10 +416,9 @@
   Section~\ref{sec:composition} introduces composition of multi-sorted
   substitions and renamings, and an abstraction to unify all four
   compositions.
-  Section~\ref{sec:types} shows how to define types
-  and type contexts for multi-sorted syntax.
-  Section~\ref{sec:typing} shows how to define a multi-sorted typing relation,
-  and an abstraction to unify type preservation lemmas for renamings and substitutions.
+  Section~\ref{sec:types} shows how to define types,
+  type contexts, and typing relations,
+  and presents an abstraction for unifying type preservation lemmas for renamings and substitutions.
   % Section~\ref{sec:subjectreduction} introduces a small-step
   % operational semantics for System F and proves subject reduction.
   Section~\ref{sec:reflection} describes the class of object languages covered by
@@ -1248,8 +1247,9 @@
   % \AppCode\FFusionProofRest
   % \AppCode\FCTraversal
 
-  \section{Types \& Contexts}
+  \section{Types \& Typing}
   \label{sec:types}
+  \subsection{Types}
   % To define type contexts and a typing relation, we need to know
   % which sorts of terms play the role of types for other sorts of terms.
   % When modeling a typed language with multi-sorted syntax, both terms
@@ -1289,47 +1289,40 @@
   \LibCode\KTypes
 
   \subsection{Type Contexts}
-  Equipped with a notion of types, we define a type context as a
-  function that maps variables to types of the same sort.
-
-  As we want our framework to support dependent types, we allow a type returned
-  by the type context to use all variables bound previously in the type context.
-  This is achieved by the \ACode{drop-∈} function, which cuts off all
+  \begin{figure}
+    \centering
+    % \LibCode\KContextHelper
+    \begin{minipage}{1.0\linewidth}
+      \begin{minipage}{0.57\linewidth}
+        \LibCode\KContexts
+        \LibCode\KContextLookupI
+        \LibCode\KVariableTyping
+      \end{minipage}
+      \begin{minipage}{0.43\linewidth}
+        \LibCode\KContextExt
+        \LibCode\KContextLookupII
+        \vspace{10.1mm}
+      \end{minipage}
+    \end{minipage}
+    \caption{Type Contexts}
+    \label{fig:type-contexts}
+  \end{figure}
+  Equipped with a notion of types, we are ready to define type contexts as shown
+  in Figure~\ref{fig:type-contexts}.
+  The type \ACode{\ADef{Ctx} S} describes type contexts with bindings for variables from \ACode{S}
+  as functions that map variables to types of the same sort.
+  As we want our framework to support dependent types, we allow a type
+  in the context to use all variables bound previously in the context.
+  This is achieved with \ACode{\ADef{drop-∈} x S}, which cuts off all
   sorts from \ACode{S} that are at smaller or equal positions than a variable \ACode{x}.
-  Contexts \ACode{Γ} can be extended by a type \ACode{t} via \ACode{t \ADef{∷ᵗ} Γ}.
+  The \ACode{\ADef{\_∷ᵗ\_}} function extends a context with a new binding.
+  The \ACode{\ADef{lookup}} function looks up the type of a variable in a context
+  and weakens it appropriately.
+  Finally, a variable typing \ACode{Γ \ADef{∋} x \ADef{∶} t} is defined in terms of \ACode{\ADef{lookup}}.
 
-  % \LibCode\KContextHelper
-  \noindent
-  \begin{minipage}{1.0\linewidth}
-    \begin{minipage}{0.5\linewidth}
-      \LibCode\KContexts
-      \vspace{3mm}
-    \end{minipage}
-    \begin{minipage}{0.5\linewidth}
-      \LibCode\KContextExt
-    \end{minipage}
-  \end{minipage}
-
-  To use a type returned from a type context, it needs to be
-  weakened appropriately through the \ACode{\ADef{wk-telescope}} function:
-
-  \noindent
-  \begin{minipage}[t]{1.0\linewidth}
-    \begin{minipage}[t]{0.45\linewidth}
-      \LibCode\KContextLookupII
-    \end{minipage}
-    \begin{minipage}[t]{0.55\linewidth}
-      \LibCode\KContextLookupI
-    \end{minipage}
-  \end{minipage}
-  % \LibCode\KContextLookup
-
-  We then define a variable typing as followed:
-  \LibCode\KVariableTyping
-
-  \section{Typing}
-  \label{sec:typing}
-  Now that we have a notion of types and type context, we are ready to define
+  \subsection{Typing}
+  \label{sec:types:typing}
+  Now that we have a notion of types and type contexts, we are ready to define
   the multi-sorted typing relation for System F, which describes both
   typing and kinding:
   \AppCode\FTyping

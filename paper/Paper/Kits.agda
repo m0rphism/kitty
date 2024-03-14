@@ -464,14 +464,14 @@ record Syntax : Set₁ where
         wk-drop-∈ (suc x)  t = wk-drop-∈ x t ⋯ weaken _
 
         --! ContextLookupII
-        wk-telescope : Ctx S → S ∋ s → S ∶⊢ s
-        wk-telescope Γ x = wk-drop-∈ x (Γ _ x)
+        lookup : Ctx S → S ∋ s → S ∶⊢ s
+        lookup Γ x = wk-drop-∈ x (Γ _ x)
 
         infix   4  _∋_∶_
 
         --! VariableTyping
         _∋_∶_ : Ctx S → S ∋ s → S ∶⊢ s → Set
-        Γ ∋ x ∶ t = wk-telescope Γ x ≡ t
+        Γ ∋ x ∶ t = lookup Γ x ≡ t
 
         --! Typing
         record Typing : Set₁ where
@@ -506,15 +506,15 @@ record Syntax : Set₁ where
             --! LiftTypingProof
             _⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
               subst (  ((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
-                    (  t ⋯ ϕ ⋯ weaken s                       ≡⟨ ⋯-↑-wk t ϕ s ⟩
-                       t ⋯ weaken s ⋯ (ϕ ↑ s)                 ≡⟨⟩
-                       wk-telescope (t ∷ₜ Γ₁) zero ⋯ (ϕ ↑ s)  ∎ )
+                    (  t ⋯ ϕ ⋯ weaken s                 ≡⟨ ⋯-↑-wk t ϕ s ⟩
+                       t ⋯ weaken s ⋯ (ϕ ↑ s)           ≡⟨⟩
+                       lookup (t ∷ₜ Γ₁) zero ⋯ (ϕ ↑ s)  ∎ )
                     (  id/⊢` {x = zero} {Γ = (t ⋯ ϕ) ∷ₜ Γ₂} refl )
             _⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@(suc y) _ refl =
               subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (suc y & (ϕ ↑ s)) ∶_)
-                    (wk-telescope Γ₁ y ⋯ ϕ ⋯ weaken s          ≡⟨ ⋯-↑-wk _ ϕ s ⟩
-                     wk-telescope Γ₁ y ⋯ weaken s ⋯ (ϕ ↑ s)    ≡⟨⟩
-                     wk-telescope (t ∷ₜ Γ₁) (suc y) ⋯ (ϕ ↑ s)  ∎)
+                    (lookup Γ₁ y ⋯ ϕ ⋯ weaken s          ≡⟨ ⋯-↑-wk _ ϕ s ⟩
+                     lookup Γ₁ y ⋯ weaken s ⋯ (ϕ ↑ s)    ≡⟨⟩
+                     lookup (t ∷ₜ Γ₁) (suc y) ⋯ (ϕ ↑ s)  ∎)
                     (⊢wk _ _ _ _ (⊢ϕ y _ refl))
 
             --! SingleTyping
@@ -523,15 +523,15 @@ record Syntax : Set₁ where
             --! SingleTypingProof
             ⊢⦅_⦆ {s} {S} {Γ} {t} {T} ⊢x/t x@zero _ refl =
               subst (Γ ∋/⊢ t ∶_)
-                    (T                                   ≡⟨ sym (wk-cancels-⦅⦆-⋯ T t) ⟩
-                     T ⋯ weaken _ ⋯ ⦅ t ⦆                ≡⟨⟩
-                     wk-telescope (T ∷ₜ Γ) zero ⋯ ⦅ t ⦆  ∎)
+                    (T                             ≡⟨ sym (wk-cancels-⦅⦆-⋯ T t) ⟩
+                     T ⋯ weaken _ ⋯ ⦅ t ⦆          ≡⟨⟩
+                     lookup (T ∷ₜ Γ) zero ⋯ ⦅ t ⦆  ∎)
                     ⊢x/t
             ⊢⦅_⦆ {s} {S} {Γ} {t} {T} ⊢x/t x@(suc y) _ refl =
               subst (Γ ∋/⊢ id/` y ∶_)
-                    (wk-telescope Γ y                       ≡⟨ sym (wk-cancels-⦅⦆-⋯ _ t) ⟩
-                     wk-telescope Γ y ⋯ weaken _ ⋯ ⦅ t ⦆    ≡⟨⟩
-                     wk-telescope (T ∷ₜ Γ) (suc y) ⋯ ⦅ t ⦆  ∎)
+                    (lookup Γ y                       ≡⟨ sym (wk-cancels-⦅⦆-⋯ _ t) ⟩
+                     lookup Γ y ⋯ weaken _ ⋯ ⦅ t ⦆    ≡⟨⟩
+                     lookup (T ∷ₜ Γ) (suc y) ⋯ ⦅ t ⦆  ∎)
                     (id/⊢` refl)
 
           --! TypingNotation {
