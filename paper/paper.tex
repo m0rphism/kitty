@@ -1318,7 +1318,8 @@
   The \ACode{\ADef{\_∷ᵗ\_}} function extends a context with a new binding.
   The \ACode{\ADef{lookup}} function looks up the type of a variable in a context
   and weakens it appropriately.
-  Finally, a variable typing \ACode{Γ \ADef{∋} x \ADef{∶} t} is defined in terms of \ACode{\ADef{lookup}}.
+  Finally, a variable typing \ACode{Γ \ADef{∋} x \ADef{∶} t}
+  states that \ACode{\ADef{lookup} Γ x} is \ACode{t}.
 
   \subsection{Typing}
   \label{sec:types:typing}
@@ -1337,16 +1338,16 @@
   The interesting cases are:
   \begin{itemize}
   \item
-    the variable typing constructor \ACode{\ACon{⊢`}}, which covers both expression- and
+    the variable rule \ACode{\ACon{⊢`}}, which covers both expression- and
     type-variables, analogously to the variable term constructor;
   \item
-    the typing \ACode{\ACon{⊢λ}} of a lambda abstraction, which
+    the lambda rule \ACode{\ACon{⊢λ}}, which
     weakens the codomain type \ACode{t₂}.
     This is necessary, because multi-sorted syntax allows types
     to depend on expressions, so the typing derivation for \ACode{e}
     has to account for a variable, which is not used by the type; and
   \item
-    the kinding constructor \ACode{\ACon{⊢τ}} states that all types
+    the kinding rule \ACode{\ACon{⊢τ}} states that all types
     have kind \ACode{\ACon{★}}. This is sufficient for System F as types
     are automatically well-kinded due to intrinsic scoping.
   \end{itemize}
@@ -1366,8 +1367,8 @@
   \ACode{\ACon{TTraversal}}, which provides
   substitution-preserves-typing for all \ACode{\ACon{TKit}}s.
   \LibCode\KTKit
-  The operations are completely analogous to those of a \ACode{\ACon{Kit}}, but talk
-  about typing instead of terms.
+  The fields of a \ACode{\ACon{TKit}} are completely analogous to
+  those of a \ACode{\ACon{Kit}}, but talk about typing instead of terms.
   Building on the fields of a \ACode{\ACon{TKit}}, we define further operations:
   \begin{itemize}
   \item
