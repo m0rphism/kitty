@@ -168,7 +168,7 @@ private variable
 --! Typing
 data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
   ⊢`  :  ∀ {x : S ∋ s} {T : S ∶⊢ s} → Γ ∋ x ∶ T → Γ ⊢ ` x ∶ T
-  ⊢λ  :  ∀ {e : (𝕖 ∷ S) ⊢ 𝕖} → (t₁ ∷ₜ Γ) ⊢ e ∶ (wk _ t₂) → Γ ⊢ λx e ∶ t₁ ⇒ t₂
+  ⊢λ  :  ∀ {e : (𝕖 ∷ S) ⊢ 𝕖} → (t₁ ∷ₜ Γ) ⊢ e ∶ (wk 𝕖 t₂) → Γ ⊢ λx e ∶ t₁ ⇒ t₂
   ⊢Λ  :  (k ∷ₜ Γ) ⊢ e ∶ t₂ → Γ ⊢ Λα e ∶ ∀[α∶ k ] t₂
   ⊢·  :  Γ ⊢ e₁ ∶ t₁ ⇒ t₂ → Γ ⊢ e₂ ∶ t₁ → Γ ⊢ e₁ · e₂ ∶ t₂
   ⊢∙  :  {Γ : Ctx S} → (k₂ ∷ₜ Γ) ⊢ t₁ ∶ k₁ → Γ ⊢ t₂ ∶ k₂ → Γ ⊢ e₁ ∶ ∀[α∶ k₂ ] t₁ →

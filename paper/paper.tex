@@ -1285,6 +1285,7 @@
   by the typing context to use all variables bound previously in the typing context.
   This is achieved by the \ACode{drop-∈} function, which cuts off all
   sorts from \ACode{S} that are at smaller or equal positions than a variable \ACode{x}.
+  Contexts \ACode{Γ} can be extended by a type \ACode{t} via \ACode{t \ADef{∷ᵗ} Γ}.
 
   % \LibCode\KContextHelper
   \noindent
@@ -1318,7 +1319,7 @@
   \section{Typing}
   \label{sec:typing}
   Now that we have a notion of types and type context, we are ready to define
-  the multi-sorted typing relation for System F, incorporating both
+  the multi-sorted typing relation for System F, which describes both
   typing and kinding:
   \AppCode\FTyping
 
@@ -1335,8 +1336,8 @@
     the variable typing constructor, which covers both expression- and
     type-variables, analogously to the variable term constructor;
   \item
-    the typing \ACode{\ACon{⊢λ}} of the lambda abstraction, which
-    weakens the type of the codomain \ACode{t₂}.
+    the typing \ACode{\ACon{⊢λ}} of a lambda abstraction, which
+    weakens codomain type \ACode{t₂}.
     This is necessary, because multi-sorted syntax allows types
     to depend on expressions, so the typing derivation for \ACode{e}
     has to account for a variable, which is not used by the type.
@@ -1387,7 +1388,8 @@
 
   We then define a \ACode{\ACon{TTraversal}} analogously to
   \ACode{\ACon{Traversal}}, but instead of defining the application of
-  maps, it defines the type preservation of applying maps:
+  % maps, it defines that the application of typed maps preserves term types:
+  maps, it defines that the application of a typed map to a typed term yields a typed term:
   \LibCode\KTTraversal
   Given a term \ACode{e} with typing \ACode{⊢e} and
   a renaming/substitution \ACode{ϕ} with typing \ACode{⊢ϕ},
@@ -1500,9 +1502,9 @@
   datastructures can also be inlined into the syntax definition as terms
   of a new sort.
 
-  We believe restriction 3 can be lifted partially to allow for
-  example the encoding of linear types that requires context
-  splitting.
+  % We believe restriction 3 can be lifted partially to allow for
+  % example the encoding of linear types that requires context
+  % splitting.
 
 
   \section{Case Studies}
@@ -1653,27 +1655,33 @@
 
   \section{Conclusion}
   \label{sec:conclusion}
-  We want to focus our future work in the following directions:
-  \begin{itemize}
-  \item
-    Enabling more object languages by allowing subterms with less
-    restrictions on the form of \ACode{S}, allowing recursive
-    occurences in container types like lists and finite functions, and
-    adding support for substructural types as in
-    \cite{DBLP:journals/corr/abs-2005-02247}.
-  \item
-    Extending the class of typing relations covered by
-    the \ACode{\ACon{TTraversal}} abstraction and identifying
-    a subclass for which it can be derived.
-  \item
-    Developing a decision procedure for equational
-    substitution lemmas based on $\sigma$-calculus as in Autosubst
-    \cite{DBLP:conf/itp/SchaferTS15, DBLP:conf/cpp/StarkSK19}.
-  \item
-    Developing abstractions and derived lemmas beyond substition and
-    type preservation, e.g. for confluence or denotational semantics
-    as in \cite{DBLP:journals/pacmpl/AllaisA0MM18}.
-  \end{itemize}
+  We have presented a framework for deriving untyped substitution and its properties, and
+  and abstraction for proving type preservation of substitution with a single lemma.
+
+  Using extrinsic typing allowed us to unify the renamings and
+  substitutions for variables of arbitrary many syntactic categories.
+
+  Furthermore, extrinsic typing allowed us treat untyped substitution
+  and its properties separately from typing and type preservation.
+  This has the benefit that the former can be derived automatically for virtually
+  any object language, while the latter is more domain specific and
+  can be handled independently.
+
+  We believe our framework is a viable alternative to intrinsic
+  typing, as the duplication is automated away.
+
+  We believe our framework is particularly useful for polymorphic languages,
+  where intrinsic typing requires necessarily to deal with multiple substitutions
+  and their interactions. Furthermore, in more complex scenarios, intrinsic typing
+  can easily lead to subst-hell, which is avoided with extrinsic typing.
+  
+  We belive the core limitation of our framework are the typing kits, which
+  require a classical ternary typing relation. However, this problem is hard
+  to avoid as typing relations can become arbitrarily complicated.
+  To adapt the framework to more complicated type systems, only the typing
+  kits and typing traversals need to be extended, which we have successfully
+  done for linear typing ala Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} and
+  general substructural typing ala Licata et al\cite{DBLP:conf/rta/LicataSR17}.
 
   % \bibliographystyle{ACM-Reference-Format}
   \bibliography{paper}
