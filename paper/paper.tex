@@ -1644,11 +1644,32 @@
   We think it is worthwile to explore if their semantics abstraction
   can also be generalized to multi-sorted typing relations.
 
-  \subsection{Fibrational}
-  \cite{DBLP:conf/rta/LicataSR17}
+  % \subsection{Fibrational}
+  % \cite{DBLP:conf/rta/LicataSR17}
 
   \subsection{Pure Type Systems}
-  \cite{DBLP:conf/esop/BarendregtH90, berarditowards, terlouw1989een}
+  Pure Type Systems\cite{DBLP:conf/esop/BarendregtH90, berarditowards, terlouw1989een}
+  describe a class of typed lambda calculi parameterized over a set of
+  sorts, dependencies between sorts, and rules for quantification.
+
+  While pure type systems may seem very similar to multi-sorted
+  syntax, they are actually quite different:
+  \begin{itemize}
+  \item 
+    In multi-sorted syntax, sorts describe syntactic categories of terms. Terms
+    of different sorts are kept syntactically different, e.g. the set of expressions
+    \ACode{S ⊢ 𝕖} and types \ACode{S ⊢ 𝕥} in our System F example.
+  \item 
+    In pure type systems, sorts are universes, e.g. as
+    in Agda a type has itself type \ACode{Set} or a kind has type \ACode{Set₁}.
+    Terms which have different sorts as types, do still belong to the
+    same syntactic category.
+  \end{itemize}
+
+  We can use our framework to model pure type systems, but the sorts of pure type systems
+  do not correspond to the sorts of the multi-sorted syntax. The multi-sorted syntax
+  has just a single sort that describes all terms, as it is common for
+  dependently typed languages.
 
   \section{Conclusion}
   \label{sec:conclusion}
