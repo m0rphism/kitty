@@ -417,7 +417,7 @@
   substitions and renamings, and an abstraction to unify all four
   compositions.
   Section~\ref{sec:types} shows how to define types
-  and typing contexts for multi-sorted syntax.
+  and type contexts for multi-sorted syntax.
   Section~\ref{sec:typing} shows how to define a multi-sorted typing relation,
   and an abstraction to unify type preservation lemmas for renamings and substitutions.
   % Section~\ref{sec:subjectreduction} introduces a small-step
@@ -451,7 +451,7 @@
   \item
     an implementation as an Agda framework featuring
     a reflection algorithm, representation independence for
-    substitutions and typing contexts, heterogeneous equality between
+    substitutions and type contexts, heterogeneous equality between
     renamings and substitutions, and absence of postulated axioms.
   \item
     three case studies in using our approach to prove subject reduction
@@ -1250,11 +1250,11 @@
 
   \section{Types \& Contexts}
   \label{sec:types}
-  % To define typing contexts and a typing relation, we need to know
+  % To define type contexts and a typing relation, we need to know
   % which sorts of terms play the role of types for other sorts of terms.
   % When modeling a typed language with multi-sorted syntax, both terms
   % and types are represented as terms, but with different sorts.
-  % To define typing contexts and a typing relation, we need to record for each term
+  % To define type contexts and a typing relation, we need to record for each term
   % from 
   % describe terms, and ocan be mapped to 
   % In a typed language,
@@ -1288,12 +1288,12 @@
   the type for a term \ACode{S \ACon{⊢} s}.
   \LibCode\KTypes
 
-  \subsection{Typing Context}
-  Equipped with a notion of types, we define a typing context as a
+  \subsection{Type Contexts}
+  Equipped with a notion of types, we define a type context as a
   function that maps variables to types of the same sort.
 
   As we want our framework to support dependent types, we allow a type returned
-  by the typing context to use all variables bound previously in the typing context.
+  by the type context to use all variables bound previously in the type context.
   This is achieved by the \ACode{drop-∈} function, which cuts off all
   sorts from \ACode{S} that are at smaller or equal positions than a variable \ACode{x}.
   Contexts \ACode{Γ} can be extended by a type \ACode{t} via \ACode{t \ADef{∷ᵗ} Γ}.
@@ -1310,7 +1310,7 @@
     \end{minipage}
   \end{minipage}
 
-  To use a type returned from a typing context, it needs to be
+  To use a type returned from a type context, it needs to be
   weakened appropriately through the \ACode{\ADef{wk-telescope}} function:
 
   \noindent
@@ -1344,14 +1344,14 @@
   The interesting cases are:
   \begin{itemize}
   \item
-    the variable typing constructor, which covers both expression- and
+    the variable typing constructor \ACode{\ACon{⊢`}}, which covers both expression- and
     type-variables, analogously to the variable term constructor;
   \item
     the typing \ACode{\ACon{⊢λ}} of a lambda abstraction, which
-    weakens codomain type \ACode{t₂}.
+    weakens the codomain type \ACode{t₂}.
     This is necessary, because multi-sorted syntax allows types
     to depend on expressions, so the typing derivation for \ACode{e}
-    has to account for a variable, which is not used by the type.
+    has to account for a variable, which is not used by the type; and
   \item
     the kinding constructor \ACode{\ACon{⊢τ}} states that all types
     have kind \ACode{\ACon{★}}. This is sufficient for System F as types
