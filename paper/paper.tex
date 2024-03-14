@@ -391,7 +391,7 @@
   \subsection{Structure}
   \label{sec:introduction:structure}
 
-  The rest of this paper will introduce our framework using System F
+  The rest of this paper introduces our framework using System F
   as a running example for a substitution-preserves-typing proof.
 
   Code of the framework is displayed in gray boxes.
@@ -402,9 +402,10 @@
   In this paper we present a simplified version of the actual
   framework, focusing on the core concepts. We present all necessary
   definitions and lemmas, but omit some proofs for the sake of
-  space. The omitted proofs can be found in Appendix~\ref{sec:proofs}
-  and in the supplementary material.
-  The full framework is available on Github: \textcolor{blue}{\url{https://github.com/m0rphism/kitty}}
+  space. The omitted proofs can be found in our supplementary material,
+  which includes the simplified framework (504 lines of code) and the
+  System F formalization (228 lines of code).
+  The full framework including the case studies is available on Github: \textcolor{blue}{\url{https://github.com/m0rphism/kitty}}
   % The full framework is available online.\footnote{See supplementary material. In the final version, this text will be replaced by a link to github.}
 
   The rest of this paper is structured as follows:
@@ -469,7 +470,7 @@
   variables \ACode{n}.
   \ACode{\ACon{Expr}}essions are additionally indexed by the number of
   free expression variables \ACode{m}.
-  Variables \ACode{\ACon{`\_}} are represented as DeBruijn-indices, where
+  Variables \ACode{\ACon{`\_}} are represented as de Bruijn indices, where
   \ACode{\ACon{Fin} n} is the type of \ACode{n} elements.
 
   We identify two drawbacks with this style of syntax:
@@ -497,7 +498,7 @@
   \LibCode\KSortTy
   \AppCode\FSort
   
-  The term type \ACode{S \ACon{⊢} s} is then indexed by its sort
+  The term type \ACode{S \ACon{⊢} s} is indexed by its sort
   \ACode{s} and the sorts of its free variables \ACode{S}.
   For example, \ACode{\ACon{[𝕥, 𝕥] ⊢ 𝕖}} is the type of expressions
   (\ACode{\ACon{𝕖}}) with two free type-variables (\ACode{\ACon{𝕥}}).
@@ -510,7 +511,7 @@
   correspond to type environments.
 
   As it is typical in intrinsic typing, variables are represented as
-  typed (in our case sorted) DeBruijn indices \ACode{S \ACon{∋} s}, i.e.\
+  typed (in our case sorted) de Bruijn indices \ACode{S \ACon{∋} s}, i.e.\
   values of the usual proof-relevant list-membership relation:
   \LibCode\KVariables
 
@@ -535,7 +536,8 @@
   % structure for syntaxes of arbitrary object-languages, i.e.\ syntaxes
   % with arbitrary amounts of syntactic categories and variables:
   The regularity of the multi-sorted syntax makes it easy to define a
-  structure for arbitrary syntaxes, i.e. with arbitrarily many syntactic categories and variable types:
+  structure for arbitrary syntaxes, i.e.\ syntaxes with arbitrarily
+  many syntactic categories and variable types:
   \LibCode\KSyntax
   \noindent The first three fields record the definitions of sorts, terms, and variable introduction.
   The last field records that variable introduction
@@ -570,7 +572,7 @@
 
   % \subsection{The Need for Renamings}
   % \label{sec:maps:renamings}
-  % A problem with mechanizing languages with DeBruijn-indices is that
+  % A problem with mechanizing languages with de bruijn indices is that
   % the operation of applying a substitution \ACode{σ} to a term
   % \ACode{t} cannot be defined directly by structural recursion on
   % \ACode{t}.
@@ -607,7 +609,7 @@
   \label{sec:maps:kits}
   To avoid the duplication between renamings and substitutions,
   McBride\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
-  introduced the \emph{Kit} abstraction.%
+  introduced the \emph{kit} abstraction.
   % \footnote{
   %   While kits were originally formulated for intrinsically-typed languages,
   %   they nicely extend to our extrinsically-typed multi-sorted syntax, whose
@@ -615,7 +617,7 @@
   % }
   % A \ACode{Kit} is a structure that captures the commonalities
   % between variables and terms:
-  A \ACode{Kit} is a structure that allows to abstract over whether
+  A kit is a structure that allows to abstract over whether
   something is a term or a variable. The intention is to instantiate
   this structure exactly twice (once for variables and once for terms),
   and then write definitions, which are parameterized over a kit and
@@ -642,7 +644,7 @@
     \ACode{\AField{`/id}} converts a \ACode{S ∋/⊢ s} into a term \ACode{S \AField{⊢} s}
     and is analogous to the \ACode{\AField{id/`}} operation.
   \item 
-    \ACode{\AField{wk}} shifts the DeBruin-Indices in a \ACode{S ∋/⊢ s}.
+    \ACode{\AField{wk}} shifts the de Bruin indices in a variable or term.
     The new, unused variable \ACode{\ACon{zero}} can assume any sort \ACode{s'}.
     For variables, \ACode{\AField{wk}} is the successor \ACode{\ACon{suc}}.
     For terms, \ACode{\AField{wk}} means applying a shifting renaming to the term.
@@ -677,10 +679,9 @@
     \caption{Map Operations}
     \label{fig:map-ops}
   \end{figure}
-  Figure~\ref{fig:map-ops} shows the usual operations for renamings and substitutions.\footnote{
-    The definitions are included directly in the record module of the
-    Kit, so they are implicitly parameterized over a kit.
-  }
+  Figure~\ref{fig:map-ops} shows the usual operations for renamings and substitutions.
+  The definitions are included directly in the record module of the
+  Kit, so they are implicitly parameterized over a kit.
   The type \ACode{S₁ \ADef{→ₖ} S₂} unifies
     renamings \ACode{S₁ \ADef{→ᵣ} S₂} and
     substitutions \ACode{S₁ \ADef{→ₛ} S₂}.
@@ -776,7 +777,7 @@
     we apply it to the subterm to account for the bound variable.
   \end{itemize}
 
-  Then we prove that applying an identity map does not change the term:
+  We then prove that applying an identity map does not change the term:
   \AppCode\FTraversalId
   \AppCode\FTraversalIdProofInteresting
   We only display and discuss the interesting cases:
@@ -784,7 +785,7 @@
   \item
     in the variable case \ACode{\ACon{`} x}, the
     \ACon{\AField{id/`}} from the identity map meets the \ACon{\AField{`/id}}
-    from the traversal operation, so we use \ACon{\AField{`/`-is-`}}.
+    from the traversal operation, so we need to use \ACon{\AField{`/`-is-`}}.
   \item
     in the lambda abstraction case \ACode{\ACon{λx} e}, the
     traversal lifts the identity under its binder. Here
@@ -851,7 +852,7 @@
   \ACode{\AField{fusion}} lemma, which states that applying two maps \ACode{ϕ₁}
   and \ACode{ϕ₂} in sequence to a term \ACode{t}, is the same as
   applying their composition \ACode{(ϕ₁~\AField{·ₖ}~ϕ₂)} to \ACode{t},
-  i.e. \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}.
+  i.e.\ \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}.
   % $$
   % \ACode{(t \AField{⋯} ϕ₁) \AField{⋯} ϕ₂ \ACon{≡} t \AField{⋯} (ϕ₁ \AField{·ₖ} ϕ₂)}
   % $$
@@ -887,8 +888,8 @@
   consider all four compositions between renamings and substitutions.
   While the composition operations can be defined independently of each other,
   the \ACode{\AField{fusion}} lemma for two substitutions, depends on the
-  \ACode{\AField{fusion}} lemmas between a renaming and a substitution, which in
-  turn depend on the \ACode{\AField{fusion}} lemma between two renamings.
+  \ACode{\AField{fusion}} lemmas for a renaming and a substitution, which in
+  turn depend on the \ACode{\AField{fusion}} lemma for two renamings.
 
   Previous work on kits\cite{DBLP:journals/jar/BentonHKM12} addresses this
   issue by duplicating the definitions and using tactics to reduce
@@ -946,7 +947,7 @@
   \noindent But to abstract over \ACode{ϕ₁}, the \ACode{\ACon{Kit}} abstraction
   is not sufficient: while it allows us to abstract over what we are applying, i.e.
   a renaming or a substitution, it does not allow us to
-  abstract over what we are applying it to, i.e. a variable or a term.
+  abstract over what we are applying it to, i.e.\ a variable or a term.
   For the latter we have two distinct operations \ACode{\ADef{\_\&\_}}
   and \ACode{\ADef{\_⋯\_}}.
 
@@ -1046,15 +1047,27 @@
   Similarly, as it was the case for the \ACode{\ADef{Kit}} and \ACode{\ADef{Traversal}}
   structures, the idea is that we instantiate the \ACode{\ADef{CTraversal}} for
   our object language, and in return the framework defines the concrete \ACode{\ADef{CKit}}
-  instances for us:
+  instances for us. Hence, we define them in the record module of \ACode{\ADef{CTraversal}}:
   \LibCode\KCKitInstances
-  Interestingly, the \ACode{\ADef{Cₛ}} instance has another
-  \ACode{\ADef{CKit}} parameter.
-  This allows us to first use \ACode{\ADef{Cᵣ}} as an argument,
-  which yields the \ACode{\ADef{CKit}} between substitutions
-  and renamings, and then use this resulting \ACode{\ADef{CKit}}
-  as an argument for the case with two substitutions.
-  As shown below, Agda's instance resolution is up for the task:
+  \noindent
+  \ACode{\ADef{Cᵣ}} is the compose kit between a renaming and another kit \ACode{K}.
+  \ACode{\ADef{Cₛ}} is the compose kit between a substitution and another kit \ACode{K},
+  and requires that we already know how to compose a \ACode{K}-map with a renaming.
+  The following verifies that \ACode{\ADef{Cᵣ}} and \ACode{\ADef{Cₛ}} indeed get us all four compositions:
+
+  \noindent
+  \begin{minipage}[t]{0.244\linewidth}
+  \ExampleCode\KCKitInstancesConcreteI
+  \end{minipage}
+  \begin{minipage}[t]{0.244\linewidth}
+  \ExampleCode\KCKitInstancesConcreteII
+  \end{minipage}
+  \begin{minipage}[t]{0.244\linewidth}
+  \ExampleCode\KCKitInstancesConcreteIII
+  \end{minipage}
+  \begin{minipage}[t]{0.244\linewidth}
+  \ExampleCode\KCKitInstancesConcreteIV
+  \end{minipage}
 
   % To get the \ACode{\ADef{CKit}} between substitutions and
   % renamings, the argument \ACode{\ADef{Cᵣ}} is used.
@@ -1062,13 +1075,14 @@
   % for \ACode{\ADef{Cₛ}} to yield the \ACode{\ADef{CKit}}
   % between two substitutions. As shown below, Agda's instance
   % resolution is up for the task:
-  \noindent
-  \begin{minipage}[t]{0.5\linewidth}
-  \LibCode\KCKitInstancesConcreteI
-  \end{minipage}
-  \begin{minipage}[t]{0.5\linewidth}
-  \LibCode\KCKitInstancesConcreteII
-  \end{minipage}
+
+  % \noindent
+  % \begin{minipage}[t]{0.5\linewidth}
+  % \LibCode\KCKitInstancesConcreteI
+  % \end{minipage}
+  % \begin{minipage}[t]{0.5\linewidth}
+  % \LibCode\KCKitInstancesConcreteII
+  % \end{minipage}
 
   % \LibCode\KCKitNotation
 
@@ -1471,7 +1485,7 @@
   \label{sec:reflection}
   We used Agda's reflection mechanism to derive
   instantiations related to all structures for untyped substitition,
-  i.e. \ACode{\ACon{Syntax}}, \ACode{\ACon{Traversal}} and
+  i.e.\ \ACode{\ACon{Syntax}}, \ACode{\ACon{Traversal}} and
   \ACode{\ACon{CTraversal}}.
 
   To gain insight into the class of object languages supported by our
@@ -1608,7 +1622,7 @@
   vectorized substitutions.
   Compared to our work, the syntax they generate takes the form of
   what we described as \emph{unsorted syntax} in
-  Section~\ref{sec:syntax}, i.e. different syntactic categories are
+  Section~\ref{sec:syntax}, i.e.\ different syntactic categories are
   described by different types with different amount of indices for
   variable counts. To eliminate the need for interaction lemmas, they
   define the notion of \emph{vectorized substitution}, which combines
@@ -1660,8 +1674,8 @@
     of different sorts are kept syntactically different, e.g. the set of expressions
     \ACode{S ⊢ 𝕖} and types \ACode{S ⊢ 𝕥} in our System F example.
   \item 
-    In pure type systems, sorts are universe types, i.e. they play the role
-    of \ACode{Set}, \ACode{Set₁}, etc.\ in Agda.
+    In pure type systems, sorts are universe types, e.g.\ like
+    \ACode{Set} and \ACode{Set₁} in Agda.
     Terms which have different sorts as types, do still belong to the
     same syntactic category.
   \end{itemize}

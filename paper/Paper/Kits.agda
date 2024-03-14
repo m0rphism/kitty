@@ -348,22 +348,35 @@ record Syntax : Set₁ where
       -- --! }
 
       --! CKitInstances {
-        Cᵣ : ⦃ K₂ : Kit _∋/⊢_ ⦄ → CKit Kᵣ K₂ K₂
+        Cᵣ : ⦃ K : Kit _∋/⊢_ ⦄ → CKit Kᵣ K K
         Cᵣ = record  { _&/⋯_     = _&_
                      ; &/⋯-⋯     = λ x ϕ → sym (⋯-var x ϕ)
                      ; &/⋯-wk-↑  = λ x ϕ → refl }
-        Cₛ :  ⦃ K₂ : Kit _∋/⊢_ ⦄ ⦃ C : CKit K₂ Kᵣ K₂ ⦄ ⦃ W₂ : WkKit K₂ ⦄ → CKit Kₛ K₂ Kₛ
+        Cₛ :  ⦃ K : Kit _∋/⊢_ ⦄ ⦃ C : CKit K Kᵣ K ⦄ ⦃ W : WkKit K ⦄ → CKit Kₛ K Kₛ
         Cₛ = record  { _&/⋯_     = _⋯_
                      ; &/⋯-⋯     = λ t ϕ → refl
                      ; &/⋯-wk-↑  = λ t ϕ → ⋯-↑-wk t ϕ _ }
       --! }
 
+      -- --! CKitInstancesConcreteI
+      -- Cᵣᵣ : CKit Kᵣ Kᵣ Kᵣ;  Cᵣᵣ = Cᵣ ⦃ K = Kᵣ ⦄
+      -- Cᵣₛ : CKit Kᵣ Kₛ Kₛ;  Cᵣₛ = Cᵣ ⦃ K = Kₛ ⦄
+      -- --! CKitInstancesConcreteII
+      -- Cₛᵣ : CKit Kₛ Kᵣ Kₛ;  Cₛᵣ = Cₛ ⦃ C = Cᵣᵣ ⦄
+      -- Cₛₛ : CKit Kₛ Kₛ Kₛ;  Cₛₛ = Cₛ ⦃ C = Cₛᵣ ⦄
+
       --! CKitInstancesConcreteI
-      Cᵣᵣ : CKit Kᵣ Kᵣ Kᵣ;  Cᵣᵣ = Cᵣ
-      Cₛᵣ : CKit Kₛ Kᵣ Kₛ;  Cₛᵣ = Cₛ
+      Cᵣᵣ : CKit Kᵣ Kᵣ Kᵣ
+      Cᵣᵣ = Cᵣ ⦃ K = Kᵣ ⦄
       --! CKitInstancesConcreteII
-      Cᵣₛ : CKit Kᵣ Kₛ Kₛ;  Cᵣₛ = Cᵣ
-      Cₛₛ : CKit Kₛ Kᵣ Kₛ;  Cₛₛ = Cₛ
+      Cᵣₛ : CKit Kᵣ Kₛ Kₛ
+      Cᵣₛ = Cᵣ ⦃ K = Kₛ ⦄
+      --! CKitInstancesConcreteIII
+      Cₛᵣ : CKit Kₛ Kᵣ Kₛ
+      Cₛᵣ = Cₛ ⦃ C = Cᵣᵣ ⦄
+      --! CKitInstancesConcreteIV
+      Cₛₛ : CKit Kₛ Kₛ Kₛ
+      Cₛₛ = Cₛ ⦃ C = Cₛᵣ ⦄
 
       --! WeakenCancelsSingle
       wk-cancels-⦅⦆ : ∀ ⦃ K : Kit _∋/⊢_ ⦄ (x/t : S ∋/⊢[ K ] s) → (weaken s ·ₖ ⦅ x/t ⦆) ~ id
