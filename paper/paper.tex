@@ -1002,8 +1002,8 @@
     % \LibCode\KDistLiftComposeProof
   \end{itemize}
 
-  A \ACode{\ACon{CTraversal}} provides a generic \ACode{\AField{fusion}} lemma
-  that works for any composition described by a \ACode{\ACon{CKit}}:
+  A \ACode{\ACon{CTraversal}} provides a \ACode{\AField{fusion}} lemma
+  that works for the composition of any \ACode{\ACon{CKit}}:
   \LibCode\KCTraversal
 
   \noindent Given a \ACode{\ACon{CTraversal}}, we can prove the usual lemmas about interactions
@@ -1046,8 +1046,10 @@
     % \LibCode\KDistLiftSingleTraverse
     % % \LibCode\KDistLiftSingleTraverseProof
   \end{itemize}
-  We define \ACode{\ACon{CKit}} instances for each of the four
-  combinations between renamings and substitutions:
+  Similarly, as it was the case for the \ACode{\ADef{Kit}} and \ACode{\ADef{Traversal}}
+  structures, the idea is that we instantiate the \ACode{\ADef{CTraversal}} for
+  our object language, and in return the framework defines the concrete \ACode{\ADef{CKit}}
+  instances for us:
   \LibCode\KCKitInstances
   Interestingly, the \ACode{\ADef{Cₛ}} instance has another
   \ACode{\ADef{CKit}} parameter.
@@ -1253,7 +1255,7 @@
   \ACode{\ACon{𝕜}}.
   The following structure is used to teach our framework about types:
   \LibCode\KTypeSorts
-  For System F the instantiation is
+  For System F, the instantiation is
   \AppCode\FTypes
   There are two things to discuss:
   \begin{enumerate}
@@ -1269,7 +1271,7 @@
     sorts, but we still need to provide one, as \ACode{\AField{↑ᵗ}} is a
     total function.
     For such sorts, we can simply use arbitrary sort types, as the
-    formalization will never use them.
+    formalization will have no typing rules that use them.
   \end{enumerate}
   To hide the existential, we define \ACode{S \ACon{∶⊢} s}, which represents
   the type for a term \ACode{S \ACon{⊢} s}.
@@ -1301,11 +1303,11 @@
 
   \noindent
   \begin{minipage}[t]{1.0\linewidth}
-    \begin{minipage}[t]{0.55\linewidth}
-      \LibCode\KContextLookupI
-    \end{minipage}
     \begin{minipage}[t]{0.45\linewidth}
       \LibCode\KContextLookupII
+    \end{minipage}
+    \begin{minipage}[t]{0.55\linewidth}
+      \LibCode\KContextLookupI
     \end{minipage}
   \end{minipage}
   % \LibCode\KContextLookup
