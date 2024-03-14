@@ -222,21 +222,17 @@
   % acting on the same syntactic categories!
   If one is not careful, a formalization of a language with type and
   kind polymorphism can easily end up with 24 slightly changed copies of
-  the whole substitution machinery, which for de Bruijn indices tends to
-  include at least a type for parallel substitution, and operations for
-  application, extension, weakening, lifting, singleton substitution,
-  extensional equality, and an identity substitution - and this is not
-  counting the slightly changed copies of interaction lemmas!
+  the whole substitution machinery!
   Clearly, this situation is in need of automation.
 
-  Our framework approaches this problem using a combination of
+  Our framework approaches this problem by using a combination of
   abstractions and reflection in the context of extrinsically typed,
   intrinsically scoped syntax with de Bruijn indices.
   The user can write a language specification using regular Agda
   definitions (no generic encodings) and our framework derives
   definitions and lemmas for untyped substitution, and provides an
   abstraction to prove type preservation for all substitution operations
-  using a single lemma. For System F, our framework allows to prove
+  with only a single lemma. For System F, our framework allows to prove
   subject reduction with only a single handwritten lemma for type
   preservation.
 
@@ -396,7 +392,7 @@
   \label{sec:introduction:structure}
 
   The rest of this paper will introduce our framework using System F
-  as a running example for a type soundness proof.
+  as a running example for a substitution-preserves-typing proof.
 
   Code of the framework is displayed in gray boxes.
   Code of examples is written in yellow boxes.
@@ -408,9 +404,10 @@
   definitions and lemmas, but omit some proofs for the sake of
   space. The omitted proofs can be found in Appendix~\ref{sec:proofs}
   and in the supplementary material.
-  The full framework is available online.\footnote{See supplementary material. In the final version, this text will be replaced by a link to github.}
+  The full framework is available on Github: \textcolor{blue}{\url{https://github.com/m0rphism/kitty}}
+  % The full framework is available online.\footnote{See supplementary material. In the final version, this text will be replaced by a link to github.}
 
-  The rest of this paper is structured as followed:
+  The rest of this paper is structured as follows:
   Section~\ref{sec:syntax} introduces the multi-sorted syntax and compares it to the
   more common unsorted syntax.
   Section~\ref{sec:maps} introduces multi-sorted substitutions and renamings, and
@@ -418,8 +415,8 @@
   Section~\ref{sec:composition} introduces composition of multi-sorted
   substitions and renamings, and an abstraction to unify all four
   compositions.
-  Section~\ref{sec:types} shows how to introduce the notion of types
-  for multi-sorted syntax and how to define typing contexts.
+  Section~\ref{sec:types} shows how to define types
+  and typing contexts for multi-sorted syntax.
   Section~\ref{sec:typing} shows how to define a multi-sorted typing relation,
   and an abstraction to unify type preservation lemmas for renamings and substitutions.
   % Section~\ref{sec:subjectreduction} introduces a small-step
@@ -428,7 +425,7 @@
   our reflection algorithm.
   Section~\ref{sec:casestudies} discusses our case studies.
   Section~\ref{sec:related} discusses related work.
-  Section~\ref{sec:conclusion} concludes with future work.
+  Section~\ref{sec:conclusion} concludes.
 
   \subsection{Contributions}
   \label{sec:introduction:contributions}
@@ -437,15 +434,15 @@
     a novel approach for formalizing intrinsically-scoped syntax with
     multiple variable sorts as a special kind of intrinsically-typed
     syntax, we call \emph{multi-sorted syntax};
-  \item
-    an adaptation of McBride's
-    kit-abstraction\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
-    for unifying renamings and substitutions to multi-sorted syntax;
+  % \item
+  %   an adaptation of McBride's
+  %   kit-abstraction\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
+  %   for unifying renamings and substitutions to multi-sorted syntax;
   \item
     a novel abstraction for composition and it's metatheory, unifying
     the four compositions between renamings and substitutions;
   \item
-    a novel abstraction for typing relations, unifying type
+    a novel abstraction for typing, unifying type
     preservation of renaming and substitution;
   \item
     a formalized specification of a large class of object languages
