@@ -2,11 +2,7 @@ module Paper.Kits where
 
 --! K >
 
-open import Data.Nat using (ℕ; zero; suc)
-open import Data.List using (List; []; _∷_; drop; _++_)
-open import Data.List.Membership.Propositional public using (_∈_)
-open import Data.List.Relation.Unary.Any public using (here; there)
-open import Data.List.Relation.Unary.All as All public using (All; []; _∷_)
+open import Data.List using (List; []; _∷_; _++_)
 open import Data.Product using (∃-syntax; _,_; proj₁; proj₂)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; module ≡-Reasoning)
 open ≡-Reasoning
@@ -439,25 +435,10 @@ record Syntax : Set₁ where
         _∶⊢_ : ∀ {t} → List (Sort Var) → Sort t → Set
         S ∶⊢ s = S ⊢ proj₂ (↑ᵗ s)
 
-        --! ContextHelper {
-        depth : ∀ {ℓ} {A : Set ℓ} {x : A} {xs : List A} → xs ∋ x → ℕ
-        depth zero     = zero
-        depth (suc x)  = suc (depth x)
-
-        -- We need to drop one extra using `suc`, because otherwise the types in a
-        -- context are allowed to use themselves.
-        drop-∈ :  ∀ {ℓ} {A : Set ℓ} {x : A} {xs : List A} →
-                  xs ∋ x → List A → List A
-        drop-∈ e xs = drop (suc (depth e)) xs
-        --! }
-
         --! Contexts
         data Ctx : List (Sort Var) → Set where
           []   : Ctx []
           _∷_  : S ∶⊢ s → Ctx S → Ctx (s ∷ S)
-
-        variable
-          Γ Γ₁ Γ₂ : Ctx S
 
         --! ContextLookup
         lookup : Ctx S → S ∋ s → S ∶⊢ s
@@ -597,11 +578,14 @@ record Syntax : Set₁ where
 
             -- Substitution preserves typing
 
-            private variable
-              e : S ⊢ s
-              t : S ∶⊢ s
-              σ : S₁ →ₛ S₂
+            module ExampleX (Γ₁ : Ctx S₁) (Γ₂ : Ctx S₂) (e : S₁ ⊢ s) (t : S₁ ∶⊢ s) (σ : S₁ →ₛ S₂) where
+              --! TPresS
+              _⊢⋯ₛ_ : Γ₁ ⊢ e ∶ t → σ ∶ Γ₁ ⇒ₛ Γ₂ → Γ₂ ⊢ (e ⋯ σ) ∶ (t ⋯ σ)
+              _⊢⋯ₛ_ = _⊢⋯_
 
-            --! TPresS
-            _⊢⋯ₛ_ : Γ₁ ⊢ e ∶ t → σ ∶ Γ₁ ⇒ₛ Γ₂ → Γ₂ ⊢ (e ⋯ σ) ∶ (t ⋯ σ)
+            _⊢⋯ₛ_ : ∀ {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
+                      {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {σ : S₁ →ₛ S₂} →
+                    Γ₁ ⊢ e ∶ t →
+                    σ ∶ Γ₁ ⇒ₛ Γ₂ →
+                    Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
             _⊢⋯ₛ_ = _⊢⋯_

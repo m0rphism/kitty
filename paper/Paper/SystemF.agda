@@ -1,4 +1,4 @@
-module Paper.Definitions where
+module Paper.SystemF where
 
 --! F >
 
