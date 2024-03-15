@@ -456,6 +456,9 @@ record Syntax : Set₁ where
           []   : Ctx []
           _∷_  : S ∶⊢ s → Ctx S → Ctx (s ∷ S)
 
+        variable
+          Γ Γ₁ Γ₂ : Ctx S
+
         --! ContextLookup
         lookup : Ctx S → S ∋ s → S ∶⊢ s
         lookup (t ∷ Γ) zero     = t ⋯ weaken ⦃ Kᵣ ⦄ _
@@ -489,8 +492,8 @@ record Syntax : Set₁ where
 
             --! MapTyping
             _∶_⇒ₖ_ : S₁ –[ K ]→ S₂ → Ctx S₁ → Ctx S₂ → Set
-            _∶_⇒ₖ_ {S₁} {S₂} ϕ Γ₁ Γ₂ =
-              ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) → Γ₁ ∋ x ∶ t → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
+            _∶_⇒ₖ_ {S₁} {S₂} ϕ Γ₁ Γ₂ = ∀ {s₁} (x : S₁ ∋ s₁) (t : S₁ ∶⊢ s₁) →
+              Γ₁ ∋ x ∶ t → Γ₂ ∋/⊢ (x & ϕ) ∶ (t ⋯ ϕ)
 
             --! LiftTyping
             _⊢↑_ :  ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄ {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂}
@@ -578,7 +581,6 @@ record Syntax : Set₁ where
               --               ; ⊢wk  = λ Γ t' e t ⊢e →
               --                   ⊢e ⊢⋯ ⊢wk Γ t' }
 
-            --! TTraversalNotation {
             open TKit TKᵣ public using () renaming
               (⊢wk to ⊢wkᵣ; _∶_⇒ₖ_ to _∶_⇒ᵣ_; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ)
             open TKit TKₛ public using () renaming
@@ -595,10 +597,11 @@ record Syntax : Set₁ where
 
             -- Substitution preserves typing
 
-            _⊢⋯ₛ_ : ∀ {S₁ S₂ st} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {s : Sort st}
-                      {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {σ : S₁ →ₛ S₂} →
-                    Γ₁ ⊢ e ∶ t →
-                    σ ∶ Γ₁ ⇒ₛ Γ₂ →
-                    Γ₂ ⊢ e ⋯ σ ∶ t ⋯ σ
+            private variable
+              e : S ⊢ s
+              t : S ∶⊢ s
+              σ : S₁ →ₛ S₂
+
+            --! TPresS
+            _⊢⋯ₛ_ : Γ₁ ⊢ e ∶ t → σ ∶ Γ₁ ⇒ₛ Γ₂ → Γ₂ ⊢ (e ⋯ σ) ∶ (t ⋯ σ)
             _⊢⋯ₛ_ = _⊢⋯_
-            --! }

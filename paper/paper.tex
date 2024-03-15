@@ -1349,15 +1349,17 @@
   \ACode{\ACon{TTraversal}}, which provides
   substitution-preserves-typing for all \ACode{\ACon{TKit}}s.
   \LibCode\KTKit
-  The fields of a \ACode{\ACon{TKit}} are completely analogous to
-  those of a \ACode{\ACon{Kit}}, but talk about typing instead of terms.
-  Building on the fields of a \ACode{\ACon{TKit}}, we define further operations:
+  The first field abstracts over variable and term typing.
+  The other fields express typings for the fields of a \ACode{\ACon{Kit}}.
+  Building on the fields of a \ACode{\ACon{TKit}}, we define map
+  typing and type preservation for map lifting and the singleton map
+  in the record module of \ACode{\ACon{TKit}}:
   \begin{itemize}
   \item
     Using the variable/term typing, we can define a renaming/substitution typing:
     \LibCode\KMapTyping
     \ACode{ϕ \ADef{∶} Γ₁ \ADef{⇒ₖ} Γ₂} states that \ACode{ϕ} is a map that takes
-    terms in \ACode{Γ₁} to terms in \ACode{Γ₂}.
+    terms from \ACode{Γ₁} to terms in \ACode{Γ₂}.
   \item 
     Lifting a map preserves its typing:
     \LibCode\KLiftTyping
@@ -1381,14 +1383,17 @@
   Given a term \ACode{e} with typing \ACode{⊢e} and
   a renaming/substitution \ACode{ϕ} with typing \ACode{⊢ϕ},
   the term \ACode{⊢e \AField{⊢⋯} ⊢ϕ} is a typing for \ACode{e \AField{⋯} ϕ}.
-  The large amount of kit-parameters does not impose any restriction,
-  as both our \ACode{\ACon{Kit}}s support the \ACode{\ACon{WkKit}}
-  extension and can be composed arbitrarily. They only make the previously
-  built machinery available to the proof of \ACode{\AField{\_⊢⋯\_}}.
 
-  Given a \ACode{\ACon{TTraversal}}, we can easily instantiate the
-  \ACode{\ACon{TKits}} for variables and terms:
+  As before, we define the \ACode{\ACon{TKit}} instances in the record module
+  of \ACode{\ACon{TTraversal}}:
   \LibCode\KTypingInstances
+
+  The large amount of kit-parameters of \ACode{\AField{\_⊢⋯\_}} does
+  not impose any restriction, as both our \ACode{\ACon{Kit}}s support
+  the \ACode{\ACon{WkKit}} extension and can be composed
+  arbitrarily. Agda's instance resolution allows us to easily
+  instantiate a concrete substitution-preserves-typing lemma:
+  \LibCode\KTPresS
 
   % \noindent
   % \begin{minipage}[t]{0.5\linewidth}
