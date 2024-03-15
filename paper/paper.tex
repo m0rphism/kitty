@@ -1289,37 +1289,19 @@
   \LibCode\KTypes
 
   \subsection{Type Contexts}
-  \begin{figure}
-    \centering
-    % \LibCode\KContextHelper
-    \begin{minipage}{1.0\linewidth}
-      \begin{minipage}{0.57\linewidth}
-        \LibCode\KContexts
-        \LibCode\KContextLookupI
-        \LibCode\KVariableTyping
-      \end{minipage}
-      \begin{minipage}{0.43\linewidth}
-        \LibCode\KContextExt
-        \LibCode\KContextLookupII
-        \vspace{10.1mm}
-      \end{minipage}
-    \end{minipage}
-    \caption{Type Contexts}
-    \label{fig:type-contexts}
-  \end{figure}
-  Equipped with a notion of types, we are ready to define type contexts as shown
-  in Figure~\ref{fig:type-contexts}.
-  \ACode{\ADef{Ctx} S} describes type contexts with bindings for variables from \ACode{S}
-  as functions that map variables to types of the same sort.
+  Equipped with a notion of types, we are ready to define type contexts.
   As we want our framework to support dependent types, we allow a type
-  in the context to use all variables bound previously in the context.
-  This is achieved with \ACode{\ADef{drop-∈} x S}, which cuts off all
-  sorts from \ACode{S} that are at smaller or equal positions than a variable \ACode{x}.
-  The \ACode{\ADef{\_∷ᵗ\_}} function extends a context with a new binding.
-  The \ACode{\ADef{lookup}} function looks up the type of a variable in a context
-  and weakens it appropriately.
+  in the context to use all variables bound previously in the context:
+  \LibCode\KContexts
+
+  When looking up the type of a variable, we need to weaken it for each
+  binding that comes after the variable:
+  \LibCode\KContextLookup
+
+  % Finally, we define a variable typing:
   Finally, a variable typing \ACode{Γ \ADef{∋} x \ADef{∶} t}
-  states that \ACode{\ADef{lookup} Γ x} is \ACode{t}.
+  states that looking up \ACode{x} in \ACode{Γ} yields \ACode{t}:
+  \LibCode\KVariableTyping
 
   \subsection{Typing}
   \label{sec:types:typing}

@@ -452,23 +452,14 @@ record Syntax : Set₁ where
         --! }
 
         --! Contexts
-        Ctx : List (Sort Var) → Set
-        Ctx S = ∀ s → (x : S ∋ s) → drop-∈ x S ∶⊢ s
-        --! ContextExt
-        _∷ₜ_ : S ∶⊢ s → Ctx S → Ctx (s ∷ S)
-        (t ∷ₜ Γ) _ zero     = t
-        (t ∷ₜ Γ) _ (suc x)  = Γ _ x
+        data Ctx : List (Sort Var) → Set where
+          []   : Ctx []
+          _∷_  : S ∶⊢ s → Ctx S → Ctx (s ∷ S)
 
-        --! ContextLookupI
-        wk-drop-∈ : (x : S ∋ s) → drop-∈ x S ⊢ s' → S ⊢ s'
-        wk-drop-∈ zero     t = t ⋯ weaken _
-        wk-drop-∈ (suc x)  t = wk-drop-∈ x t ⋯ weaken _
-
-        --! ContextLookupII
+        --! ContextLookup
         lookup : Ctx S → S ∋ s → S ∶⊢ s
-        lookup Γ x = wk-drop-∈ x (Γ _ x)
-
-        infix   4  _∋_∶_
+        lookup (t ∷ Γ) zero     = t ⋯ weaken ⦃ Kᵣ ⦄ _
+        lookup (t ∷ Γ) (suc x)  = lookup Γ x ⋯ weaken ⦃ Kᵣ ⦄ _
 
         --! VariableTyping
         _∋_∶_ : Ctx S → S ∋ s → S ∶⊢ s → Set
@@ -493,7 +484,7 @@ record Syntax : Set₁ where
                    id/⊢`    : ∀ {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋ x ∶ t → Γ ∋/⊢ id/` x ∶ t
                    ⊢`/id    : ∀ {e : S ∋/⊢ s} {t : S ∶⊢ s} {Γ : Ctx S} → Γ ∋/⊢ e ∶ t → Γ ⊢ `/id e ∶ t
                    ⊢wk      : ∀ (Γ : Ctx S) (t' : S ∶⊢ s) (e : S ∋/⊢ s') (t : S ∶⊢ s') →
-                              Γ ∋/⊢ e ∶ t → (t' ∷ₜ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weaken _)
+                              Γ ∋/⊢ e ∶ t → (t' ∷ Γ) ∋/⊢ wk _ e ∶ (t ⋯ weaken _)
           --! }
 
             --! MapTyping
@@ -503,36 +494,36 @@ record Syntax : Set₁ where
 
             --! LiftTyping
             _⊢↑_ :  ⦃ W : WkKit K ⦄ ⦃ C₁ : CKit K Kᵣ K ⦄ {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ : S₁ –[ K ]→ S₂}
-                    → ϕ ∶ Γ₁ ⇒ₖ Γ₂ → (t : S₁ ∶⊢ s) → (ϕ ↑ s) ∶ (t ∷ₜ Γ₁) ⇒ₖ ((t ⋯ ϕ) ∷ₜ Γ₂)
+                    → ϕ ∶ Γ₁ ⇒ₖ Γ₂ → (t : S₁ ∶⊢ s) → (ϕ ↑ s) ∶ (t ∷ Γ₁) ⇒ₖ ((t ⋯ ϕ) ∷ Γ₂)
             --! LiftTypingProof
             _⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@zero _ refl =
-              subst (  ((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
+              subst (  ((t ⋯ ϕ) ∷ Γ₂) ∋/⊢ (zero & (ϕ ↑ s)) ∶_ )
                     (  t ⋯ ϕ ⋯ weaken s                 ≡⟨ ⋯-↑-wk t ϕ s ⟩
                        t ⋯ weaken s ⋯ (ϕ ↑ s)           ≡⟨⟩
-                       lookup (t ∷ₜ Γ₁) zero ⋯ (ϕ ↑ s)  ∎ )
-                    (  id/⊢` {x = zero} {Γ = (t ⋯ ϕ) ∷ₜ Γ₂} refl )
+                       lookup (t ∷ Γ₁) zero ⋯ (ϕ ↑ s)  ∎ )
+                    (  id/⊢` {x = zero} {Γ = (t ⋯ ϕ) ∷ Γ₂} refl )
             _⊢↑_ {S₁} {S₂} {s} {Γ₁} {Γ₂} {ϕ} ⊢ϕ t {sx} x@(suc y) _ refl =
-              subst (((t ⋯ ϕ) ∷ₜ Γ₂) ∋/⊢ (suc y & (ϕ ↑ s)) ∶_)
+              subst (((t ⋯ ϕ) ∷ Γ₂) ∋/⊢ (suc y & (ϕ ↑ s)) ∶_)
                     (lookup Γ₁ y ⋯ ϕ ⋯ weaken s          ≡⟨ ⋯-↑-wk _ ϕ s ⟩
                      lookup Γ₁ y ⋯ weaken s ⋯ (ϕ ↑ s)    ≡⟨⟩
-                     lookup (t ∷ₜ Γ₁) (suc y) ⋯ (ϕ ↑ s)  ∎)
+                     lookup (t ∷ Γ₁) (suc y) ⋯ (ϕ ↑ s)  ∎)
                     (⊢wk _ _ _ _ (⊢ϕ y _ refl))
 
             --! SingleTyping
             ⊢⦅_⦆ :  ∀ {s S} {Γ : Ctx S} {x/t : S ∋/⊢ s} {T : S ∶⊢ s} →
-                    Γ ∋/⊢ x/t ∶ T → ⦅ x/t ⦆ ∶ (T ∷ₜ Γ) ⇒ₖ Γ
+                    Γ ∋/⊢ x/t ∶ T → ⦅ x/t ⦆ ∶ (T ∷ Γ) ⇒ₖ Γ
             --! SingleTypingProof
             ⊢⦅_⦆ {s} {S} {Γ} {t} {T} ⊢x/t x@zero _ refl =
               subst (Γ ∋/⊢ t ∶_)
-                    (T                             ≡⟨ sym (wk-cancels-⦅⦆-⋯ T t) ⟩
-                     T ⋯ weaken _ ⋯ ⦅ t ⦆          ≡⟨⟩
-                     lookup (T ∷ₜ Γ) zero ⋯ ⦅ t ⦆  ∎)
+                    (T                            ≡⟨ sym (wk-cancels-⦅⦆-⋯ T t) ⟩
+                     T ⋯ weaken _ ⋯ ⦅ t ⦆         ≡⟨⟩
+                     lookup (T ∷ Γ) zero ⋯ ⦅ t ⦆  ∎)
                     ⊢x/t
             ⊢⦅_⦆ {s} {S} {Γ} {t} {T} ⊢x/t x@(suc y) _ refl =
               subst (Γ ∋/⊢ id/` y ∶_)
-                    (lookup Γ y                       ≡⟨ sym (wk-cancels-⦅⦆-⋯ _ t) ⟩
-                     lookup Γ y ⋯ weaken _ ⋯ ⦅ t ⦆    ≡⟨⟩
-                     lookup (T ∷ₜ Γ) (suc y) ⋯ ⦅ t ⦆  ∎)
+                    (lookup Γ y                      ≡⟨ sym (wk-cancels-⦅⦆-⋯ _ t) ⟩
+                     lookup Γ y ⋯ weaken _ ⋯ ⦅ t ⦆   ≡⟨⟩
+                     lookup (T ∷ Γ) (suc y) ⋯ ⦅ t ⦆  ∎)
                     (id/⊢` refl)
 
           --! TypingNotation {
