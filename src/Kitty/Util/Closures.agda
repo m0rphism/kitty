@@ -5,7 +5,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 module SymmetricClosure {ℓ₁ ℓ₂} (A : Set ℓ₁) (R : A → A → Set ℓ₂) where
   infix 3 Sym
-  data Sym : A → A → Set ℓ₂ where
+  data Sym : A → A → Set (ℓ₁ ⊔ ℓ₂) where
     fwd : ∀ {a₁ a₂} → R a₁ a₂ → Sym a₁ a₂  
     bwd : ∀ {a₁ a₂} → R a₂ a₁ → Sym a₁ a₂  
 
