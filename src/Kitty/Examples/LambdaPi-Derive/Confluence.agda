@@ -4,274 +4,441 @@ open import Data.Product using (∃-syntax; _×_ ; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using () renaming (_∋_ to _by_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; module ≡-Reasoning)
-open ≡-Reasoning
 
 open import Kitty.Examples.LambdaPi-Derive.Definitions
 open import Kitty.Util.Closures
-open import Kitty.Typing.ITerms compose-traversal ctx-repr
+open import Kitty.Typing.TypingKit compose-traversal ctx-repr
+  record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = λ { refl ⊢e → ⊢e } }
+open TypingKit ⦃ … ⦄
 
-≡ᶜ-cong-⊢ : ∀ {µ M} {Γ₁ Γ₂ : Ctx µ} {e : µ ⊢ M} {t : µ ∶⊢ M} → 
-  Γ₁ ≡ᶜ Γ₂ →
-  Γ₁ ⊢ e ∶ t →
-  Γ₂ ⊢ e ∶ t
-≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢` {x = x} ∋x) = ⊢` (≡ᶜ-cong-∋ x Γ₁≡Γ₂ ∋x)
-≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢λ ⊢e₁ ⊢e₂)    = ⊢λ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶ Γ₁≡Γ₂ refl) ⊢e₂)
-≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢∀ ⊢e₁ ⊢e₂)    = ⊢∀ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ (≡ᶜ-cong-▶ Γ₁≡Γ₂ refl) ⊢e₂)
-≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢· ⊢e₁ ⊢e₂)    = ⊢· (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₁) (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e₂)
-≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢★              = ⊢★
-≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢≣ eq ⊢e)      = ⊢≣ eq (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢e)
+↪*-trans : e₁ ↪* e₂ → e₂ ↪* e₃ → e₁ ↪* e₃
+↪*-trans ↪*-refl         q = q
+↪*-trans (↪*-step p₁ p₂) q = ↪*-step p₁ (↪*-trans p₂ q)
 
-iterms : ITerms
-iterms = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+↪*-map :
+  {f : S ⊢ 𝕖 → S' ⊢ 𝕖} →
+  (F : ∀ {e₁ e₂ : S ⊢ 𝕖} → e₁ ↪ e₂ → f e₁ ↪ f e₂) →
+  e₁ ↪* e₂ →
+  f e₁ ↪* f e₂
+↪*-map F ↪*-refl = ↪*-refl
+↪*-map F (↪*-step p q) = ↪*-step (F p) (↪*-map F q)
 
-open import Kitty.Typing.IKit compose-traversal ctx-repr iterms
-open IKit ⦃ … ⦄
+module ↪*-Reasoning where
+  infix 1 begin_
+  infixr 2 _↪⟨_⟩_ _↪*⟨_⟩_ _≡⟨_⟩_ _≡⟨⟩_
+  infix 3 _∎
 
-ξ-λ* :
-  e ↪* e' →
-  λx e ↪* λx e'
-ξ-λ* = map-↪* ξ-λ
+  begin_ : ∀ {e₁ e₂ : S ⊢ 𝕖} → e₁ ↪* e₂ → e₁ ↪* e₂
+  begin p = p
 
-ξ-∀₁* :
-  t₁ ↪* t₁' →
-  ∀[x∶ t₁ ] t₂ ↪* ∀[x∶ t₁' ] t₂
-ξ-∀₁* = map-↪* ξ-∀₁
+  _↪⟨_⟩_ : ∀ (e₁ {e₂} {e₃} : S ⊢ 𝕖) → e₁ ↪ e₂ → e₂ ↪* e₃ → e₁ ↪* e₃
+  _ ↪⟨ p ⟩ q = ↪*-step p q
 
-ξ-∀₂* :
-  t₂ ↪* t₂' →
-  ∀[x∶ t₁ ] t₂ ↪* ∀[x∶ t₁ ] t₂'
-ξ-∀₂* = map-↪* ξ-∀₂
+  _↪*⟨_⟩_ : ∀ (e₁ {e₂} {e₃} : S ⊢ 𝕖) → e₁ ↪* e₂ → e₂ ↪* e₃ → e₁ ↪* e₃
+  _ ↪*⟨ p ⟩ q = ↪*-trans p q
 
-ξ-·₁* :
-  e₁ ↪* e₁' →
-  e₁ · e₂ ↪* e₁' · e₂
-ξ-·₁* = map-↪* ξ-·₁
+  _≡⟨_⟩_ : ∀ (e₁ {e₂} {e₃} : S ⊢ 𝕖) → e₁ ≡ e₂ → e₂ ↪* e₃ → e₁ ↪* e₃
+  _ ≡⟨ refl ⟩ q = q
 
-ξ-·₂* :
-  e₂ ↪* e₂' →
-  e₁ · e₂ ↪* e₁ · e₂'
-ξ-·₂* = map-↪* ξ-·₂
+  _≡⟨⟩_ : ∀ (e₁ {e₂} {e₃} : S ⊢ 𝕖) → e₁ ↪* e₂ → e₁ ↪* e₂
+  _ ≡⟨⟩ q = q
+
+  _∎ : ∀ (e : S ⊢ 𝕖) → e ↪* e
+  _ ∎ = ↪*-refl
 
 infix   3  _↪ₚ_
-data _↪ₚ_ : µ ⊢ M → µ ⊢ M → Set where
-  ξ-` : ∀ {x : µ ∋ m} →
+data _↪ₚ_ : S ⊢ s → S ⊢ s → Set where
+
+  -- Variables
+
+  ξ-` : ∀ {x : S ∋ s} →
     ` x ↪ₚ ` x
-  β-λ : ∀ {t₁ t₁' : (µ ▷ 𝕖) ⊢ 𝕖} {t₂ t₂' : µ ⊢ 𝕖} →
-    t₁ ↪ₚ t₁' →
-    t₂ ↪ₚ t₂' →
-    (λx t₁) · t₂ ↪ₚ t₁' ⋯ ⦅ t₂' ⦆ₛ
-  ξ-λ :
-    t ↪ₚ t' →
-    λx t ↪ₚ λx t'
+
+  -- Pi Types
+
+  β-λ : ∀ {e₁ e₁' : (S ▷ 𝕖) ⊢ 𝕖} {e₂ e₂' : S ⊢ 𝕖} →
+    e₁ ↪ₚ e₁' →
+    e₂ ↪ₚ e₂' →
+    (λx e₁) · e₂ ↪ₚ e₁' ⋯ ⦅ e₂' ⦆ₛ
+
   ξ-∀ :
     t₁ ↪ₚ t₁' →
     t₂ ↪ₚ t₂' →
     ∀[x∶ t₁ ] t₂ ↪ₚ ∀[x∶ t₁' ] t₂'
+
+  ξ-λ :
+    e ↪ₚ e' →
+    λx e ↪ₚ λx e'
+
   ξ-· :
+    e₁ ↪ₚ e₁' →
+    e₂ ↪ₚ e₂' →
+    e₁ · e₂ ↪ₚ e₁' · e₂'
+
+  -- Sigma Types
+
+  β-proj₁ :
+    e₁ ↪ₚ e₁' →
+    e₂ ↪ₚ e₂' →
+    `proj₁ (e₁ `, e₂) ↪ₚ e₁'
+  β-proj₂ :
+    e₁ ↪ₚ e₁' →
+    e₂ ↪ₚ e₂' →
+    `proj₂ (e₁ `, e₂) ↪ₚ e₂'
+  ξ-∃ :
     t₁ ↪ₚ t₁' →
     t₂ ↪ₚ t₂' →
-    t₁ · t₂ ↪ₚ t₁' · t₂'
-  ξ-★ :
-    ★ ↪ₚ (★ {µ = µ})
+    ∃[x∶ t₁ ] t₂ ↪ₚ ∃[x∶ t₁' ] t₂'
+  ξ-, :
+    e₁ ↪ₚ e₁' →
+    e₂ ↪ₚ e₂' →
+    e₁ `, e₂ ↪ₚ e₁' `, e₂'
+  ξ-proj₁ :
+    e ↪ₚ e' →
+    `proj₁ e ↪ₚ `proj₁ e'
+  ξ-proj₂ :
+    e ↪ₚ e' →
+    `proj₂ e ↪ₚ `proj₂ e'
+
+  -- Equality Types
+
+  β-J :
+    e ↪ₚ e' →
+    `J t `refl e ↪ₚ e'
+  ξ-≡ :
+    e₁ ↪ₚ e₁' →
+    e₂ ↪ₚ e₂' →
+    (e₁ `≡ e₂) ↪ₚ (e₁' `≡ e₂')
+  ξ-refl :
+    `refl {S = S} ↪ₚ `refl
+  ξ-J :
+    t ↪ₚ t' →
+    e₁ ↪ₚ e₁' →
+    e₂ ↪ₚ e₂' →
+    `J t e₁ e₂ ↪ₚ `J t' e₁' e₂'
+
+  -- Universe Type
+
+  ξ-Set :
+    `Set ↪ₚ (`Set {S = S})
 
 ↪ₚ-refl : t ↪ₚ t
 ↪ₚ-refl {t = ` x}          = ξ-`
-↪ₚ-refl {t = λx t}         = ξ-λ ↪ₚ-refl
 ↪ₚ-refl {t = ∀[x∶ t₁ ] t₂} = ξ-∀ ↪ₚ-refl ↪ₚ-refl
+↪ₚ-refl {t = λx t}         = ξ-λ ↪ₚ-refl
 ↪ₚ-refl {t = t₁ · t₂}      = ξ-· ↪ₚ-refl ↪ₚ-refl
-↪ₚ-refl {t = ★}            = ξ-★
+↪ₚ-refl {t = ∃[x∶ t₁ ] t₂} = ξ-∃ ↪ₚ-refl ↪ₚ-refl
+↪ₚ-refl {t = t₁ `, t₂}     = ξ-, ↪ₚ-refl ↪ₚ-refl
+↪ₚ-refl {t = `proj₁ t}     = ξ-proj₁ ↪ₚ-refl
+↪ₚ-refl {t = `proj₂ t}     = ξ-proj₂ ↪ₚ-refl
+↪ₚ-refl {t = e₁ `≡ e₂}     = ξ-≡ ↪ₚ-refl ↪ₚ-refl
+↪ₚ-refl {t = `refl}        = ξ-refl
+↪ₚ-refl {t = `J t e₁ e₂}   = ξ-J ↪ₚ-refl ↪ₚ-refl ↪ₚ-refl
+↪ₚ-refl {t = `Set}         = ξ-Set
 
-open ReflexiveTransitiveClosure₂ (_⊢_) _↪ₚ_ renaming
-  ( ReflTrans to _↪ₚ*_
-  ; map-ReflTrans to map-↪ₚ*
-  ; _⟨_⟩_ to _↪ₚ⟨_⟩_
-  ; _*⟨_⟩_ to _↪ₚ*⟨_⟩_
-  ; _∎ to _↪ₚ∎
-  ; trans to ↪ₚ*-trans
-  ; embed to ↪ₚ*-embed
-  ) hiding (refl; step) public
+data _↪ₚ*_ : S ⊢ s → S ⊢ s → Set where
+  ↪ₚ*-refl : e ↪ₚ* e
+  ↪ₚ*-step : e₁ ↪ₚ e₂ → e₂ ↪ₚ* e₃ → e₁ ↪ₚ* e₃
+
+↪ₚ*-trans : e₁ ↪ₚ* e₂ → e₂ ↪ₚ* e₃ → e₁ ↪ₚ* e₃
+↪ₚ*-trans ↪ₚ*-refl         q = q
+↪ₚ*-trans (↪ₚ*-step p₁ p₂) q = ↪ₚ*-step p₁ (↪ₚ*-trans p₂ q)
+
+↪ₚ*-map :
+  {f : S ⊢ 𝕖 → S' ⊢ 𝕖} →
+  (F : ∀ {e₁ e₂ : S ⊢ 𝕖} → e₁ ↪ₚ e₂ → f e₁ ↪ₚ f e₂) →
+  e₁ ↪ₚ* e₂ →
+  f e₁ ↪ₚ* f e₂
+↪ₚ*-map F ↪ₚ*-refl = ↪ₚ*-refl
+↪ₚ*-map F (↪ₚ*-step p q) = ↪ₚ*-step (F p) (↪ₚ*-map F q)
 
 ↪→↪ₚ : t ↪ t' → t ↪ₚ t'
-↪→↪ₚ β-λ           = β-λ ↪ₚ-refl ↪ₚ-refl
-↪→↪ₚ (ξ-λ t↪t')    = ξ-λ (↪→↪ₚ t↪t')
-↪→↪ₚ (ξ-∀₁ t₁↪t₁') = ξ-∀ (↪→↪ₚ t₁↪t₁') ↪ₚ-refl
-↪→↪ₚ (ξ-∀₂ t₂↪t₂') = ξ-∀ ↪ₚ-refl (↪→↪ₚ t₂↪t₂')
-↪→↪ₚ (ξ-·₁ t₁↪t₁') = ξ-· (↪→↪ₚ t₁↪t₁') ↪ₚ-refl
-↪→↪ₚ (ξ-·₂ t₂↪t₂') = ξ-· ↪ₚ-refl (↪→↪ₚ t₂↪t₂')
+↪→↪ₚ β-λ            = β-λ ↪ₚ-refl ↪ₚ-refl
+↪→↪ₚ (ξ-λ t↪t')     = ξ-λ (↪→↪ₚ t↪t')
+↪→↪ₚ (ξ-∀₁ t₁↪t₁')  = ξ-∀ (↪→↪ₚ t₁↪t₁') ↪ₚ-refl
+↪→↪ₚ (ξ-∀₂ t₂↪t₂')  = ξ-∀ ↪ₚ-refl (↪→↪ₚ t₂↪t₂')
+↪→↪ₚ (ξ-·₁ t₁↪t₁')  = ξ-· (↪→↪ₚ t₁↪t₁') ↪ₚ-refl
+↪→↪ₚ (ξ-·₂ t₂↪t₂')  = ξ-· ↪ₚ-refl (↪→↪ₚ t₂↪t₂')
+↪→↪ₚ β-proj₁        = β-proj₁ ↪ₚ-refl ↪ₚ-refl
+↪→↪ₚ β-proj₂        = β-proj₂ ↪ₚ-refl ↪ₚ-refl
+↪→↪ₚ (ξ-∃₁ t↪t')    = ξ-∃ (↪→↪ₚ t↪t') ↪ₚ-refl
+↪→↪ₚ (ξ-∃₂ t↪t')    = ξ-∃ ↪ₚ-refl (↪→↪ₚ t↪t')
+↪→↪ₚ (ξ-proj₁ t↪t') = ξ-proj₁ (↪→↪ₚ t↪t')
+↪→↪ₚ (ξ-proj₂ t↪t') = ξ-proj₂ (↪→↪ₚ t↪t')
+↪→↪ₚ (ξ-,₁ t↪t')    = ξ-, (↪→↪ₚ t↪t') ↪ₚ-refl
+↪→↪ₚ (ξ-,₂ t↪t')    = ξ-, ↪ₚ-refl (↪→↪ₚ t↪t')
+↪→↪ₚ β-J            = β-J ↪ₚ-refl
+↪→↪ₚ (ξ-≡₁ t↪t')    = ξ-≡ (↪→↪ₚ t↪t') ↪ₚ-refl
+↪→↪ₚ (ξ-≡₂ t↪t')    = ξ-≡ ↪ₚ-refl (↪→↪ₚ t↪t')
+↪→↪ₚ (ξ-J₁ t↪t')    = ξ-J (↪→↪ₚ t↪t') ↪ₚ-refl ↪ₚ-refl
+↪→↪ₚ (ξ-J₂ t↪t')    = ξ-J ↪ₚ-refl (↪→↪ₚ t↪t') ↪ₚ-refl
+↪→↪ₚ (ξ-J₃ t↪t')    = ξ-J ↪ₚ-refl ↪ₚ-refl (↪→↪ₚ t↪t')
 
 ↪*→↪ₚ* : t ↪* t' → t ↪ₚ* t'
-↪*→↪ₚ* refl                = refl
-↪*→↪ₚ* (step t↪t' t'↪*t'') = step (↪→↪ₚ t↪t') (↪*→↪ₚ* t'↪*t'')
+↪*→↪ₚ* ↪*-refl                = ↪ₚ*-refl
+↪*→↪ₚ* (↪*-step t↪t' t'↪*t'') = ↪ₚ*-step (↪→↪ₚ t↪t') (↪*→↪ₚ* t'↪*t'')
 
-↪ₚ→↪* : t ↪ₚ t' → t ↪* t'
-↪ₚ→↪* ξ-`                    = refl
-↪ₚ→↪* (β-λ {t₁ = t₁} {t₁'} {t₂} {t₂'} t₁↪ₚt₁' t₂↪ₚt₂'') =
-  ((λx t₁) · t₂)   ↪*⟨ ξ-·₁* (ξ-λ* (↪ₚ→↪* t₁↪ₚt₁')) ⟩
-  ((λx t₁') · t₂)  ↪*⟨ ξ-·₂* (↪ₚ→↪* t₂↪ₚt₂'') ⟩
-  ((λx t₁') · t₂') ↪⟨ β-λ ⟩
-  (t₁' ⋯ ⦅ t₂' ⦆ₛ) ↪∎
-↪ₚ→↪* (ξ-λ t↪ₚt')            = ξ-λ* (↪ₚ→↪* t↪ₚt')
+↪ₚ→↪* :
+  t ↪ₚ t' →
+  t ↪* t'
+↪ₚ→↪* ξ-`                    = ↪*-refl
+↪ₚ→↪* (β-λ {e₁ = e₁} {e₁'} {e₂} {e₂'} e₁↪ₚe₁' e₂↪ₚe₂'') =
+  let open ↪*-Reasoning in
+  begin
+    (λx e₁) · e₂
+  ↪*⟨ ↪*-map ξ-·₁ (↪*-map ξ-λ (↪ₚ→↪* e₁↪ₚe₁')) ⟩
+    (λx e₁') · e₂
+  ↪*⟨ ↪*-map ξ-·₂ (↪ₚ→↪* e₂↪ₚe₂'') ⟩
+    (λx e₁') · e₂'
+  ↪⟨ β-λ ⟩
+    e₁' ⋯ₛ ⦅ e₂' ⦆ₛ
+  ∎
+↪ₚ→↪* (ξ-λ t↪ₚt')            = ↪*-map ξ-λ (↪ₚ→↪* t↪ₚt')
 ↪ₚ→↪* (ξ-∀ {t₁ = t₁} {t₁'} {t₂} {t₂'} t₁↪ₚt₁' t₂↪ₚt₂') =
-  ∀[x∶ t₁  ] t₂  ↪*⟨ ξ-∀₁* (↪ₚ→↪* t₁↪ₚt₁') ⟩
-  ∀[x∶ t₁' ] t₂  ↪*⟨ ξ-∀₂* (↪ₚ→↪* t₂↪ₚt₂') ⟩
-  ∀[x∶ t₁' ] t₂' ↪∎
-↪ₚ→↪* (ξ-· {t₁ = t₁} {t₁'} {t₂} {t₂'} t₁↪ₚt₁' t₂↪ₚt₂') =
-  t₁  · t₂  ↪*⟨ ξ-·₁* (↪ₚ→↪* t₁↪ₚt₁') ⟩
-  t₁' · t₂  ↪*⟨ ξ-·₂* (↪ₚ→↪* t₂↪ₚt₂') ⟩
-  t₁' · t₂' ↪∎
-↪ₚ→↪* ξ-★                    = refl
+  let open ↪*-Reasoning in
+  begin
+    ∀[x∶ t₁  ] t₂
+  ↪*⟨ ↪*-map ξ-∀₁ (↪ₚ→↪* t₁↪ₚt₁') ⟩
+    ∀[x∶ t₁' ] t₂
+  ↪*⟨ ↪*-map ξ-∀₂ (↪ₚ→↪* t₂↪ₚt₂') ⟩
+    ∀[x∶ t₁' ] t₂'
+  ∎
+↪ₚ→↪* (ξ-· {e₁ = e₁} {e₁' = e₁'} {e₂ = e₂} {e₂' = e₂'} t₁↪ₚt₁' t₂↪ₚt₂') =
+  let open ↪*-Reasoning in
+  begin
+    e₁  · e₂
+  ↪*⟨ ↪*-map ξ-·₁ (↪ₚ→↪* t₁↪ₚt₁') ⟩
+    e₁' · e₂
+  ↪*⟨ ↪*-map ξ-·₂ (↪ₚ→↪* t₂↪ₚt₂') ⟩
+    e₁' · e₂'
+  ∎
+↪ₚ→↪* ξ-Set                     = ↪*-refl
+↪ₚ→↪* (β-proj₁ {e₁ = e₁} {e₁' = e₁'} {e₂ = e₂} {e₂' = e₂'} e₁↪ₚe₁' e₂↪ₚe₂') = 
+  let open ↪*-Reasoning in
+  begin
+    `proj₁ (e₁ `, e₂)
+  ↪*⟨ ↪*-map ξ-proj₁ (↪*-map ξ-,₁ (↪ₚ→↪* e₁↪ₚe₁')) ⟩
+    `proj₁ (e₁' `, e₂)
+  ↪*⟨ ↪*-map ξ-proj₁ (↪*-map ξ-,₂ (↪ₚ→↪* e₂↪ₚe₂')) ⟩
+    `proj₁ (e₁' `, e₂')
+  ↪⟨ β-proj₁ ⟩
+    e₁'
+  ∎
+↪ₚ→↪* (β-proj₂ {e₁ = e₁} {e₁' = e₁'} {e₂ = e₂} {e₂' = e₂'} e₁↪ₚe₁' e₂↪ₚe₂') =
+  let open ↪*-Reasoning in
+  begin
+    `proj₂ (e₁ `, e₂)
+  ↪*⟨ ↪*-map ξ-proj₂ (↪*-map ξ-,₁ (↪ₚ→↪* e₁↪ₚe₁')) ⟩
+    `proj₂ (e₁' `, e₂)
+  ↪*⟨ ↪*-map ξ-proj₂ (↪*-map ξ-,₂ (↪ₚ→↪* e₂↪ₚe₂')) ⟩
+    `proj₂ (e₁' `, e₂')
+  ↪⟨ β-proj₂ ⟩
+    e₂'
+  ∎
+↪ₚ→↪* (β-J {e = e} {e' = e'} {t = t} e↪ₚe') =
+  let open ↪*-Reasoning in
+  begin
+    `J t `refl e
+  ↪*⟨ ↪*-map ξ-J₃ (↪ₚ→↪* e↪ₚe') ⟩
+    `J t `refl e'
+  ↪⟨ β-J ⟩
+    e'
+  ∎
+↪ₚ→↪* (ξ-∃ {t₁ = t₁} {t₁'} {t₂} {t₂'} t₁↪ₚt₁' t₂↪ₚt₂') =
+  let open ↪*-Reasoning in
+  begin
+    ∃[x∶ t₁  ] t₂
+  ↪*⟨ ↪*-map ξ-∃₁ (↪ₚ→↪* t₁↪ₚt₁') ⟩
+    ∃[x∶ t₁' ] t₂
+  ↪*⟨ ↪*-map ξ-∃₂ (↪ₚ→↪* t₂↪ₚt₂') ⟩
+    ∃[x∶ t₁' ] t₂'
+  ∎
+↪ₚ→↪* (ξ-, {e₁ = e₁} {e₁' = e₁'} {e₂ = e₂} {e₂' = e₂'} e₁↪ₚe₁' e₂↪ₚe₂')     =
+  let open ↪*-Reasoning in
+  begin
+    e₁  `, e₂
+  ↪*⟨ ↪*-map ξ-,₁ (↪ₚ→↪* e₁↪ₚe₁') ⟩
+    e₁' `, e₂
+  ↪*⟨ ↪*-map ξ-,₂ (↪ₚ→↪* e₂↪ₚe₂') ⟩
+    e₁' `, e₂'
+  ∎
+↪ₚ→↪* (ξ-proj₁ e↪ₚe')           = ↪*-map ξ-proj₁ (↪ₚ→↪* e↪ₚe')
+↪ₚ→↪* (ξ-proj₂ e↪ₚe')           = ↪*-map ξ-proj₂ (↪ₚ→↪* e↪ₚe')
+↪ₚ→↪* (ξ-≡ {e₁ = e₁} {e₁' = e₁'} {e₂ = e₂} {e₂' = e₂'} e₁↪ₚe₁' e₂↪ₚe₂')     =
+  let open ↪*-Reasoning in
+  begin
+    e₁  `≡ e₂
+  ↪*⟨ ↪*-map ξ-≡₁ (↪ₚ→↪* e₁↪ₚe₁') ⟩
+    e₁' `≡ e₂
+  ↪*⟨ ↪*-map ξ-≡₂ (↪ₚ→↪* e₂↪ₚe₂') ⟩
+    e₁' `≡ e₂'
+  ∎
+↪ₚ→↪* ξ-refl                    = ↪*-refl
+↪ₚ→↪* (ξ-J {t = t} {t' = t'} {e₁ = e₁} {e₁' = e₁'} {e₂ = e₂} {e₂' = e₂'} t↪ₚt' e₁↪ₚe₁' e₂↪ₚe₂')  =
+  let open ↪*-Reasoning in
+  begin
+    `J t e₁ e₂
+  ↪*⟨ ↪*-map ξ-J₁ (↪ₚ→↪* t↪ₚt') ⟩
+    `J t' e₁ e₂
+  ↪*⟨ ↪*-map ξ-J₂ (↪ₚ→↪* e₁↪ₚe₁') ⟩
+    `J t' e₁' e₂
+  ↪*⟨ ↪*-map ξ-J₃ (↪ₚ→↪* e₂↪ₚe₂') ⟩
+    `J t' e₁' e₂'
+  ∎
 
-↪ₚ*→↪* : t ↪ₚ* t' → t ↪* t'
-↪ₚ*→↪* refl                  = refl
-↪ₚ*→↪* (step t↪ₚt' t'↪ₚ*t'') = ↪*-trans (↪ₚ→↪* t↪ₚt') (↪ₚ*→↪* t'↪ₚ*t'')
+↪ₚ*→↪* : ∀ {t t' : S ⊢ 𝕖}
+  → t ↪ₚ* t'
+  → t ↪* t'
+↪ₚ*→↪* ↪ₚ*-refl                  = ↪*-refl
+↪ₚ*→↪* (↪ₚ*-step t↪ₚt' t'↪ₚ*t'') = ↪*-trans (↪ₚ→↪* t↪ₚt') (↪ₚ*→↪* t'↪ₚ*t'')
 
-_↪ₚσ_ : ∀ {µ₁ µ₂} (σ₁ σ₂ : µ₁ →ₛ µ₂) → Set
-σ₁ ↪ₚσ σ₂ = ∀ {m} (x : _ ∋ m) → σ₁ _ x ↪ₚ σ₂ _ x
+-- _↪ₚσ_ : ∀ {S₁ S₂} (σ₁ σ₂ : S₁ →ₛ S₂) → Set
+-- σ₁ ↪ₚσ σ₂ = ∀ {m} (x : _ ∋ m) → σ₁ _ x ↪ₚ σ₂ _ x
 
--- Are Ctx's basically Substitutions which don't weaken automatically?
--- Can be represent them as such or even generalize our substitutions?
-↪ₚσ-refl : ∀ {µ₁ µ₂} {σ : µ₁ →ₛ µ₂} →
-  σ ↪ₚσ σ
-↪ₚσ-refl {m = 𝕖} x = ↪ₚ-refl
+-- -- Are Ctx's basically Substitutions which don't weaken automatically?
+-- -- Can be represent them as such or even generalize our substitutions?
+-- ↪ₚσ-refl : ∀ {S₁ S₂} {σ : S₁ →ₛ S₂} →
+--   σ ↪ₚσ σ
+-- ↪ₚσ-refl {m = 𝕖} x = ↪ₚ-refl
 
-↪ₚσ-ext : ∀ {µ₁ µ₂} {σ₁ σ₂ : µ₁ →ₛ µ₂} {m} {t₁ t₂ : µ₂ ⊢ m→M m} →
-  σ₁ ↪ₚσ σ₂ →
-  t₁ ↪ₚ t₂ →
-  (σ₁ ,ₛ t₁) ↪ₚσ (σ₂ ,ₛ t₂)
-↪ₚσ-ext σ₁↪σ₂ t₁↪t₂ (here refl) = t₁↪t₂
-↪ₚσ-ext σ₁↪σ₂ t₁↪t₂ (there x)   = σ₁↪σ₂ x
+-- ↪ₚσ-ext : ∀ {S₁ S₂} {σ₁ σ₂ : S₁ →ₛ S₂} {m} {t₁ t₂ : S₂ ⊢ m→M m} →
+--   σ₁ ↪ₚσ σ₂ →
+--   t₁ ↪ₚ t₂ →
+--   (σ₁ ,ₛ t₁) ↪ₚσ (σ₂ ,ₛ t₂)
+-- ↪ₚσ-ext σ₁↪σ₂ t₁↪t₂ (here refl) = t₁↪t₂
+-- ↪ₚσ-ext σ₁↪σ₂ t₁↪t₂ (there x)   = σ₁↪σ₂ x
 
-↪ₚ-⋯ :
-  ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
-    ⦃ K : KitT 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
-    ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
-    ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
-    {µ₁ µ₂ m} {ϕ : µ₁ –[ 𝕂 ]→ µ₂} {t t' : µ₁ ⊢ m} →
-  t ↪ₚ t' →
-  t ⋯ ϕ ↪ₚ t' ⋯ ϕ
-↪ₚ-⋯ ξ-`                = ↪ₚ-refl
-↪ₚ-⋯ (ξ-λ t↪ₚt')        = ξ-λ (↪ₚ-⋯ t↪ₚt')
-↪ₚ-⋯ (ξ-∀ t↪ₚt' t↪ₚt'') = ξ-∀ (↪ₚ-⋯ t↪ₚt') (↪ₚ-⋯ t↪ₚt'')
-↪ₚ-⋯ (ξ-· t↪ₚt' t↪ₚt'') = ξ-· (↪ₚ-⋯ t↪ₚt') (↪ₚ-⋯ t↪ₚt'')
-↪ₚ-⋯ ξ-★                = ξ-★
-↪ₚ-⋯ {ϕ = ϕ} (β-λ {t₁ = t₁} {t₁'} {t₂} {t₂'} t₁↪ₚt₁' t₂↪ₚt₂') =
-  subst (((λx t₁) · t₂) ⋯ ϕ ↪ₚ_)
-        (sym (dist-⦅⦆ₛ-⋯ t₁' t₂' ϕ))
-        (β-λ (↪ₚ-⋯ t₁↪ₚt₁') (↪ₚ-⋯ t₂↪ₚt₂'))
+-- ↪ₚ-⋯ :
+--   ∀ {M} {_∋/⊢_ : Scoped M} ⦃ 𝕂 : Kit _∋/⊢_ ⦄
+--     ⦃ K : KitT 𝕂 ⦄ ⦃ C₂ : ComposeKit 𝕂 𝕂 𝕂 ⦄
+--     ⦃ C₃ : ComposeKit kitₛ 𝕂 kitₛ ⦄
+--     ⦃ C₄ : ComposeKit 𝕂 kitₛ kitₛ ⦄
+--     {S₁ S₂ m} {ϕ : S₁ –[ 𝕂 ]→ S₂} {t t' : S₁ ⊢ m} →
+--   t ↪ₚ t' →
+--   t ⋯ ϕ ↪ₚ t' ⋯ ϕ
+-- ↪ₚ-⋯ ξ-`                = ↪ₚ-refl
+-- ↪ₚ-⋯ (ξ-λ t↪ₚt')        = ξ-λ (↪ₚ-⋯ t↪ₚt')
+-- ↪ₚ-⋯ (ξ-∀ t↪ₚt' t↪ₚt'') = ξ-∀ (↪ₚ-⋯ t↪ₚt') (↪ₚ-⋯ t↪ₚt'')
+-- ↪ₚ-⋯ (ξ-· t↪ₚt' t↪ₚt'') = ξ-· (↪ₚ-⋯ t↪ₚt') (↪ₚ-⋯ t↪ₚt'')
+-- ↪ₚ-⋯ ξ-`Set                = ξ-`Set
+-- ↪ₚ-⋯ {ϕ = ϕ} (β-λ {t₁ = t₁} {t₁'} {t₂} {t₂'} t₁↪ₚt₁' t₂↪ₚt₂') =
+--   subst (((λx t₁) · t₂) ⋯ ϕ ↪ₚ_)
+--         (sym (dist-⦅⦆ₛ-⋯ t₁' t₂' ϕ))
+--         (β-λ (↪ₚ-⋯ t₁↪ₚt₁') (↪ₚ-⋯ t₂↪ₚt₂'))
 
-↪ₚ-⋯ₛ : ∀ {µ₁ µ₂ m} {ϕ : µ₁ →ₛ µ₂} {t t' : µ₁ ⊢ m} →
-  t ↪ₚ t' →
-  t ⋯ₛ ϕ ↪ₚ t' ⋯ₛ ϕ
-↪ₚ-⋯ₛ = ↪ₚ-⋯ where instance _ = kitₛ; _ = kittₛ; _ = ckitₛₛ; _ = ckitᵣ
+-- ↪ₚ-⋯ₛ : ∀ {S₁ S₂ m} {ϕ : S₁ →ₛ S₂} {t t' : S₁ ⊢ m} →
+--   t ↪ₚ t' →
+--   t ⋯ₛ ϕ ↪ₚ t' ⋯ₛ ϕ
+-- ↪ₚ-⋯ₛ = ↪ₚ-⋯ where instance _ = kitₛ; _ = kittₛ; _ = ckitₛₛ; _ = ckitᵣ
 
-↪ₚ-⋯ᵣ : ∀ {µ₁ µ₂ m} {ϕ : µ₁ →ᵣ µ₂} {t t' : µ₁ ⊢ m} →
-  t ↪ₚ t' →
-  t ⋯ᵣ ϕ ↪ₚ t' ⋯ᵣ ϕ
-↪ₚ-⋯ᵣ = ↪ₚ-⋯ where instance _ = kitᵣ; _ = kittᵣ; _ = ckitₛᵣ; _ = ckitᵣ
+-- ↪ₚ-⋯ᵣ : ∀ {S₁ S₂ m} {ϕ : S₁ →ᵣ S₂} {t t' : S₁ ⊢ m} →
+--   t ↪ₚ t' →
+--   t ⋯ᵣ ϕ ↪ₚ t' ⋯ᵣ ϕ
+-- ↪ₚ-⋯ᵣ = ↪ₚ-⋯ where instance _ = kitᵣ; _ = kittᵣ; _ = ckitₛᵣ; _ = ckitᵣ
 
-↪ₚσ-wk : ∀ {µ₁ µ₂} {σ₁ σ₂ : µ₁ →ₛ µ₂} {m'} →
-  σ₁ ↪ₚσ σ₂ →
-  wk→ₛ m' σ₁ ↪ₚσ wk→ₛ m' σ₂
-↪ₚσ-wk {m' = 𝕖} σ₁↪σ₂ x = ↪ₚ-⋯ᵣ (σ₁↪σ₂ x)
+-- ↪ₚσ-wk : ∀ {S₁ S₂} {σ₁ σ₂ : S₁ →ₛ S₂} {m'} →
+--   σ₁ ↪ₚσ σ₂ →
+--   wk→ₛ m' σ₁ ↪ₚσ wk→ₛ m' σ₂
+-- ↪ₚσ-wk {m' = 𝕖} σ₁↪σ₂ x = ↪ₚ-⋯ᵣ (σ₁↪σ₂ x)
 
-↪ₚσ-↑ : ∀ {µ₁ µ₂} {σ₁ σ₂ : µ₁ →ₛ µ₂} {m'} →
-  σ₁ ↪ₚσ σ₂ →
-  (σ₁ ↑ₛ m') ↪ₚσ (σ₂ ↑ₛ m')
-↪ₚσ-↑ {m' = 𝕖} σ₁↪σ₂ = ↪ₚσ-ext (↪ₚσ-wk σ₁↪σ₂) ↪ₚ-refl
+-- ↪ₚσ-↑ : ∀ {S₁ S₂} {σ₁ σ₂ : S₁ →ₛ S₂} {m'} →
+--   σ₁ ↪ₚσ σ₂ →
+--   (σ₁ ↑ₛ m') ↪ₚσ (σ₂ ↑ₛ m')
+-- ↪ₚσ-↑ {m' = 𝕖} σ₁↪σ₂ = ↪ₚσ-ext (↪ₚσ-wk σ₁↪σ₂) ↪ₚ-refl
 
--- ↪σ-⋯ : ∀ {µ₁ µ₂ m} {σ σ' : µ₁ →ₛ µ₂} (t : µ₁ ⊢ m) →
+-- -- ↪σ-⋯ : ∀ {S₁ S₂ m} {σ σ' : S₁ →ₛ S₂} (t : S₁ ⊢ m) →
+-- --   σ ↪ₚσ σ' →
+-- --   t ⋯ σ ↪ₚ t ⋯ σ'
+-- -- ↪σ-⋯ (` x)          σ↪σ' = σ↪σ' x
+-- -- ↪σ-⋯ (λx t)         σ↪σ' = ξ-λ (↪σ-⋯ t (↪ₚσ-↑ σ↪σ'))
+-- -- ↪σ-⋯ (∀[x∶ t₁ ] t₂) σ↪σ' = ξ-∀ (↪σ-⋯ t₁ σ↪σ') (↪σ-⋯ t₂ (↪ₚσ-↑ σ↪σ'))
+-- -- ↪σ-⋯ (t₁ · t₂)      σ↪σ' = ξ-· (↪σ-⋯ t₁ σ↪σ') (↪σ-⋯ t₂ σ↪σ')
+-- -- ↪σ-⋯ `Set              σ↪σ' = ξ-`Set
+
+-- ↪ₚσ-⋯ : ∀ {S₁ S₂ m} {t t' : S₁ ⊢ m} {σ σ' : S₁ →ₛ S₂} →
+--   t ↪ₚ t' →
 --   σ ↪ₚσ σ' →
---   t ⋯ σ ↪ₚ t ⋯ σ'
--- ↪σ-⋯ (` x)          σ↪σ' = σ↪σ' x
--- ↪σ-⋯ (λx t)         σ↪σ' = ξ-λ (↪σ-⋯ t (↪ₚσ-↑ σ↪σ'))
--- ↪σ-⋯ (∀[x∶ t₁ ] t₂) σ↪σ' = ξ-∀ (↪σ-⋯ t₁ σ↪σ') (↪σ-⋯ t₂ (↪ₚσ-↑ σ↪σ'))
--- ↪σ-⋯ (t₁ · t₂)      σ↪σ' = ξ-· (↪σ-⋯ t₁ σ↪σ') (↪σ-⋯ t₂ σ↪σ')
--- ↪σ-⋯ ★              σ↪σ' = ξ-★
+--   t ⋯ σ ↪ₚ t' ⋯ σ'
+-- ↪ₚσ-⋯ ξ-`                   σ↪σ' = σ↪σ' _
+-- ↪ₚσ-⋯ {σ = σ} {σ'} (β-λ {t₁' = t₁'} {t₂' = t₂'} t₁↪ₚt₁' t₂↪ₚt₂') σ↪σ' = subst (_ ↪ₚ_) (sym (dist-⦅⦆ₛ-⋯ₛ t₁' t₂' σ'))
+--                                                                               (β-λ (↪ₚσ-⋯ t₁↪ₚt₁' (↪ₚσ-↑ σ↪σ'))
+--                                                                                    (↪ₚσ-⋯ t₂↪ₚt₂' σ↪σ'))
+-- ↪ₚσ-⋯ (ξ-λ t↪ₚt')           σ↪σ' = ξ-λ (↪ₚσ-⋯ t↪ₚt' (↪ₚσ-↑ σ↪σ'))
+-- ↪ₚσ-⋯ (ξ-∀ t₁↪ₚt₁' t₂↪ₚt₂') σ↪σ' = ξ-∀ (↪ₚσ-⋯ t₁↪ₚt₁' σ↪σ') (↪ₚσ-⋯ t₂↪ₚt₂' (↪ₚσ-↑ σ↪σ'))
+-- ↪ₚσ-⋯ (ξ-· t₁↪ₚt₁' t₂↪ₚt₂') σ↪σ' = ξ-· (↪ₚσ-⋯ t₁↪ₚt₁' σ↪σ') (↪ₚσ-⋯ t₂↪ₚt₂' σ↪σ')
+-- ↪ₚσ-⋯ ξ-`Set                   σ↪σ' = ξ-`Set
 
-↪ₚσ-⋯ : ∀ {µ₁ µ₂ m} {t t' : µ₁ ⊢ m} {σ σ' : µ₁ →ₛ µ₂} →
-  t ↪ₚ t' →
-  σ ↪ₚσ σ' →
-  t ⋯ σ ↪ₚ t' ⋯ σ'
-↪ₚσ-⋯ ξ-`                   σ↪σ' = σ↪σ' _
-↪ₚσ-⋯ {σ = σ} {σ'} (β-λ {t₁' = t₁'} {t₂' = t₂'} t₁↪ₚt₁' t₂↪ₚt₂') σ↪σ' = subst (_ ↪ₚ_) (sym (dist-⦅⦆ₛ-⋯ₛ t₁' t₂' σ'))
-                                                                              (β-λ (↪ₚσ-⋯ t₁↪ₚt₁' (↪ₚσ-↑ σ↪σ'))
-                                                                                   (↪ₚσ-⋯ t₂↪ₚt₂' σ↪σ'))
-↪ₚσ-⋯ (ξ-λ t↪ₚt')           σ↪σ' = ξ-λ (↪ₚσ-⋯ t↪ₚt' (↪ₚσ-↑ σ↪σ'))
-↪ₚσ-⋯ (ξ-∀ t₁↪ₚt₁' t₂↪ₚt₂') σ↪σ' = ξ-∀ (↪ₚσ-⋯ t₁↪ₚt₁' σ↪σ') (↪ₚσ-⋯ t₂↪ₚt₂' (↪ₚσ-↑ σ↪σ'))
-↪ₚσ-⋯ (ξ-· t₁↪ₚt₁' t₂↪ₚt₂') σ↪σ' = ξ-· (↪ₚσ-⋯ t₁↪ₚt₁' σ↪σ') (↪ₚσ-⋯ t₂↪ₚt₂' σ↪σ')
-↪ₚσ-⋯ ξ-★                   σ↪σ' = ξ-★
+-- ↪ₚσ-⦅_⦆ : ∀ {S m} {t₁ t₂ : S ⊢ m→M m} →
+--   t₁ ↪ₚ t₂ →
+--   ⦅ t₁ ⦆ ↪ₚσ ⦅ t₂ ⦆
+-- ↪ₚσ-⦅ t₁↪ₚt₂ ⦆ = ↪ₚσ-ext (↪ₚσ-refl {σ = idₛ}) t₁↪ₚt₂ 
 
-↪ₚσ-⦅_⦆ : ∀ {µ m} {t₁ t₂ : µ ⊢ m→M m} →
-  t₁ ↪ₚ t₂ →
-  ⦅ t₁ ⦆ ↪ₚσ ⦅ t₂ ⦆
-↪ₚσ-⦅ t₁↪ₚt₂ ⦆ = ↪ₚσ-ext (↪ₚσ-refl {σ = idₛ}) t₁↪ₚt₂ 
+-- ↪ₚσ-⋯-⦅⦆ : ∀ {S M} {t₁ t₁' : (S ▷ 𝕖) ⊢ M}  {t₂ t₂' : S ⊢ 𝕖} →
+--   t₁ ↪ₚ t₁' →
+--   t₂ ↪ₚ t₂' →
+--   t₁ ⋯ ⦅ t₂ ⦆ₛ ↪ₚ t₁' ⋯ ⦅ t₂' ⦆ₛ
+-- ↪ₚσ-⋯-⦅⦆ t₁↪ₚt₁' t₂↪ₚt₂' = ↪ₚσ-⋯ t₁↪ₚt₁' ↪ₚσ-⦅ t₂↪ₚt₂' ⦆
 
-↪ₚσ-⋯-⦅⦆ : ∀ {µ M} {t₁ t₁' : (µ ▷ 𝕖) ⊢ M}  {t₂ t₂' : µ ⊢ 𝕖} →
-  t₁ ↪ₚ t₁' →
-  t₂ ↪ₚ t₂' →
-  t₁ ⋯ ⦅ t₂ ⦆ₛ ↪ₚ t₁' ⋯ ⦅ t₂' ⦆ₛ
-↪ₚσ-⋯-⦅⦆ t₁↪ₚt₁' t₂↪ₚt₂' = ↪ₚσ-⋯ t₁↪ₚt₁' ↪ₚσ-⦅ t₂↪ₚt₂' ⦆
+-- diamond :
+--   t ↪ₚ t₁ →
+--   t ↪ₚ t₂ →
+--   ∃[ t' ] t₁ ↪ₚ t' × t₂ ↪ₚ t'
+-- diamond ξ-`             ξ-`               = _ , ξ-` , ξ-`
+-- diamond (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
+--   with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+-- ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
+--   = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , ↪ₚσ-⋯ t₁'↪T₁ ↪ₚσ-⦅ t₂'↪T₂ ⦆ , ↪ₚσ-⋯ t₁''↪T₁ ↪ₚσ-⦅ t₂''↪T₂ ⦆
+-- diamond (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (ξ-· (ξ-λ t₁↪t₁'') t₂↪t₂'')
+--   with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+-- ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
+--   = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , ↪ₚσ-⋯ t₁'↪T₁ ↪ₚσ-⦅ t₂'↪T₂ ⦆ , (β-λ t₁''↪T₁ t₂''↪T₂)
+-- diamond (ξ-λ t↪t') (ξ-λ t↪t'')
+--   with diamond t↪t' t↪t''
+-- ...  | T , t'↪T , t''↪T
+--   = λx T , ξ-λ t'↪T , ξ-λ t''↪T
+-- diamond (ξ-∀ t₁↪t₁' t₂↪t₂') (ξ-∀ t₁↪t₁'' t₂↪t₂'')
+--   with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+-- ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
+--   = ∀[x∶ T₁ ] T₂ , ξ-∀ t₁'↪T₁ t₂'↪T₂ , ξ-∀ t₁''↪T₁ t₂''↪T₂
+-- diamond (ξ-· (ξ-λ t₁↪t₁') t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
+--   with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+-- ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
+--   = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , β-λ t₁'↪T₁ t₂'↪T₂ , ↪ₚσ-⋯ t₁''↪T₁ ↪ₚσ-⦅ t₂''↪T₂ ⦆
+-- diamond (ξ-· t₁↪t₁' t₂↪t₂') (ξ-· t₁↪t₁'' t₂↪t₂'')
+--   with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
+-- ...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
+--   = T₁ · T₂ , ξ-· t₁'↪T₁ t₂'↪T₂ , ξ-· t₁''↪T₁ t₂''↪T₂
+-- diamond ξ-`Set ξ-`Set = `Set , ξ-`Set , ξ-`Set
 
-diamond :
-  t ↪ₚ t₁ →
-  t ↪ₚ t₂ →
-  ∃[ t' ] t₁ ↪ₚ t' × t₂ ↪ₚ t'
-diamond ξ-`             ξ-`               = _ , ξ-` , ξ-`
-diamond (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
-...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
-  = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , ↪ₚσ-⋯ t₁'↪T₁ ↪ₚσ-⦅ t₂'↪T₂ ⦆ , ↪ₚσ-⋯ t₁''↪T₁ ↪ₚσ-⦅ t₂''↪T₂ ⦆
-diamond (β-λ {t₁' = t₁'} t₁↪t₁' t₂↪t₂') (ξ-· (ξ-λ t₁↪t₁'') t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
-...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
-  = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , ↪ₚσ-⋯ t₁'↪T₁ ↪ₚσ-⦅ t₂'↪T₂ ⦆ , (β-λ t₁''↪T₁ t₂''↪T₂)
-diamond (ξ-λ t↪t') (ξ-λ t↪t'')
-  with diamond t↪t' t↪t''
-...  | T , t'↪T , t''↪T
-  = λx T , ξ-λ t'↪T , ξ-λ t''↪T
-diamond (ξ-∀ t₁↪t₁' t₂↪t₂') (ξ-∀ t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
-...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
-  = ∀[x∶ T₁ ] T₂ , ξ-∀ t₁'↪T₁ t₂'↪T₂ , ξ-∀ t₁''↪T₁ t₂''↪T₂
-diamond (ξ-· (ξ-λ t₁↪t₁') t₂↪t₂') (β-λ t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
-...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
-  = T₁ ⋯ₛ ⦅ T₂ ⦆ₛ , β-λ t₁'↪T₁ t₂'↪T₂ , ↪ₚσ-⋯ t₁''↪T₁ ↪ₚσ-⦅ t₂''↪T₂ ⦆
-diamond (ξ-· t₁↪t₁' t₂↪t₂') (ξ-· t₁↪t₁'' t₂↪t₂'')
-  with diamond t₁↪t₁' t₁↪t₁'' | diamond t₂↪t₂' t₂↪t₂''
-...  | T₁ , t₁'↪T₁ , t₁''↪T₁  | T₂ , t₂'↪T₂ , t₂''↪T₂
-  = T₁ · T₂ , ξ-· t₁'↪T₁ t₂'↪T₂ , ξ-· t₁''↪T₁ t₂''↪T₂
-diamond ξ-★ ξ-★ = ★ , ξ-★ , ξ-★
+-- strip :
+--   t ↪ₚ t₁ →
+--   t ↪ₚ* t₂ →
+--   ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ t')
+-- strip {t = t} {t₁} {t₂} t↪ₚt₁ refl = t₁ , refl , t↪ₚt₁
+-- strip {t = t} {t₁} {t₂} t↪ₚt₁ (step t↪ₚt₂' t₂'↪ₚ*t₂)
+--   with diamond t↪ₚt₁ t↪ₚt₂'
+-- ... | T , t₁↪ₚT , t₂'↪ₚT
+--   with strip t₂'↪ₚT t₂'↪ₚ*t₂
+-- ... | U , T↪ₚ*U , t₂↪U
+--   = U , step t₁↪ₚT T↪ₚ*U , t₂↪U
 
-strip :
-  t ↪ₚ t₁ →
-  t ↪ₚ* t₂ →
-  ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ t')
-strip {t = t} {t₁} {t₂} t↪ₚt₁ refl = t₁ , refl , t↪ₚt₁
-strip {t = t} {t₁} {t₂} t↪ₚt₁ (step t↪ₚt₂' t₂'↪ₚ*t₂)
-  with diamond t↪ₚt₁ t↪ₚt₂'
-... | T , t₁↪ₚT , t₂'↪ₚT
-  with strip t₂'↪ₚT t₂'↪ₚ*t₂
-... | U , T↪ₚ*U , t₂↪U
-  = U , step t₁↪ₚT T↪ₚ*U , t₂↪U
+-- confluenceₚ : 
+--   t ↪ₚ* t₁ →
+--   t ↪ₚ* t₂ →
+--   ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ* t')
+-- confluenceₚ refl                   t↪ₚ*t₂ = _ , t↪ₚ*t₂ , refl
+-- confluenceₚ (step t↪ₚt₁' t₁'↪ₚ*t₁) t↪ₚ*t₂
+--   with strip t↪ₚt₁' t↪ₚ*t₂
+-- ... | T , t₁'↪ₚ*T , t₂↪ₚT
+--   with confluenceₚ t₁'↪ₚ*t₁ t₁'↪ₚ*T
+-- ... | U , t₁↪ₚ*U , T↪ₚ*U
+--   = U , t₁↪ₚ*U , step t₂↪ₚT T↪ₚ*U 
 
-confluenceₚ : 
-  t ↪ₚ* t₁ →
-  t ↪ₚ* t₂ →
-  ∃[ t' ] (t₁ ↪ₚ* t') × (t₂ ↪ₚ* t')
-confluenceₚ refl                   t↪ₚ*t₂ = _ , t↪ₚ*t₂ , refl
-confluenceₚ (step t↪ₚt₁' t₁'↪ₚ*t₁) t↪ₚ*t₂
-  with strip t↪ₚt₁' t↪ₚ*t₂
-... | T , t₁'↪ₚ*T , t₂↪ₚT
-  with confluenceₚ t₁'↪ₚ*t₁ t₁'↪ₚ*T
-... | U , t₁↪ₚ*U , T↪ₚ*U
-  = U , t₁↪ₚ*U , step t₂↪ₚT T↪ₚ*U 
-
-confluence : 
-  t ↪* t₁ →
-  t ↪* t₂ →
-  ∃[ t' ] (t₁ ↪* t') × (t₂ ↪* t')
-confluence t↪*t₁ t↪*t₂
-  with confluenceₚ (↪*→↪ₚ* t↪*t₁) (↪*→↪ₚ* t↪*t₂)
-... | t' , t₁↪ₚ*t' , t₂↪ₚ*t'
-  = t' , ↪ₚ*→↪* t₁↪ₚ*t' , ↪ₚ*→↪* t₂↪ₚ*t'
+-- confluence : 
+--   t ↪* t₁ →
+--   t ↪* t₂ →
+--   ∃[ t' ] (t₁ ↪* t') × (t₂ ↪* t')
+-- confluence t↪*t₁ t↪*t₂
+--   with confluenceₚ (↪*→↪ₚ* t↪*t₁) (↪*→↪ₚ* t↪*t₂)
+-- ... | t' , t₁↪ₚ*t' , t₂↪ₚ*t'
+--   = t' , ↪ₚ*→↪* t₁↪ₚ*t' , ↪ₚ*→↪* t₂↪ₚ*t'

@@ -10,11 +10,12 @@ open import Data.Product using (_×_; _,_; proj₁; proj₂; Σ-syntax; ∃-synt
 
 -- Fixities --------------------------------------------------------------------
 
-infix   3  _⊢_  _↪_  _≣_  _⊢_∶_
-infixr  5  λx_  ∀[x∶_]_
--- infixr  6  _⇒_
-infixl  6  _·_
-infix   7  `_
+infix   3  _⊢_  _↪_  _↪*_  _≈_  _⊢_∶_
+infixr  5  λx_  ∀[x∶_]_  ∃[x∶_]_
+infix   6  _`≡_
+infixr  7  _`,_
+infixl  8  _·_
+infix   9  `_
 
 -- Syntax ----------------------------------------------------------------------
 
@@ -35,12 +36,12 @@ data _⊢_ : List (Sort Var) → Sort st → Set where
   `_        : S ∋ s  →  S ⊢ s
 
   -- Pi Types
-  ∀[x∶_]_   : S ⊢ 𝕖  →  (𝕖 ∷ S) ⊢ 𝕖  →  S ⊢ 𝕖
-  λx_       : (𝕖 ∷ S) ⊢ 𝕖  →  S ⊢ 𝕖
+  ∀[x∶_]_   : S ⊢ 𝕖  →  S ▷ 𝕖 ⊢ 𝕖  →  S ⊢ 𝕖
+  λx_       : S ▷ 𝕖 ⊢ 𝕖  →  S ⊢ 𝕖
   _·_       : S ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖
 
   -- Sigma Types
-  ∃[x∶_]_   : S ⊢ 𝕖  →  (𝕖 ∷ S) ⊢ 𝕖  →  S ⊢ 𝕖
+  ∃[x∶_]_   : S ⊢ 𝕖  →  S ▷ 𝕖 ⊢ 𝕖  →  S ⊢ 𝕖
   _`,_      : S ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖
   `proj₁    : S ⊢ 𝕖  →  S ⊢ 𝕖
   `proj₂    : S ⊢ 𝕖  →  S ⊢ 𝕖
@@ -48,13 +49,14 @@ data _⊢_ : List (Sort Var) → Sort st → Set where
   -- Equality Types
   _`≡_      : S ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖
   `refl     : S ⊢ 𝕖
-  `J        : (𝕖 ∷ S) ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖
+  `J        : S ▷ 𝕖 ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖
 
   -- Universe
   `Set      : S ⊢ 𝕖
 
 variable
   e e₁ e₂ e₃ e' e₁' e₂' e₃' : S ⊢ 𝕖
+  u u₁ u₂ u₃ u' u₁' u₂' u₃' : S ⊢ 𝕖
   E E₁ E₂ E₃ E' E₁' E₂' E₃' : S ⊢ s
 
 -- Deriving Renaming/Substitution and related lemmas.
@@ -69,12 +71,12 @@ open Derived.Functional D public
 open import Kitty.Typing.TypeSorts terms
 
 -- Each variable mode corresponds to a term mode that represents its type.
-type-modes : TypeSorts
-type-modes = record { ↑ᵗ = λ { 𝕖 → _ , 𝕖 } }
+type-sorts : TypeSorts
+type-sorts = record { ↑ᵗ = λ { 𝕖 → _ , 𝕖 } }
 
-open TypeSorts type-modes public
+open TypeSorts type-sorts public
 
-open import Kitty.Typing.CtxRepr type-modes
+open import Kitty.Typing.CtxRepr type-sorts
 
 ctx-repr : CtxRepr
 ctx-repr = List-CtxRepr
@@ -194,174 +196,91 @@ data _↪_ : S ⊢ s → S ⊢ s → Set where
     e₂ ↪ e₂' →
     `J t e₁ e₂ ↪ `J t e₁ e₂'
 
--- data _↪_ : µ ⊢ M → µ ⊢ M → Set where
---   β-λ : ∀ {e₂ : µ ⊢ 𝕖} →
---     (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆ₛ
---   ξ-λ :
---     e ↪ e' →
---     λx e ↪ λx e'
---   ξ-∀₁ :
---     t₁ ↪ t₁' →
---     ∀[x∶ t₁ ] t₂ ↪ ∀[x∶ t₁' ] t₂
---   ξ-∀₂ :
---     t₂ ↪ t₂' →
---     ∀[x∶ t₁ ] t₂ ↪ ∀[x∶ t₁ ] t₂'
---   ξ-·₁ :
---     e₁ ↪ e₁' →
---     e₁ · e₂ ↪ e₁' · e₂
---   ξ-·₂ :
---     e₂ ↪ e₂' →
---     e₁ · e₂ ↪ e₁ · e₂'
+data _↪*_ : S ⊢ s → S ⊢ s → Set where
+  ↪*-refl : e ↪* e
+  ↪*-step : e₁ ↪ e₂ → e₂ ↪* e₃ → e₁ ↪* e₃
 
--- -- data _↪β_ : µ ⊢ M → µ ⊢ M → Set where
--- --   β-λ : ∀ {e₂ : µ ⊢ 𝕖} →
--- --     (λx e₁) · e₂ ↪β e₁ ⋯ ⦅ e₂ ⦆ₛ
+record _≈_ (e₁ e₂ : S ⊢ s) : Set where
+  constructor mk-≈
+  field
+    ≈-e     : S ⊢ s
+    ≈-e₁↪*e : e₁ ↪* ≈-e
+    ≈-e₂↪*e : e₂ ↪* ≈-e
 
--- -- -- Closes `R` under term congruency. Can be derived!
--- -- data Cong (R : ∀ {µ M} → µ ⊢ M → µ ⊢ M → Set) : µ ⊢ M → µ ⊢ M → Set where 
--- --   ξ-R :
--- --     R e e' →
--- --     Cong R e e'
--- --   ξ-λ :
--- --     Cong R e e' →
--- --     Cong R (λx e) (λx e')
--- --   ξ-∀₁ :
--- --     Cong R t₁ t₁' →
--- --     Cong R (∀[x∶ t₁ ] t₂) (∀[x∶ t₁' ] t₂)
--- --   ξ-∀₂ :
--- --     Cong R t₂ t₂' →
--- --     Cong R (∀[x∶ t₁ ] t₂) (∀[x∶ t₁ ] t₂')
--- --   ξ-·₁ :
--- --     Cong R e₁ e₁' →
--- --     Cong R (e₁ · e₂) (e₁' · e₂)
--- --   ξ-·₂ :
--- --     Cong R e₂ e₂' →
--- --     Cong R (e₁ · e₂) (e₁ · e₂')
--- --   -- Alternative: more concise, but not suitable for small-step. We can derive two Closures!
--- --   -- ξ-· :
--- --   --   Cong R e₁ e₁' →
--- --   --   Cong R e₂ e₂' →
--- --   --   Cong R (e₁ · e₂) (e₁' · e₂')
--- --
--- -- We can also derive Congruency-Closure for call-by-value and
--- -- call-by-name as a module that's parameterized over the
--- -- Value-relation!
+-- Type System -----------------------------------------------------------------
 
--- -- _↪'_ : µ ⊢ M → µ ⊢ M → Set
--- -- _↪'_ = Cong (_↪β_)
+data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
 
--- -- -- _↪*'_ : µ ⊢ M → µ ⊢ M → Set
--- -- -- _↪*'_ = ReflTrans (Cong (_↪β_))
+  -- Variables
 
--- -- -- _≣'_ : µ ⊢ M → µ ⊢ M → Set
--- -- -- _≣'_ = ReflTrans (Sym (Cong (_↪β_)))
-  
--- -- module Test where
--- --   open import Kitty.Examples.LambdaPi-Derive.Closures
--- --   open SymmetricClosure₂ {C = _⊢_} _↪_ renaming (Sym to _≣_)
+  ⊢` : ∀ {x : S ∋ s} {T : S ∶⊢ s} →
+    Γ ∋ x ∶ T →
+    Γ ⊢ ` x ∶ T
 
--- --   ≣-sym : e₁ ≣ e₂ → e₂ ≣ e₁
--- --   ≣-sym = sym
+  -- Pi Types
 
--- --   ≣-f :
--- --     ∀ {µ} {µ'} {M} {M'}
--- --       {f : µ ⊢ M → µ' ⊢ M'}
--- --       (F : ∀ {e e' : µ ⊢ M} → e ↪ e' → f e ↪ f e')
--- --       {e e' : µ ⊢ M}
--- --     → e ≣ e'
--- --     → f e ≣ f e'
--- --   ≣-f = map-Sym
+  ⊢∀ :
+    Γ ⊢ t₁ ∶ `Set →
+    Γ ▶ t₁ ⊢ t₂ ∶ `Set →
+    Γ ⊢ ∀[x∶ t₁ ] t₂ ∶ `Set
 
--- -- data _≣_ : µ ⊢ M → µ ⊢ M → Set where
--- --   ≣-refl : e ≣ e
--- --   ≣-step-↪ : e₁ ↪ e₂ → e₂ ≣ e₃ → e₁ ≣ e₃
--- --   ≣-step-↩ : e₂ ↪ e₁ → e₂ ≣ e₃ → e₁ ≣ e₃
+  ⊢λ :
+    Γ ⊢ t₁ ∶ `Set →
+    Γ ▶ t₁ ⊢ e ∶ t₂ →
+    Γ ⊢ λx e ∶ ∀[x∶ t₁ ] t₂
 
--- -- ≣-trans : e₁ ≣ e₂ → e₂ ≣ e₃ → e₁ ≣ e₃
--- -- ≣-trans ≣-refl        e₂≣e₃ = e₂≣e₃
--- -- ≣-trans {e₂ = e₃} {e₃ = e₄} (≣-step-↪ e₁↪e₂ e₂≣e₃) e₃≣e₄ = ≣-step-↪ e₁↪e₂ (≣-trans e₂≣e₃ e₃≣e₄)
--- -- ≣-trans {e₂ = e₃} {e₃ = e₄} (≣-step-↩ e₂↪e₁ e₂≣e₃) e₃≣e₄ = ≣-step-↩ e₂↪e₁ (≣-trans e₂≣e₃ e₃≣e₄)
+  ⊢· : ∀ {Γ : Ctx S} →
+    Γ ⊢ e₁ ∶ ∀[x∶ t₁ ] t₂ →
+    Γ ⊢ e₂ ∶ t₁ →
+    Γ ⊢ e₁ · e₂ ∶ t₂ ⋯ₛ ⦅ e₂ ⦆ₛ
 
--- -- ≣-sym : e₁ ≣ e₂ → e₂ ≣ e₁
--- -- ≣-sym ≣-refl                           = ≣-refl
--- -- ≣-sym {e₂ = e₃} (≣-step-↪ e₁↪e₂ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-step-↩ e₁↪e₂ ≣-refl)
--- -- ≣-sym {e₂ = e₃} (≣-step-↩ e₂↪e₁ e₂≣e₃) = ≣-trans (≣-sym e₂≣e₃) (≣-step-↪ e₂↪e₁ ≣-refl)
+  -- Sigma Types
 
--- -- data _↪*_ : µ ⊢ M → µ ⊢ M → Set where
--- --   refl :
--- --     t ↪* t
--- --   step :
--- --     t₁ ↪  t₂ →
--- --     t₂ ↪* t₃ →
--- --     t₁ ↪* t₃
+  ⊢∃ :
+    Γ ⊢ t₁ ∶ `Set →
+    Γ ▶ t₁ ⊢ t₂ ∶ `Set →
+    Γ ⊢ ∃[x∶ t₁ ] t₂ ∶ `Set
 
--- open ReflexiveTransitiveClosure₂ (_⊢_) _↪_ renaming
---   ( ReflTrans to _↪*_
---   ; map-ReflTrans to map-↪*
---   ; _⟨_⟩_ to _↪⟨_⟩_
---   ; _*⟨_⟩_ to _↪*⟨_⟩_
---   ; _∎ to _↪∎
---   ; trans to ↪*-trans
---   ) public
+  ⊢, : ∀ {Γ : Ctx S} →
+    Γ ⊢ e₁ ∶ t₁ →
+    Γ ⊢ e₂ ∶ t₂ ⋯ₛ ⦅ e₁ ⦆ₛ →
+    Γ ⊢ e₁ `, e₂ ∶ ∃[x∶ t₁ ] t₂
 
--- data _≣_ (t₁ t₂ : µ ⊢ M) : Set where
---   mk-≣ : ∀ t → (t₁↪*t : t₁ ↪* t) → (t₂↪*t : t₂ ↪* t) → t₁ ≣ t₂
+  ⊢proj₁ : ∀ {Γ : Ctx S} →
+    Γ ⊢ e ∶ ∃[x∶ t₁ ] t₂ →
+    Γ ⊢ `proj₁ e ∶ t₁ 
 
--- data _⇓_ (e₁ e₂ : µ ⊢ M) : Set where
---   ⇓[_,_] :
---       e₁ ↪* e₂  
---     → Value e₂
---     → e₁ ⇓ e₂
+  ⊢proj₂ : ∀ {Γ : Ctx S} →
+    Γ ⊢ e ∶ ∃[x∶ t₁ ] t₂ →
+    Γ ⊢ `proj₂ e ∶ t₂ ⋯ₛ ⦅ `proj₁ e ⦆ₛ 
 
--- -- Type System -----------------------------------------------------------------
+  -- Equality Types
 
--- data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
---   ⊢` : ∀ {x : µ ∋ m} →
---     Γ ∋ x ∶ T →
---     Γ ⊢ ` x ∶ T
---   ⊢λ :
---     Γ ⊢ t₁ ∶ ★ →
---     Γ ▶ t₁ ⊢ e ∶ t₂ →
---     Γ ⊢ λx e ∶ ∀[x∶ t₁ ] t₂
---   ⊢∀ :
---     Γ ⊢ t₁ ∶ ★ →
---     Γ ▶ t₁ ⊢ t₂ ∶ ★ →
---     Γ ⊢ ∀[x∶ t₁ ] t₂ ∶ ★
---   ⊢· :
---     Γ ⊢ e₁ ∶ ∀[x∶ t₁ ] t₂ →
---     Γ ⊢ e₂ ∶ t₁ →
---     Γ ⊢ e₁ · e₂ ∶ t₂ ⋯ₛ ⦅ e₂ ⦆ₛ
---   ⊢★ :
---     Γ ⊢ ★ ∶ ★
---   -- ⊢↪ :
---   --   t ↪ t' →
---   --   Γ ⊢ e ∶ t →
---   --   Γ ⊢ e ∶ t'
---   ⊢≣ :
---     t ≣ t' →
---     Γ ⊢ e ∶ t →
---     Γ ⊢ e ∶ t'
+  ⊢≡ :
+    Γ ⊢ e₁ ∶ t →
+    Γ ⊢ e₂ ∶ t →
+    Γ ⊢ e₁ `≡ e₂ ∶ `Set
 
--- -- Values : Ctx µ → Set
--- -- Values {µ} Γ = ∀ {m} (x : µ ∋ m) → Value (Γ x) 
+  ⊢refl :
+    Γ ⊢ e ∶ t →
+    Γ ⊢ `refl ∶ e `≡ e
 
--- -- Values-ext : ∀ {Γ : Ctx µ} → Values Γ → Value t → Values (Γ ▶ t)
--- -- Values-ext {µ} VΓ Vt (here refl) = Vt
--- -- Values-ext {µ} VΓ Vt (there x) = VΓ x
+  ⊢-J : ∀ {Γ : Ctx S} {t : S ▷ 𝕖 ⊢ 𝕖} →
+    Γ ▶ t' ⊢ t ∶ `Set →
+    Γ ⊢ u₁ ∶ t' →
+    Γ ⊢ u₂ ∶ t' →
+    Γ ⊢ e₁ ∶ u₁ `≡ u₂ →
+    Γ ⊢ e₂ ∶ t ⋯ₛ ⦅ u₁ ⦆ₛ →
+    Γ ⊢ `J t e₁ e₂ ∶ t ⋯ₛ ⦅ u₂ ⦆ₛ
 
--- -- postulate
--- --   Value-wk-telescope : Value (Γ x) → Value (wk-telescope Γ x)
--- -- -- Value-wk-telescope : Value (Γ x) → Value (wk-telescope Γ x)
--- -- -- Value-wk-telescope {x = here refl} VΓx = {!VΓx!}
--- -- -- Value-wk-telescope {x = there x} VΓx = {!!}
+  -- Universe Type
 
--- -- ⊢-Value :
--- --   ∀ {µ} {Γ : Ctx µ} {M} {e : µ ⊢ M} {t : µ ⊢ M}
--- --   → Values Γ
--- --   → Γ ⊢ e ∶ t
--- --   → Value t
--- -- ⊢-Value {Γ = Γ} VΓ (⊢` {x = x} refl) = Value-wk-telescope {Γ = Γ} (VΓ x)
--- -- ⊢-Value VΓ (⊢λ Vt₁ ⊢e₁ ⊢e₂)          = ∀[x∶ Vt₁ ] ⊢-Value (Values-ext VΓ Vt₁) ⊢e₂
--- -- ⊢-Value VΓ (⊢∀ t₁⇓t₁' ⊢t₁ ⊢t₂)       = ★
--- -- ⊢-Value VΓ (⊢· ⊢e₁ ⊢e₂ ⇓[ _ , Vt ])  = Vt
--- -- ⊢-Value VΓ ⊢★                        = ★
+  ⊢Set :
+    Γ ⊢ `Set ∶ `Set
+
+  -- Conversion
+
+  ⊢≈ :
+    t ≈ t' →
+    Γ ⊢ e ∶ t →
+    Γ ⊢ e ∶ t'

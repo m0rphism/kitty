@@ -55,13 +55,13 @@ open Derived.Functional D public
 
 open import Kitty.Typing.TypeSorts terms
 
--- Each variable mode corresponds to a term mode that represents its type.
-type-modes : TypeSorts
-type-modes = record { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → _ , 𝕜 } }
+-- Each variable sort corresponds to a term sort that represents its type.
+type-sorts : TypeSorts
+type-sorts = record { ↑ᵗ = λ { 𝕖 → _ , 𝕥 ; 𝕥 → _ , 𝕜 ; 𝕜 → _ , 𝕜 } }
 
-open TypeSorts type-modes public
+open TypeSorts type-sorts public
 
-open import Kitty.Typing.CtxRepr type-modes
+open import Kitty.Typing.CtxRepr type-sorts
 
 ctx-repr : CtxRepr
 ctx-repr = List-CtxRepr

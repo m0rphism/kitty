@@ -15,7 +15,8 @@ infix  4  _∋_
 
 --! Variables
 data _∋_ {ℓ} {A : Set ℓ} : List A → A → Set ℓ where
-  zero  : ∀ {xs x} → (x ∷ xs) ∋ x ; suc : ∀ {xs x y} → xs ∋ x → (y ∷ xs) ∋ x
+  zero  : ∀ {xs x} → (x ∷ xs) ∋ x
+  suc   : ∀ {xs x y} → xs ∋ x → (y ∷ xs) ∋ x
 
 --! SortTy
 data SortTy : Set where Var NoVar : SortTy
