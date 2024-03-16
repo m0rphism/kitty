@@ -1424,11 +1424,12 @@
     preservation lemmas \ACode{\AField{⊢`/id}} or \ACode{\AField{\_⊢↑\_}}.
   \item
     The lambda typing constructor \ACode{\ACon{⊢λ}} weakens the type \ACode{t₂} to
-    shield it from expression-substitution, requiring us to use the
-    \ACode{\AField{⋯-↑-wk}} lemma.
+    shield it from expression-substitution, requiring us to use
+    \ACode{\AField{⋯-↑-wk}} to move the map under the weakening.
   \item
     The type application constructor \ACode{\ACon{⊢∙}} substitutes \ACode{t₁} into \ACode{t₂},
-    requiring us to use \ACode{\AField{dist-↑-⦅⦆}}.
+    requiring us to use \ACode{\AField{dist-↑-⦅⦆}} to move the map
+    under the singleton substitution.
   \end{itemize}
   % Finally, we instantiate the \ACode{\ACon{TTraversal}} structure:
   % \AppCode\FTTraversal
@@ -1465,35 +1466,35 @@
 
   \section{Reflection \& Generics}
   \label{sec:reflection}
-  We used Agda's reflection mechanism to derive
+  We use Agda's reflection mechanism to derive
   instantiations related to all structures for untyped substitition,
   i.e.\ \ACode{\ACon{Syntax}}, \ACode{\ACon{Traversal}} and
   \ACode{\ACon{CTraversal}}.
 
   To gain insight into the class of object languages supported by our
-  reflection algorithm, we have formalized a class of object languages
-  using a generic programming technique and instantiated the structures
-  generically. Informally, this class contains all object languages described
-  via multi-sorted syntax, which
+  reflection algorithm, we have instantiated the structures for a generic syntax
+  similar to the one in Allais et al.\cite{DBLP:journals/pacmpl/AllaisA0MM18}.
+  Our reflection algorithm derives proofs with the same
+  structure as the generic proofs, giving high confidence that it covers
+  the same class of languages. 
+
+  Informally, all objects languages with multi-sorted syntax are supported that
   \begin{enumerate}
   \item have a variable constructor of type
-    \ACode{S \ACon{∋} s \AKw{→} S \ACon{⊢} s};
-  \item use subterms only directly (e.g. not in lists);
-  \item only extend the scope-context of subterms, but never modify it.
+    \ACode{\AKw{∀} \{S s\} \AKw{→} S \ACon{∋} s \AKw{→} S \ACon{⊢} s};
+  \item use subterms only directly (e.g. not in lists); and
+  \item only extend the scope-context of subterms, but never modify it otherwise.
   \end{enumerate}
 
-  Our reflection algorithm derives proofs with exactly the same
-  structure as the generic proof, giving high confidence that it covers
-  the same class of languages.
-
-  The formal definition of the generic class can be found in
-  the supplementary material.
   % Appendix~\ref{sec:generic-class} and the actual implementation.
 
   We believe restriction 2 is purely technical and can be lifted
-  with a more sophisticated reflection algorithm, as parameterized
-  datastructures can also be inlined into the syntax definition as terms
-  of a new sort.
+  with a more sophisticated reflection algorithm. In the current system,
+  this restriction can be worked around by inlining the data structure
+  constructors into the syntax definition as terms of a new sort.
+
+  The formal definition of the generic syntax can be found in
+  the supplementary material.
 
   % We believe restriction 3 can be lifted partially to allow for
   % example the encoding of linear types that requires context
