@@ -102,7 +102,7 @@ variable
   E E₁ E₂ E₃ E' E₁' E₂' : µ ⊢ M
 
 -- Deriving Renaming/Substitution and related lemmas.
-open import Kitty.Derive using (derive; module Derived)
+open import Kitty.Term.Reflection using (derive; module Derived)
 unquoteDecl D = derive 𝕄 _⊢_ D
 open Derived.Functional D public
 

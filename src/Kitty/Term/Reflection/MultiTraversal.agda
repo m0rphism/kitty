@@ -1,6 +1,6 @@
 {-# OPTIONS -vreflection-debug:10 #-}
 
-module Kitty.Derive.MultiTraversal where
+module Kitty.Term.Reflection.MultiTraversal where
 
 open import Agda.Primitive using (Level; _⊔_) renaming (lzero to 0ℓ)
 open import Data.Bool using (Bool; true; false; if_then_else_)
@@ -40,7 +40,7 @@ open import Kitty.Term.Terms
 import Kitty.Term.Kit
 import Kitty.Term.MultiTraversal
 open import Kitty.Util.Star using (Star; []; _∷_)
-open import Kitty.Derive.Common
+open import Kitty.Term.Reflection.Common
 import Kitty.Term.Sub
 import Kitty.Term.MultiSub
 

@@ -1,8 +1,8 @@
 {-# OPTIONS -vreflection-debug:10 #-}
 
-module Kitty.Derive.MultiTraversalTest where
+module Kitty.Term.Reflection.MultiTraversalTest where
 
-open import Kitty.Derive.MultiTraversal
+open import Kitty.Term.Reflection.MultiTraversal
 import Kitty.Term.MultiTraversalDerived as Derived
 
 module Example where

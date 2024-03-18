@@ -1,6 +1,6 @@
 {-# OPTIONS -vreflection-debug:10 #-}
 
-module Kitty.Derive.Common where
+module Kitty.Term.Reflection.Common where
 
 open import ReflectionLib.Standard.Syntax
 open import ReflectionLib.Standard.VeryPretty
