@@ -2,16 +2,16 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1667653703,
-        "narHash": "sha256-Xow4vx52/g5zkhlgZnMEm/TEXsj+13jTPCc2jIhW1xU=",
+        "lastModified": 1710631334,
+        "narHash": "sha256-rL5LSYd85kplL5othxK5lmAtjyMOBg390sGBTb3LRMM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f09ad462c5a121d0239fde645aacb2221553a217",
+        "rev": "c75037bbf9093a2acb617804ee46320d6d1fea5a",
         "type": "github"
       },
       "original": {
         "id": "nixpkgs",
-        "ref": "nixos-22.05",
+        "ref": "nixos-unstable",
         "type": "indirect"
       }
     },
@@ -35,11 +35,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1667757926,
-        "narHash": "sha256-LyDh5eL2Q1JGe6qCZet8i/CE8cAKJoh0jJFExf1nCBc=",
-        "ref": "master",
-        "rev": "9a66974a029a8ab52256a3987a59f457f71c44cb",
-        "revCount": 56,
+        "lastModified": 1710360408,
+        "narHash": "sha256-qn16g2hJAmq5MPFi47Wn9uCTST29VX2I+2fnDLtZJZ0=",
+        "ref": "refs/heads/master",
+        "rev": "7740de091ce79bbcc47d5307c4815f5ac5c0ffd2",
+        "revCount": 63,
         "type": "git",
         "url": "ssh://git@github.com/m0rphism/reflection-lib"
       },

@@ -2,7 +2,7 @@
   description = "kitty";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-22.05";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
     reflection-lib.url = "git+ssh://git@github.com/m0rphism/reflection-lib";
   };
 
