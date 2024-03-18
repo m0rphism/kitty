@@ -7,8 +7,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst
 
 open import Kitty.Examples.LambdaPi-Derive.Definitions
 open import Kitty.Util.Closures
-open import Kitty.Typing.TypingKit compose-traversal ctx-repr
-  record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = λ { refl ⊢e → ⊢e } }
+open import Kitty.Typing.TypingKit compose-traversal ctx-repr typing
 open TypingKit ⦃ … ⦄
 
 ↪*-trans : e₁ ↪* e₂ → e₂ ↪* e₃ → e₁ ↪* e₃
@@ -152,6 +151,51 @@ data _↪ₚ*_ : S ⊢ s → S ⊢ s → Set where
 ↪ₚ*-map F ↪ₚ*-refl = ↪ₚ*-refl
 ↪ₚ*-map F (↪ₚ*-step p q) = ↪ₚ*-step (F p) (↪ₚ*-map F q)
 
+↪ₚ*-map₂ :
+  {f : S₁ ⊢ s → S₂ ⊢ s → S' ⊢ s} →
+  (F : ∀ {e₁ e₁' : S₁ ⊢ s} {e₂ e₂' : S₂ ⊢ s} → e₁ ↪ₚ e₁' → e₂ ↪ₚ e₂' → f e₁ e₂ ↪ₚ f e₁' e₂') →
+  e₁ ↪ₚ* e₁' →
+  e₂ ↪ₚ* e₂' →
+  f e₁ e₂ ↪ₚ* f e₁' e₂'
+↪ₚ*-map₂ F ↪ₚ*-refl ↪ₚ*-refl = ↪ₚ*-refl
+↪ₚ*-map₂ F ↪ₚ*-refl (↪ₚ*-step p q) = ↪ₚ*-step (F ↪ₚ-refl p) (↪ₚ*-map₂ F ↪ₚ*-refl q)
+↪ₚ*-map₂ F (↪ₚ*-step p q) r = ↪ₚ*-step (F p ↪ₚ-refl) (↪ₚ*-map₂ F q r)
+
+↪ₚ*-map₃ :
+  {f : S₁ ⊢ s → S₂ ⊢ s → S₃ ⊢ s → S' ⊢ s} →
+  (F : ∀ {e₁ e₁' : S₁ ⊢ s} {e₂ e₂' : S₂ ⊢ s} {e₃ e₃' : S₃ ⊢ s} → e₁ ↪ₚ e₁' → e₂ ↪ₚ e₂' → e₃ ↪ₚ e₃' → f e₁ e₂ e₃ ↪ₚ f e₁' e₂' e₃') →
+  e₁ ↪ₚ* e₁' →
+  e₂ ↪ₚ* e₂' →
+  e₃ ↪ₚ* e₃' →
+  f e₁ e₂ e₃ ↪ₚ* f e₁' e₂' e₃'
+↪ₚ*-map₃ F ↪ₚ*-refl ↪ₚ*-refl ↪ₚ*-refl = ↪ₚ*-refl
+↪ₚ*-map₃ F ↪ₚ*-refl ↪ₚ*-refl (↪ₚ*-step p q) = ↪ₚ*-step (F ↪ₚ-refl ↪ₚ-refl p) (↪ₚ*-map₃ F ↪ₚ*-refl ↪ₚ*-refl q)
+↪ₚ*-map₃ F ↪ₚ*-refl (↪ₚ*-step p q) r = ↪ₚ*-step (F ↪ₚ-refl p ↪ₚ-refl) (↪ₚ*-map₃ F ↪ₚ*-refl q r)
+↪ₚ*-map₃ F (↪ₚ*-step p q) r s = ↪ₚ*-step (F p ↪ₚ-refl ↪ₚ-refl) (↪ₚ*-map₃ F q r s)
+
+β*-proj₁ :
+  e₁ ↪ₚ* e₁' →
+  e₂ ↪ₚ* e₂' →
+  `proj₁ (e₁ `, e₂) ↪ₚ* e₁'
+β*-proj₁ p q = ↪ₚ*-trans (↪ₚ*-map ξ-proj₁ (↪ₚ*-map₂ ξ-, p q)) (↪ₚ*-step (β-proj₁ ↪ₚ-refl ↪ₚ-refl) ↪ₚ*-refl)
+
+β*-proj₂ :
+  e₁ ↪ₚ* e₁' →
+  e₂ ↪ₚ* e₂' →
+  `proj₂ (e₁ `, e₂) ↪ₚ* e₂'
+β*-proj₂ p q = ↪ₚ*-trans (↪ₚ*-map ξ-proj₂ (↪ₚ*-map₂ ξ-, p q)) (↪ₚ*-step (β-proj₂ ↪ₚ-refl ↪ₚ-refl) ↪ₚ*-refl)
+
+β*-λ : ∀ {e₁ e₁' : (S ▷ 𝕖) ⊢ 𝕖} {e₂ e₂' : S ⊢ 𝕖} →
+  e₁ ↪ₚ* e₁' →
+  e₂ ↪ₚ* e₂' →
+  ((λx e₁) · e₂) ↪ₚ* (e₁' ⋯ ⦅ e₂' ⦆ₛ)
+β*-λ p q = ↪ₚ*-trans (↪ₚ*-map₂ ξ-· (↪ₚ*-map ξ-λ p) q) (↪ₚ*-step (β-λ ↪ₚ-refl ↪ₚ-refl) ↪ₚ*-refl)
+
+β*-J :
+  e ↪ₚ* e' →
+  `J t `refl e ↪ₚ* e'
+β*-J p = ↪ₚ*-trans (↪ₚ*-map₃ ξ-J ↪ₚ*-refl ↪ₚ*-refl p) (↪ₚ*-step (β-J ↪ₚ-refl) ↪ₚ*-refl)
+
 ↪→↪ₚ : e ↪ e' → e ↪ₚ e'
 ↪→↪ₚ β-λ            = β-λ ↪ₚ-refl ↪ₚ-refl
 ↪→↪ₚ (ξ-λ e↪e')     = ξ-λ (↪→↪ₚ e↪e')
@@ -291,12 +335,6 @@ data _↪ₚ*_ : S ⊢ s → S ⊢ s → Set where
   e ↪* e'
 ↪ₚ*→↪* ↪ₚ*-refl                  = ↪*-refl
 ↪ₚ*→↪* (↪ₚ*-step t↪ₚt' t'↪ₚ*t'') = ↪*-trans (↪ₚ→↪* t↪ₚt') (↪ₚ*→↪* t'↪ₚ*t'')
-
-open import Kitty.Term.Prelude using (_∋_; List; []; _▷_) public
-open import Kitty.Term.Terms using (SortTy; Var; NoVar)
-
-private variable
-  _∋/⊢_ : List (Sort Var) → Sort Var → Set
 
 ↪ₚ-⋯ :
   ∀ ⦃ K : Kit _∋/⊢_ ⦄ ⦃ KT : KitT K ⦄

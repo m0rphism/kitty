@@ -206,6 +206,8 @@ record _≈_ (e₁ e₂ : S ⊢ s) : Set where
     ≈-e₁↪*e : e₁ ↪* ≈-e
     ≈-e₂↪*e : e₂ ↪* ≈-e
 
+open _≈_ public
+
 -- Type System -----------------------------------------------------------------
 
 data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
@@ -283,3 +285,10 @@ data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
     t ≈ t' →
     Γ ⊢ e ∶ t →
     Γ ⊢ e ∶ t'
+
+open import Kitty.Typing.Typing compose-traversal ctx-repr
+typing : Typing
+typing = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢`; ≡ᶜ-cong-⊢ = λ { refl ⊢e → ⊢e } }
+
+variable
+  _∋/⊢_ : List (Sort Var) → Sort Var → Set
