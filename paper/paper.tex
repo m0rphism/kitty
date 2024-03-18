@@ -395,11 +395,11 @@
   as a running example for a substitution-preserves-typing proof.
 
   Code of the framework is displayed in gray boxes.
-  Code of examples is written in yellow boxes.
-  Code of the System F formalization is written without boxes. The
+  Code of examples is displayed in yellow boxes.
+  Code of the System F formalization is displayed without boxes. The
   latter is the only code a user of our framework has to write.
 
-  In this paper we present a simplified version of the actual
+  In this paper, we present a simplified version of the actual
   framework, focusing on the core concepts. We present all necessary
   definitions and lemmas, but omit some proofs for the sake of
   space. The omitted proofs can be found in our supplementary material,
@@ -440,7 +440,7 @@
   %   kit-abstraction\cite{DBLP:journals/jar/BentonHKM12, unpublished:mcbride2005kits}
   %   for unifying renamings and substitutions to multi-sorted syntax;
   \item
-    a novel abstraction for composition and it's metatheory, unifying
+    a novel abstraction for composition and its metatheory, unifying
     the four compositions between renamings and substitutions;
   \item
     a novel abstraction for typing, unifying type
@@ -481,7 +481,7 @@
     have different types, which makes it difficult to treat them uniformly; and
   \item the different sorts of variables are modeled separately, which requires to define not just
     type-in-type and expression-in-expression substitution, but also type-in-expression substitution.
-    Consequently, interaction lemmas between those substitutions are required.
+    Consequently, interaction lemmas between the substitutions are required.
     % In general, this leads to a combinatory explosion of
     % substitutions, e.g.\ adding kind variables would lead to a total of 6
     % different substitutions and corresponding interaction lemmas.
@@ -687,18 +687,18 @@
     substitutions \ACode{S₁ \ADef{→ₛ} S₂}.
     We call a value of type \ACode{S₁ \ADef{→ₖ} S₂} a \emph{map} and
     use the meta-variable \ACode{ϕ} for it.
-  The operation \ACode{ϕ \& x} applies a map to a variable.
-  The operation \ACode{ϕ ↑ s} lifts a map under a binder of sort \ACode{s}.
-  The operation \ACode{⦅ x/t ⦆} constructs a singleton map that replaces
+  The operation \ACode{ϕ \ADef{\&} x} applies a map to a variable.
+  The operation \ACode{ϕ \ADef{↑} s} lifts a map under a binder of sort \ACode{s}.
+  The operation \ACode{\ADef{⦅} x/t \ADef{⦆}} constructs a singleton map that replaces
   \ACode{\ACon{zero}} with \ACode{x/t} and decreases all other variables by one.
-  The \ACode{\AField{weaken s}} map increases all variables by one.
-  The \ACode{ϕ₁ $\sim$ ϕ₂} type expresses extensional equality of maps.
-    For simplicity, we postulate functional extensionality \ACode{$\sim$-ext}.\footnote{
+  The \ACode{\ADef{weaken}} map increases all variables by one.
+  The \ACode{ϕ₁ \ADef{$\sim$} ϕ₂} type expresses extensional equality of maps.
+    For simplicity, we postulate functional extensionality \ACode{\AField{$\sim$-ext}}.\footnote{
       The actual implementation does \emph{not} use any postulates.
       % The workaround is explained in Appendix~\ref{sec:fun-ext}.
     }
-  There is an identity map \ACode{id}.
-  The lemma \ACode{id↑-id} states that a lifted identity map is again an identity map.
+  There is an identity map \ACode{\ADef{id}}.
+  The lemma \ACode{\ADef{id↑-id}} states that a lifted identity map is again an identity map.
 
   To make it easier to talk about a specific kit, we introduce the following notations:
   % We also specify notation 
@@ -707,15 +707,15 @@
   % to explicitly pass a particular \ACode{\ACon{Kit}} to those definitions:
   \begin{itemize}
   \item
-     we write \ACode{(S \ADef{∋/⊢[} K \ADef{]} s)} for the \ACode{(S ∋/⊢ s)}
-     of some specific \ACode{\ACon{Kit}} \ACode{K}; and
-   \item
-     we write \ACode{(S₁ \ADef{–[} K \ADef{]→} S₂)} for the \ACode{(S₁ \ADef{→ₖ} S₂)}
-     of some specific \ACode{\ACon{Kit}} \ACode{K}.
+    we write \ACode{S₁ \ADef{–[} K \ADef{]→} S₂} for the \ACode{S₁ \ADef{→ₖ} S₂}
+    of some specific \ACode{\ACon{Kit}} \ACode{K}.
+  \item
+    we write \ACode{S \ADef{∋/⊢[} K \ADef{]} s} for the \ACode{S ∋/⊢ s}
+    of some specific \ACode{\ACon{Kit}} \ACode{K}; and
   \end{itemize}
 
   The operation of applying a map to a term depends on the concrete
-  structure of a term, so we define a structure for it:
+  object language. It is captured by the following structure:
   \LibCode\KTraversal
   \noindent The fields of this structure have the following meaning:
   \begin{itemize}
@@ -773,8 +773,9 @@
     This is exactly what \ACode{\AField{`/id}} does.
   \item 
     In cases where the operation needs to go under a binder, like
-    \ACode{(\ACon{λx} e) \ADef{⋯} ϕ}, we lift the map using \AField{\_↑\_} before
-    we apply it to the subterm to account for the bound variable.
+    \ACode{(\ACon{λx} e) \ADef{⋯} ϕ}, we lift the map using
+    \AField{\_↑\_} to account for the bound variable before
+    we apply it to the subterm.
   \end{itemize}
 
   We then prove that applying an identity map does not change the term:
@@ -968,8 +969,7 @@
 
   A compose kit \ACode{\ACon{CKit}~K₁~K₂~K₁⊔K₂}
   describes the operations necessary for definining the composition of a
-  map from \ACode{K₁} with a map from \ACode{K₂} that results in a map from
-  \ACode{K₁⊔K₂}:
+  \ACode{K₁}-map with a \ACode{K₂}-map that results in a \ACode{K₁⊔K₂}-map:
   \LibCode\KCKit
   \noindent The third parameter \ACode{K₁⊔K₂} can be seen as a functional
   dependency\cite{DBLP:conf/esop/Jones00} and is determined
@@ -1047,7 +1047,7 @@
   Similarly, as it was the case for the \ACode{\ADef{Kit}} and \ACode{\ADef{Traversal}}
   structures, the idea is that we instantiate the \ACode{\ADef{CTraversal}} for
   our object language, and in return the framework defines the concrete \ACode{\ADef{CKit}}
-  instances for us. Hence, we define them in the record module of \ACode{\ADef{CTraversal}}:
+  instances for us. Hence, we define the \ACode{\ADef{CKit}} instances in the record module of \ACode{\ADef{CTraversal}}:
   \LibCode\KCKitInstances
   \noindent
   \ACode{\ADef{Cᵣ}} is the compose kit between a renaming and another kit \ACode{K}.
@@ -1419,8 +1419,8 @@
   \begin{itemize}
   \item
     There is a strong similarity to the instantiation of
-    map traversal \ACode{\AField{\_⋯\_}}. Where \ACode{\AField{\_⋯\_}}
-    used \ACode{\AField{`/id}} or \ACode{\AField{\_↑\_}}, we now use their
+    map traversal \ACode{\ADef{\_⋯\_}}: where \ACode{\ADef{\_⋯\_}}
+    used \ACode{\AField{`/id}} or \ACode{\AField{\_↑\_}}, our \ACode{\ADef{\_⊢⋯\_}} uses their
     preservation lemmas \ACode{\AField{⊢`/id}} or \ACode{\AField{\_⊢↑\_}}.
   \item
     The lambda typing constructor \ACode{\ACon{⊢λ}} weakens the type \ACode{t₂} to
@@ -1527,21 +1527,29 @@
     then bind the constraint as \ACode{c ∶ (α <: t)}. This description is
     similar to first-class constraints, but restricted enough to be
     isomorphic to the original formalization, as constraint variables
-    cannot be accesses by the user.
+    cannot be accessed by the user.
     With this encoding, substitution-preserves-typing is generally true
     again: replacing a type variable \ACode{α <: t} with a type \ACode{t'},
     which is not a subtype of \ACode{t}, results in a term that is still
     well-typed, but in a context with an unsatisfiable constraint \ACode{t' <: t}.
   \item
-    Object languages with pattern matching can be encoded by adding
+    % Object languages with pattern matching can be encoded by adding
+    % the sorts of the variables bound by a pattern to the pattern sort
+    % \ACode{\ACon{𝕡}} itself:
+    % \begin{quote}
+    % \ACode{\ACon{𝕡} \AKw{:} \ACon{List (Sort Var)} \AKw{→} \ACon{Sort NoVar}} 
+    % \end{quote}
+    % This allows the clause of a \ACode{\ACon{match}} expression to
+    % read the bound variables from the pattern sort and make them
+    % available as free variables in its body expression.
+    Object languages with pattern matching can be modeled by adding
     the sorts of the variables bound by a pattern to the pattern sort
-    \ACode{\ACon{𝕡}} itself:
+    \ACode{\ACon{𝕡}} itself. A pattern matching clause \ACode{p~\ACon{⇒}~e} can
+    then be defined as
     \begin{quote}
-    \ACode{\ACon{𝕡} \AKw{:} \ACon{List (Sort Var)} \AKw{→} \ACon{Sort NoVar}} 
+    \ACode{\ACon{\_⇒\_} \AKw{:} S \ACon{⊢} \ACon{𝕡} S' \AKw{→} \AKw{(}S' \ADef{++} S\AKw{)} \ACon{⊢} \ACon{𝕖} \AKw{→} S \ACon{⊢} \ACon{𝕔}} 
     \end{quote}
-    This allows the clause of a \ACode{\ACon{match}} expression to
-    read the bound variables from the pattern sort and make them
-    available as free variables in its body expression.
+    where \ACode{S'} describes the variables bound by the pattern and \ACode{\ACon{𝕔}} is the sort of a clause.
   \end{itemize}
 
   \section{Related Work}
@@ -1571,9 +1579,9 @@
 
   \subsection{Variable Binding}
   There is a plethora of different methods for representing
-  variable binders in the literature:
-  de Bruijn\cite{scholar:de1972lambda},
-  co de Bruijn\cite{DBLP:journals/corr/abs-1807-04085},
+  variable binders:
+  de Bruijn indices\cite{scholar:de1972lambda},
+  co de Bruijn indices\cite{DBLP:journals/corr/abs-1807-04085},
   locally nameless\cite{DBLP:journals/jar/Chargueraud12},
   locally named\cite{DBLP:conf/tlca/McKinnaP93},
   higher order abstract syntax\cite{DBLP:conf/pldi/PfenningE88} and
@@ -1657,7 +1665,7 @@
   With only a slight modification to their framework, we can instantiate it
   for multi-sorted syntax, enabling the definition of polymorphic languages.
   However, as the intrinsic typing is then
-  used to ensure syntactic sorts, the semantic abstractions talk about untyped
+  used to describe syntactic categories, the semantic abstractions talk about untyped
   terms, so typing and type preservation lemmas have to be modeled entirely manually.
   We believe it would be worthwhile to explore how their semantics
   abstractions can be lifted to typing relations similar to how our typing kits lift
@@ -1728,31 +1736,44 @@
   %   - Deriving untyped substitution is on par with intrinsic
   %   - Subst-Hell / Interaction lemmas unavoidable
 
+  We have presented an Agda framework, which automatically derives definitions and lemmas
+  for untyped substitution, and provides an abstraction for proving
+  type preservation of renaming and substitution for all syntactic
+  categories with a single lemma (\ACode{\AField{\_⊢⋯\_}}).
+
+  Compared to many extrinsically typed approaches, our framework also models
+  typing and type preservation. Compared to many intrinsically typed approaches, our
+  framework gracefully extends to polymorphic scenarios.
+
+  The main limitation of our framework is the shape of typing relations, similarly
+  as it is the case with approaches based on intrinsic typing: we can
+  only model classical ternary typing relations.
+  To adapt our framework to more complicated typing relations, the
+  machinery for untyped substitution can be reused, but the
+  abstractions related to typing need to be modified.
+  We found that this works surprisingly well in practice,
+  where we have already made extended typing abstractions that support
+  linear typing ala Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} and
+  general substructural typing ala Licata et al\cite{DBLP:conf/rta/LicataSR17}.
+  In both cases, the typing relation is extended with a fourth
+  component that models usage restrictions on the type context.
+
   While intrinsic typing allows to unify definitions with their type
   preservation proofs, extrinsic typing allows to unify
   substitutions across different syntactic categories, as we have demonstrated.
-  We believe this makes extrinsic typing more suitable for polymorphic languages:
-  with extrinsic typing, the definitions and lemmas for untyped
-  substitutions can be automated for virtually any object language,
-  whereas with intrinsic typing, it seems impossible to unify
-  substitutions across syntactic categories, because an intrinsically
-  typed multi-sorted syntax would require to index terms with terms,
-  which is the same problem that occurs with giving intrinsic types to a dependently typed language.
-
-  Our framework is able to automatically derive definitions and lemmas
-  about untyped substitution, and provides an abstraction for proving
-  type preservation of substitution with a single lemma (\ACode{\AField{\_⊢⋯\_}}).
-
-  Similarly to frameworks with intrinsic typing, the main limitation in our work is the shape of
-  typing relations: our typing kits can only model classical ternary typing relations.
-  To adapt our framework to more complicated typing relations, the machinery for untyped substitution
-  can be reused, but the typing kits and typing traversals need to be modified.
-  We found that this works surprisingly well in practice,
-  where we have already made extended typing kits to support
-  linear typing ala Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} and
-  general substructural typing ala Licata et al\cite{DBLP:conf/rta/LicataSR17}.
-  In both cases, the typing relation has a fourth component which models usage restrictions
-  on the type context.
+  We believe this makes our framework particularly suited for polymorphic languages,
+  where the downside of extrinsic typing is automated away, and the benefits
+  of a unified substitution bears fruits.
+  % Furthermore, extrinsic typing allows us
+  % to avoid the ``subst-hell'', which typically appears in formalizations
+  % of logical relations for polymorphic languages.
+  % We believe this makes extrinsic typing more suitable for polymorphic languages:
+  % with extrinsic typing, the definitions and lemmas for untyped
+  % substitutions can be automated for virtually any object language,
+  % whereas with intrinsic typing, it seems impossible to unify
+  % substitutions across syntactic categories, because an intrinsically
+  % typed multi-sorted syntax would require to index terms with terms,
+  % which is the same problem that occurs with giving intrinsic types to a dependently typed language.
 
 
 

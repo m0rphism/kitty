@@ -72,7 +72,7 @@ record Syntax : Set₁ where
 
       --! WeakenAlt
       weaken : ∀ s → S →ₖ (s ∷ S)
-      weaken s _ x = wk _ (id/` x)
+      weaken s _ x = wk s (id/` x)
 
     --! Wkm
     wkm : ∀ s → S₁ →ₖ S₂ → S₁ →ₖ (s ∷ S₂)
