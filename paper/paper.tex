@@ -1508,36 +1508,30 @@
   \begin{itemize}
   \item
     For lambda calculus with dependent function types, the framework
-    just works out of the box for both deriving and instantiating the
-    \ACode{\ACon{TTraversal}}.
-    Furthermore, the \ACode{\ACon{CKit}} abstraction turned out
-    to be useful to prove confluence, allowing to unify certain
-    lemmas, which otherwise need to be proved for both renamings and
+    works out of the box for both deriving untyped substitution
+    and instantiating the \ACode{\ACon{TTraversal}}.
+    In the proof of confluence, the \ACode{\ACon{CKit}} abstraction
+    allowed us to unify lemmas about the reduction of renamings and
     substitutions.
-    % e.g. that for two terms \ACode{t} and \ACode{t'}
-    % with \ACode{t \ACon{↪} t'} it follows that \ACode{(t \AField{⋯} ϕ)
-    % \ACon{↪} (t' \AField{⋯} ϕ)} for any map \ACode{ϕ}.
   \item
     For System F with subtyping the main challenges are how to represent
     subtyping constraints and how to deal with the fact that
-    substitution preserves typing is not generally true, as type variables
+    substitution-preserves-typing is not generally true, as type variables
     have subtyping bounds that need to be respected.
     While it would be possible to use our framework only to derive
     untyped substitution and define typing contexts and type preservation
-    lemmas by hand, we found an encoding, which still allows us to use the
-    the \ACode{\ACon{TKit}} abstraction.
+    lemmas by hand, we instead used an encoding that allows us to use the
+    the \ACode{\ACon{TKit}} abstraction directly.
     Instead of binding a type variable with a subtyping constraint
     \ACode{α <: t}, we first bind the type variable as \ACode{α : ★}, and
     then bind the constraint as \ACode{c ∶ (α <: t)}. This description is
     similar to first-class constraints, but restricted enough to be
     isomorphic to the original formalization, as constraint variables
     cannot be accesses by the user.
-    With that encoding substitution preserves typing is generally true
-    again, enabling the use of the framework's typing contexts and
-    \ACode{\ACon{TKit}} machinery.
-    When replacing a type variable \ACode{α <: t} with a type \ACode{t'},
-    which is not a subtype of \ACode{t}, then the resulting term is still
-    well-typed, but in a context with an unsatisfiable constraint.
+    With this encoding, substitution-preserves-typing is generally true
+    again: replacing a type variable \ACode{α <: t} with a type \ACode{t'},
+    which is not a subtype of \ACode{t}, results in a term that is still
+    well-typed, but in a context with an unsatisfiable constraint \ACode{t' <: t}.
   \item
     Object languages with pattern matching can be encoded by adding
     the sorts of the variables bound by a pattern to the pattern sort
@@ -1567,12 +1561,29 @@
   As the amount of related work is rather large, we focus on work that
   is closely related to ours and refer to other papers for the
   broader
-  picture\cite{DBLP:conf/cpp/StarkSK19,DBLP:journals/pacmpl/AllaisA0MM18}. In
-  particular, we discuss abstractions for renamings
-  and substitutions, comparable extrinsically typed approaches, but also
-  intrinsically typed approaches that could be used as a basis for
-  multi-sorted syntax, which as mentioned before is intrinsically typed
-  in disguise.
+  picture\cite{DBLP:conf/cpp/StarkSK19,DBLP:journals/pacmpl/AllaisA0MM18}.
+  % In
+  % particular, we discuss abstractions for renamings
+  % and substitutions, comparable extrinsically typed approaches, but also
+  % intrinsically typed approaches that could be used as a basis for
+  % multi-sorted syntax, which as mentioned before is intrinsically typed
+  % in disguise.
+
+  \subsection{Variable Binding}
+  There is a plethora of different methods for representing
+  variable binders in the literature:
+  de Bruijn\cite{scholar:de1972lambda},
+  co de Bruijn\cite{DBLP:journals/corr/abs-1807-04085},
+  locally nameless\cite{DBLP:journals/jar/Chargueraud12},
+  locally named\cite{DBLP:conf/tlca/McKinnaP93},
+  higher order abstract syntax\cite{DBLP:conf/pldi/PfenningE88} and
+  its parametric variant\cite{DBLP:conf/icfp/Chlipala08},
+  nominal logic\cite{DBLP:journals/tcs/UrbanPG04},
+  shifted names\cite{scholar:dolansyntax},
+  nameless painless\cite{DBLP:conf/icfp/Pouillard11}, and
+  scope graphs\cite{DBLP:journals/pacmpl/AntwerpenPRV18}.
+  Many of these representations have been studied in solutions to the POPLMark
+  challenges\cite{DBLP:conf/tphol/AydemirBFFPSVWWZ05, DBLP:journals/jfp/AbelAHPMSS19}.
 
   \subsection{Unifying Renamings \& Substitution}
 
@@ -1584,7 +1595,7 @@
   extension to kits that supports substructural types via resource
   vectors.
   In all three cases kits are formulated for intrinsic typing
-  and scenarios with polymorphism are not yet considered.
+  and scenarios with polymorphism are not considered.
 
   \subsection{Extrinsically Typed Approaches}
 
@@ -1610,12 +1621,22 @@
   variable counts. To eliminate the need for interaction lemmas, they
   define the notion of \emph{vectorized substitution}, which combines
   the individual substitutions by putting them in a vector.
+  We believe their great work of creating a decision procedure for
+  vectorized substitutions should also translate to our setting with
+  multi-sorted substitutions.
+
+  \emph{Needle and Knot}\cite{DBLP:conf/esop/KeuchelWS16} is a code
+  generator for unscoped syntax with de Bruijn indices. They generate
+  substitution and interaction lemmas for single-pointed substitution
+  for languages with multiple variable sorts and binders that bind
+  lists of variables.
   
-  Both works do not provide machinery for type preservation and do not
-  unify renaming and substitution (although the latter is listed as
-  future work). We believe their amazing work of creating a decision
-  procedure for vectorized substitutions should also translate to our
-  setting with multi-sorted substitutions.
+  All of the above work does not provide machinery to model typing
+  and type preservation and does not unify renaming and substitution and
+  their compositions.
+  Hence, type preservation needs to be modeled manually and
+  individually for renamings and substitutions.
+
 
   % Abstract binding trees
 
@@ -1631,15 +1652,16 @@
   their generic fusion lemma, and also provide an abstraction to unify
   renamings and substitutions.
   They show how to use their framework for both intrinsic and
-  extrinsic typing, but have not yet explored the realm of polymorphism.
+  extrinsic typing, but are missing a story for polymorphism.
 
-  This work is orthogonal, but compatible to our approach.
-  We can instantiate their system using the hidden intrinsic type
-  system of our multi-sorted syntax, but unfortunately then their
-  semantics abstraction would only work with terms, which are untyped
-  with respect to the actual extrinsic type system.
-  We think it is worthwile to explore if their semantics abstraction
-  can also be generalized to multi-sorted typing relations.
+  With only a slight modification to their framework, we can instantiate it
+  for multi-sorted syntax, enabling the definition of polymorphic languages.
+  However, as the intrinsic typing is then
+  used to ensure syntactic sorts, the semantic abstractions talk about untyped
+  terms, so typing and type preservation lemmas have to be modeled entirely manually.
+  We believe it would be worthwhile to explore how their semantics
+  abstractions can be lifted to typing relations similar to how our typing kits lift
+  regular kits from terms to typing relations.
 
   % \subsection{Fibrational}
   % \cite{DBLP:conf/rta/LicataSR17}
@@ -1648,7 +1670,6 @@
   Pure Type Systems\cite{DBLP:conf/esop/BarendregtH90, berarditowards, terlouw1989een}
   describe a class of typed lambda calculi parameterized over a set of
   sorts, dependencies between sorts, and rules for quantification.
-
   While pure type systems may seem very similar to multi-sorted
   syntax, they are actually quite different:
   \begin{itemize}
@@ -1658,120 +1679,161 @@
     \ACode{S ⊢ 𝕖} and types \ACode{S ⊢ 𝕥} in our System F example.
   \item 
     In pure type systems, sorts are universe types, e.g.\ like
-    \ACode{Set} and \ACode{Set₁} in Agda.
+    \ACode{Set} in Agda or \ACode{Prop} in Coq.
     Terms which have different sorts as types, do still belong to the
     same syntactic category.
   \end{itemize}
 
-  We can use our framework to model pure type systems, but the sorts of pure type systems
-  do not correspond to the sorts of the multi-sorted syntax. The multi-sorted syntax
-  has just a single sort that describes all terms, as it is common for
-  dependently typed languages.
+  We can model pure type systems as a multi-sorted syntax with a single sort,
+  where the sorts of the pure type system occur as terms representing universe types.
+
+  % We can use our framework to model pure type systems, but the sorts of pure type systems
+  % do not correspond to the sorts of the multi-sorted syntax. The multi-sorted syntax
+  % has just a single sort that describes all terms, as it is common for
+  % dependently typed languages.
 
   \section{Conclusion}
   \label{sec:conclusion}
-  We have presented a framework for deriving untyped substitution and its properties, and
-  and abstraction for proving type preservation of substitution with a single lemma.
+  % We have presented a framework for deriving untyped substitution and its properties, and
+  % and abstraction for proving type preservation of substitution with a single lemma.
 
-  Using extrinsic typing allowed us to unify the renamings and
-  substitutions for variables of arbitrary many syntactic categories.
+  % Using extrinsic typing allowed us to unify the renamings and
+  % substitutions for variables of arbitrary many syntactic categories.
 
-  Furthermore, extrinsic typing allowed us treat untyped substitution
-  and its properties separately from typing and type preservation.
-  This has the benefit that the former can be derived automatically for virtually
-  any object language, while the latter is more domain specific and
-  can be handled independently.
+  % Furthermore, extrinsic typing allowed us treat untyped substitution
+  % and its properties separately from typing and type preservation.
+  % This has the benefit that the former can be derived automatically for virtually
+  % any object language, while the latter is more domain specific and
+  % can be handled independently.
 
-  We believe our framework is a viable alternative to intrinsic
-  typing, as the duplication is automated away.
+  % We believe our framework is a viable alternative to intrinsic
+  % typing, as the duplication is automated away.
 
-  We believe our framework is particularly useful for polymorphic languages,
-  where intrinsic typing requires necessarily to deal with multiple substitutions
-  and their interactions. Furthermore, in more complex scenarios, intrinsic typing
-  can easily lead to subst-hell, which is avoided with extrinsic typing.
+  % We believe our framework is particularly useful for polymorphic languages,
+  % where intrinsic typing requires necessarily to deal with multiple substitutions
+  % and their interactions. Furthermore, in more complex scenarios, intrinsic typing
+  % can easily lead to subst-hell, which is avoided with extrinsic typing.
   
-  We belive the core limitation of our framework are the typing kits, which
-  require a classical ternary typing relation. However, this problem is hard
-  to avoid as typing relations can become arbitrarily complicated.
-  To adapt the framework to more complicated type systems, only the typing
-  kits and typing traversals need to be extended, which we have successfully
-  done for linear typing ala Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} and
+  % We belive the core limitation of our framework are the typing kits, which
+  % require a classical ternary typing relation. However, this problem is hard
+  % to avoid as typing relations can become arbitrarily complicated.
+  % To adapt the framework to more complicated type systems, only the typing
+  % kits and typing traversals need to be extended, which we have successfully
+  % done for linear typing ala Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} and
+  % general substructural typing ala Licata et al\cite{DBLP:conf/rta/LicataSR17}.
+
+  % - Main use case: polymorphism / multiple syntactic categories / dependent types
+  % - Limitations and Flexibility with only extending typing kits
+  % - Comparison with intrinsic typing
+  %   - Deriving untyped substitution is on par with intrinsic
+  %   - Subst-Hell / Interaction lemmas unavoidable
+
+  While intrinsic typing allows to unify definitions with their type
+  preservation proofs, extrinsic typing allows to unify
+  substitutions across different syntactic categories, as we have demonstrated.
+  We believe this makes extrinsic typing more suitable for polymorphic languages:
+  with extrinsic typing, the definitions and lemmas for untyped
+  substitutions can be automated for virtually any object language,
+  whereas with intrinsic typing, it seems impossible to unify
+  substitutions across syntactic categories, because an intrinsically
+  typed multi-sorted syntax would require to index terms with terms,
+  which is the same problem that occurs with giving intrinsic types to a dependently typed language.
+
+  Our framework is able to automatically derive definitions and lemmas
+  about untyped substitution, and provides an abstraction for proving
+  type preservation of substitution with a single lemma (\ACode{\AField{\_⊢⋯\_}}).
+
+  Similarly to frameworks with intrinsic typing, the main limitation in our work is the shape of
+  typing relations: our typing kits can only model classical ternary typing relations.
+  To adapt our framework to more complicated typing relations, the machinery for untyped substitution
+  can be reused, but the typing kits and typing traversals need to be modified.
+  We found that this works surprisingly well in practice,
+  where we have already made extended typing kits to support
+  linear typing ala Wood and Atkey\cite{DBLP:journals/corr/abs-2005-02247} and
   general substructural typing ala Licata et al\cite{DBLP:conf/rta/LicataSR17}.
+  In both cases, the typing relation has a fourth component which models usage restrictions
+  on the type context.
+
+
+
+
+  % In our opinion, our framework makes a case for extrinsic typing for
+  % polymorphic, languages as the
 
   % \bibliographystyle{ACM-Reference-Format}
   \bibliography{paper}
 
   \clearpage
-  \appendix
-  \onecolumn
+  % \appendix
+  % \onecolumn
 
-  \section{Omitted Proofs}
-  \label{sec:proofs}
+  % \section{Omitted Proofs}
+  % \label{sec:proofs}
 
-  \subsection{Proofs for Section~\ref{sec:maps}}
-  \LibCode\KIdLift
-  \LibCode\KIdLiftProof
+  % \subsection{Proofs for Section~\ref{sec:maps}}
+  % \LibCode\KIdLift
+  % \LibCode\KIdLiftProof
 
-  % \AppCode\FTraversalId
-  % \AppCode\FTraversalIdProofInteresting
-  % \LibCode\FTraversalIdProofRest
+  % % \AppCode\FTraversalId
+  % % \AppCode\FTraversalIdProofInteresting
+  % % \LibCode\FTraversalIdProofRest
 
-  \subsection{Proofs for Section~\ref{sec:composition}}
-  \LibCode\KCKitAp
-  \LibCode\KCKitApProof
+  % \subsection{Proofs for Section~\ref{sec:composition}}
+  % \LibCode\KCKitAp
+  % \LibCode\KCKitApProof
 
-  \LibCode\KDistLiftCompose
-  \LibCode\KDistLiftComposeProof
+  % \LibCode\KDistLiftCompose
+  % \LibCode\KDistLiftComposeProof
 
-  \LibCode\KCommLiftWeaken
-  \LibCode\KCommLiftWeakenProof
+  % \LibCode\KCommLiftWeaken
+  % \LibCode\KCommLiftWeakenProof
 
-  \LibCode\KCommLiftWeakenTraverse
-  \LibCode\KCommLiftWeakenTraverseProof
+  % \LibCode\KCommLiftWeakenTraverse
+  % \LibCode\KCommLiftWeakenTraverseProof
 
-  \LibCode\KWeakenCancelsSingle
-  \LibCode\KWeakenCancelsSingleProof
+  % \LibCode\KWeakenCancelsSingle
+  % \LibCode\KWeakenCancelsSingleProof
 
-  \LibCode\KWeakenCancelsSingleTraverse
-  \LibCode\KWeakenCancelsSingleTraverseProof
+  % \LibCode\KWeakenCancelsSingleTraverse
+  % \LibCode\KWeakenCancelsSingleTraverseProof
 
-  \LibCode\KDistLiftSingle
-  \LibCode\KDistLiftSingleProof
+  % \LibCode\KDistLiftSingle
+  % \LibCode\KDistLiftSingleProof
 
-  \LibCode\KDistLiftSingleTraverse
-  \LibCode\KDistLiftSingleTraverseProof
-
-
-  % \AppCode\FFusion
-  % \AppCode\FFusionProofInteresting
-  % \AppCode\FFusionProofRest
+  % \LibCode\KDistLiftSingleTraverse
+  % \LibCode\KDistLiftSingleTraverseProof
 
 
-  \subsection{Proofs for Section~\ref{sec:typing}}
-  \LibCode\KLiftTyping
-  \LibCode\KLiftTypingProof
-
-  \LibCode\KSingleTyping
-  \LibCode\KSingleTypingProof
+  % % \AppCode\FFusion
+  % % \AppCode\FFusionProofInteresting
+  % % \AppCode\FFusionProofRest
 
 
-  % \AppCode\FSubjectReduction
-  % \AppCode\FSubjectReductionProofInteresting
+  % \subsection{Proofs for Section~\ref{sec:typing}}
+  % \LibCode\KLiftTyping
+  % \LibCode\KLiftTypingProof
+
+  % \LibCode\KSingleTyping
+  % \LibCode\KSingleTypingProof
 
 
-  % \section{Generic Class of Object Languages}
-  % \label{sec:generic-class}
+  % % \AppCode\FSubjectReduction
+  % % \AppCode\FSubjectReductionProofInteresting
 
 
-  % \section{System F with Reflection}
-  % \label{sec:reflection-example}
+  % % \section{Generic Class of Object Languages}
+  % % \label{sec:generic-class}
 
 
-  % \section{Map Equality Without Functional Extensionality}
-  % \label{sec:fun-ext}
+  % % \section{System F with Reflection}
+  % % \label{sec:reflection-example}
 
 
-  % \section{Features of the Actual Implementation}
-  % \label{sec:features}
+  % % \section{Map Equality Without Functional Extensionality}
+  % % \label{sec:fun-ext}
+
+
+  % % \section{Features of the Actual Implementation}
+  % % \label{sec:features}
 
 \end{document}
