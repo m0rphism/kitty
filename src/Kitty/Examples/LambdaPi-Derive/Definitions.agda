@@ -55,9 +55,8 @@ data _⊢_ : List (Sort Var) → Sort st → Set where
   `Set      : S ⊢ 𝕖
 
 variable
-  e e₁ e₂ e₃ e' e₁' e₂' e₃' : S ⊢ 𝕖
-  u u₁ u₂ u₃ u' u₁' u₂' u₃' : S ⊢ 𝕖
-  E E₁ E₂ E₃ E' E₁' E₂' E₃' : S ⊢ s
+  e e₁ e₂ e₃ e' e₁' e₂' e₃' : S ⊢ s
+  u u₁ u₂ u₃ u' u₁' u₂' u₃' : S ⊢ s
 
 -- Deriving Renaming/Substitution and related lemmas.
 open import Kitty.Term.Reflection using (derive; module Derived)
