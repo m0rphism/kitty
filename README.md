@@ -52,7 +52,7 @@ The full framework extends the simple framework as follows:
 
 -   We don't rely on the functional extensionality axiom, and instead
     prove that our operations preserve map equivalence and provide a
-    lemma that states that applying equivalent maps to a term yiels
+    lemma that states that applying equivalent maps to a term yields
     equal terms.
 
 Those changes significantly increase the complexity of our framework,
