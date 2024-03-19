@@ -15,6 +15,13 @@ compositions between them and over type preservation of renamings and
 substitutions. In the following, we use the term *map* to talk about
 something, which can be either a renaming or a substitution.
 
+## Dependencies
+
+The framework requires the following dependencies to be installed:
+
+-   [The Agda proof assistant](https://agda.readthedocs.io/en/latest/) in version >= 2.6.4
+-   [The Agda standard library](https://github.com/agda/agda-stdlib) in version 2.0
+
 ## Comparison to the Simplified Version
 
 We have submitted a paper about our framework to ITP'24. In the paper
