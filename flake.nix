@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    reflection-lib.url = "git+ssh://git@github.com/m0rphism/reflection-lib";
+    # reflection-lib.url = "git+ssh://git@github.com/m0rphism/reflection-lib";
   };
 
   outputs = { self, nixpkgs, reflection-lib, ... }: 
@@ -25,7 +25,10 @@
       version = "0.1.0";
       pname = "kitty";
       src = ./.;
-      buildInputs = with pkgs.agdaPackages; [ standard-library reflection-lib.packages.x86_64-linux.reflection-lib ];
+      buildInputs = with pkgs.agdaPackages; [
+        standard-library
+        # reflection-lib.packages.x86_64-linux.reflection-lib
+      ];
 
       libraryName = "kitty";  # has to match the .agda-lib
       everythingFile = "src/Kitty/Everything.agda";  # defaults to "Everything.agda"
