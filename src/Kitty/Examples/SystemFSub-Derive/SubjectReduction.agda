@@ -11,6 +11,7 @@ open TypingKit ⦃ … ⦄
 open import Function using () renaming (_∋_ to _by_)
 
 -- BEGIN DERIVABLE -------------------------------------------------------------
+-- TODO: We can extend the framework to derive the following code:
 
 open import Kitty.Term.Terms
 Injective-Map :

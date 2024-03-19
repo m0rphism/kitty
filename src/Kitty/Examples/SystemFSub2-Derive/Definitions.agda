@@ -54,7 +54,7 @@ variable
   E E₁ E₂ E₃ E' E₁' E₂' : S ⊢ s
 
 -- Deriving Renaming/Substitution and related lemmas.
-open import Kitty.Derive using (derive; module Derived)
+open import Kitty.Term.Reflection using (derive; module Derived)
 
 unquoteDecl D = derive Sort _⊢_ D
 
