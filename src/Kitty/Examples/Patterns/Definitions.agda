@@ -1,12 +1,11 @@
-module Kitty.Examples.STLC-Pat.Definitions where
+module Kitty.Examples.Patterns.Definitions where
 
 open import Kitty.Term.Prelude using (_∋_; _▷_; _▷▷_; List; []) public
-open import Kitty.Term.Modes using (Modes; Terms)
-open import Kitty.Util.List
+open import Kitty.Term.Terms using (Terms; SortTy; Var; NoVar)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; subst; sym)
 open import Data.List.Relation.Unary.Any using (here; there)
 open import Data.List.Properties using (++-assoc)
-open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_)
+open import Data.Product using (∃-syntax; Σ-syntax; _,_; _×_; proj₂)
 
 -- Fixities --------------------------------------------------------------------
 
@@ -16,108 +15,112 @@ infixr  6  _⇒_
 infixl  6  _·_
 infix   7  `_
 
--- Modes -----------------------------------------------------------------------
+-- Sorts -----------------------------------------------------------------------
 
--- Variable Modes
-data Modeᵥ : Set where
-  𝕖 : Modeᵥ  -- Expression-level variables
-
--- Term Modes
-data Modeₜ : Set where
-  𝕖 : Modeₜ  -- Expressions
-  𝕥 : Modeₜ  -- Types
-  𝕡 : List Modeᵥ → Modeₜ  -- Patterns
-  ℙ : List Modeᵥ → Modeₜ  -- Pattern Types
-  𝕔 : Modeₜ  -- Clause
-  𝕔𝕤 : Modeₜ  -- Clauses
-  ℂ : Modeₜ  -- Clause Type
-
--- Mapping variable modes to the term modes they represent.
-m→M : Modeᵥ → Modeₜ
-m→M 𝕖 = 𝕖
-
-↑ₜ : Modeₜ → Modeₜ
-↑ₜ = λ { 𝕖 → 𝕥 ; (𝕡 µ) → ℙ µ ; 𝕥 → 𝕥 ; (ℙ µ) → ℙ µ ; 𝕔 → ℂ ; 𝕔𝕤 → ℂ ; ℂ → ℂ }
-
-𝕄 : Modes
-𝕄 = record { VarMode = Modeᵥ ; TermMode = Modeₜ ; m→M = m→M }
+data Sort : SortTy → Set where
+  𝕖  : Sort Var                     -- Expressions
+  𝕥  : Sort NoVar                   -- Types
+  𝕡  : List (Sort Var) → Sort NoVar -- Patterns
+  ℙ  : List (Sort Var) → Sort NoVar -- Pattern Types
+  𝕔  : Sort NoVar                   -- Clause
+  𝕔𝕤 : Sort NoVar                   -- Clauses
+  ℂ  : Sort NoVar                   -- Clause Type
 
 variable
-  m m₁ m₂ m₃ m' m₁' m₂' m₃' : Modeᵥ
-  M M₁ M₂ M₃ M' M₁' M₂' M₃' : Modeₜ
-  µ µ₁ µ₂ µ₃ µ' µ₁' µ₂' µ₃' : List Modeᵥ
-  x y z                     : µ ∋ m
+  st                        : SortTy
+  s s₁ s₂ s₃ s' s₁' s₂' s₃' : Sort st
+  S S₁ S₂ S₃ S' S₁' S₂' S₃' : List (Sort Var)
+  x y z                     : S ∋ s
+
+↑ᵗ : Sort st → ∃[ st' ] Sort st'
+↑ᵗ 𝕖     = _ , 𝕥
+↑ᵗ (𝕡 S) = _ , ℙ S
+↑ᵗ 𝕥     = _ , 𝕥
+↑ᵗ (ℙ S) = _ , ℙ S
+↑ᵗ 𝕔     = _ , ℂ
+↑ᵗ 𝕔𝕤    = _ , ℂ
+↑ᵗ ℂ     = _ , ℂ
 
 -- Syntax ----------------------------------------------------------------------
 
-mutual
+-- Expressions and Types
+data _⊢_ : List (Sort Var) → Sort st → Set where
+  `_        : S ∋ s  →  S ⊢ s
 
-  -- Expressions and Types
-  data _⊢_ : List Modeᵥ → Modeₜ → Set where
-    `[_]_     : ∀ {m M}  →  M ≡ m→M m  →  µ ∋ m  →  µ ⊢ M
-    λx_       : µ ▷ 𝕖 ⊢ 𝕖  →  µ ⊢ 𝕖
-    _·_       : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
-    _`→_       : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
+  -- Functions
+  λx_       : S ▷ 𝕖 ⊢ 𝕖  →  S ⊢ 𝕖
+  _·_       : S ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖
+  _`→_       : S ⊢ 𝕥  →  S ⊢ 𝕥  →  S ⊢ 𝕥
 
-    𝟘 𝟙       : µ ⊢ 𝕥
-    _`×_ _`⊎_ : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ 𝕥
-    tt        : µ ⊢ 𝕖
-    _,_       : µ ⊢ 𝕖  →  µ ⊢ 𝕖  →  µ ⊢ 𝕖
-    inj₁ inj₂ : µ ⊢ 𝕖  →  µ ⊢ 𝕖
+  -- Bottom, Unit, Products, Sums
+  𝟘 𝟙       : S ⊢ 𝕥
+  _`×_ _`⊎_ : S ⊢ 𝕥  →  S ⊢ 𝕥  →  S ⊢ 𝕥
+  tt        : S ⊢ 𝕖
+  _,_       : S ⊢ 𝕖  →  S ⊢ 𝕖  →  S ⊢ 𝕖
+  inj₁ inj₂ : S ⊢ 𝕖  →  S ⊢ 𝕖
 
-    match     : µ ⊢ 𝕖  →  µ ⊢ 𝕔𝕤  →  µ ⊢ 𝕖
-    _⇒_       : µ ⊢ 𝕡 µ'  →  (µ ▷▷ µ') ⊢ 𝕖  →  µ ⊢ 𝕔
-    []        : µ ⊢ 𝕔𝕤
-    _∷_       : µ ⊢ 𝕔  →  µ ⊢ 𝕔𝕤  →  µ ⊢ 𝕔𝕤
-    `ᵖ        : µ ⊢ 𝕡 ([] ▷ 𝕖)
-    _,ᵖ_      : µ ⊢ 𝕡 µ₁  →  (µ ▷▷ µ₁) ⊢ 𝕡 µ₂  →  µ ⊢ 𝕡 (µ₁ ▷▷ µ₂)
-    inj₁ᵖ inj₂ᵖ : µ ⊢ 𝕡 µ'  →  µ ⊢ 𝕡 µ'
-    ttᵖ       : µ ⊢ 𝕡 []
+  -- Matching
+  match     : S ⊢ 𝕖  →  S ⊢ 𝕔𝕤  →  S ⊢ 𝕖
 
-    []ᵖ       : µ ⊢ ℙ []
-    _▶ᵖ_      : µ ⊢ ℙ µ₁ → (µ ▷▷ µ₁) ⊢ 𝕥 → µ ⊢ ℙ (µ₁ ▷ 𝕖)
-    Clause    : µ ⊢ 𝕥  →  µ ⊢ 𝕥  →  µ ⊢ ℂ
+  -- List of clauses (workaround, as we do not support `List (S ⊢ 𝕔)` yet)
+  []        : S ⊢ 𝕔𝕤
+  _∷_       : S ⊢ 𝕔  →  S ⊢ 𝕔𝕤  →  S ⊢ 𝕔𝕤
 
-  CtxP' : List Modeᵥ → List Modeᵥ → Set
-  CtxP' µ µ' = ∀ m → (x : µ' ∋ m) →  (µ ▷▷ drop-∈ x µ') ⊢ ↑ₜ (m→M m)
+  -- Clause
+  _⇒_       : S ⊢ 𝕡 S'  →  (S ▷▷ S') ⊢ 𝕖  →  S ⊢ 𝕔
 
-pattern `_ x = `[ refl ] x
+  -- Patterns
+  `ᵖ        : S ⊢ 𝕡 ([] ▷ 𝕖)
+  _,ᵖ_      : S ⊢ 𝕡 S₁  →  (S ▷▷ S₁) ⊢ 𝕡 S₂  →  S ⊢ 𝕡 (S₁ ▷▷ S₂)
+  inj₁ᵖ inj₂ᵖ : S ⊢ 𝕡 S'  →  S ⊢ 𝕡 S'
+  ttᵖ       : S ⊢ 𝕡 []
 
-_▶▶ᵖ_ : µ ⊢ ℙ µ₁ → (µ ▷▷ µ₁) ⊢ ℙ µ₂ → µ ⊢ ℙ (µ₁ ▷▷ µ₂)
-P₁ ▶▶ᵖ (`[_]_ {m = 𝕖} () _)
+  -- Pattern Types, i.e. type contexts.
+  -- (workaround, as we do not support using real type contexts in the syntax yet)
+  []ᵖ       : S ⊢ ℙ []
+  _▶ᵖ_      : S ⊢ ℙ S₁ → (S ▷▷ S₁) ⊢ 𝕥 → S ⊢ ℙ (S₁ ▷ 𝕖)
+
+  -- Clause Types
+  Clause    : S ⊢ 𝕥  →  S ⊢ 𝕥  →  S ⊢ ℂ
+
+-- Concatenation for the syntax of type contexts (pattern types).
+_▶▶ᵖ_ : S ⊢ ℙ S₁ → (S ▷▷ S₁) ⊢ ℙ S₂ → S ⊢ ℙ (S₁ ▷▷ S₂)
 P₁ ▶▶ᵖ []ᵖ       = P₁
-_▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) =
-  let sub = subst (_⊢ 𝕥) (sym (++-assoc µ₂ µ₁ µ)) in
+_▶▶ᵖ_ {S} {S₁} {S₂ = S₂ ▷ _} P₁ (P₂ ▶ᵖ t) =
+  let sub = subst (_⊢ 𝕥) (sym (++-assoc S₂ S₁ S)) in
   (P₁ ▶▶ᵖ P₂) ▶ᵖ sub t
--- _▶▶ᵖ_ {µ} {µ₁} {µ₂ = µ₂ ▷ _} P₁ (P₂ ▶ᵖ t) rewrite sym (++-assoc µ₂ µ₁ µ) = (P₁ ▶▶ᵖ P₂) ▶ᵖ t
 
 variable
-  e e₁ e₂ e₃ e' e₁' e₂' : µ ⊢ 𝕖
-  t t₁ t₂ t₃ t' t₁' t₂' : µ ⊢ 𝕥
-  p p₁ p₂ p₃ p' p₁' p₂' : µ ⊢ 𝕡 µ'
-  P P₁ P₂ P₃ P' P₁' P₂' : µ ⊢ ℙ µ'
-  c  c'                 : µ ⊢ 𝕔
-  cs cs'                : µ ⊢ 𝕔𝕤
-  C C'                  : µ ⊢ ℂ
-  E E₁ E₂ E₃ E' E₁' E₂' : µ ⊢ M
+  e e₁ e₂ e₃ e' e₁' e₂' : S ⊢ 𝕖
+  t t₁ t₂ t₃ t' t₁' t₂' : S ⊢ 𝕥
+  p p₁ p₂ p₃ p' p₁' p₂' : S ⊢ 𝕡 S'
+  P P₁ P₂ P₃ P' P₁' P₂' : S ⊢ ℙ S'
+  c  c'                 : S ⊢ 𝕔
+  cs cs'                : S ⊢ 𝕔𝕤
+  C C'                  : S ⊢ ℂ
+  E E₁ E₂ E₃ E' E₁' E₂' : S ⊢ s
+
+-- Reflection Time -------------------------------------------------------------
 
 -- Deriving Renaming/Substitution and related lemmas.
 open import Kitty.Term.Reflection using (derive; module Derived)
-unquoteDecl D = derive 𝕄 _⊢_ D
+unquoteDecl D = derive Sort _⊢_ D
+
+-- We choose to represent substitutions as functions.
 open Derived.Functional D public
 
 -- Types and Contexts ----------------------------------------------------------
 
-open import Kitty.Typing.TypeModes terms
+open import Kitty.Typing.TypeSorts terms
 
--- Each variable mode corresponds to a term mode that represents its type.
-type-modes : TypeModes
-type-modes = record { ↑ₜ = ↑ₜ }
+type-sorts : TypeSorts
+type-sorts = record { ↑ᵗ = ↑ᵗ }
 
-open TypeModes type-modes public hiding (↑ₜ)
+open TypeSorts type-sorts public hiding (↑ᵗ)
 
-open import Kitty.Typing.CtxRepr type-modes
+open import Kitty.Typing.CtxRepr type-sorts
 
+-- We choose to represent type contexts as functions.
 ctx-repr : CtxRepr
 ctx-repr = Functional-CtxRepr
 
@@ -126,21 +129,28 @@ open CtxRepr ctx-repr public
 open import Kitty.Typing.OPE compose-traversal ctx-repr public
 
 variable
-  Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx µ
-  T T₁ T₂ T' T₁' T₂' : µ ∶⊢ M
+  Γ Γ₁ Γ₂ Γ' Γ₁' Γ₂' : Ctx S
+  T T₁ T₂ T' T₁' T₂' : S ∶⊢ s
 
-PatTy→Ctx' : µ ⊢ ℙ µ' → CtxP' µ µ' 
-PatTy→Ctx' (`[_]_ {m = 𝕖} () x)
+_∶⊢'_ : List (Sort Var) → Sort st → Set
+S ∶⊢' s = S ⊢ proj₂ (↑ᵗ s)
+
+CtxP' : List (Sort Var) → List (Sort Var) → Set
+CtxP' S S' = ∀ s → (x : S' ∋ s) →  (S ▷▷ drop-∈ x S') ∶⊢' s
+
+-- Converting syntactic type contexts (pattern types) to real type contexts.
+PatTy→Ctx' : S ⊢ ℙ S' → CtxP' S S' 
 PatTy→Ctx' []ᵖ = λ _ ()
 PatTy→Ctx' (P ▶ᵖ t) = PatTy→Ctx' P ▶' t
 
 -- Type System -----------------------------------------------------------------
 
-data Matches : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕡 µ' → Set where
+-- `Matches e p` is proof that pattern `p` matches expression `e`.
+data Matches : S₁ ⊢ 𝕖 → S₂ ⊢ 𝕡 S' → Set where
   M-` :
-    Matches {µ₂ = µ₂} e `ᵖ
+    Matches {S₂ = S₂} e `ᵖ
   M-tt :
-    Matches {µ₂ = µ₂} (tt {µ = µ}) ttᵖ
+    Matches {S₂ = S₂} (tt {S = S}) ttᵖ
   M-, :
     Matches e₁ p₁ →
     Matches e₂ p₂ →
@@ -152,11 +162,12 @@ data Matches : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕡 µ' → Set where
     Matches e p →
     Matches (inj₂ e) (inj₂ᵖ p)
 
-data Canonical : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕥 → Set where
+-- `Canonical e t` is proof that expression `e` has the right shape to be of type `t`.
+data Canonical : S₁ ⊢ 𝕖 → S₂ ⊢ 𝕥 → Set where
   C-λ :
     Canonical (λx e) (t₁ `→ t₂)
   C-tt :
-    Canonical (tt {µ = µ₁}) (𝟙 {µ = µ₂})
+    Canonical (tt {S = S₁}) (𝟙 {S = S₂})
   C-, :
     Canonical e₁ t₁ →
     Canonical e₂ t₂ →
@@ -168,22 +179,24 @@ data Canonical : µ₁ ⊢ 𝕖 → µ₂ ⊢ 𝕥 → Set where
     Canonical e t₂ →
     Canonical (inj₂ e) (t₁ `⊎ t₂)
 
-data _∈cs_ (c : µ ⊢ 𝕔) : µ ⊢ 𝕔𝕤 → Set where
-  here : ∀ {c' : µ ⊢ 𝕔} {cs : µ ⊢ 𝕔𝕤} → c ≡ c' → c ∈cs (c' ∷ cs)
-  there : ∀ {c' : µ ⊢ 𝕔} {cs : µ ⊢ 𝕔𝕤} → c ∈cs cs → c ∈cs (c' ∷ cs)
+-- List membership for our syntactic encoding of lists of clauses.
+data _∈cs_ (c : S ⊢ 𝕔) : S ⊢ 𝕔𝕤 → Set where
+  here : ∀ {c' : S ⊢ 𝕔} {cs : S ⊢ 𝕔𝕤} → c ≡ c' → c ∈cs (c' ∷ cs)
+  there : ∀ {c' : S ⊢ 𝕔} {cs : S ⊢ 𝕔𝕤} → c ∈cs cs → c ∈cs (c' ∷ cs)
 
-Exhaustive : µ ⊢ 𝕔𝕤 → µ ⊢ 𝕥 → Set
-Exhaustive {µ} cs t =
-  ∀ {µ'} {e : µ' ⊢ 𝕖} →
+-- When a list of clauses is exhaustive for a given type.
+Exhaustive : S ⊢ 𝕔𝕤 → S ⊢ 𝕥 → Set
+Exhaustive {S} cs t =
+  ∀ {S'} {e : S' ⊢ 𝕖} →
   Canonical e t →
-  ∃[ µ' ] Σ[ p ∈ µ ⊢ 𝕡 µ' ] ∃[ e' ]
+  ∃[ S' ] Σ[ p ∈ S ⊢ 𝕡 S' ] ∃[ e' ]
     (p ⇒ e') ∈cs cs × Matches e p
 
-data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
-  ⊢-` : ∀ {µ} {m} {Γ : Ctx µ} {T : µ ∶⊢ m→M m} {x : µ ∋ m} →
+data _⊢_∶_ : Ctx S → S ⊢ s → S ∶⊢ s → Set where
+  ⊢-` : ∀ {S} {s} {Γ : Ctx S} {T : S ∶⊢ s} {x : S ∋ s} →
     Γ ∋ x ∶ T →
     Γ ⊢ ` x ∶ T
-  ⊢-λ : {Γ : Ctx µ} →
+  ⊢-λ : {Γ : Ctx S} →
     Γ ▶ t₁ ⊢ e ∶ t₂ ⋯ᵣ wknᵣ →
     Γ ⊢ λx e ∶ t₁ `→ t₂
   ⊢-· :
@@ -207,13 +220,14 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ⊢ cs ∶ Clause t t' →
     Exhaustive cs t →
     Γ ⊢ match e cs ∶ t'
-  ⊢-clause : ∀ {Γ : Ctx µ} {p : µ ⊢ 𝕡 µ'} {t' : µ ⊢ 𝕥} →
+  ⊢-clause : ∀ {Γ : Ctx S} {p : S ⊢ 𝕡 S'} {t' : S ⊢ 𝕥} →
     Γ ⊢ p ∶ P →
-    (Γ ▶▶ PatTy→Ctx' P) ⊢ e ∶ wk* µ' t' →
-    Γ ⊢ (p ⇒ e) ∶ Clause t t' -- TODO: where does t come from...
+    (Γ ▶▶ PatTy→Ctx' P) ⊢ e ∶ t' ⋯ᵣ wkn* S'  →
+    Γ ⊢ (p ⇒ e) ∶ Clause t t' -- `t` can be arbitrary, as it is already pinned
+                              -- down by the `Exhaustive` proof in the match
   ⊢-clause-[] :
     Γ ⊢ [] ∶ Clause t t'
-  ⊢-clause-∷ : ∀ {Γ : Ctx µ} →
+  ⊢-clause-∷ : ∀ {Γ : Ctx S} →
     Γ ⊢ c  ∶ Clause t t' →
     Γ ⊢ cs ∶ Clause t t' →
     Γ ⊢ (c ∷ cs) ∶ Clause t t'
@@ -221,7 +235,8 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
     Γ ⊢ ttᵖ ∶ []ᵖ
   ⊢-`ᵖ :
     Γ ⊢ `ᵖ ∶ []ᵖ ▶ᵖ t
-  ⊢-,ᵖ : ∀ {µ µ₁ µ₂} {Γ : Ctx µ} {p₁ : µ ⊢ 𝕡 µ₁} {P₁ : µ ⊢ ℙ µ₁} {p₂ : µ ▷▷ µ₁ ⊢ 𝕡 µ₂} {P₂ : µ ▷▷ µ₁ ⊢ ℙ µ₂} →
+  ⊢-,ᵖ : ∀ {S S₁ S₂} {Γ : Ctx S} {p₁ : S ⊢ 𝕡 S₁} {P₁ : S ⊢ ℙ S₁}
+           {p₂ : S ▷▷ S₁ ⊢ 𝕡 S₂} {P₂ : S ▷▷ S₁ ⊢ ℙ S₂} →
     Γ ⊢ p₁ ∶ P₁ →
     (Γ ▶▶ PatTy→Ctx' P₁) ⊢ p₂ ∶ P₂ →
     Γ ⊢ p₁ ,ᵖ p₂ ∶ (P₁ ▶▶ᵖ P₂)
@@ -235,35 +250,35 @@ data _⊢_∶_ : Ctx µ → µ ⊢ M → µ ∶⊢ M → Set where
 -- Semantics -------------------------------------------------------------------
 
 mutual
-  data Neutral : µ ⊢ M → Set where
-    `ⁿ_  : ∀ (x : µ ∋ 𝕖) → Neutral (` x)
+  data Neutral : S ⊢ s → Set where
+    `ⁿ_  : ∀ (x : S ∋ 𝕖) → Neutral (` x)
     _·_ : Neutral e₁ → Value e₂ → Neutral (e₁ · e₂)
     match : Neutral e₁ → Neutral (match e₁ cs)
 
-  data Value : µ ⊢ M → Set where
-    λx_     : ∀ (e : (µ ▷ 𝕖) ⊢ 𝕖) → Value (λx e)
+  data Value : S ⊢ s → Set where
+    λx_     : ∀ (e : (S ▷ 𝕖) ⊢ 𝕖) → Value (λx e)
     _,_     : Value e₁ → Value e₂ → Value (e₁ , e₂)
     inj₁    : Value e → Value (inj₁ e)
     inj₂    : Value e → Value (inj₂ e)
-    tt      : Value (tt {µ})
+    tt      : Value (tt {S})
     neutral : Neutral e → Value e
 
-matching-sub : ∀ {µ µ' µ''} {e : µ ⊢ 𝕖} {p : µ' ⊢ 𝕡 µ''} → Matches e p → µ'' →ₛ µ
+-- The substitution resulting from an expression `e` matching a pattern `p`.
+matching-sub : ∀ {S S' S''} {e : S ⊢ 𝕖} {p : S' ⊢ 𝕡 S''} → Matches e p → S'' →ₛ S
 matching-sub {e = e} M-` = ⦅ e ⦆ₛ₀
 matching-sub M-tt        = []*
 matching-sub (M-, m₁ m₂) = matching-sub m₁ ∥ₛ matching-sub m₂
 matching-sub (M-inj₁ m)  = matching-sub m
 matching-sub (M-inj₂ m)  = matching-sub m
 
-data _↪_ : µ ⊢ M → µ ⊢ M → Set where
-  β-λ : ∀ {e₂ : µ ⊢ 𝕖} →
+data _↪_ : S ⊢ s → S ⊢ s → Set where
+  β-λ : ∀ {e₂ : S ⊢ 𝕖} →
     (λx e₁) · e₂ ↪ e₁ ⋯ ⦅ e₂ ⦆
-  β-match : ∀ {µ µ'} {e : µ ⊢ 𝕖} {cs : µ ⊢ 𝕔𝕤} {p : µ ⊢ 𝕡 µ'} {e' : µ ▷▷ µ' ⊢ 𝕖} {σ : µ' →ₛ µ} →
+  β-match : ∀ {S S'} {e : S ⊢ 𝕖} {cs : S ⊢ 𝕔𝕤} {p : S ⊢ 𝕡 S'} {e' : S ▷▷ S' ⊢ 𝕖} {σ : S' →ₛ S} →
     (p ⇒ e') ∈cs cs →
     (m : Matches e p) →
     matching-sub m ≡ σ →
     match e cs ↪ e' ⋯ₛ (idₛ ∥ₛ σ)
-  -- TODO: ξ-match ...
   ξ-λ :
     e ↪ e' →
     λx e ↪ λx e'
@@ -273,3 +288,6 @@ data _↪_ : µ ⊢ M → µ ⊢ M → Set where
   ξ-·₂ :
     e₂ ↪ e₂' →
     e₁ · e₂ ↪ e₁ · e₂'
+  ξ-match :
+    e ↪ e' →
+    match e cs ↪ match e' cs
