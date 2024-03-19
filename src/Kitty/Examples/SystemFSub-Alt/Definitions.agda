@@ -1,4 +1,4 @@
-module Kitty.Examples.SystemFSub2.Definitions where
+module Kitty.Examples.SystemFSub-Alt.Definitions where
 
 open import Data.Product using (_,_)
 open import Kitty.Term.Prelude using (_∋_; List; []; _▷_) public
