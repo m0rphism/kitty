@@ -24,7 +24,8 @@ The framework requires the following dependencies to be installed:
 
 ## Comparison to the Simplified Version
 
-We have submitted a paper about our framework to ITP'24. In the paper
+We have submitted a paper about our framework to
+[ITP'24](https://www.viam.science.tsu.ge/itp2024/). In the paper
 we describe a simplified version of our framework, which can also be
 found in the repository in
 [src/Kitty/Examples/SystemF-Simple](src/Kitty/Examples/SystemF-Simple).
