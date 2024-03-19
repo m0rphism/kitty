@@ -303,11 +303,10 @@ record TypingKit
     ∀ {s₁} (x : S₁ ∋ s₁) (t : S ▷▷ S₁ ∶⊢ s₁) (⊢x : Γ₁ ∋' x ∶ t)
     → Γ₂ ∋/⊢ x & ϕ ∶ (t ⋯ (ϕ' ∥ ϕ) )
 
-  postulate
-    _⊢∥'_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx' S₁ S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
-      Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
-      Γ ∋*/⊢* ϕ₂ ∶ Γ₂ via ϕ₁ →
-      Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶ Γ₂
+    -- _⊢∥'_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx' S₁ S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
+    --   Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
+    --   Γ ∋*/⊢* ϕ₂ ∶ Γ₂ via ϕ₁ →
+    --   Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶ Γ₂
   -- _⊢∥'_ {S} {S₁} {[]} {Γ} {Γ₁} {Γ₂} {ϕ₁} {ϕ₂} ⊢ϕ₁ ⊢ϕ₂ {sx} x _ refl =
   --   let sub = subst (_∶⊢_ S) (sym (id/sx)) in
   --   Γ ∋/⊢ x & ϕ₁ ∥ ϕ₂ ∶ sub (wk-telescope (Γ₁ ▶▶ Γ₂) x ⋯ ϕ₁ ∥ ϕ₂)
@@ -332,14 +331,13 @@ record TypingKit
   --               {!(⊢ϕ₁ ⊢∥' (⊢ϕ₂ ⊢↓)) x _ refl!}
 
   -- TODO: Dependency not yet upgraded to 2.6.4
-  postulate
-    _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
-      Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
-      Γ ∋*/⊢* ϕ₂ ∶ Γ₂ →
-      Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶ wk*-Ctx _ Γ₂
-    ⊢⦅_⦆' : ∀ {s} {Γ : Ctx S} {t : S ∋/⊢ s} {T : S ∶⊢ (s)}
-      → Γ ∋/⊢ t ∶ T 
-      → Γ ∋*/⊢* ⦅ t ⦆ ∶ Γ ▶ T
+    -- _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
+    --   Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
+    --   Γ ∋*/⊢* ϕ₂ ∶ Γ₂ →
+    --   Γ ∋*/⊢* (ϕ₁ ∥ ϕ₂) ∶ Γ₁ ▶▶ wk*-Ctx _ Γ₂
+    -- ⊢⦅_⦆' : ∀ {s} {Γ : Ctx S} {t : S ∋/⊢ s} {T : S ∶⊢ (s)}
+    --   → Γ ∋/⊢ t ∶ T 
+    --   → Γ ∋*/⊢* ⦅ t ⦆ ∶ Γ ▶ T
   -- _⊢∥_ : ∀ {S S₁ S₂} {Γ : Ctx S} {Γ₁ : Ctx S₁} {Γ₂ : Ctx S₂} {ϕ₁ : S₁ –[ K ]→ S} {ϕ₂ : S₂ –[ K ]→ S} →
   --   Γ ∋*/⊢* ϕ₁ ∶ Γ₁ →
   --   Γ ∋*/⊢* ϕ₂ ∶ Γ₂ →
@@ -551,10 +549,10 @@ record TypingTraversal : Set (lsuc ℓ) where
     TypingKit.≡ᶜ-cong-∋/⊢ iKₛ = λ x → ≡ᶜ-cong-⊢
 
   open TypingKit iKᵣ public using () renaming
-    (∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ; _⊢↓ to ⊢↓ᵣ; _⊢∥_ to _⊢∥ᵣ_; _⊢∥'_ to _⊢∥'ᵣ_;
+    (∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ; _⊢↓ to ⊢↓ᵣ;
      _∋*/⊢*_∶_via_ to _∋*_∶_via_)
   open TypingKit iKₛ public using () renaming
-    (∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ; _⊢↓ to ⊢↓ₛ; _⊢∥_ to _⊢∥ₛ_; _⊢∥'_ to _⊢∥'ₛ_;
+    (∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ; _⊢↓ to ⊢↓ₛ;
      _∋*/⊢*_∶_via_ to _⊢*_∶_via_)
 
   -- Renaming preserves typing

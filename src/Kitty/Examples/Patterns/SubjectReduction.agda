@@ -213,41 +213,12 @@ open TypingTraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 ⊢cs→⊢c (here refl) (⊢-clause-∷ ⊢c ⊢cs) = ⊢c
 ⊢cs→⊢c (there x)   (⊢-clause-∷ ⊢c ⊢cs) = ⊢cs→⊢c x ⊢cs
 
--- ⊢matching-sub : ∀ {S S'} {Γ : Ctx S} {e : S ⊢ 𝕖} {t : S ⊢ 𝕥} {p : S ⊢ 𝕡 S'} {P : S ⊢ ℙ S'} →
---   (m : Matches e p) →
---   Γ ⊢ e ∶ t →
---   Γ ⊢ p ∶ P →
---   Γ ⊢* matching-sub m ∶ PatTy→Ctx' P via idₛ
--- ⊢matching-sub = {!!}
-
 ⊢matching-sub : ∀ {S S'} {Γ : Ctx S} {e : S ⊢ 𝕖} {t : S ⊢ 𝕥} {p : S ⊢ 𝕡 S'} {P : S ⊢ ℙ S'} →
   (m : Matches e p) →
   Γ ⊢ e ∶ t →
   Γ ⊢ p ∶ P →
   Γ ⊢* (idₛ ∥ₛ matching-sub m) ∶ (Γ ▶▶ PatTy→Ctx' P)
-⊢matching-sub {e = e} M-` ⊢e ⊢-`ᵖ = _⊢∥_ {ϕ₁ = idₛ} {ϕ₂ = ⦅ e ⦆ₛ} ⊢idₛ {!⊢⦅_⦆' {K = Kₛ} {t = e}  ⊢e!} -- ⊢idₛ ⊢∥ {!⊢⦅ ⊢e ⦆ₛ!}
-⊢matching-sub M-tt ⊢e ⊢-ttᵖ = _⊢∥_ {Γ₂ = ∅} {ϕ₁ = idₛ} {ϕ₂ = []*} ⊢idₛ  λ ()
-⊢matching-sub (M-, m₁ m₂) (⊢-, ⊢e₁ ⊢e₂) (⊢-,ᵖ ⊢p₁ ⊢p₂) = {!⊢matching-sub m₁ ⊢e₁ ⊢p₁!}
-⊢matching-sub (M-inj₁ m) ⊢e ⊢p = {!!}
-⊢matching-sub (M-inj₂ m) ⊢e ⊢p = {!!}
-
--- PatTy→Ctx' P             : CtxP' S S'
--- matching-sub m           : S' →ₛ S
--- wkₖ* S' (matching-sub m) : S' →ₛ (S ▷▷ S')
--- idₛ ∥ₛ (matching-sub m)  : (S ▷▷ S') →ₛ S
-
--- semantics applies  e' ⋯ₛ (idₛ ∥ₛ matching-sub m)  where  {e' : S ▷▷ S' ⊢ 𝕖}
--- so we need  idₛ ∥ₛ matching-sub m  ∶  Γ₁ ▶▶ Γ₁'  ⇒ₖ  Γ₁
-
--- Goal for  Γ ⊢* matching-sub m ∶ ?  is  Ctx S'
-
--- Γ ⊢* (idₛ ∥ₛ matching-sub m) ∶ {!PatTy→Ctx' P!}
--- Goal: (s : Sort Var)
---       (x : (S' ++ S) ∋ s) →
---       (drop (suc (depth x)) (S' ++ S) ++ []) ∶⊢ s
--- Have: (s : Sort Var)
---       (x : S' ∋ s) →
---       (drop (suc (depth x)) S' ++ S) ∶⊢ s
+⊢matching-sub = {!!}
 
 subject-reduction :
   Γ ⊢ e ∶ t →
