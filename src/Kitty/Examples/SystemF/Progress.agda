@@ -1,10 +1,10 @@
-module Kitty.Examples.SystemF-Derive.Progress where
+module Kitty.Examples.SystemF.Progress where
 
 open import Data.Product using (∃-syntax; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary.PropositionalEquality using (refl)
 
-open import Kitty.Examples.SystemF-Derive.Definitions
+open import Kitty.Examples.SystemF.Definitions
 
 progress : ∀ {Γ : Ctx S} {e : S ⊢ 𝕖} {t : S ∶⊢ 𝕖} →
   Γ ⊢ e ∶ t →

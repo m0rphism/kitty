@@ -1,10 +1,10 @@
-module Kitty.Examples.SystemFSub-Derive.LogicalSubtyping where
+module Kitty.Examples.SystemFSub.LogicalSubtyping where
 
 open import Data.Product using (_,_)
 open import Kitty.Term.Prelude using (_∋_; List; []; _▷_) public
 open import Kitty.Term.Terms using (Terms; SortTy; Var; NoVar)
 
-open import Kitty.Examples.SystemFSub-Derive.Definitions
+open import Kitty.Examples.SystemFSub.Definitions
 
 infix   3  _⊢_⊑ᴸ_
 

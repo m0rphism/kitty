@@ -1,4 +1,4 @@
-module Kitty.Examples.LambdaPi-Derive.Definitions where
+module Kitty.Examples.LambdaPi.Definitions where
 
 open import Data.List using (List; []; _∷_)
 open import Data.List.Relation.Unary.Any using (here; there) public

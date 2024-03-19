@@ -1,4 +1,4 @@
-module Kitty.Examples.STLC-Pat-Derive.Definitions where
+module Kitty.Examples.STLC-Pat.Definitions where
 
 open import Kitty.Term.Prelude using (_∋_; _▷_; _▷▷_; List; []) public
 open import Kitty.Term.Modes using (Modes; Terms)

@@ -1,4 +1,4 @@
-module Kitty.Examples.SystemF-Derive.Definitions where
+module Kitty.Examples.SystemF.Definitions where
 
 open import Data.Product using (_,_)
 open import Kitty.Term.Prelude using (_∋_; List; []; _▷_) public

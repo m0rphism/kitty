@@ -1,4 +1,4 @@
-module Kitty.Examples.LambdaPi-Derive.SubjectReduction where
+module Kitty.Examples.LambdaPi.SubjectReduction where
 
 open import Data.Product using (∃-syntax; Σ-syntax; _×_ ; _,_; proj₁; proj₂)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
@@ -9,8 +9,8 @@ open import Data.Nat using (ℕ; suc; zero)
 open import Data.List using (List; []; _∷_; drop)
 open ≡-Reasoning
 
-open import Kitty.Examples.LambdaPi-Derive.Definitions
-open import Kitty.Examples.LambdaPi-Derive.Confluence
+open import Kitty.Examples.LambdaPi.Definitions
+open import Kitty.Examples.LambdaPi.Confluence
 open import Kitty.Typing.TypingKit compose-traversal ctx-repr typing
 open import Kitty.Util.List using (depth)
 open TypingKit ⦃ … ⦄

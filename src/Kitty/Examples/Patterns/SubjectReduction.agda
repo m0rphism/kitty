@@ -1,9 +1,9 @@
-module Kitty.Examples.STLC-Pat-Derive.SubjectReduction where
+module Kitty.Examples.STLC-Pat.SubjectReduction where
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; cong; subst; subst₂; module ≡-Reasoning)
 open import Data.Product using (∃-syntax; Σ-syntax; _×_; _,_)
 open ≡-Reasoning
-open import Kitty.Examples.STLC-Pat-Derive.Definitions
+open import Kitty.Examples.STLC-Pat.Definitions
 open import Function using () renaming (_∋_ to _by_)
 
 open import Kitty.Typing.ITerms compose-traversal ctx-repr

@@ -1,11 +1,11 @@
-module Kitty.Examples.LambdaPi-Derive.Confluence where
+module Kitty.Examples.LambdaPi.Confluence where
 
 open import Data.Product using (∃-syntax; _×_ ; _,_)
 open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Function using () renaming (_∋_ to _by_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym; subst; subst₂; module ≡-Reasoning)
 
-open import Kitty.Examples.LambdaPi-Derive.Definitions
+open import Kitty.Examples.LambdaPi.Definitions
 open import Kitty.Util.Closures
 open import Kitty.Typing.TypingKit compose-traversal ctx-repr typing
 open TypingKit ⦃ … ⦄
