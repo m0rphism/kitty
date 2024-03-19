@@ -1,19 +1,61 @@
-# Kit Theory
+# Kitty
 
-The best way to traverse a kitty cat.
+An Agda Framework for programming language metatheory based on
+extrinsic typing, intrinsic scoping and de Bruijn indices.
 
-## Project Structure
+You write the syntax and typing relation, and the framework derives
+definitions and lemmas of untyped substitution via reflection, and
+provide you with an abstraction to prove type preservation of all
+renaming and substitution operations of all variable sorts with a
+single lemma.
 
-- `Kitty.Prelude` contains small helper like `_∋_` and `_,_`.
-- `Kitty.Modes` contains the records `Modes` and `Terms` over which all other modules are parameterized.
-- `Kitty.Kit` contains the records `Kit` and `KitTraversal` for renaming and substiution.
-- `Kitty.Compose` contains the records `ComposeKit`, `KitAssoc`, and `KitAssocLemmas` for composing renaming and substitution and dealing with identity.
-- `Kitty.Types` contains the record `KitType`, which given a lifting of term- to type-modes defines contexts, and `KitTypeSubst`, which given a `KitTraversal` provides substitution on contexts.
-- `Kitty.OPE` defines Order Preserving Embeddings (OPEs) and the `ope-preserves-telescope`-lemma.
-- `Kitty.Kit2` and `Kitty.Compose2` use a single stronger lemma to derive everything (traversal are defined by how they behave on variables)
-- `Kitty.ITerms` and `Kitty.IKit` are a WIP attempt to derive substitution lemmas for typing relations with regular structure (Γ ⊢ e ∶ t).
-- `Kitty.Generics` are a WIP attempt to implement substitution for a generic syntax datatype based on the paper "A Type and Scope Safe Universe of Syntaxes with Binding".
+We build on McBride's *kit* abstraction, which abstracts over
+renamings and substitutions, and also abstract over the four
+compositions between them and over type preservation of renamings and
+substitutions. In the following, we use the term *map* to talk about
+something, which can be either a renaming or a substitution.
 
+## Comparison to the Simplified Version
 
+We have submitted a paper about our framework to ITP'24. In the paper
+we describe a simplified version of our framework, which can also be
+found in the repository in
+[src/Kitty/Examples/SystemF-Simple](src/Kitty/Examples/SystemF-Simple).
 
+The full framework extends the simple framework as follows:
 
+-   Additional map operations are provided, such as parallel
+    compositions `_∥_`.
+
+-   A reflection algorithm is provided to derive all definitions and
+    lemmas about untyped maps.
+
+-   We axiomatize the structure of maps, so you can choose
+    whether you want to represent them as functions, vectors, or
+    syntax trees.
+
+-   We axiomatize the structure of type contexts, so you can choose
+    whether you want to represent them as functions or vectors.
+
+-   We extend the extensional equality for maps to an equivalence that
+    can also compare renamings with substitutions. Intuitively, a
+    renaming is equivalent to a substitution, iff they behave the same
+    when applied to a term.
+
+-   We don't rely on the functional extensionality axiom, and instead
+    prove that our operations preserve map equivalence and provide a
+    lemma that states that applying equivalent maps to a term yiels
+    equal terms.
+
+Those changes significantly increase the complexity of our framework,
+so if you are interested in the internals of our framework, we
+recommend to start looking at the simplified framework in
+[src/Kitty/Examples/SystemF-Simple](src/Kitty/Examples/SystemF-Simple).
+
+## Documentation
+
+As the library is still changing a lot, we do not provide extensive
+documentation, yet.
+
+For now, we recommend to check out the examples and case studies in
+[src/Kitty/Examples](src/Kitty/Examples) to get familiar with the framework.
