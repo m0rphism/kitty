@@ -379,32 +379,23 @@ _⊢⋯_ {Γ₂ = Γ₂} {ϕ = ϕ} (⊢proj₂ {e = e} {t₂ = t₂} ⊢e) ⊢ϕ
         (⊢proj₂ (⊢e ⊢⋯ ⊢ϕ))
 ⊢≡ ⊢e₁ ⊢e₂ ⊢⋯ ⊢ϕ = ⊢≡ (⊢e₁ ⊢⋯ ⊢ϕ) (⊢e₂ ⊢⋯ ⊢ϕ)
 ⊢refl ⊢e ⊢⋯ ⊢ϕ = ⊢refl (⊢e ⊢⋯ ⊢ϕ)
-⊢J ⊢t ⊢u₁ ⊢u₂ ⊢e₁ ⊢e₂ ⊢⋯ ⊢ϕ = {!!}
+_⊢⋯_ {Γ₂ = Γ₂} {ϕ = ϕ} (⊢J {t' = t'} {u₁ = u₁} {u₂ = u₂} {e₁ = e₁} {e₂ = e₂} {t = t} ⊢t ⊢u₁ ⊢u₂ ⊢e₁ ⊢e₂) ⊢ϕ =
+  subst (Γ₂ ⊢ `J (t ⋯ (ϕ ↑ _)) (e₁ ⋯ ϕ) (e₂ ⋯ ϕ) ∶_)
+        (sym (dist-⦅⦆-⋯ t u₂ ϕ))
+        (⊢J (⊢t ⊢⋯ (⊢ϕ ∋↑/⊢↑ _))
+            (⊢u₁ ⊢⋯ ⊢ϕ)
+            (⊢u₂ ⊢⋯ ⊢ϕ)
+            (⊢e₁ ⊢⋯ ⊢ϕ)
+            (subst (Γ₂ ⊢ (e₂ ⋯ ϕ) ∶_)
+                   (dist-⦅⦆-⋯ t u₁ ϕ)
+                   (⊢e₂ ⊢⋯ ⊢ϕ) ))
+
 ⊢Set ⊢⋯ ⊢ϕ = ⊢Set
 ⊢≈ t≈t' ⊢e ⊢⋯ ⊢ϕ = ⊢≈ (≈-⋯ₖ t≈t') (⊢e ⊢⋯ ⊢ϕ)
 
 open TypingTraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 
 --------------------------------------------------------------------------------
-
--- subject-reduction :
---   Γ ⊢ e ∶ t →
---   e ↪ e' →
---   Γ ⊢ e' ∶ t
--- subject-reduction (⊢λ ⊢t ⊢e)             (ξ-λ e↪e')    = ⊢λ ⊢t (subject-reduction ⊢e e↪e')
--- subject-reduction {Γ = Γ} (⊢∀ ⊢t₁ ⊢t₂)   (ξ-∀₁ t₁↪t₁') = ⊢∀ (subject-reduction ⊢t₁ t₁↪t₁')
---                                                             (≣*-pres (≣*-ext (≣*-refl {Γ = Γ}) (≣-↪ t₁↪t₁')) ⊢t₂)
--- subject-reduction (⊢∀ ⊢t₁ ⊢t₂)           (ξ-∀₂ t₂↪t₂') = ⊢∀ ⊢t₁ (subject-reduction ⊢t₂ t₂↪t₂')
--- subject-reduction (⊢· {e₂ = e₂} ⊢e₁ ⊢e₂) β-λ           with invert-⊢λ ⊢e₁
--- ...                                                       | t₁ , t₂ , ∀≣∀ , ⊢t₁ , ⊢e₁
---                                                        with invert-≣-λ ∀≣∀
--- ...                                                       | t₁≣t₁' , t₂≣t₂'
---                                                        =  ⊢≣ (≣-sym (≣-⋯ₛ t₂≣t₂' (≣σ-refl {σ = ⦅ e₂ ⦆ₛ})))
---                                                              (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢≣ t₁≣t₁' ⊢e₂ ⦆ₛ)
--- subject-reduction (⊢· ⊢e₁ ⊢e₂)           (ξ-·₁ e₁↪e₁') = ⊢· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
--- subject-reduction (⊢· {t₂ = t₂} ⊢e₁ ⊢e₂) (ξ-·₂ e₂↪e₂') = ⊢≣ (≣-⋯ₛ (≣-refl {e = t₂}) ≣σ-⦅ ≣-↩ e₂↪e₂' ⦆)
---                                                             (⊢· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂'))
--- subject-reduction (⊢≣ t≣t' ⊢e)           e↪e'          = ⊢≣ t≣t' (subject-reduction ⊢e e↪e')
 
 subject-reduction : ∀ {Γ : Ctx S} →
   Γ ⊢ e ∶ t →
