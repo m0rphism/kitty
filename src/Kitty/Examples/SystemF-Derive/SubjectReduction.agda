@@ -9,11 +9,11 @@ open TypingKit ⦃ … ⦄
 _⊢⋯_ :
   ∀ {_∋/⊢_ : VarScoped} ⦃ K : Kit _∋/⊢_ ⦄
     ⦃ W : KitT K ⦄ ⦃ C₁ : ComposeKit K Kᵣ K ⦄ ⦃ C₂ : ComposeKit K K K ⦄
-    ⦃ IK : TypingKit K W C₁ C₂ ⦄
+    ⦃ TK : TypingKit K W C₁ C₂ ⦄
     ⦃ C₄ : ComposeKit K Kₛ Kₛ ⦄
     {e : S₁ ⊢ s} {t : S₁ ∶⊢ s} {ϕ : S₁ –[ K ]→ S₂} →
   Γ₁ ⊢ e ∶ t →
-  Γ₂ ∋*/⊢*[ IK ] ϕ ∶ Γ₁ →
+  Γ₂ ∋*/⊢*[ TK ] ϕ ∶ Γ₁ →
   Γ₂ ⊢ e ⋯ ϕ ∶ t ⋯ ϕ
 ⊢` ∋x                              ⊢⋯ ⊢ϕ = ⊢`/id (⊢ϕ _ _ ∋x)
 ⊢λ {t₂ = t₂} ⊢e                    ⊢⋯ ⊢ϕ = ⊢λ (subst (_ ⊢ _ ∶_) (dist-↑-f t₂ _) (⊢e ⊢⋯ (⊢ϕ ∋↑/⊢↑ _)))
