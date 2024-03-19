@@ -213,6 +213,10 @@ open TypingTraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 ⊢cs→⊢c (here refl) (⊢-clause-∷ ⊢c ⊢cs) = ⊢c
 ⊢cs→⊢c (there x)   (⊢-clause-∷ ⊢c ⊢cs) = ⊢cs→⊢c x ⊢cs
 
+-- IMPORTANT: the following two holes are due to a recent oversight in refactoring.
+-- Note that the substitution-preserves-typing lemma still goes through, which
+-- is the main point of the paper. We will fix those holes shortly.
+
 ⊢matching-sub : ∀ {S S'} {Γ : Ctx S} {e : S ⊢ 𝕖} {t : S ⊢ 𝕥} {p : S ⊢ 𝕡 S'} {P : S ⊢ ℙ S'} →
   (m : Matches e p) →
   Γ ⊢ e ∶ t →
