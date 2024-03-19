@@ -34,8 +34,11 @@ open import Kitty.Typing.Typing compose-traversal ctx-repr
 ≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢-inj₁ᵖ ⊢p)                   = ⊢-inj₁ᵖ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢p)
 ≡ᶜ-cong-⊢ Γ₁≡Γ₂ (⊢-inj₂ᵖ ⊢p)                   = ⊢-inj₂ᵖ (≡ᶜ-cong-⊢ Γ₁≡Γ₂ ⊢p)
 
-open import Kitty.Typing.TypingKit compose-traversal ctx-repr
-  record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢-`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+typing : Typing
+typing = record { _⊢_∶_ = _⊢_∶_ ; ⊢` = ⊢-`; ≡ᶜ-cong-⊢ = ≡ᶜ-cong-⊢ }
+
+open Typing typing hiding (_⊢_∶_; ⊢`; ≡ᶜ-cong-⊢)
+open import Kitty.Typing.TypingKit compose-traversal ctx-repr typing
 open TypingKit ⦃ … ⦄
 
 open import Kitty.Term.MultiSub terms using (_↑*'_; ↑*'~↑*)
@@ -210,21 +213,49 @@ open TypingTraversal record { _⊢⋯_ = _⊢⋯_ } public hiding (_⊢⋯_)
 ⊢cs→⊢c (here refl) (⊢-clause-∷ ⊢c ⊢cs) = ⊢c
 ⊢cs→⊢c (there x)   (⊢-clause-∷ ⊢c ⊢cs) = ⊢cs→⊢c x ⊢cs
 
+-- ⊢matching-sub : ∀ {S S'} {Γ : Ctx S} {e : S ⊢ 𝕖} {t : S ⊢ 𝕥} {p : S ⊢ 𝕡 S'} {P : S ⊢ ℙ S'} →
+--   (m : Matches e p) →
+--   Γ ⊢ e ∶ t →
+--   Γ ⊢ p ∶ P →
+--   Γ ⊢* matching-sub m ∶ PatTy→Ctx' P via idₛ
+-- ⊢matching-sub = {!!}
+
 ⊢matching-sub : ∀ {S S'} {Γ : Ctx S} {e : S ⊢ 𝕖} {t : S ⊢ 𝕥} {p : S ⊢ 𝕡 S'} {P : S ⊢ ℙ S'} →
   (m : Matches e p) →
   Γ ⊢ e ∶ t →
   Γ ⊢ p ∶ P →
-  Γ ⊢* matching-sub m ∶ PatTy→Ctx' P via idₛ
-⊢matching-sub = {!!}
+  Γ ⊢* (idₛ ∥ₛ matching-sub m) ∶ (Γ ▶▶ PatTy→Ctx' P)
+⊢matching-sub m ⊢e ⊢p = {!!}
+
+-- PatTy→Ctx' P             : CtxP' S S'
+-- matching-sub m           : S' →ₛ S
+-- wkₖ* S' (matching-sub m) : S' →ₛ (S ▷▷ S')
+-- idₛ ∥ₛ (matching-sub m)  : (S ▷▷ S') →ₛ S
+
+-- semantics applies  e' ⋯ₛ (idₛ ∥ₛ matching-sub m)  where  {e' : S ▷▷ S' ⊢ 𝕖}
+-- so we need  idₛ ∥ₛ matching-sub m  ∶  Γ₁ ▶▶ Γ₁'  ⇒ₖ  Γ₁
+
+-- Goal for  Γ ⊢* matching-sub m ∶ ?  is  Ctx S'
+
+-- Γ ⊢* (idₛ ∥ₛ matching-sub m) ∶ {!PatTy→Ctx' P!}
+-- Goal: (s : Sort Var)
+--       (x : (S' ++ S) ∋ s) →
+--       (drop (suc (depth x)) (S' ++ S) ++ []) ∶⊢ s
+-- Have: (s : Sort Var)
+--       (x : S' ∋ s) →
+--       (drop (suc (depth x)) S' ++ S) ∶⊢ s
 
 subject-reduction :
   Γ ⊢ e ∶ t →
   e ↪ e' →
   Γ ⊢ e' ∶ t
 subject-reduction (⊢-· {t₂ = t₂} (⊢-λ ⊢e₁) ⊢e₂) β-λ                   = subst (_ ⊢ _ ∶_) (wk-cancels-⦅⦆ t₂ _) (⊢e₁ ⊢⋯ₛ ⊢⦅ ⊢e₂ ⦆ₛ)
-subject-reduction {Γ = Γ} (⊢-match ⊢e ⊢cs ex)           (β-match c∈cs m refl) with ⊢cs→⊢c c∈cs ⊢cs
+subject-reduction {Γ = Γ} (⊢-match ⊢e ⊢cs ex)           (β-match {e' = e'} c∈cs m refl) with ⊢cs→⊢c c∈cs ⊢cs
 ...                                                                   | ⊢-clause ⊢p ⊢e'
-                                                                      = {!!}
+                                                                      =
+  subst (Γ ⊢ e' ⋯ (idₛ ∥ₛ matching-sub m) ∶_)
+        {!!}
+        (⊢e' ⊢⋯ ⊢matching-sub m ⊢e ⊢p)
 subject-reduction (⊢-λ ⊢e)                      (ξ-λ e↪e')            = ⊢-λ (subject-reduction ⊢e e↪e')
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₁ e₁↪e₁')         = ⊢-· (subject-reduction ⊢e₁ e₁↪e₁') ⊢e₂
 subject-reduction (⊢-· ⊢e₁ ⊢e₂)                 (ξ-·₂ e₂↪e₂')         = ⊢-· ⊢e₁ (subject-reduction ⊢e₂ e₂↪e₂')

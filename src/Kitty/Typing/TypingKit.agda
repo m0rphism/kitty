@@ -549,10 +549,10 @@ record TypingTraversal : Set (lsuc ℓ) where
 
   open TypingKit iKᵣ public using () renaming
     (∋wk/⊢wk to ⊢wk; _∋↑/⊢↑_ to _∋↑_; _,*_ to _,*ᵣ_; ⊢id to ⊢idᵣ; ⊢⦅_⦆ to ⊢⦅_⦆ᵣ; _⊢↓ to ⊢↓ᵣ; _⊢∥_ to _⊢∥ᵣ_; _⊢∥'_ to _⊢∥'ᵣ_;
-    _∋*/⊢*_∶_via_ to _∋*_∶_via_)
+     _∋*/⊢*_∶_via_ to _∋*_∶_via_)
   open TypingKit iKₛ public using () renaming
     (∋wk/⊢wk to ∋wk; _∋↑/⊢↑_ to _⊢↑_; _,*_ to _,*ₛ_; ⊢id to ⊢idₛ; ⊢⦅_⦆ to ⊢⦅_⦆ₛ; _⊢↓ to ⊢↓ₛ; _⊢∥_ to _⊢∥ₛ_; _⊢∥'_ to _⊢∥'ₛ_;
-    _∋*/⊢*_∶_via_ to _⊢*_∶_via_)
+     _∋*/⊢*_∶_via_ to _⊢*_∶_via_)
 
   -- Renaming preserves typing
 
