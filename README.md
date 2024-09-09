@@ -27,7 +27,7 @@ The framework requires the following dependencies to be installed:
 We have submitted a paper about our framework to
 [ITP'24](https://www.viam.science.tsu.ge/itp2024/). In the paper
 we describe a simplified version of our framework, which can be
-found [src/Kitty/Examples/SystemF-Simpl](https://github.com/m0rphism/kitty-supplement](here).
+found [src/Kitty/Examples/SystemF-Simpl](here).
 
 The full framework extends the simple framework as follows:
 
